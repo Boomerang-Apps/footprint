@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Footprint - אמנות פופ ארט מהתמונות שלכם</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+    input { font-family: inherit; }
+    img { max-width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState } = React;
+    const { 
+      Upload, Palette, Package, Truck, Heart, Award, Star, 
+      ArrowLeft, ShoppingCart, Search, Menu, Play, Phone, Mail, 
+      Sparkles, Users, Gift, Zap, Shield, Instagram, Facebook 
+    } = lucideReact;
+
+    function FootprintWebsite() {
+      const [activeTab, setActiveTab] = useState(0);
+
+      const galleryImages = [
+        { 
+          src: 'https://images.unsplash.com/photo-1581952976147-5a2d15560349?w=600&h=750&fit=crop',
+          label: 'משפחה',
+          filter: 'sepia(20%) saturate(200%) hue-rotate(-10deg) contrast(110%)',
+          overlay: 'rgba(236, 72, 153, 0.3)'
+        },
+        { 
+          src: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=750&fit=crop',
+          label: 'חיית מחמד',
+          filter: 'saturate(180%) contrast(115%) hue-rotate(20deg)',
+          overlay: 'rgba(139, 92, 246, 0.3)'
+        },
+        { 
+          src: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&h=750&fit=crop',
+          label: 'זוגות',
+          filter: 'saturate(200%) contrast(105%) hue-rotate(-20deg)',
+          overlay: 'rgba(249, 115, 22, 0.3)'
+        },
+        { 
+          src: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=600&h=750&fit=crop',
+          label: 'ילדים',
+          filter: 'saturate(190%) contrast(110%) brightness(105%)',
+          overlay: 'rgba(34, 211, 238, 0.3)'
+        },
+      ];
+
+      const showcaseImages = [
+        { src: 'https://images.unsplash.com/photo-1476234251651-f353703a034d?w=400&h=400&fit=crop', label: 'יום הולדת', color: '#ec4899' },
+        { src: 'https://images.unsplash.com/photo-1601979031925-424e53b6caaa?w=400&h=400&fit=crop', label: 'כלב אהוב', color: '#8b5cf6' },
+        { src: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=400&fit=crop', label: 'חתונה', color: '#f59e0b' },
+        { src: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=400&fit=crop', label: 'משפחה', color: '#22d3ee' },
+      ];
+
+      const testimonialImages = [
+        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
+      ];
+
+      return (
+        <div style={{ minHeight: '100vh', backgroundColor: '#000', color: '#fff' }}>
+          
+          {/* Announcement Bar */}
+          <div style={{ backgroundColor: '#18181b', borderBottom: '1px solid #27272a', padding: '10px 16px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', fontSize: '14px', color: '#a1a1aa' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Zap size={14} color="#a78bfa" />
+                פריט שני ב-50% הנחה
+              </span>
+              <span style={{ color: '#3f3f46' }}>|</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Truck size={14} color="#a78bfa" />
+                משלוח חינם מעל ₪299
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #27272a' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', backgroundColor: '#27272a', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Sparkles size={18} color="#a78bfa" />
+                  </div>
+                  <span style={{ fontSize: '20px', fontWeight: '600' }}>Footprint</span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                  {['מוצרים', 'גלריה', 'איך זה עובד', 'צור קשר'].map((item) => (
+                    <a key={item} href="#" style={{ fontSize: '14px', color: '#a1a1aa' }}>{item}</a>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button style={{ width: '36px', height: '36px', borderRadius: '8px', border: 'none', backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Search size={18} color="#71717a" />
+                  </button>
+                  <button style={{ position: 'relative', width: '36px', height: '36px', borderRadius: '8px', border: 'none', backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShoppingCart size={18} color="#71717a" />
+                    <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '16px', height: '16px', backgroundColor: '#8b5cf6', borderRadius: '50%', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '600' }}>0</span>
+                  </button>
+                  <button style={{ backgroundColor: '#fff', color: '#000', padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '14px', fontWeight: '500', marginRight: '8px' }}>
+                    התחילו
+                  </button>
+                </div>
+              </div>
+            </div>
+          </nav>
+
+          {/* Hero Section */}
+          <section style={{ padding: '60px 24px 80px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'center' }}>
+              {/* Images Side */}
+              <div style={{ position: 'relative', height: '550px' }}>
+                {/* Main frame */}
+                <div style={{ 
+                  position: 'absolute', 
+                  top: '50%', 
+                  left: '50%', 
+                  transform: 'translate(-50%, -50%) rotate(-4deg)',
+                  width: '280px',
+                  zIndex: 3
+                }}>
+                  <div style={{ backgroundColor: '#fff', padding: '12px', borderRadius: '4px', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
+                    <div style={{ position: 'relative', overflow: 'hidden' }}>
+                      <img 
+                        src="https://images.unsplash.com/photo-1581952976147-5a2d15560349?w=400&h=500&fit=crop"
+                        alt="Family portrait"
+                        style={{ 
+                          width: '100%', 
+                          height: '340px', 
+                          objectFit: 'cover',
+                          filter: 'saturate(200%) contrast(120%) hue-rotate(-15deg)'
+                        }}
+                      />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(236,72,153,0.25) 0%, transparent 50%, rgba(139,92,246,0.25) 100%)' }} />
+                    </div>
+                    <div style={{ textAlign: 'center', padding: '8px 0 4px', color: '#000', fontSize: '11px', fontWeight: '500', letterSpacing: '0.1em' }}>FOOTPRINT ART</div>
+                  </div>
+                </div>
+
+                {/* Dog frame */}
+                <div style={{ 
+                  position: 'absolute', 
+                  top: '8%', 
+                  right: '8%', 
+                  transform: 'rotate(6deg)',
+                  width: '160px',
+                  zIndex: 2
+                }}>
+                  <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '3px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                    <div style={{ position: 'relative', overflow: 'hidden' }}>
+                      <img 
+                        src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300&h=350&fit=crop"
+                        alt="Dog portrait"
+                        style={{ 
+                          width: '100%', 
+                          height: '180px', 
+                          objectFit: 'cover',
+                          filter: 'saturate(180%) contrast(115%) hue-rotate(30deg)'
+                        }}
+                      />
+                      <div style={{ position: 'absolute', inset: 0, background: 'rgba(139,92,246,0.2)' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Couple frame */}
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: '8%', 
+                  left: '5%', 
+                  transform: 'rotate(-8deg)',
+                  width: '150px',
+                  zIndex: 4
+                }}>
+                  <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '3px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                    <div style={{ position: 'relative', overflow: 'hidden' }}>
+                      <img 
+                        src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=350&fit=crop"
+                        alt="Couple portrait"
+                        style={{ 
+                          width: '100%', 
+                          height: '170px', 
+                          objectFit: 'cover',
+                          filter: 'saturate(200%) contrast(110%) hue-rotate(-20deg)'
+                        }}
+                      />
+                      <div style={{ position: 'absolute', inset: 0, background: 'rgba(249,115,22,0.2)' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decorative blurs */}
+                <div style={{ position: 'absolute', top: '10%', left: '20%', width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', opacity: 0.5, filter: 'blur(30px)' }} />
+                <div style={{ position: 'absolute', bottom: '20%', right: '10%', width: '100px', height: '100px', borderRadius: '50%', background: 'linear-gradient(135deg, #22d3ee, #3b82f6)', opacity: 0.4, filter: 'blur(35px)' }} />
+              </div>
+
+              {/* Text Side */}
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#18181b', border: '1px solid #27272a', padding: '6px 12px', borderRadius: '20px', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex' }}>
+                    {[1,2,3,4,5].map(i => <Star key={i} size={12} color="#facc15" fill="#facc15" />)}
+                  </div>
+                  <span style={{ fontSize: '12px', color: '#71717a' }}>30,000+ לקוחות מרוצים</span>
+                </div>
+
+                <h1 style={{ fontSize: '48px', fontWeight: '700', lineHeight: 1.1, marginBottom: '24px' }}>
+                  המתנה שלא שוכחים!
+                  <br />
+                  <span style={{ background: 'linear-gradient(to left, #a78bfa, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                    אמנות פופ ארט מהתמונות שלכם
+                  </span>
+                </h1>
+
+                <p style={{ fontSize: '18px', color: '#71717a', lineHeight: 1.6, marginBottom: '32px', maxWidth: '500px' }}>
+                  העלו תמונה של המשפחה, הכלב, הזוגיות או הילדים - ותקבלו יצירת אמנות בסגנון פופ ארט צבעוני ומרהיב, מודפסת על נייר פיין ארט באיכות מוזיאון.
+                </p>
+
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
+                  <button style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(to left, #8b5cf6, #ec4899)', color: '#fff', padding: '16px 28px', borderRadius: '12px', border: 'none', fontSize: '16px', fontWeight: '600' }}>
+                    <span>צרו אמנות עכשיו</span>
+                    <ArrowLeft size={18} />
+                  </button>
+                  <button style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#18181b', border: '1px solid #27272a', color: '#fff', padding: '16px 24px', borderRadius: '12px', fontSize: '16px', fontWeight: '500' }}>
+                    <Play size={16} fill="#fff" />
+                    <span>איך זה עובד</span>
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '32px', paddingTop: '24px', borderTop: '1px solid #27272a' }}>
+                  {[
+                    { value: '500+', label: 'לקוחות' },
+                    { value: '4.9', label: 'דירוג' },
+                    { value: '24-48h', label: 'משלוח' },
+                  ].map((stat, i) => (
+                    <div key={i}>
+                      <div style={{ fontSize: '24px', fontWeight: '700' }}>{stat.value}</div>
+                      <div style={{ fontSize: '12px', color: '#52525b' }}>{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Features Bar */}
+          <section style={{ padding: '48px 24px', backgroundColor: 'rgba(24,24,27,0.5)', borderTop: '1px solid #27272a', borderBottom: '1px solid #27272a' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '32px' }}>
+              {[
+                { Icon: Sparkles, title: 'AI פופ ארט', desc: 'הפיכה אוטומטית לסגנון אמנותי' },
+                { Icon: Shield, title: 'שביעות רצון', desc: 'לא מרוצים? נתקן או נחזיר כסף' },
+                { Icon: Truck, title: 'משלוח מהיר', desc: 'עד 48 שעות לכל הארץ' },
+                { Icon: Award, title: 'איכות מוזיאון', desc: 'הדפסה על נייר פיין ארט' },
+              ].map((feature, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', backgroundColor: '#27272a', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <feature.Icon size={18} color="#a78bfa" />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>{feature.title}</h3>
+                    <p style={{ fontSize: '12px', color: '#52525b', margin: 0 }}>{feature.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Gallery Section */}
+          <section style={{ padding: '80px 24px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+                <h2 style={{ fontSize: '36px', fontWeight: '700', marginBottom: '12px' }}>הגלריה שלנו</h2>
+                <p style={{ color: '#71717a', maxWidth: '500px', margin: '0 auto' }}>
+                  כל תמונה הופכת ליצירת אמנות ייחודית בסגנון פופ ארט צבעוני
+                </p>
+              </div>
+
+              {/* Main Gallery Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                {galleryImages.map((img, i) => (
+                  <div 
+                    key={i} 
+                    style={{ 
+                      position: 'relative',
+                      aspectRatio: '4/5',
+                      borderRadius: '12px', 
+                      overflow: 'hidden',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <img 
+                      src={img.src}
+                      alt={img.label}
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                        filter: img.filter
+                      }}
+                    />
+                    <div style={{ position: 'absolute', inset: 0, background: img.overlay }} />
+                    <div style={{ 
+                      position: 'absolute', 
+                      bottom: 0, 
+                      left: 0, 
+                      right: 0, 
+                      padding: '32px 16px 16px',
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
+                    }}>
+                      <span style={{ fontSize: '16px', fontWeight: '600' }}>{img.label}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Showcase Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+                {showcaseImages.map((img, i) => (
+                  <div 
+                    key={i}
+                    style={{ 
+                      position: 'relative',
+                      aspectRatio: '1',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <img 
+                      src={img.src}
+                      alt={img.label}
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                        filter: 'saturate(180%) contrast(115%)'
+                      }}
+                    />
+                    <div style={{ position: 'absolute', inset: 0, background: `${img.color}50` }} />
+                    <div style={{ 
+                      position: 'absolute', 
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        fontWeight: '600',
+                        padding: '8px 16px',
+                        backgroundColor: img.color,
+                        borderRadius: '20px'
+                      }}>{img.label}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Products Section */}
+          <section style={{ padding: '80px 24px', backgroundColor: 'rgba(24,24,27,0.3)' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+                <h2 style={{ fontSize: '36px', fontWeight: '700', marginBottom: '12px' }}>בחרו את הסגנון שלכם</h2>
+                <p style={{ color: '#71717a' }}>מגוון סגנונות אמנותיים להפוך כל תמונה ליצירה</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+                {[
+                  { 
+                    title: 'פופ ארט קלאסי',
+                    subtitle: 'Classic Pop Art',
+                    desc: 'צבעים עזים וקווי מתאר בולטים בסגנון אנדי וורהול',
+                    price: 149,
+                    color: '#ec4899',
+                    img: 'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&h=400&fit=crop',
+                    filter: 'saturate(250%) contrast(130%) brightness(105%)'
+                  },
+                  { 
+                    title: 'צבעי מים',
+                    subtitle: 'Watercolor Style',
+                    desc: 'מראה רך ואמנותי עם טשטושים עדינים',
+                    price: 149,
+                    color: '#8b5cf6',
+                    img: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=400&fit=crop',
+                    filter: 'saturate(120%) contrast(90%) brightness(110%) sepia(20%)',
+                    popular: true
+                  },
+                  { 
+                    title: 'קווים מינימליסטי',
+                    subtitle: 'Line Art',
+                    desc: 'סגנון נקי ומודרני עם קווים פשוטים',
+                    price: 129,
+                    color: '#22d3ee',
+                    img: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&h=400&fit=crop',
+                    filter: 'grayscale(100%) contrast(150%)'
+                  },
+                ].map((product, i) => (
+                  <div key={i} style={{ position: 'relative', backgroundColor: '#18181b', borderRadius: '16px', border: '1px solid #27272a', overflow: 'hidden' }}>
+                    {product.popular && (
+                      <div style={{ position: 'absolute', top: '16px', right: '16px', backgroundColor: '#8b5cf6', color: '#fff', fontSize: '12px', padding: '4px 12px', borderRadius: '12px', fontWeight: '600', zIndex: 10 }}>
+                        הכי פופולרי
+                      </div>
+                    )}
+
+                    <div style={{ height: '200px', position: 'relative', overflow: 'hidden' }}>
+                      <img 
+                        src={product.img}
+                        alt={product.title}
+                        style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          objectFit: 'cover',
+                          filter: product.filter
+                        }}
+                      />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 50%, #18181b 100%)' }} />
+                    </div>
+
+                    <div style={{ padding: '24px', paddingTop: '0', position: 'relative', marginTop: '-30px' }}>
+                      <p style={{ fontSize: '11px', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>{product.subtitle}</p>
+                      <h3 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>{product.title}</h3>
+                      <p style={{ fontSize: '14px', color: '#71717a', marginBottom: '20px', lineHeight: 1.5 }}>{product.desc}</p>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '16px', borderTop: '1px solid #27272a' }}>
+                        <div>
+                          <span style={{ fontSize: '12px', color: '#52525b' }}>החל מ-</span>
+                          <span style={{ fontSize: '28px', fontWeight: '700', marginRight: '4px' }}>₪{product.price}</span>
+                        </div>
+                        <button style={{ backgroundColor: product.color, color: '#fff', padding: '10px 20px', borderRadius: '10px', border: 'none', fontSize: '14px', fontWeight: '600' }}>
+                          בחרו סגנון
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* How It Works */}
+          <section style={{ padding: '80px 24px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+                <h2 style={{ fontSize: '36px', fontWeight: '700', marginBottom: '12px' }}>איך זה עובד?</h2>
+                <p style={{ color: '#71717a' }}>שלושה צעדים פשוטים ליצירת אמנות</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '48px' }}>
+                {[
+                  { Icon: Upload, title: 'העלו תמונה', desc: 'בחרו תמונה של המשפחה, הכלב, הזוגיות או כל רגע מיוחד', num: '01' },
+                  { Icon: Palette, title: 'בחרו סגנון', desc: 'פופ ארט, צבעי מים, קווים או סגנון מותאם אישית', num: '02' },
+                  { Icon: Package, title: 'קבלו הדפסה', desc: 'משלוח מהיר עד הבית על נייר פיין ארט איכותי', num: '03' },
+                ].map((step, i) => (
+                  <div key={i} style={{ textAlign: 'center' }}>
+                    <div style={{ position: 'relative', width: '80px', height: '80px', margin: '0 auto 20px' }}>
+                      <div style={{ width: '80px', height: '80px', backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <step.Icon size={32} color="#a78bfa" />
+                      </div>
+                      <span style={{ position: 'absolute', top: '-8px', right: '-8px', width: '28px', height: '28px', background: 'linear-gradient(135deg, #8b5cf6, #ec4899)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>{step.num}</span>
+                    </div>
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px' }}>{step.title}</h3>
+                    <p style={{ fontSize: '14px', color: '#71717a', lineHeight: 1.6 }}>{step.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Testimonials */}
+          <section style={{ padding: '80px 24px', backgroundColor: 'rgba(24,24,27,0.3)' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
+                  {[1,2,3,4,5].map(i => <Star key={i} size={20} color="#facc15" fill="#facc15" />)}
+                </div>
+                <p style={{ fontSize: '14px', color: '#71717a' }}>מעל 500 ביקורות חיוביות בגוגל</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginTop: '40px' }}>
+                {[
+                  { name: 'מיכל כהן', text: 'הזמנתי פורטרט פופ ארט של הכלב שלנו כמתנה לבעלי. הוא התרגש עד דמעות! האיכות מדהימה והצבעים פשוט קופצים מהקיר.', location: 'תל אביב', img: testimonialImages[0] },
+                  { name: 'יוסי לוי', text: 'הפכנו תמונה מהחתונה שלנו לאמנות. התוצאה מעבר לכל ציפייה - זה נראה כמו ציור אמיתי! ממליץ בחום.', location: 'חיפה', img: testimonialImages[1] },
+                  { name: 'נועה שמיר', text: 'עשיתי פורטרט משפחתי כמתנה להורים שלי ליום הנישואין ה-40. הם היו בהלם מהיופי. כבר הזמנתי עוד שניים!', location: 'ירושלים', img: testimonialImages[2] },
+                ].map((item, i) => (
+                  <div key={i} style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '16px', padding: '24px' }}>
+                    <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
+                      {[1,2,3,4,5].map(j => <Star key={j} size={14} color="#facc15" fill="#facc15" />)}
+                    </div>
+                    <p style={{ fontSize: '15px', color: '#d4d4d8', lineHeight: 1.7, marginBottom: '20px' }}>"{item.text}"</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <img 
+                        src={item.img}
+                        alt={item.name}
+                        style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover' }}
+                      />
+                      <div>
+                        <div style={{ fontSize: '15px', fontWeight: '600' }}>{item.name}</div>
+                        <div style={{ fontSize: '13px', color: '#52525b' }}>{item.location}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* CTA Section */}
+          <section style={{ padding: '100px 24px' }}>
+            <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+                {[
+                  'https://images.unsplash.com/photo-1552053831-71594a27632d?w=80&h=80&fit=crop',
+                  'https://images.unsplash.com/photo-1519741497674-611481863552?w=80&h=80&fit=crop',
+                  'https://images.unsplash.com/photo-1581952976147-5a2d15560349?w=80&h=80&fit=crop',
+                ].map((src, i) => (
+                  <div key={i} style={{ width: '60px', height: '60px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #000', marginLeft: i > 0 ? '-12px' : 0 }}>
+                    <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(180%) contrast(110%)' }} />
+                  </div>
+                ))}
+              </div>
+              
+              <h2 style={{ fontSize: '42px', fontWeight: '700', marginBottom: '16px', lineHeight: 1.2 }}>
+                מוכנים להפוך את התמונה
+                <br />
+                <span style={{ background: 'linear-gradient(to left, #a78bfa, #ec4899, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  ליצירת אמנות?
+                </span>
+              </h2>
+              <p style={{ color: '#71717a', marginBottom: '32px', fontSize: '18px' }}>העלו תמונה וראו את הקסם תוך שניות - בחינם וללא התחייבות</p>
+              <button style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: 'linear-gradient(to left, #8b5cf6, #ec4899)', color: '#fff', padding: '18px 36px', borderRadius: '14px', border: 'none', fontSize: '18px', fontWeight: '600', boxShadow: '0 10px 40px rgba(139,92,246,0.3)' }}>
+                <span>התחילו עכשיו - חינם!</span>
+                <Sparkles size={20} />
+              </button>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <footer style={{ backgroundColor: '#09090b', borderTop: '1px solid #27272a', padding: '48px 24px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '32px', marginBottom: '48px' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                    <div style={{ width: '32px', height: '32px', backgroundColor: '#27272a', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Sparkles size={14} color="#a78bfa" />
+                    </div>
+                    <span style={{ fontWeight: '600', fontSize: '18px' }}>Footprint</span>
+                  </div>
+                  <p style={{ fontSize: '14px', color: '#52525b', marginBottom: '16px', lineHeight: 1.6 }}>הפכו כל תמונה ליצירת אמנות פופ ארט מרהיבה.<br />איכות מוזיאון, משלוח מהיר, שביעות רצון מובטחת.</p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <a href="#" style={{ width: '36px', height: '36px', backgroundColor: '#27272a', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Instagram size={16} color="#71717a" />
+                    </a>
+                    <a href="#" style={{ width: '36px', height: '36px', backgroundColor: '#27272a', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Facebook size={16} color="#71717a" />
+                    </a>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px' }}>סגנונות</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {['פופ ארט', 'צבעי מים', 'קווים', 'אימפרסיוניסטי'].map(item => (
+                      <li key={item} style={{ marginBottom: '10px' }}>
+                        <a href="#" style={{ fontSize: '14px', color: '#52525b' }}>{item}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px' }}>מידע</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {['אודות', 'שאלות נפוצות', 'משלוחים', 'מדיניות החזרות'].map(item => (
+                      <li key={item} style={{ marginBottom: '10px' }}>
+                        <a href="#" style={{ fontSize: '14px', color: '#52525b' }}>{item}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px' }}>צור קשר</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', fontSize: '14px', color: '#52525b' }}>
+                      <Phone size={14} />
+                      <span>WhatsApp</span>
+                    </li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#52525b' }}>
+                      <Mail size={14} />
+                      <span>hello@footprint.co.il</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style={{ paddingTop: '24px', borderTop: '1px solid #27272a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: '#3f3f46' }}>
+                <span>© 2025 Footprint. כל הזכויות שמורות.</span>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <a href="#" style={{ color: '#3f3f46' }}>תקנון</a>
+                  <a href="#" style={{ color: '#3f3f46' }}>פרטיות</a>
+                  <a href="#" style={{ color: '#3f3f46' }}>נגישות</a>
+                </div>
+              </div>
+            </div>
+          </footer>
+
+          {/* WhatsApp Button */}
+          <a 
+            href="https://wa.me/972501234567"
+            style={{ position: 'fixed', bottom: '24px', left: '24px', width: '56px', height: '56px', backgroundColor: '#22c55e', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(34,197,94,0.4)', zIndex: 50 }}
+          >
+            <Phone size={24} color="#fff" />
+          </a>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<FootprintWebsite />);
+  </script>
+</body>
+</html>

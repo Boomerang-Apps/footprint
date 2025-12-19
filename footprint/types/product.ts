@@ -1,0 +1,79 @@
+// Product Types for Footprint
+
+// AI Style Types
+export type StyleType = 
+  | 'original'
+  | 'pop_art'
+  | 'watercolor'
+  | 'line_art'
+  | 'oil_painting'
+  | 'romantic'
+  | 'comic_book'
+  | 'vintage'
+  | 'minimalist';
+
+export interface Style {
+  id: StyleType;
+  name: string;
+  nameHe: string;
+  description: string;
+  descriptionHe: string;
+  thumbnailUrl: string;
+  processingTime: number; // seconds
+  popular?: boolean;
+}
+
+// Size Types
+export type SizeType = 'A5' | 'A4' | 'A3' | 'A2';
+
+export interface Size {
+  id: SizeType;
+  name: string;
+  dimensions: string; // e.g., "14.8 x 21 cm"
+  dimensionsCm: { width: number; height: number };
+  price: number;
+  popular?: boolean;
+}
+
+// Paper Types
+export type PaperType = 'matte' | 'glossy' | 'canvas';
+
+export interface Paper {
+  id: PaperType;
+  name: string;
+  nameHe: string;
+  description: string;
+  descriptionHe: string;
+  priceModifier: number; // Added to base price
+}
+
+// Frame Types
+export type FrameType = 'none' | 'black' | 'white' | 'oak';
+
+export interface Frame {
+  id: FrameType;
+  name: string;
+  nameHe: string;
+  color: string; // CSS color for preview
+  price: number; // Added to base price
+  popular?: boolean;
+}
+
+// Product Configuration
+export interface ProductConfig {
+  style: StyleType;
+  size: SizeType;
+  paperType: PaperType;
+  frameType: FrameType;
+}
+
+// Price Calculation Result
+export interface PriceBreakdown {
+  basePrice: number;
+  paperModifier: number;
+  framePrice: number;
+  subtotal: number;
+  shipping: number;
+  discount: number;
+  total: number;
+}

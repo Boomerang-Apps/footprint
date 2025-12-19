@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Footprint - אמנות פופ ארט</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Heebo', sans-serif; 
+      background: #000; 
+      color: #fff;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    
+    /* Announcement Bar */
+    .announcement {
+      background: #18181b;
+      border-bottom: 1px solid #27272a;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #a1a1aa;
+    }
+    
+    /* Navigation */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #27272a;
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: #27272a;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+    .nav-links a {
+      color: #a1a1aa;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-btn {
+      background: #fff;
+      color: #000;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+    }
+    
+    /* Hero Section */
+    .hero {
+      padding: 60px 24px 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .hero-images {
+      position: relative;
+      height: 550px;
+    }
+    .frame {
+      position: absolute;
+      background: #fff;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+    .frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .frame-main {
+      width: 280px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-4deg);
+      z-index: 3;
+    }
+    .frame-main img {
+      height: 340px;
+      filter: saturate(200%) contrast(120%) hue-rotate(-15deg);
+    }
+    .frame-dog {
+      width: 160px;
+      top: 8%;
+      right: 8%;
+      transform: rotate(6deg);
+      z-index: 2;
+    }
+    .frame-dog img {
+      height: 180px;
+      filter: saturate(180%) contrast(115%) hue-rotate(30deg);
+    }
+    .frame-couple {
+      width: 150px;
+      bottom: 8%;
+      left: 5%;
+      transform: rotate(-8deg);
+      z-index: 4;
+    }
+    .frame-couple img {
+      height: 170px;
+      filter: saturate(200%) contrast(110%) hue-rotate(-20deg);
+    }
+    .frame-label {
+      text-align: center;
+      padding: 8px 0 4px;
+      color: #000;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+    }
+    .blur-circle {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.5;
+    }
+    .blur-1 {
+      width: 100px;
+      height: 100px;
+      top: 5%;
+      left: 15%;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    }
+    .blur-2 {
+      width: 120px;
+      height: 120px;
+      bottom: 15%;
+      right: 5%;
+      background: linear-gradient(135deg, #22d3ee, #3b82f6);
+    }
+    
+    /* Hero Content */
+    .hero-content {
+      padding-right: 20px;
+    }
+    .rating-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      font-size: 12px;
+      color: #71717a;
+    }
+    .stars {
+      color: #facc15;
+      letter-spacing: 2px;
+    }
+    h1 {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    .gradient-text {
+      background: linear-gradient(to left, #a78bfa, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: 18px;
+      color: #71717a;
+      margin-bottom: 32px;
+      max-width: 480px;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(to left, #8b5cf6, #ec4899);
+      color: #fff;
+      padding: 16px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      color: #fff;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #27272a;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #52525b;
+    }
+    
+    /* Features */
+    .features {
+      padding: 48px 24px;
+      background: rgba(24,24,27,0.5);
+      border-top: 1px solid #27272a;
+      border-bottom: 1px solid #27272a;
+    }
+    .features-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+    }
+    .feature {
+      display: flex;
+      gap: 12px;
+    }
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: #27272a;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .feature-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .feature-desc {
+      font-size: 12px;
+      color: #52525b;
+    }
+    
+    /* Gallery */
+    .gallery {
+      padding: 80px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .section-header h2 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .section-header p {
+      color: #71717a;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 4/5;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .gallery-item:hover {
+      transform: scale(1.02);
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+    }
+    .gallery-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 32px 16px 16px;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      font-weight: 600;
+    }
+    
+    /* Showcase Grid */
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .showcase-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .showcase-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(180%) contrast(115%);
+    }
+    .showcase-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .showcase-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    /* Products */
+    .products {
+      padding: 80px 24px;
+      background: rgba(24,24,27,0.3);
+    }
+    .products-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .product-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+    .product-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #8b5cf6;
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      z-index: 10;
+    }
+    .product-image {
+      height: 200px;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, #18181b 100%);
+    }
+    .product-content {
+      padding: 24px;
+      padding-top: 0;
+      margin-top: -30px;
+      position: relative;
+    }
+    .product-subtitle {
+      font-size: 11px;
+      color: #71717a;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .product-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .product-desc {
+      font-size: 14px;
+      color: #71717a;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid #27272a;
+    }
+    .product-price-label {
+      font-size: 12px;
+      color: #52525b;
+    }
+    .product-price {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .product-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+    }
+    
+    /* How It Works */
+    .how-it-works {
+      padding: 80px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
+    }
+    .step {
+      text-align: center;
+    }
+    .step-icon-wrapper {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+    }
+    .step-icon {
+      width: 80px;
+      height: 80px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    .step-number {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .step-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: #71717a;
+    }
+    
+    /* Testimonials */
+    .testimonials {
+      padding: 80px 24px;
+      background: rgba(24,24,27,0.3);
+    }
+    .testimonials-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .testimonials-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .testimonials-header .stars {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .testimonials-header p {
+      font-size: 14px;
+      color: #71717a;
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .testimonial-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .testimonial-stars {
+      color: #facc15;
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+    }
+    .testimonial-text {
+      font-size: 15px;
+      color: #d4d4d8;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .testimonial-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .testimonial-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .testimonial-location {
+      font-size: 13px;
+      color: #52525b;
+    }
+    
+    /* CTA */
+    .cta {
+      padding: 100px 24px;
+      text-align: center;
+    }
+    .cta-avatars {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .cta-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 3px solid #000;
+      object-fit: cover;
+      filter: saturate(180%) contrast(110%);
+    }
+    .cta-avatar:not(:first-child) {
+      margin-right: -12px;
+    }
+    .cta h2 {
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .cta p {
+      color: #71717a;
+      font-size: 18px;
+      margin-bottom: 32px;
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(to left, #8b5cf6, #ec4899);
+      color: #fff;
+      padding: 18px 36px;
+      border-radius: 14px;
+      border: none;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 40px rgba(139,92,246,0.3);
+    }
+    
+    /* Footer */
+    .footer {
+      background: #09090b;
+      border-top: 1px solid #27272a;
+      padding: 48px 24px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    .footer-brand p {
+      font-size: 14px;
+      color: #52525b;
+      margin: 16px 0;
+      line-height: 1.6;
+    }
+    .footer-social {
+      display: flex;
+      gap: 8px;
+    }
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      background: #27272a;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .footer-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .footer-links {
+      list-style: none;
+    }
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+    .footer-links a {
+      font-size: 14px;
+      color: #52525b;
+    }
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid #27272a;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #3f3f46;
+    }
+    .footer-bottom-links {
+      display: flex;
+      gap: 16px;
+    }
+    
+    /* WhatsApp Button */
+    .whatsapp-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      width: 56px;
+      height: 56px;
+      background: #22c55e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 20px rgba(34,197,94,0.4);
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <!-- Announcement Bar -->
+  <div class="announcement">
+    ✨ פריט שני ב-50% הנחה | 🚚 משלוח חינם מעל ₪299
+  </div>
+  
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo">
+        <div class="logo-icon">✨</div>
+        <span>Footprint</span>
+      </div>
+      <div class="nav-links">
+        <a href="#">מוצרים</a>
+        <a href="#">גלריה</a>
+        <a href="#">איך זה עובד</a>
+        <a href="#">צור קשר</a>
+      </div>
+      <button class="nav-btn">התחילו</button>
+    </div>
+  </nav>
+  
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-images">
+      <div class="blur-circle blur-1"></div>
+      <div class="blur-circle blur-2"></div>
+      
+      <!-- Main Frame - Family -->
+      <div class="frame frame-main">
+        <img src="https://images.unsplash.com/photo-1581952976147-5a2d15560349?w=400&h=500&fit=crop" alt="משפחה">
+        <div class="frame-label">FOOTPRINT ART</div>
+      </div>
+      
+      <!-- Dog Frame -->
+      <div class="frame frame-dog">
+        <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300&h=300&fit=crop" alt="כלב">
+      </div>
+      
+      <!-- Couple Frame -->
+      <div class="frame frame-couple">
+        <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop" alt="זוג">
+      </div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="rating-badge">
+        <span class="stars">★★★★★</span>
+        <span>30,000+ לקוחות מרוצים</span>
+      </div>
+      
+      <h1>
+        המתנה שלא שוכחים!<br>
+        <span class="gradient-text">אמנות פופ ארט מהתמונות שלכם</span>
+      </h1>
+      
+      <p class="hero-desc">
+        העלו תמונה של המשפחה, הכלב, הזוגיות או הילדים - ותקבלו יצירת אמנות בסגנון פופ ארט צבעוני ומרהיב, מודפסת על נייר פיין ארט באיכות מוזיאון.
+      </p>
+      
+      <div class="hero-buttons">
+        <button class="btn-primary">צרו אמנות עכשיו ←</button>
+        <button class="btn-secondary">▶ איך זה עובד</button>
+      </div>
+      
+      <div class="hero-stats">
+        <div>
+          <div class="stat-value">500+</div>
+          <div class="stat-label">לקוחות</div>
+        </div>
+        <div>
+          <div class="stat-value">4.9</div>
+          <div class="stat-label">דירוג</div>
+        </div>
+        <div>
+          <div class="stat-value">24-48h</div>
+          <div class="stat-label">משלוח</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Features -->
+  <section class="features">
+    <div class="features-inner">
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <div>
+          <div class="feature-title">AI פופ ארט</div>
+          <div class="feature-desc">הפיכה אוטומטית לסגנון אמנותי</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛡️</div>
+        <div>
+          <div class="feature-title">שביעות רצון</div>
+          <div class="feature-desc">לא מרוצים? נתקן או נחזיר כסף</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🚚</div>
+        <div>
+          <div class="feature-title">משלוח מהיר</div>
+          <div class="feature-desc">עד 48 שעות לכל הארץ</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🏆</div>
+        <div>
+          <div class="feature-title">איכות מוזיאון</div>
+          <div class="feature-desc">הדפסה על נייר פיין ארט</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Gallery -->
+  <section class="gallery">
+    <div class="section-header">
+      <h2>הגלריה שלנו</h2>
+      <p>כל תמונה הופכת ליצירת אמנות ייחודית בסגנון פופ ארט צבעוני</p>
+    </div>
+    
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1581952976147-5a2d15560349?w=600&h=750&fit=crop" alt="משפחה" style="filter: sepia(20%) saturate(200%) hue-rotate(-10deg) contrast(110%)">
+        <div class="gallery-overlay" style="background: rgba(236, 72, 153, 0.3)"></div>
+        <div class="gallery-label">משפחה</div>
+      </div>
+      <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=750&fit=crop" alt="כלב" style="filter: saturate(180%) contrast(115%) hue-rotate(20deg)">
+        <div class="gallery-overlay" style="background: rgba(139, 92, 246, 0.3)"></div>
+        <div class="gallery-label">חיית מחמד</div>
+      </div>
+      <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&h=750&fit=crop" alt="זוג" style="filter: saturate(200%) contrast(105%) hue-rotate(-20deg)">
+        <div class="gallery-overlay" style="background: rgba(249, 115, 22, 0.3)"></div>
+        <div class="gallery-label">זוגות</div>
+      </div>
+      <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=600&h=750&fit=crop" alt="ילדים" style="filter: saturate(190%) contrast(110%) brightness(105%)">
+        <div class="gallery-overlay" style="background: rgba(34, 211, 238, 0.3)"></div>
+        <div class="gallery-label">ילדים</div>
+      </div>
+    </div>
+    
+    <div class="showcase-grid">
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1476234251651-f353703a034d?w=400&h=400&fit=crop" alt="יום הולדת">
+        <div class="showcase-overlay" style="background: rgba(236, 72, 153, 0.5)">
+          <span class="showcase-badge" style="background: #ec4899">יום הולדת</span>
+        </div>
+      </div>
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1601979031925-424e53b6caaa?w=400&h=400&fit=crop" alt="כלב">
+        <div class="showcase-overlay" style="background: rgba(139, 92, 246, 0.5)">
+          <span class="showcase-badge" style="background: #8b5cf6">כלב אהוב</span>
+        </div>
+      </div>
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=400&fit=crop" alt="חתונה">
+        <div class="showcase-overlay" style="background: rgba(245, 158, 11, 0.5)">
+          <span class="showcase-badge" style="background: #f59e0b">חתונה</span>
+        </div>
+      </div>
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=400&fit=crop" alt="משפחה">
+        <div class="showcase-overlay" style="background: rgba(34, 211, 238, 0.5)">
+          <span class="showcase-badge" style="background: #22d3ee; color: #000">משפחה</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Products -->
+  <section class="products">
+    <div class="products-inner">
+      <div class="section-header">
+        <h2>בחרו את הסגנון שלכם</h2>
+        <p>מגוון סגנונות אמנותיים להפוך כל תמונה ליצירה</p>
+      </div>
+      
+      <div class="products-grid">
+        <div class="product-card">
+          <div class="product-image">
+            <img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&h=400&fit=crop" alt="פופ ארט" style="filter: saturate(250%) contrast(130%) brightness(105%)">
+            <div class="product-image-overlay"></div>
+          </div>
+          <div class="product-content">
+            <div class="product-subtitle">Classic Pop Art</div>
+            <h3 class="product-title">פופ ארט קלאסי</h3>
+            <p class="product-desc">צבעים עזים וקווי מתאר בולטים בסגנון אנדי וורהול</p>
+            <div class="product-footer">
+              <div>
+                <div class="product-price-label">החל מ-</div>
+                <span class="product-price">₪149</span>
+              </div>
+              <button class="product-btn" style="background: #ec4899">בחרו סגנון</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="product-card">
+          <div class="product-badge">הכי פופולרי</div>
+          <div class="product-image">
+            <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=400&fit=crop" alt="צבעי מים" style="filter: saturate(120%) contrast(90%) brightness(110%) sepia(20%)">
+            <div class="product-image-overlay"></div>
+          </div>
+          <div class="product-content">
+            <div class="product-subtitle">Watercolor Style</div>
+            <h3 class="product-title">צבעי מים</h3>
+            <p class="product-desc">מראה רך ואמנותי עם טשטושים עדינים</p>
+            <div class="product-footer">
+              <div>
+                <div class="product-price-label">החל מ-</div>
+                <span class="product-price">₪149</span>
+              </div>
+              <button class="product-btn" style="background: #8b5cf6">בחרו סגנון</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="product-card">
+          <div class="product-image">
+            <img src="https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&h=400&fit=crop" alt="קווים" style="filter: grayscale(100%) contrast(150%)">
+            <div class="product-image-overlay"></div>
+          </div>
+          <div class="product-content">
+            <div class="product-subtitle">Line Art</div>
+            <h3 class="product-title">קווים מינימליסטי</h3>
+            <p class="product-desc">סגנון נקי ומודרני עם קווים פשוטים</p>
+            <div class="product-footer">
+              <div>
+                <div class="product-price-label">החל מ-</div>
+                <span class="product-price">₪129</span>
+              </div>
+              <button class="product-btn" style="background: #22d3ee; color: #000">בחרו סגנון</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <div class="section-header">
+      <h2>איך זה עובד?</h2>
+      <p>שלושה צעדים פשוטים ליצירת אמנות</p>
+    </div>
+    
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon-wrapper">
+          <div class="step-icon">📤</div>
+          <span class="step-number">01</span>
+        </div>
+        <h3 class="step-title">העלו תמונה</h3>
+        <p class="step-desc">בחרו תמונה של המשפחה, הכלב, הזוגיות או כל רגע מיוחד</p>
+      </div>
+      <div class="step">
+        <div class="step-icon-wrapper">
+          <div class="step-icon">🎨</div>
+          <span class="step-number">02</span>
+        </div>
+        <h3 class="step-title">בחרו סגנון</h3>
+        <p class="step-desc">פופ ארט, צבעי מים, קווים או סגנון מותאם אישית</p>
+      </div>
+      <div class="step">
+        <div class="step-icon-wrapper">
+          <div class="step-icon">📦</div>
+          <span class="step-number">03</span>
+        </div>
+        <h3 class="step-title">קבלו הדפסה</h3>
+        <p class="step-desc">משלוח מהיר עד הבית על נייר פיין ארט איכותי</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="testimonials-inner">
+      <div class="testimonials-header">
+        <div class="stars">★★★★★</div>
+        <p>מעל 500 ביקורות חיוביות בגוגל</p>
+      </div>
+      
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"הזמנתי פורטרט פופ ארט של הכלב שלנו כמתנה לבעלי. הוא התרגש עד דמעות! האיכות מדהימה והצבעים פשוט קופצים מהקיר."</p>
+          <div class="testimonial-author">
+            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" alt="מיכל" class="testimonial-avatar">
+            <div>
+              <div class="testimonial-name">מיכל כהן</div>
+              <div class="testimonial-location">תל אביב</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"הפכנו תמונה מהחתונה שלנו לאמנות. התוצאה מעבר לכל ציפייה - זה נראה כמו ציור אמיתי! ממליץ בחום."</p>
+          <div class="testimonial-author">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="יוסי" class="testimonial-avatar">
+            <div>
+              <div class="testimonial-name">יוסי לוי</div>
+              <div class="testimonial-location">חיפה</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"עשיתי פורטרט משפחתי כמתנה להורים שלי ליום הנישואין ה-40. הם היו בהלם מהיופי. כבר הזמנתי עוד שניים!"</p>
+          <div class="testimonial-author">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" alt="נועה" class="testimonial-avatar">
+            <div>
+              <div class="testimonial-name">נועה שמיר</div>
+              <div class="testimonial-location">ירושלים</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta-avatars">
+      <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=80&h=80&fit=crop" alt="" class="cta-avatar">
+      <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=80&h=80&fit=crop" alt="" class="cta-avatar">
+      <img src="https://images.unsplash.com/photo-1581952976147-5a2d15560349?w=80&h=80&fit=crop" alt="" class="cta-avatar">
+    </div>
+    <h2>
+      מוכנים להפוך את התמונה<br>
+      <span class="gradient-text">ליצירת אמנות?</span>
+    </h2>
+    <p>העלו תמונה וראו את הקסם תוך שניות - בחינם וללא התחייבות</p>
+    <button class="cta-btn">התחילו עכשיו - חינם! ✨</button>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <div class="logo-icon">✨</div>
+            <span>Footprint</span>
+          </div>
+          <p>הפכו כל תמונה ליצירת אמנות פופ ארט מרהיבה.<br>איכות מוזיאון, משלוח מהיר, שביעות רצון מובטחת.</p>
+          <div class="footer-social">
+            <a href="#">📷</a>
+            <a href="#">📘</a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">סגנונות</h4>
+          <ul class="footer-links">
+            <li><a href="#">פופ ארט</a></li>
+            <li><a href="#">צבעי מים</a></li>
+            <li><a href="#">קווים</a></li>
+            <li><a href="#">אימפרסיוניסטי</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">מידע</h4>
+          <ul class="footer-links">
+            <li><a href="#">אודות</a></li>
+            <li><a href="#">שאלות נפוצות</a></li>
+            <li><a href="#">משלוחים</a></li>
+            <li><a href="#">מדיניות החזרות</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="footer-title">צור קשר</h4>
+          <ul class="footer-links">
+            <li>📱 WhatsApp</li>
+            <li>✉️ hello@footprint.co.il</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <span>© 2025 Footprint. כל הזכויות שמורות.</span>
+        <div class="footer-bottom-links">
+          <a href="#">תקנון</a>
+          <a href="#">פרטיות</a>
+          <a href="#">נגישות</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- WhatsApp Button -->
+  <a href="https://wa.me/972501234567" class="whatsapp-btn">💬</a>
+</body>
+</html>
