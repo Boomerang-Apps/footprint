@@ -41,19 +41,19 @@ export default function CreatePage() {
   });
 
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-black/95 backdrop-blur-xl border-b border-dark-border">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-zinc-200">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => router.push('/')}
-            className="flex items-center gap-2 text-zinc-400 hover:text-white transition"
+            className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>חזרה</span>
           </button>
-          
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 text-zinc-900">
             <Sparkles className="w-5 h-5 text-brand-purple" />
             <span className="font-semibold">יצירת הזמנה</span>
           </div>
@@ -63,21 +63,21 @@ export default function CreatePage() {
       </header>
 
       {/* Progress Steps */}
-      <div className="border-b border-dark-border">
+      <div className="border-b border-zinc-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-center gap-2">
             {['העלאה', 'סגנון', 'התאמה', 'תשלום'].map((step, i) => (
               <div key={step} className="flex items-center gap-2">
                 <div className={`
                   w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                  ${i === 0 ? 'bg-brand-purple text-white' : 'bg-dark-card text-zinc-500'}
+                  ${i === 0 ? 'bg-brand-purple text-white' : 'bg-zinc-100 text-zinc-500'}
                 `}>
                   {i + 1}
                 </div>
-                <span className={`text-sm ${i === 0 ? 'text-white' : 'text-zinc-500'}`}>
+                <span className={`text-sm ${i === 0 ? 'text-zinc-900' : 'text-zinc-500'}`}>
                   {step}
                 </span>
-                {i < 3 && <div className="w-8 h-px bg-dark-border" />}
+                {i < 3 && <div className="w-8 h-px bg-zinc-200" />}
               </div>
             ))}
           </div>
@@ -87,7 +87,7 @@ export default function CreatePage() {
       {/* Main Content */}
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-3">העלו תמונה</h1>
+          <h1 className="text-3xl font-bold mb-3 text-zinc-900">העלו תמונה</h1>
           <p className="text-zinc-500">
             בחרו תמונה מהגלריה שלכם להפיכה לאמנות
           </p>
@@ -99,19 +99,19 @@ export default function CreatePage() {
           className={`
             card p-12 cursor-pointer transition-all duration-200
             flex flex-col items-center justify-center text-center
-            ${isDragActive 
-              ? 'border-brand-purple bg-brand-purple/5' 
-              : 'hover:border-zinc-600'
+            ${isDragActive
+              ? 'border-brand-purple bg-brand-purple/5'
+              : 'hover:border-zinc-400'
             }
           `}
         >
           <input {...getInputProps()} />
-          
+
           <div className={`
             w-20 h-20 rounded-2xl mb-6 flex items-center justify-center
-            ${isDragActive 
-              ? 'bg-brand-purple/20 text-brand-purple' 
-              : 'bg-dark-border text-zinc-500'
+            ${isDragActive
+              ? 'bg-brand-purple/20 text-brand-purple'
+              : 'bg-zinc-100 text-zinc-500'
             }
           `}>
             {isDragActive ? (
@@ -121,10 +121,10 @@ export default function CreatePage() {
             )}
           </div>
 
-          <h3 className="text-xl font-semibold mb-2">
+          <h3 className="text-xl font-semibold mb-2 text-zinc-900">
             {isDragActive ? 'שחררו כאן' : 'גררו תמונה לכאן'}
           </h3>
-          
+
           <p className="text-zinc-500 mb-6">
             או לחצו לבחירה מהמכשיר
           </p>
@@ -133,15 +133,15 @@ export default function CreatePage() {
             בחירת תמונה
           </button>
 
-          <p className="text-xs text-zinc-600 mt-6">
+          <p className="text-xs text-zinc-500 mt-6">
             JPG, PNG, HEIC עד 20MB
           </p>
         </div>
 
         {/* Tips */}
-        <div className="mt-8 p-6 bg-dark-card/50 rounded-xl border border-dark-border">
-          <h4 className="font-semibold mb-3 text-sm">טיפים לתמונה מושלמת:</h4>
-          <ul className="space-y-2 text-sm text-zinc-400">
+        <div className="mt-8 p-6 bg-zinc-50 rounded-xl border border-zinc-200">
+          <h4 className="font-semibold mb-3 text-sm text-zinc-900">טיפים לתמונה מושלמת:</h4>
+          <ul className="space-y-2 text-sm text-zinc-600">
             <li className="flex items-start gap-2">
               <span className="text-brand-purple">•</span>
               <span>בחרו תמונה באיכות גבוהה ותאורה טובה</span>

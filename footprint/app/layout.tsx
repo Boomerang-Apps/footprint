@@ -9,15 +9,15 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: 'Footprint | אמנות AI מותאמת אישית',
-  description: 'הפכו תמונות לאמנות מודפסת באיכות מוזיאון. טרנספורמציית AI מיידית, משלוח מהיר.',
-  keywords: ['הדפסת תמונות', 'אמנות AI', 'מתנות מותאמות אישית', 'פורטרט משפחתי'],
-  authors: [{ name: 'Footprint' }],
+  title: 'פוטפרינט | אמנות AI מהתמונות שלכם',
+  description: 'הפכו תמונות לאמנות מודפסת באיכות מוזיאון. בינה מלאכותית הופכת כל תמונה ליצירת אמנות, משלוח מהיר.',
+  keywords: ['הדפסת תמונות', 'אמנות AI', 'מתנות מותאמות אישית', 'פורטרט משפחתי', 'פוטפרינט'],
+  authors: [{ name: 'פוטפרינט' }],
   openGraph: {
-    title: 'Footprint | אמנות AI מותאמת אישית',
+    title: 'פוטפרינט | אמנות AI מהתמונות שלכם',
     description: 'הפכו תמונות לאמנות מודפסת באיכות מוזיאון',
     url: 'https://footprint.co.il',
-    siteName: 'Footprint',
+    siteName: 'פוטפרינט',
     locale: 'he_IL',
     type: 'website',
   },
@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="he" dir="rtl" className={heebo.variable}>
-      <body className="min-h-screen bg-black text-white font-heebo antialiased">
+      <body className="min-h-screen bg-white text-zinc-900 font-heebo antialiased">
         <Providers>
           {children}
         </Providers>

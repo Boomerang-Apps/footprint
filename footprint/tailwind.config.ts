@@ -16,12 +16,19 @@ const config: Config = {
           cyan: '#22d3ee',
           orange: '#f59e0b',
         },
-        // Dark theme
-        dark: {
-          bg: '#000000',
-          card: '#18181b',
-          border: '#27272a',
-          hover: '#3f3f46',
+        // Light theme (primary)
+        light: {
+          bg: '#ffffff',
+          soft: '#fafafa',
+          muted: '#f5f5f5',
+          border: '#e5e5e5',
+          'border-soft': '#ebebeb',
+        },
+        // Text colors
+        text: {
+          primary: '#1a1a1a',
+          secondary: '#525252',
+          muted: '#737373',
         }
       },
       backgroundImage: {
@@ -30,6 +37,17 @@ const config: Config = {
       },
       fontFamily: {
         heebo: ['Heebo', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        'soft-sm': '0 1px 2px rgba(0,0,0,0.04)',
+        'soft-md': '0 4px 12px rgba(0,0,0,0.06)',
+        'soft-lg': '0 8px 24px rgba(0,0,0,0.08)',
+        'brand': '0 4px 16px rgba(139,92,246,0.25)',
+        'brand-lg': '0 8px 32px rgba(139,92,246,0.3)',
+      },
+      borderRadius: {
+        'xl': '16px',
+        '2xl': '24px',
       },
     },
   },
