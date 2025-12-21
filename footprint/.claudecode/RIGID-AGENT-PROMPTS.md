@@ -1,16 +1,25 @@
-# Rigid Agent Kickstart Prompts (Linear-First)
+# Rigid Agent Kickstart Prompts (Linear-First + Git Environment)
 
-**These prompts ENFORCE the validation protocol with Linear integration. Use EXACTLY as written.**
+**These prompts ENFORCE the validation protocol with Linear integration and Git Environment. Use EXACTLY as written.**
 
 ---
 
-## Key Addition: Linear-First Workflow
+## Key Additions
 
+### Linear-First Workflow
 Every dev agent prompt now includes:
 - Fetch FULL story from Linear before starting
 - Output Linear Story Confirmation block
 - Update Linear at key milestones
 - Include Linear URL in all handoffs
+
+### Git Environment Protocol
+All agents must follow:
+- **Production**: `main` branch (PM merges only)
+- **Staging**: `develop` branch (PM merges from feature/*)
+- **Development**: `feature/RZ-XXX-*` branches (agent workspace)
+- Feature branches ALWAYS created from `develop`
+- NEVER commit directly to main or develop
 
 ---
 
@@ -75,8 +84,9 @@ STEP 1: Read my agent definition
 STEP 2: Read the safety framework
 STEP 3: Read the workflow protocol
 STEP 4: Read the validation protocol
-STEP 5: Check my inbox
-STEP 6: Output my Identity Declaration
+STEP 5: Read the Git Environment protocol
+STEP 6: Check my inbox
+STEP 7: Output my Identity Declaration
 
 I will now read each document using the Read tool, then output my declaration.
 
@@ -87,6 +97,13 @@ CRITICAL RULES I MUST FOLLOW:
 - BLOCK merge if START.md or ROLLBACK-PLAN.md missing
 - BLOCK merge if coverage < 80%
 - Verify agent displayed Safety Banner before accepting work
+
+GIT ENVIRONMENT RULES (I am the ONLY one who merges):
+- Feature branches merge to DEVELOP only (never main)
+- Develop merges to MAIN only at release time
+- VERIFY feature branch was created from develop
+- Tag completed stories: RZ-XXX-complete
+- Tag releases: vX.Y.Z
 
 AGENT ASSIGNMENT (memorized):
 - Backend-1: Database, Auth, State
@@ -101,7 +118,8 @@ Please read these files now:
 2. .claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
 3. .claudecode/workflows/WORKFLOW-2.0-PM-ORCHESTRATION.md
 4. .claudecode/workflows/AGENT-VALIDATION-PROTOCOL.md
-5. .claudecode/handoffs/pm-inbox.md
+5. .claudecode/workflows/GIT-ENVIRONMENT-PROTOCOL.md
+6. .claudecode/handoffs/pm-inbox.md
 ```
 
 ---
@@ -206,6 +224,13 @@ BEFORE EVERY FILE OPERATION I MUST:
 
 If ANY check fails → STOP and ask PM.
 
+GIT BRANCH WORKFLOW:
+1. ALWAYS create feature branch FROM develop
+2. git checkout develop && git pull origin develop
+3. git checkout -b feature/RZ-XXX-description
+4. NEVER commit to main or develop directly
+5. When complete → PM merges to develop
+
 LINEAR WORKFLOW:
 1. Get Linear ID from inbox
 2. Fetch: mcp__linear-server__get_issue with the issue ID
@@ -277,6 +302,13 @@ BEFORE EVERY FILE OPERATION I MUST:
 4. Linear Check: Is this requirement in the Linear story?
 
 If ANY check fails → STOP and ask PM.
+
+GIT BRANCH WORKFLOW:
+1. ALWAYS create feature branch FROM develop
+2. git checkout develop && git pull origin develop
+3. git checkout -b feature/RZ-XXX-description
+4. NEVER commit to main or develop directly
+5. When complete → PM merges to develop
 
 LINEAR WORKFLOW:
 1. Get Linear ID from inbox
@@ -350,6 +382,13 @@ BEFORE EVERY FILE OPERATION I MUST:
 
 If ANY check fails → STOP and ask PM.
 
+GIT BRANCH WORKFLOW:
+1. ALWAYS create feature branch FROM develop
+2. git checkout develop && git pull origin develop
+3. git checkout -b feature/RZ-XXX-description
+4. NEVER commit to main or develop directly
+5. When complete → PM merges to develop
+
 LINEAR WORKFLOW:
 1. Get Linear ID from inbox
 2. Fetch: mcp__linear-server__get_issue with the issue ID
@@ -421,6 +460,13 @@ BEFORE EVERY FILE OPERATION I MUST:
 4. Linear Check: Is this requirement in the Linear story?
 
 If ANY check fails → STOP and ask PM.
+
+GIT BRANCH WORKFLOW:
+1. ALWAYS create feature branch FROM develop
+2. git checkout develop && git pull origin develop
+3. git checkout -b feature/RZ-XXX-description
+4. NEVER commit to main or develop directly
+5. When complete → PM merges to develop
 
 LINEAR WORKFLOW:
 1. Get Linear ID from inbox
