@@ -1,9 +1,10 @@
 # Research: Replicate AI Integration
 
-**Date**: 2025-12-19
+**Date**: 2025-12-21 (Updated)
 **Author**: CTO Agent
 **Story**: AI-02 (Preview photo in different styles)
 **Gate**: 0 - Research
+**Status**: ✅ APPROVED
 
 ---
 
@@ -31,31 +32,44 @@ Evaluate Replicate API for AI-powered image style transformation. Determine the 
 - **Authentication**: API token in header
 - **Pricing**: Pay-per-prediction, varies by model
 
-### Recommended Models
+### Recommended Models (2025 Update)
 
-#### Option 1: Stable Diffusion img2img
+#### Option 1: Flux Kontext Pro (RECOMMENDED)
+- **Model**: `black-forest-labs/flux-kontext-pro`
+- **Use Case**: Context-aware image transformation with identity preservation
+- **Time**: 6-12 seconds (meets our < 10 sec requirement)
+- **Cost**: ~$0.005 per image
+- **Released**: May 2025 by Black Forest Labs (Stable Diffusion creators)
+- **Key Benefits**: Lightning-fast processing, context-aware capabilities
+
+#### Option 2: fofr/style-transfer
+- **Model**: `fofr/style-transfer`
+- **Use Case**: Artistic style transfer between images
+- **Time**: 5-10 seconds
+- **Cost**: ~$0.0071 per image
+- **Hardware**: Nvidia L40S GPU
+- **Open Source**: Can self-host with Docker
+
+#### Option 3: Flux Kontext Max (Premium)
+- **Model**: `black-forest-labs/flux-kontext-max`
+- **Use Case**: Premium workflows with typography, precise edits, full stylization
+- **Time**: 10-15 seconds
+- **Cost**: ~$0.008 per image
+- **Best For**: High-end print quality
+
+#### Option 4: Stable Diffusion img2img (Legacy)
 - **Model**: `stability-ai/stable-diffusion`
 - **Use Case**: Style transfer with prompt guidance
 - **Time**: 5-15 seconds
 - **Cost**: ~$0.0023 per image
 
-#### Option 2: Style Transfer Models
-- **Model**: `kuprel/min-dalle` or custom fine-tuned
-- **Use Case**: Specific artistic styles
-- **Time**: 3-10 seconds
-- **Cost**: ~$0.001-0.003 per image
-
-#### Option 3: SDXL for Higher Quality
-- **Model**: `stability-ai/sdxl`
-- **Use Case**: Premium quality transformations
-- **Time**: 10-20 seconds
-- **Cost**: ~$0.005 per image
+**[CTO-DECISION]**: Use `flux-kontext-pro` as primary model for optimal speed/quality balance. Fall back to `fofr/style-transfer` for artistic styles.
 
 ---
 
 ## Recommended Approach
 
-**Primary**: Use Stable Diffusion img2img with style prompts
+**Primary**: Use Flux Kontext Pro for fast, context-aware style transfer
 
 ```typescript
 // lib/ai/replicate.ts
@@ -65,31 +79,40 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
+export type StyleType =
+  | 'pop_art' | 'watercolor' | 'line_art' | 'oil_painting'
+  | 'romantic' | 'comic_book' | 'vintage' | 'original_enhanced';
+
+const STYLE_PROMPTS: Record<StyleType, string> = {
+  pop_art: "Transform into pop art style: bold vibrant colors, halftone dots pattern, Andy Warhol inspired, high contrast",
+  watercolor: "Transform into watercolor painting: soft flowing edges, translucent color washes, wet-on-wet technique, artistic brushstrokes",
+  line_art: "Transform into minimalist line art: clean precise lines, single color, elegant simplicity, vector-like quality",
+  oil_painting: "Transform into oil painting: thick impasto brushstrokes, rich textures, classical art style, museum quality",
+  romantic: "Transform into romantic style: soft dreamy focus, warm golden tones, ethereal lighting, tender atmosphere",
+  comic_book: "Transform into comic book style: bold black outlines, vibrant flat colors, Ben-Day dots, dynamic composition",
+  vintage: "Transform into vintage style: sepia tones, film grain, retro color grading, nostalgic aesthetic",
+  original_enhanced: "Enhance photo: improve colors, sharpen details, professional color grading, maintain original composition"
+};
+
 export async function transformImage(
   imageUrl: string,
   style: StyleType
 ): Promise<string> {
-  const stylePrompts = {
-    pop_art: "pop art style, bold colors, halftone dots, andy warhol",
-    watercolor: "watercolor painting, soft edges, flowing colors",
-    line_art: "minimalist line art, single color, clean lines",
-    oil_painting: "oil painting, thick brushstrokes, rich textures",
-    // ... more styles
-  };
-
   const output = await replicate.run(
-    "stability-ai/stable-diffusion:latest",
+    "black-forest-labs/flux-kontext-pro",
     {
       input: {
         image: imageUrl,
-        prompt: stylePrompts[style],
-        strength: 0.7, // Balance original vs style
+        prompt: STYLE_PROMPTS[style],
         guidance_scale: 7.5,
+        num_inference_steps: 28,
+        output_format: "png",
+        output_quality: 100,
       }
     }
   );
 
-  return output[0]; // URL of transformed image
+  return Array.isArray(output) ? output[0] : output;
 }
 ```
 

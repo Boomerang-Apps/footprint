@@ -15,15 +15,17 @@ Build the foundational UI components and complete Step 1 (Upload) of the order f
 
 ## Stories
 
-| Story ID | Title | Agent | Points | Status |
-|----------|-------|-------|--------|--------|
-| UP-01 | UI Primitives Library | Frontend-A | 5 | Pending |
-| UP-02 | Photo Upload Component | Frontend-B | 3 | Pending |
-| UP-03 | Upload Page Layout | Frontend-B | 3 | Pending |
-| UP-04 | Image Preview & Validation | Frontend-B | 5 | Pending |
-| ST-01 | Order Store Foundation | Backend-1 | 3 | Pending |
+| Linear ID | Story ID | Title | Agent | Points | Status |
+|-----------|----------|-------|-------|--------|--------|
+| UZF-1852 | UI-01 | UI Primitives Library | Frontend-A | 5 | Pending |
+| UZF-1829 | DB-01 | Supabase Database Schema | Backend-2 | 5 | Pending |
+| UZF-1830 | ST-01 | Order Store + Supabase Sync | Backend-1 | 3 | Pending |
+| UZF-1825 | UP-01 | Upload from camera roll | Frontend-B | 5 | Pending |
+| UZF-1826 | UP-02 | Drag-and-drop upload | Frontend-B | 3 | Pending |
+| UZF-1827 | UP-03 | Auto-optimize for print | Backend-2 | 5 | Pending |
+| UZF-1828 | UP-04 | Preview uploaded photo | Frontend-B | 3 | Pending |
 
-**Total Points**: 19
+**Total Points**: 29
 
 ---
 
@@ -131,13 +133,15 @@ Create the Zustand order store:
 
 ## Sprint Status Matrix
 
-| Story | Agent | G0 | G1 | G2 | G3 | G4 | G5 | Status |
-|-------|-------|----|----|----|----|----|----|--------|
-| UP-01 | Frontend-A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Not Started |
-| UP-02 | Frontend-B | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Not Started |
-| UP-03 | Frontend-B | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Not Started |
-| UP-04 | Frontend-B | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Not Started |
-| ST-01 | Backend-1 | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Not Started |
+| Linear ID | Story | Agent | G0 | G1 | G2 | G3 | G4 | G5 | Status |
+|-----------|-------|-------|----|----|----|----|----|----|--------|
+| UZF-1852 | UI-01 | Frontend-A | ✅ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Ready |
+| UZF-1829 | DB-01 | Backend-2 | ✅ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Ready |
+| UZF-1830 | ST-01 | Backend-1 | ✅ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Blocked (DB-01) |
+| UZF-1825 | UP-01 | Frontend-B | ✅ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Blocked (UI-01) |
+| UZF-1826 | UP-02 | Frontend-B | ✅ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Blocked (UI-01) |
+| UZF-1827 | UP-03 | Backend-2 | ✅ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Blocked (DB-01) |
+| UZF-1828 | UP-04 | Frontend-B | ✅ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Blocked (UP-01) |
 
 Legend: ✅ Complete, 🔄 In Progress, ⏳ Pending, ❌ Blocked
 
@@ -146,11 +150,18 @@ Legend: ✅ Complete, 🔄 In Progress, ⏳ Pending, ❌ Blocked
 ## Dependencies
 
 ```
-UP-01 (UI Primitives) ─┬─> UP-02 (Upload Component)
-                       ├─> UP-03 (Upload Page)
-                       └─> UP-04 (Image Preview)
+Phase 1 (Parallel - No Dependencies):
+├── UI-01 (UI Primitives) - Frontend-A
+└── DB-01 (Supabase Schema) - Backend-2
 
-ST-01 (Order Store) ───> UP-03 (Upload Page uses store)
+Phase 2 (After Phase 1):
+├── ST-01 (Order Store) ──────> needs DB-01
+├── UP-03 (Image Optimization) ──> needs DB-01
+└── UP-01 (Camera Upload) ────> needs UI-01
+
+Phase 3 (After Phase 2):
+├── UP-02 (Drag-drop) ────────> needs UI-01
+└── UP-04 (Preview) ──────────> needs UP-01
 ```
 
 ---
