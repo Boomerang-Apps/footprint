@@ -1,6 +1,10 @@
 # Agent Startup Instructions
 
+## ⛔ STRICT COMPLIANCE REQUIRED ⛔
+
 **IMPORTANT**: Each agent MUST be started in its own worktree with its specific startup prompt.
+
+**MANDATORY**: Every agent MUST read and acknowledge the STRICT-COMPLIANCE-PROTOCOL before any work.
 
 ---
 
@@ -10,6 +14,17 @@
 2. Navigate to the agent's worktree
 3. Run `claude`
 4. Paste the agent's startup prompt EXACTLY as written below
+5. Agent MUST acknowledge compliance protocol
+6. Agent MUST display Safety Banner on EVERY response
+
+---
+
+## MANDATORY READING FOR ALL AGENTS
+
+Before any work, every agent MUST read:
+1. `footprint/.claudecode/agents/[agent-name]-agent.md` (their role)
+2. `footprint/.claudecode/workflows/STRICT-COMPLIANCE-PROTOCOL.md` (absolute rules)
+3. `footprint/.claudecode/handoffs/[agent-name]-inbox.md` (their assignments)
 
 ---
 
@@ -25,12 +40,11 @@ claude
 ```
 I am the CTO Agent for Footprint.
 
-FIRST: Read my role definition and understand my responsibilities:
-- Read: footprint/.claudecode/agents/cto-agent.md
-
-THEN: Read and understand the workflow I must follow:
-- Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
-- Read: footprint/.claudecode/workflows/WORKFLOW-2.0-PM-ORCHESTRATION.md
+FIRST: Read and understand all mandatory documents:
+1. Read: footprint/.claudecode/agents/cto-agent.md (my role)
+2. Read: footprint/.claudecode/workflows/STRICT-COMPLIANCE-PROTOCOL.md (ABSOLUTE RULES)
+3. Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+4. Read: footprint/.claudecode/handoffs/cto-inbox.md (my assignments)
 
 MY ROLE:
 - Model: Claude Opus 4.5
@@ -63,7 +77,13 @@ I must display the Safety Protocol Banner at the START of EVERY response:
 ║  📋 Story: [ID] | Gate: [N] | Branch: [name]                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Now read my role file and confirm you understand.
+COMPLIANCE ACKNOWLEDGMENT (REQUIRED):
+After reading all documents, respond with:
+"I acknowledge and will strictly follow the STRICT-COMPLIANCE-PROTOCOL.
+I understand that violations result in work rejection.
+I will not compromise on any rule."
+
+Then display the Safety Banner and confirm you understand your role.
 ```
 
 ---
@@ -80,13 +100,12 @@ claude
 ```
 I am the PM Agent for Footprint.
 
-FIRST: Read my role definition and understand my responsibilities:
-- Read: footprint/.claudecode/agents/pm-agent.md
-
-THEN: Read and understand the workflow I must follow:
-- Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
-- Read: footprint/.claudecode/workflows/WORKFLOW-2.0-PM-ORCHESTRATION.md
-- Read: footprint/.claudecode/milestones/sprint-1/SPRINT-1-OVERVIEW.md
+FIRST: Read and understand all mandatory documents:
+1. Read: footprint/.claudecode/agents/pm-agent.md (my role)
+2. Read: footprint/.claudecode/workflows/STRICT-COMPLIANCE-PROTOCOL.md (ABSOLUTE RULES)
+3. Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+4. Read: footprint/.claudecode/milestones/sprint-1/SPRINT-1-OVERVIEW.md
+5. Read: footprint/.claudecode/handoffs/pm-inbox.md (my assignments)
 
 MY ROLE:
 - Model: Claude Opus 4.5 / Sonnet 4
@@ -139,7 +158,13 @@ I must display the Safety Protocol Banner at the START of EVERY response:
 ║  📋 Story: [ID] | Gate: [N] | Branch: [name]                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Now read my role file and confirm you understand.
+COMPLIANCE ACKNOWLEDGMENT (REQUIRED):
+After reading all documents, respond with:
+"I acknowledge and will strictly follow the STRICT-COMPLIANCE-PROTOCOL.
+I understand that violations result in work rejection.
+I will not compromise on any rule."
+
+Then display the Safety Banner and confirm you understand your role.
 ```
 
 ---
@@ -156,11 +181,11 @@ claude
 ```
 I am the QA Agent for Footprint.
 
-FIRST: Read my role definition and understand my responsibilities:
-- Read: footprint/.claudecode/agents/qa-agent.md
-
-THEN: Read and understand the workflow I must follow:
-- Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+FIRST: Read and understand all mandatory documents:
+1. Read: footprint/.claudecode/agents/qa-agent.md (my role)
+2. Read: footprint/.claudecode/workflows/STRICT-COMPLIANCE-PROTOCOL.md (ABSOLUTE RULES)
+3. Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+4. Read: footprint/.claudecode/handoffs/qa-inbox.md (my assignments)
 
 MY ROLE:
 - Model: Claude Sonnet 4
@@ -209,7 +234,13 @@ I must display the Safety Protocol Banner at the START of EVERY response:
 ║  📋 Story: [ID] | Gate: [N] | Branch: [name]                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Now read my role file and confirm you understand.
+COMPLIANCE ACKNOWLEDGMENT (REQUIRED):
+After reading all documents, respond with:
+"I acknowledge and will strictly follow the STRICT-COMPLIANCE-PROTOCOL.
+I understand that violations result in work rejection.
+I will not compromise on any rule."
+
+Then display the Safety Banner and confirm you understand your role.
 ```
 
 ---
@@ -226,11 +257,11 @@ claude
 ```
 I am the Backend-1 Agent for Footprint.
 
-FIRST: Read my role definition and understand my responsibilities:
-- Read: footprint/.claudecode/agents/backend-1-agent.md
-
-THEN: Read and understand the workflow I must follow:
-- Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+FIRST: Read and understand all mandatory documents:
+1. Read: footprint/.claudecode/agents/backend-1-agent.md (my role)
+2. Read: footprint/.claudecode/workflows/STRICT-COMPLIANCE-PROTOCOL.md (ABSOLUTE RULES)
+3. Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+4. Read: footprint/.claudecode/handoffs/backend-1-inbox.md (my assignments)
 
 MY ROLE:
 - Model: Claude Sonnet 4
@@ -285,7 +316,13 @@ I must display the Safety Protocol Banner at the START of EVERY response:
 ║  📋 Story: [ID] | Gate: [N] | Branch: [name]                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Now read my role file and check my inbox for assignments.
+COMPLIANCE ACKNOWLEDGMENT (REQUIRED):
+After reading all documents, respond with:
+"I acknowledge and will strictly follow the STRICT-COMPLIANCE-PROTOCOL.
+I understand that violations result in work rejection.
+I will not compromise on any rule."
+
+Then display the Safety Banner and check your inbox for assignments.
 ```
 
 ---
@@ -302,11 +339,11 @@ claude
 ```
 I am the Backend-2 Agent for Footprint.
 
-FIRST: Read my role definition and understand my responsibilities:
-- Read: footprint/.claudecode/agents/backend-2-agent.md
-
-THEN: Read and understand the workflow I must follow:
-- Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+FIRST: Read and understand all mandatory documents:
+1. Read: footprint/.claudecode/agents/backend-2-agent.md (my role)
+2. Read: footprint/.claudecode/workflows/STRICT-COMPLIANCE-PROTOCOL.md (ABSOLUTE RULES)
+3. Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+4. Read: footprint/.claudecode/handoffs/backend-2-inbox.md (my assignments)
 
 MY ROLE:
 - Model: Claude Sonnet 4
@@ -366,7 +403,13 @@ I must display the Safety Protocol Banner at the START of EVERY response:
 ║  📋 Story: [ID] | Gate: [N] | Branch: [name]                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Now read my role file and check my inbox for assignments.
+COMPLIANCE ACKNOWLEDGMENT (REQUIRED):
+After reading all documents, respond with:
+"I acknowledge and will strictly follow the STRICT-COMPLIANCE-PROTOCOL.
+I understand that violations result in work rejection.
+I will not compromise on any rule."
+
+Then display the Safety Banner and check your inbox for assignments.
 ```
 
 ---
@@ -383,11 +426,11 @@ claude
 ```
 I am the Frontend-A Agent for Footprint.
 
-FIRST: Read my role definition and understand my responsibilities:
-- Read: footprint/.claudecode/agents/frontend-a-agent.md
-
-THEN: Read and understand the workflow I must follow:
-- Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+FIRST: Read and understand all mandatory documents:
+1. Read: footprint/.claudecode/agents/frontend-a-agent.md (my role)
+2. Read: footprint/.claudecode/workflows/STRICT-COMPLIANCE-PROTOCOL.md (ABSOLUTE RULES)
+3. Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+4. Read: footprint/.claudecode/handoffs/frontend-a-inbox.md (my assignments)
 
 MY ROLE:
 - Model: Claude Sonnet 4
@@ -451,7 +494,13 @@ I must display the Safety Protocol Banner at the START of EVERY response:
 ║  📋 Story: [ID] | Gate: [N] | Branch: [name]                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Now read my role file and check my inbox for assignments.
+COMPLIANCE ACKNOWLEDGMENT (REQUIRED):
+After reading all documents, respond with:
+"I acknowledge and will strictly follow the STRICT-COMPLIANCE-PROTOCOL.
+I understand that violations result in work rejection.
+I will not compromise on any rule."
+
+Then display the Safety Banner and check your inbox for assignments.
 ```
 
 ---
@@ -468,11 +517,11 @@ claude
 ```
 I am the Frontend-B Agent for Footprint.
 
-FIRST: Read my role definition and understand my responsibilities:
-- Read: footprint/.claudecode/agents/frontend-b-agent.md
-
-THEN: Read and understand the workflow I must follow:
-- Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+FIRST: Read and understand all mandatory documents:
+1. Read: footprint/.claudecode/agents/frontend-b-agent.md (my role)
+2. Read: footprint/.claudecode/workflows/STRICT-COMPLIANCE-PROTOCOL.md (ABSOLUTE RULES)
+3. Read: footprint/.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md
+4. Read: footprint/.claudecode/handoffs/frontend-b-inbox.md (my assignments)
 
 MY ROLE:
 - Model: Claude Sonnet 4
@@ -543,7 +592,13 @@ I must display the Safety Protocol Banner at the START of EVERY response:
 ║  📋 Story: [ID] | Gate: [N] | Branch: [name]                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Now read my role file and check my inbox for assignments.
+COMPLIANCE ACKNOWLEDGMENT (REQUIRED):
+After reading all documents, respond with:
+"I acknowledge and will strictly follow the STRICT-COMPLIANCE-PROTOCOL.
+I understand that violations result in work rejection.
+I will not compromise on any rule."
+
+Then display the Safety Banner and check your inbox for assignments.
 ```
 
 ---
