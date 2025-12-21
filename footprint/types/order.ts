@@ -1,5 +1,7 @@
 // Order Types for Footprint
 
+import type { StyleType, SizeType, PaperType, FrameType } from './product';
+
 export type OrderStatus = 
   | 'pending'
   | 'paid'
@@ -86,5 +88,5 @@ export interface CreateOrderItemInput {
   frameType: FrameType;
 }
 
-// Re-export product types
-export type { StyleType, SizeType, PaperType, FrameType } from './product';
+// Re-export product types for convenience
+export type { StyleType, SizeType, PaperType, FrameType };
