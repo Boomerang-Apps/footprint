@@ -1,8 +1,9 @@
 // Order Types for Footprint
 
 import type { StyleType, SizeType, PaperType, FrameType } from './product';
+import type { Address } from './user';
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'
   | 'paid'
   | 'processing'
@@ -11,14 +12,8 @@ export type OrderStatus =
   | 'delivered'
   | 'cancelled';
 
-export interface Address {
-  name: string;
-  street: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  phone?: string;
-}
+// Re-export Address from user.ts for convenience
+export type { Address };
 
 export interface OrderItem {
   id: string;

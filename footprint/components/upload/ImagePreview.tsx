@@ -38,6 +38,7 @@ export default function ImagePreview({
     <div className={`relative ${className}`}>
       {/* Image Display */}
       <div className="relative rounded-xl overflow-hidden bg-zinc-100">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Using img for blob URLs from user uploads */}
         <img
           src={imageUrl}
           alt={`תצוגה מקדימה של ${file.name}`}

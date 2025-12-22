@@ -59,12 +59,11 @@ export default function CheckoutPage() {
 
     // Save address to store
     setShippingAddress({
-      id: '1',
-      fullName: formData.fullName,
+      name: formData.fullName,
       phone: formData.phone,
       street: formData.street,
       city: formData.city,
-      zipCode: formData.zipCode,
+      postalCode: formData.zipCode,
       country: 'ישראל',
     });
 
