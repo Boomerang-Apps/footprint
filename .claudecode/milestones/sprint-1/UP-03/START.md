@@ -33,18 +33,18 @@ Implement image optimization pipeline to prepare user photos for high-quality pr
 ---
 
 ## Acceptance Criteria
-- [ ] Resize image to optimal print DPI (300 DPI)
-- [ ] Color profile conversion (sRGB → CMYK awareness)
-- [ ] Max file size: 20MB validation
-- [ ] Compression without visible quality loss
-- [ ] Support HEIC conversion to JPEG
-- [ ] Upload to Cloudflare R2
-- [ ] Return optimized image presigned URL
-- [ ] Tests written (TDD)
-- [ ] 100% coverage for lib/image/
-- [ ] 80%+ coverage overall
-- [ ] TypeScript clean
-- [ ] Linter clean
+- [x] Resize image to optimal print DPI (300 DPI)
+- [x] Color profile conversion (sRGB → CMYK awareness)
+- [x] Max file size: 20MB validation
+- [x] Compression without visible quality loss
+- [x] Support HEIC conversion to JPEG
+- [x] Upload to Cloudflare R2
+- [x] Return optimized image presigned URL
+- [x] Tests written (TDD)
+- [x] 100% coverage for lib/image/
+- [x] 80%+ coverage overall
+- [x] TypeScript clean
+- [x] Linter clean
 
 ---
 
@@ -75,7 +75,7 @@ Implement image optimization pipeline to prepare user photos for high-quality pr
 ## Safety Gate Progress
 - [x] Gate 0: Research (GATE0-cloudflare-r2.md approved)
 - [x] Gate 1: Planning (this document)
-- [ ] Gate 2: Implementation (TDD)
+- [x] Gate 2: Implementation (TDD) - COMPLETE
 - [ ] Gate 3: QA Validation
 - [ ] Gate 4: Review
 - [ ] Gate 5: Deployment
