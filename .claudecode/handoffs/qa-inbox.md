@@ -41,59 +41,22 @@ When work is ready for testing:
 
 ## Pending Messages
 
-## 2025-12-23 - Frontend-B: GF-02 Add Personal Message
-
-**Story**: GF-02 (3 SP)
-**Branch**: `feature/gf-02-gift-message`
-**Priority**: P0
-
-### Completed
-- [x] GiftMessage component with textarea
-- [x] 150 character limit (enforced via maxLength)
-- [x] Character counter with warning/error styling
-- [x] Live preview on gift card mockup
-- [x] orderStore.giftMessage integration
-- [x] Full test suite (TDD)
-
-### Test Results
-- **Tests**: 25 passing
-- **Coverage**: 100% statements, 100% branch
-- **TypeScript**: Clean
-- **ESLint**: Clean
-
-### Files Created
-| File | Description |
-|------|-------------|
-| `components/gift/GiftMessage.tsx` | Message textarea with live preview |
-| `components/gift/GiftMessage.test.tsx` | 25 TDD tests |
-
-### Features
-- Character counter showing X/150
-- Warning styling at 130+ chars (amber)
-- Error styling at 150 chars (red)
-- Live preview with placeholder "ההודעה תופיע כאן..."
-- Hebrew RTL UI
-- Disabled state support
-
-→ **Ready for QA validation**
-
----
-
 ## 2025-12-23 - PM: Sprint 3 ACTIVE - Awaiting Dev Submissions
 
 **Sprint**: 3 - Checkout & Gifting
-**Status**: Development in progress - 50% complete!
+**Status**: Development in progress - 67% complete!
 
 **Completed:**
 - ✅ CO-02 (PayPlus Payment) - 5 SP - Merged
 - ✅ CO-04 (Order Confirmation) - 2 SP - Merged
 - ✅ GF-01 (Mark Order as Gift) - 2 SP - Merged
+- ✅ GF-02 (Add Personal Message) - 3 SP - Merged
 
 **Expect submissions from:**
-- Frontend-B: GF-02, CO-01, GF-03 (UI)
+- Frontend-B: CO-01, GF-03 (UI)
 - Backend-1: GF-03 (Logic)
 
-**Sprint 3 Progress**: 9/18 SP (50%) - 3/6 stories complete
+**Sprint 3 Progress**: 12/18 SP (67%) - 4/6 stories complete
 
 Stand by for Frontend-B and Backend-1 validation requests.
 
@@ -102,6 +65,20 @@ Stand by for Frontend-B and Backend-1 validation requests.
 ---
 
 ## Completed Validations
+
+## 2025-12-23 - GF-02 Add Personal Message Validation ✅
+
+### GF-02 Add Personal Message (Frontend-B)
+- **Result**: APPROVED
+- **Tests**: 25 passing
+- **Coverage**: 100% all metrics (statements, branch, functions, lines)
+- **Accessibility**: aria-live="polite" for live preview
+- **Features**: 150 char limit, live counter, warning/error styling
+- **Merged**: ✅ to main
+
+**Sprint 3 Progress**: 4/6 stories complete (12/18 SP - 67%)
+
+---
 
 ## 2025-12-23 - GF-01 Mark Order as Gift Validation ✅
 
