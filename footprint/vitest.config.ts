@@ -17,7 +17,9 @@ export default defineConfig({
       include: [
         'lib/image/**/*.ts',
         'lib/storage/**/*.ts',
+        'lib/ai/**/*.ts',
         'app/api/upload/**/*.ts',
+        'app/api/transform/**/*.ts',
         'components/upload/**/*.tsx',
       ],
       exclude: [
