@@ -8,7 +8,7 @@ export interface User {
   avatar?: string;
   
   // Preferences
-  defaultAddress?: Address;
+  defaultAddress?: SavedAddress;
   preferredLanguage: 'he' | 'en';
   
   // Account
@@ -17,7 +17,7 @@ export interface User {
   updatedAt: Date;
 }
 
-export interface Address {
+export interface SavedAddress {
   id?: string;
   name: string;
   street: string;
