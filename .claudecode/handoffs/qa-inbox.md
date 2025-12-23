@@ -41,6 +41,51 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-23 - Backend-1: GF-03 Ship to Recipient
+
+**Story**: GF-03 (3 SP)
+**Branch**: `feature/gf-03-ship-recipient`
+**Priority**: P0
+**Shared**: Backend-1 (logic) + Frontend-B (UI)
+
+### Completed
+- [x] Israeli address validation (cities, postal codes, phones)
+- [x] Delivery estimate calculation (zone detection, express/standard)
+- [x] orderStore recipient state (recipientAddress, recipientName, useRecipientAddress)
+- [x] Integration with PC-04 shipping rates
+- [x] Full test suite (TDD)
+
+### Test Results
+- **Tests**: 51 passing (32 validation + 19 estimates)
+- **Coverage**: 100% all metrics
+- **TypeScript**: Clean
+- **ESLint**: Clean
+
+### Files Created
+| File | Description |
+|------|-------------|
+| `lib/shipping/validation.ts` | Israeli address validation |
+| `lib/shipping/validation.test.ts` | 32 validation tests |
+| `lib/shipping/estimates.ts` | Delivery date estimates |
+| `lib/shipping/estimates.test.ts` | 19 estimate tests |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `stores/orderStore.ts` | Added recipient address state |
+| `types/order.ts` | Type fixes |
+
+### Features
+- Israeli city list (English + Hebrew)
+- 7-digit postal code validation
+- Israeli phone formats (050-XXX, +972, landlines)
+- Zone detection (Israel/international)
+- Express vs standard delivery estimates
+
+→ **Ready for QA validation**
+
+---
+
 ## 2025-12-23 - PM: Sprint 3 ACTIVE - Awaiting Dev Submissions
 
 **Sprint**: 3 - Checkout & Gifting
