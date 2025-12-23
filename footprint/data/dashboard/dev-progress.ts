@@ -293,7 +293,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1842',
     title: 'Enter Shipping Address',
     description: 'Autocomplete, save for future, validation',
-    status: 'in-progress',  // 🟡 Sprint 3 Active
+    status: 'in-review',  // 🔵 In QA Review - 31 tests, 97.61% coverage - FINAL STORY!
     agent: 'Frontend-B',
     points: 3,
     component: 'Checkout',
