@@ -18,8 +18,11 @@ export default defineConfig({
         'lib/image/**/*.ts',
         'lib/storage/**/*.ts',
         'lib/ai/**/*.ts',
+        'lib/payments/**/*.ts',
         'app/api/upload/**/*.ts',
         'app/api/transform/**/*.ts',
+        'app/api/checkout/**/*.ts',
+        'app/api/webhooks/stripe/**/*.ts',
         'components/upload/**/*.tsx',
       ],
       exclude: [
