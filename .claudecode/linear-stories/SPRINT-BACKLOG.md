@@ -38,7 +38,7 @@
 | ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
 |----|-------|--------------------|----|----------|-------|--------|
 | AI-01 | Display AI style gallery | Gallery visible, thumbnails, style names | 3 | Must | Frontend-B | ✅ Done |
-| AI-02 | Preview photo in different styles | Click to preview, loading indicator, < 10 seconds | 8 | Must | Backend-2 + Frontend-B | 🟡 In Progress |
+| AI-02 | Preview photo in different styles | Click to preview, loading indicator, < 10 seconds | 8 | Must | Backend-2 + Frontend-B | 🔵 In Review |
 | AI-03 | Keep original photo option | 'Original' in gallery, enhancement toggle | 2 | Must | Frontend-B | ✅ Done |
 | AI-04 | Unlimited free style previews | No paywall, watermark on preview, full quality on purchase | 3 | Must | Frontend-B | ✅ Done |
 | PC-01 | Select print size | A5/A4/A3 options, size visualization, live price update | 3 | Must | Frontend-B | ✅ Done |

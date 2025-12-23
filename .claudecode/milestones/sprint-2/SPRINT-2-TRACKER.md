@@ -13,7 +13,7 @@
 | Story | Title | SP | Agent | Status | Branch |
 |-------|-------|-----|-------|--------|--------|
 | AI-01 | Display AI Style Gallery | 3 | Frontend-B | ✅ Complete | `feature/sprint-2-style-config` |
-| AI-02 | Preview Photo in Styles | 8 | Backend-2 + Frontend-B | 🟡 In Progress | `feature/AI-02-style-transform` |
+| AI-02 | Preview Photo in Styles | 8 | Backend-2 + Frontend-B | 🔵 In Review | `feature/AI-02-style-transform` |
 | AI-03 | Keep Original Photo Option | 2 | Frontend-B | ✅ Complete | `feature/sprint-2-style-config` |
 | AI-04 | Unlimited Free Style Previews | 3 | Frontend-B | ✅ Complete | `feature/sprint-2-style-config` |
 | PC-01 | Select Print Size | 3 | Frontend-B | ✅ Complete | `feature/sprint-2-style-config` |
@@ -21,7 +21,7 @@
 | PC-03 | Add Frame Option | 3 | Frontend-B | ✅ Complete | `feature/sprint-2-style-config` |
 | PC-04 | Real-time Price Calculation | 3 | Backend-1 + Frontend-B | 🟢 Ready | TBD |
 
-**Legend**: 🔴 Blocked | 🟡 In Progress | ✅ Complete | 🟢 Ready | ⚪ Not Started
+**Legend**: 🔴 Blocked | 🟡 In Progress | 🔵 In Review | ✅ Complete | 🟢 Ready | ⚪ Not Started
 
 ---
 
@@ -78,11 +78,12 @@
 
 - **Total Stories**: 8 (27 SP)
 - **Completed**: 6/8 stories (16 SP) - AI-01, AI-03, AI-04, PC-01, PC-02, PC-03
-- **In Progress**: 1/8 stories (8 SP) - AI-02 (Backend-2)
+- **In Review**: 1/8 stories (8 SP) - AI-02 (Backend-2) awaiting QA
 - **Ready**: 1/8 stories (3 SP) - PC-04 (Backend-1)
 - **Blocked**: 0 stories
 
 **Frontend-B**: ✅ Complete (16 SP merged to main)
+**Backend-2**: 🔵 AI-02 submitted for QA (45 tests, 100% lib coverage)
 
 ---
 
@@ -96,7 +97,8 @@
 | 2025-12-23 | Frontend-B completes 6 stories (AI-01, AI-03, AI-04, PC-01, PC-02, PC-03) |
 | 2025-12-23 | QA approves Frontend-B work (97 tests, 90.47% coverage) |
 | 2025-12-23 | PM merges feature/sprint-2-style-config to main |
-| In Progress | Backend-2 working on AI-02 (Replicate API) |
+| 2025-12-23 | Backend-2 submits AI-02 for QA (45 tests, 100% lib coverage) |
+| In Review | AI-02 awaiting QA validation |
 | Ready | Backend-1 can start PC-04 (dependencies met) |
 
 ---
