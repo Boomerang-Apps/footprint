@@ -1,5 +1,7 @@
 // Order Types for Footprint
 
+import type { StyleType, SizeType, PaperType, FrameType } from './product';
+
 export type OrderStatus = 
   | 'pending'
   | 'paid'
