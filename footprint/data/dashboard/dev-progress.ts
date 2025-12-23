@@ -303,7 +303,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1843',
     title: 'Pay with Credit Card (PayPlus)',
     description: 'PayPlus Checkout integration, Bit support, Israeli cards',
-    status: 'in-review',  // 🔵 In QA Review - 204 tests, 96.66% coverage
+    status: 'done',  // ✅ Merged 2025-12-23 (204 tests, 88.13% coverage)
     agent: 'Backend-2',
     points: 5,
     component: 'Payment',
