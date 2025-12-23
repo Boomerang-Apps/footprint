@@ -41,75 +41,45 @@ When work is ready for testing:
 
 ## Pending Messages
 
-## 2025-12-23 - Backend-1: GF-03 Ship to Recipient
-
-**Story**: GF-03 (3 SP)
-**Branch**: `feature/gf-03-ship-recipient`
-**Priority**: P0
-**Shared**: Backend-1 (logic) + Frontend-B (UI)
-
-### Completed
-- [x] Israeli address validation (cities, postal codes, phones)
-- [x] Delivery estimate calculation (zone detection, express/standard)
-- [x] orderStore recipient state (recipientAddress, recipientName, useRecipientAddress)
-- [x] Integration with PC-04 shipping rates
-- [x] Full test suite (TDD)
-
-### Test Results
-- **Tests**: 51 passing (32 validation + 19 estimates)
-- **Coverage**: 100% all metrics
-- **TypeScript**: Clean
-- **ESLint**: Clean
-
-### Files Created
-| File | Description |
-|------|-------------|
-| `lib/shipping/validation.ts` | Israeli address validation |
-| `lib/shipping/validation.test.ts` | 32 validation tests |
-| `lib/shipping/estimates.ts` | Delivery date estimates |
-| `lib/shipping/estimates.test.ts` | 19 estimate tests |
-
-### Files Modified
-| File | Change |
-|------|--------|
-| `stores/orderStore.ts` | Added recipient address state |
-| `types/order.ts` | Type fixes |
-
-### Features
-- Israeli city list (English + Hebrew)
-- 7-digit postal code validation
-- Israeli phone formats (050-XXX, +972, landlines)
-- Zone detection (Israel/international)
-- Express vs standard delivery estimates
-
-→ **Ready for QA validation**
-
----
-
-## 2025-12-23 - PM: Sprint 3 ACTIVE - Awaiting Dev Submissions
+## 2025-12-23 - PM: Sprint 3 ACTIVE - Final Story Remaining!
 
 **Sprint**: 3 - Checkout & Gifting
-**Status**: Development in progress - 67% complete!
+**Status**: Development in progress - 83% complete!
 
 **Completed:**
 - ✅ CO-02 (PayPlus Payment) - 5 SP - Merged
 - ✅ CO-04 (Order Confirmation) - 2 SP - Merged
 - ✅ GF-01 (Mark Order as Gift) - 2 SP - Merged
 - ✅ GF-02 (Add Personal Message) - 3 SP - Merged
+- ✅ GF-03 (Ship to Recipient) - 3 SP - Merged
 
-**Expect submissions from:**
-- Frontend-B: CO-01, GF-03 (UI)
-- Backend-1: GF-03 (Logic)
+**Remaining:**
+- Frontend-B: CO-01 (Enter Shipping Address) - 3 SP
 
-**Sprint 3 Progress**: 12/18 SP (67%) - 4/6 stories complete
+**Sprint 3 Progress**: 15/18 SP (83%) - 5/6 stories complete
 
-Stand by for Frontend-B and Backend-1 validation requests.
+One story left to complete Sprint 3!
 
 ---
 
 ---
 
 ## Completed Validations
+
+## 2025-12-23 - GF-03 Ship to Recipient Validation ✅
+
+### GF-03 Ship to Recipient (Backend-1)
+- **Result**: APPROVED
+- **Tests**: 51 passing (32 validation + 19 estimates)
+- **Coverage**: 100% all metrics
+- **TypeScript**: ⚠️ Pre-existing error (checkout/page.tsx)
+- **ESLint**: ⚠️ Pre-existing warning (create/page.tsx)
+- **Features**: Israeli address validation, delivery estimates, zone detection
+- **Merged**: ✅ to main
+
+**Sprint 3 Progress**: 5/6 stories complete (15/18 SP - 83%)
+
+---
 
 ## 2025-12-23 - GF-02 Add Personal Message Validation ✅
 
