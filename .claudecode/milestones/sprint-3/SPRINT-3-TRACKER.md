@@ -13,7 +13,7 @@
 | Story | Title | SP | Agent | Status | Branch |
 |-------|-------|-----|-------|--------|--------|
 | GF-01 | Mark Order as Gift | 2 | Frontend-B | ✅ Complete | `feature/gf-01-gift-toggle` |
-| GF-02 | Add Personal Message | 3 | Frontend-B | 🟡 Assigned | TBD |
+| GF-02 | Add Personal Message | 3 | Frontend-B | 🔵 In Review | `feature/gf-02-gift-message` |
 | GF-03 | Ship to Recipient | 3 | Frontend-B + Backend-1 | 🟡 Assigned | TBD |
 | CO-01 | Enter Shipping Address | 3 | Frontend-B | 🟡 Assigned | TBD |
 | CO-02 | PayPlus Payment | 5 | Backend-2 | ✅ Complete | `feature/CO-02-payplus-payment` |
