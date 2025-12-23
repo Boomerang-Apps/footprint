@@ -41,6 +41,67 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-23 - Frontend-B: Shipping Address Form (CO-01)
+
+**Story**: CO-01 - Enter Shipping Address
+**Branch**: feature/co-01-shipping-address
+**Sprint**: 3
+**Priority**: P0
+
+### Completed
+- [x] ShippingAddressForm component with all required fields
+- [x] Field-level validation with Hebrew error messages
+- [x] Required fields: name, street, city, postalCode, country
+- [x] Optional phone field with format validation
+- [x] "Save for future" checkbox (isDefault)
+- [x] Integration with orderStore.shippingAddress
+- [x] Accessible form with aria labels
+- [x] TypeScript strict mode clean
+- [x] ESLint clean (no warnings or errors)
+- [x] Tests written with TDD approach
+
+### Test Results
+- **Tests**: 31 passing (ShippingAddressForm component)
+- **Coverage**: 97.61% statements, 98.91% branch coverage
+  - ShippingAddressForm.tsx: 97.61%
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `components/checkout/ShippingAddressForm.tsx` | Created |
+| `components/checkout/ShippingAddressForm.test.tsx` | Created |
+| `.claudecode/milestones/sprint-3/CO-01/START.md` | Created |
+| `.claudecode/milestones/sprint-3/CO-01/ROLLBACK-PLAN.md` | Created |
+
+### How to Test
+```bash
+cd footprint
+npm test -- --coverage
+npm run type-check
+npm run lint
+npm run dev  # Manual testing
+```
+
+### Manual Test Cases
+1. **Required fields**: Leave fields empty, blur, see validation errors
+2. **Name validation**: Enter 1 char, see "min 2 chars" error
+3. **Postal code**: Enter non-7-digit value, see format error
+4. **Phone validation**: Enter invalid format, see error
+5. **Valid form**: Fill all required fields, verify store updates
+6. **Save checkbox**: Check "save for future", verify isDefault=true
+
+### Gate Status
+- [x] Gate 0: Research (N/A - standard UI component)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 31 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean, 97.61% coverage)
+- [ ] Gate 5: Deployment (pending QA)
+
+> Ready for QA validation
+
+---
+
 ## 2025-12-23 - Frontend-B: Gift Message (GF-02)
 
 **Story**: GF-02 - Add Personal Message
