@@ -477,15 +477,24 @@ export const features: Record<string, Feature> = {
   },
   'F5': {
     id: 'F5',
-    name: 'Checkout & Payments',
-    description: 'Payment processing with Stripe and PayPlus',
+    name: 'Checkout (Sprint 3)',
+    description: 'Core checkout: address, payment, confirmation',
     prdRef: 'CLAUDE.md - Epic 5',
     priority: 'P0',
     stories: [
       stories['CO-01'],
       stories['CO-02'],
-      stories['CO-03'],
       stories['CO-04'],
+    ],
+  },
+  'F5b': {
+    id: 'F5b',
+    name: 'Payment Polish (Sprint 4)',
+    description: 'Additional payment methods and discount codes',
+    prdRef: 'CLAUDE.md - Epic 5',
+    priority: 'P1',
+    stories: [
+      stories['CO-03'],
       stories['CO-05'],
       stories['CO-06'],
     ],
@@ -536,7 +545,7 @@ export const sprints: Sprint[] = [
     id: 3,
     name: 'Sprint 3',
     focus: 'Checkout & Gifting',
-    status: 'active',  // 🟡 ACTIVE - Started 2025-12-23
+    status: 'completed',  // ✅ COMPLETED 2025-12-23 - All 6 stories merged (18 SP)
     features: ['F4', 'F5'],
   },
   {
@@ -544,7 +553,7 @@ export const sprints: Sprint[] = [
     name: 'Sprint 4',
     focus: 'Admin & Polish',
     status: 'planned',
-    features: ['F6'],
+    features: ['F5b', 'F6'],
   },
 ];
 
