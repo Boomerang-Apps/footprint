@@ -271,7 +271,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1840',
     title: 'Add Personal Message',
     description: '150 char limit, preview shown, printed on card',
-    status: 'in-review',  // 🔵 In QA Review - 25 tests, 100% coverage
+    status: 'done',  // ✅ QA Approved & Merged - 25 tests, 100% coverage
     agent: 'Frontend-B',
     points: 3,
     component: 'Gift',
