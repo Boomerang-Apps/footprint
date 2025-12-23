@@ -41,6 +41,41 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-23 - Frontend-B: GF-01 Mark Order as Gift
+
+**Story**: GF-01 (2 SP)
+**Branch**: `feature/gf-01-gift-toggle`
+**Priority**: P0
+
+### Completed
+- [x] GiftToggle component with toggle switch
+- [x] Gift wrap option (+₪15)
+- [x] Price notice (green, Hebrew)
+- [x] orderStore integration (isGift, giftWrap)
+- [x] Full test suite (TDD)
+
+### Test Results
+- **Tests**: 20 passing
+- **Coverage**: 100% statements, 85% branch
+- **TypeScript**: Clean
+- **ESLint**: Clean
+
+### Files Created
+| File | Description |
+|------|-------------|
+| `components/gift/GiftToggle.tsx` | Toggle switch, gift wrap checkbox, price notice |
+| `components/gift/GiftToggle.test.tsx` | 20 TDD tests |
+
+### Features
+- Prominent toggle switch with "שליחה כמתנה" label
+- Gift wrap option appears when gift is ON
+- Keyboard accessible (Enter/Space)
+- Hebrew RTL UI
+
+→ **Ready for QA validation**
+
+---
+
 ## 2025-12-23 - PM: Sprint 3 ACTIVE - Awaiting Dev Submissions
 
 **Sprint**: 3 - Checkout & Gifting
