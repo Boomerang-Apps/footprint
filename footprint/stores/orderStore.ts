@@ -31,11 +31,16 @@ interface OrderState {
   isGift: boolean;
   giftMessage: string;
   giftWrap: boolean;
-  
+
   // Addresses
   shippingAddress: Address | null;
   billingAddress: Address | null;
   useSameAddress: boolean;
+
+  // Recipient (for gift orders)
+  recipientAddress: Address | null;
+  recipientName: string;
+  useRecipientAddress: boolean;
   
   // Pricing
   pricing: PriceBreakdown | null;
@@ -73,7 +78,12 @@ interface OrderActions {
   setShippingAddress: (address: Address) => void;
   setBillingAddress: (address: Address | null) => void;
   setUseSameAddress: (value: boolean) => void;
-  
+
+  // Recipient
+  setRecipientAddress: (address: Address | null) => void;
+  setRecipientName: (name: string) => void;
+  setUseRecipientAddress: (value: boolean) => void;
+
   // Pricing
   setPricing: (pricing: PriceBreakdown) => void;
   setDiscountCode: (code: string) => void;
@@ -101,6 +111,9 @@ const initialState: OrderState = {
   shippingAddress: null,
   billingAddress: null,
   useSameAddress: true,
+  recipientAddress: null,
+  recipientName: '',
+  useRecipientAddress: false,
   pricing: null,
   discountCode: '',
   orderId: null,
@@ -161,6 +174,11 @@ export const useOrderStore = create<OrderState & OrderActions>()(
       setBillingAddress: (address) => set({ billingAddress: address }),
       setUseSameAddress: (value) => set({ useSameAddress: value }),
 
+      // Recipient
+      setRecipientAddress: (address) => set({ recipientAddress: address }),
+      setRecipientName: (name) => set({ recipientName: name }),
+      setUseRecipientAddress: (value) => set({ useRecipientAddress: value }),
+
       // Pricing
       setPricing: (pricing) => set({ pricing }),
       setDiscountCode: (code) => set({ discountCode: code }),
@@ -184,6 +202,10 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         isGift: state.isGift,
         giftMessage: state.giftMessage,
         currentStep: state.currentStep,
+        // Recipient (for gift orders)
+        recipientAddress: state.recipientAddress,
+        recipientName: state.recipientName,
+        useRecipientAddress: state.useRecipientAddress,
       }),
     }
   )
