@@ -1,34 +1,40 @@
 /**
  * POST /api/checkout
  *
- * Creates a Stripe Checkout session for payment.
+ * Creates a PayPlus payment link for checkout.
  * Requires authentication.
  *
  * Request body:
  * {
  *   "orderId": "order_123",
- *   "amount": 15800  // in agorot (158.00 ILS)
+ *   "amount": 15800,  // in agorot (158.00 ILS)
+ *   "customerName": "John Doe",
+ *   "customerEmail": "john@example.com",  // optional, uses auth user email if not provided
+ *   "customerPhone": "0501234567"  // optional
  * }
  *
  * Response:
  * {
- *   "sessionId": "cs_test_...",
- *   "url": "https://checkout.stripe.com/..."
+ *   "pageRequestUid": "xxx-xxx-xxx",
+ *   "paymentUrl": "https://payments.payplus.co.il/..."
  * }
  */
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createCheckoutSession } from '@/lib/payments/stripe';
+import { createPaymentLink } from '@/lib/payments/payplus';
 
 interface CheckoutRequest {
   orderId: string;
   amount: number;
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
 }
 
 interface CheckoutResponse {
-  sessionId: string;
-  url: string;
+  pageRequestUid: string;
+  paymentUrl: string;
 }
 
 interface ErrorResponse {
@@ -64,7 +70,7 @@ export async function POST(
       );
     }
 
-    const { orderId, amount } = body;
+    const { orderId, amount, customerName, customerEmail, customerPhone } = body;
 
     // 3. Validate required fields
     if (!orderId) {
@@ -81,6 +87,13 @@ export async function POST(
       );
     }
 
+    if (!customerName) {
+      return NextResponse.json(
+        { error: 'Missing required field: customerName' },
+        { status: 400 }
+      );
+    }
+
     // 4. Validate amount (must be positive integer in agorot)
     if (!Number.isInteger(amount) || amount <= 0) {
       return NextResponse.json(
@@ -89,26 +102,29 @@ export async function POST(
       );
     }
 
-    // 5. Create checkout session
+    // 5. Create payment link
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-    const checkoutSession = await createCheckoutSession({
+    const paymentLink = await createPaymentLink({
       orderId,
       amount,
-      customerEmail: user.email || undefined,
-      successUrl: `${baseUrl}/create/complete?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/create/checkout`,
+      customerName,
+      customerEmail: customerEmail || user.email || '',
+      customerPhone,
+      successUrl: `${baseUrl}/create/complete?page_request_uid={page_request_uid}`,
+      failureUrl: `${baseUrl}/create/checkout?error=payment_failed`,
+      callbackUrl: `${baseUrl}/api/webhooks/payplus`,
     });
 
-    // 6. Return session URL
+    // 6. Return payment URL
     return NextResponse.json({
-      sessionId: checkoutSession.sessionId,
-      url: checkoutSession.url,
+      pageRequestUid: paymentLink.pageRequestUid,
+      paymentUrl: paymentLink.paymentUrl,
     });
   } catch (error) {
     console.error('Checkout error:', error);
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: 'Failed to create payment link' },
       { status: 500 }
     );
   }
