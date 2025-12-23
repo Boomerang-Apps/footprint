@@ -261,7 +261,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1839',
     title: 'Mark Order as Gift',
     description: 'Gift toggle prominent, gift wrap option, no price on slip',
-    status: 'in-review',  // 🔵 In QA Review - 20 tests, 100% statements
+    status: 'done',  // ✅ QA Approved & Merged - 20 tests, 100% statements
     agent: 'Frontend-B',
     points: 2,
     component: 'Gift',
