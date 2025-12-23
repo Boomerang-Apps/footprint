@@ -41,6 +41,66 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-23 - Frontend-B: Gift Message (GF-02)
+
+**Story**: GF-02 - Add Personal Message
+**Branch**: feature/gf-02-gift-message
+**Sprint**: 3
+**Priority**: P0
+
+### Completed
+- [x] GiftMessage component - Textarea with 150 char limit
+- [x] Live preview showing message on gift card mockup
+- [x] Character counter with warning at 130+ chars
+- [x] Integration with orderStore (giftMessage state)
+- [x] Hebrew UI with RTL support
+- [x] Disabled state support
+- [x] TypeScript strict mode clean
+- [x] ESLint clean (no warnings or errors)
+- [x] Tests written with TDD approach
+
+### Test Results
+- **Tests**: 25 passing (GiftMessage component)
+- **Coverage**: 100% statements, 100% branch coverage
+  - GiftMessage.tsx: 100%
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `components/gift/GiftMessage.tsx` | Created |
+| `components/gift/GiftMessage.test.tsx` | Created |
+| `.claudecode/milestones/sprint-3/GF-02/START.md` | Created |
+| `.claudecode/milestones/sprint-3/GF-02/ROLLBACK-PLAN.md` | Created |
+
+### How to Test
+```bash
+cd footprint
+npm test -- --coverage
+npm run type-check
+npm run lint
+npm run dev  # Manual testing
+```
+
+### Manual Test Cases
+1. **Type message**: Enter text in textarea, verify character count updates
+2. **150 char limit**: Type long text, verify stops at 150
+3. **Warning state**: Enter 130+ chars, verify amber warning color
+4. **Live preview**: Text appears in card preview as typed
+5. **Empty state**: Preview shows placeholder text when empty
+6. **Store update**: Message saved to orderStore.giftMessage
+
+### Gate Status
+- [x] Gate 0: Research (N/A - standard UI component)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 25 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean, 100% coverage)
+- [ ] Gate 5: Deployment (pending QA)
+
+> Ready for QA validation
+
+---
+
 ## 2025-12-23 - Frontend-B: Gift Toggle (GF-01)
 
 **Story**: GF-01 - Mark Order as Gift
