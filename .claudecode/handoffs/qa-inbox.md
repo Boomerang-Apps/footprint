@@ -41,95 +41,64 @@ When work is ready for testing:
 
 ## Pending Messages
 
-## 2025-12-22 - Backend-2: UP-03 Image Optimization
+## 2025-12-23 - Frontend-B: Gift Toggle (GF-01)
 
-**Story**: UP-03
-**Branch**: feature/UP-03-image-optimization
+**Story**: GF-01 - Mark Order as Gift
+**Branch**: feature/gf-01-gift-toggle
+**Sprint**: 3
+**Priority**: P0
 
 ### Completed
-- [x] Image optimization with Sharp library (resize to 300 DPI)
-- [x] HEIC to JPEG conversion
-- [x] File size validation (20MB max)
-- [x] Compression without visible quality loss (configurable quality)
-- [x] Color profile awareness (sRGB extraction)
-- [x] Cloudflare R2 storage integration with presigned URLs
-- [x] Upload API endpoint with two modes (presigned & direct)
-- [x] Comprehensive test suite (TDD approach)
+- [x] GiftToggle component - Prominent toggle switch for gift mode
+- [x] Gift wrap checkbox option (+₪15) - shown when gift is ON
+- [x] Price notice - "מחיר לא יופיע" indicator when gift active
+- [x] Integration with orderStore (isGift, giftWrap states)
+- [x] Hebrew UI with RTL support
+- [x] Keyboard accessibility (Enter/Space keys)
+- [x] TypeScript strict mode clean
+- [x] ESLint clean (no warnings or errors)
+- [x] Tests written with TDD approach
 
 ### Test Results
-- **Tests**: 78 passing (32 image, 30 storage, 16 API)
-- **Coverage**:
-  - lib/image/optimize.ts: 100% statements, 100% lines, 100% functions
-  - lib/storage/r2.ts: 100% statements, 100% lines, 100% functions
-  - app/api/upload/route.ts: 86% statements, 84% branches
-
-### API Endpoint Documentation
-
-**POST /api/upload**
-
-Two modes supported:
-
-1. **Presigned URL Mode** (for client-side uploads)
-```json
-POST /api/upload
-Content-Type: application/json
-
-{
-  "mode": "presigned",
-  "fileName": "photo.jpg",
-  "contentType": "image/jpeg",
-  "fileSize": 5242880
-}
-
-Response:
-{
-  "uploadUrl": "https://...",
-  "publicUrl": "https://images.footprint.co.il/uploads/...",
-  "key": "uploads/user123/...",
-  "expiresIn": 3600
-}
-```
-
-2. **Direct Upload Mode** (for server-side processing)
-```
-POST /api/upload
-Content-Type: multipart/form-data
-
-FormData: file, mode: "direct", optimize: "true"
-
-Response:
-{
-  "publicUrl": "https://images.footprint.co.il/uploads/...",
-  "key": "uploads/user123/...",
-  "size": 1234567
-}
-```
+- **Tests**: 20 passing (GiftToggle component)
+- **Coverage**: 100% statements, 85.18% branch coverage
+  - GiftToggle.tsx: 100%
 
 ### Files Changed
 | File | Change |
 |------|--------|
-| footprint/lib/image/optimize.ts | Created |
-| footprint/lib/image/optimize.test.ts | Created |
-| footprint/lib/storage/r2.ts | Created |
-| footprint/lib/storage/r2.test.ts | Created |
-| footprint/app/api/upload/route.ts | Created |
-| footprint/app/api/upload/route.test.ts | Created |
-| footprint/vitest.config.ts | Created |
-| footprint/.eslintrc.json | Created |
-| footprint/package.json | Modified (added test scripts, coverage dep) |
+| `components/gift/GiftToggle.tsx` | Created |
+| `components/gift/GiftToggle.test.tsx` | Created |
+| `.claudecode/milestones/sprint-3/GF-01/START.md` | Created |
+| `.claudecode/milestones/sprint-3/GF-01/ROLLBACK-PLAN.md` | Created |
 
-### Dependencies
-- Sharp: Image processing
-- @aws-sdk/client-s3: R2 storage
-- @aws-sdk/s3-request-presigner: Presigned URLs
-- @vitest/coverage-v8: Test coverage
+### How to Test
+```bash
+cd footprint
+npm test -- --coverage
+npm run type-check
+npm run lint
+npm run dev  # Manual testing
+```
 
-### Notes
-- TypeScript clean for my files (pre-existing errors in types/order.ts)
-- Lint clean (only warning in unrelated create/page.tsx)
-- Ready for QA validation
+### Manual Test Cases
+1. **Toggle ON/OFF**: Click toggle switch, verify visual state change
+2. **Store Update**: Toggle should update orderStore.isGift
+3. **Gift Wrap Visible**: When toggle ON, gift wrap checkbox appears
+4. **Gift Wrap Click**: Click checkbox, verify orderStore.giftWrap updates
+5. **Price Notice**: Green notice box visible when gift is ON
+6. **Gift Wrap Reset**: Turning gift OFF should reset giftWrap to false
+7. **Keyboard Nav**: Tab to toggle, press Enter/Space to activate
 
-→ Ready for QA validation
+### Gate Status
+- [x] Gate 0: Research (N/A - standard UI component)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 20 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean, 100% coverage)
+- [ ] Gate 5: Deployment (pending QA)
+
+> Ready for QA validation
 
 ---
 
