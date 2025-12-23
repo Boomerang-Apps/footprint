@@ -395,4 +395,95 @@ PAYPLUS_SANDBOX=true  # false for production
 
 ---
 
+## 2025-12-23 - Backend-2: CO-04 Order Confirmation
+
+**Story**: CO-04
+**Branch**: feature/UP-03-image-optimization
+**Sprint**: 3
+**Priority**: P1
+**Story Points**: 2
+
+### Completed
+- [x] lib/email/resend.ts - Resend email service with order confirmation template
+- [x] Order number generation (FP-YYYYMMDD-XXXXXX format)
+- [x] HTML email template with order details, items, shipping address
+- [x] WhatsApp share URL generator
+- [x] app/api/orders/[id]/confirm/route.ts - Confirmation API endpoint
+  - POST: Send confirmation email
+  - GET: Return order details + WhatsApp URL
+- [x] Authentication required (Supabase session)
+- [x] Order ownership verification
+- [x] All tests written (TDD)
+
+### Test Results
+- **Tests**: 25 passing (17 email + 8 confirmation API)
+- **Coverage**:
+  - lib/email/resend.ts: 96.87% statements, 85.71% branches, 100% lines
+  - app/api/orders/[id]/confirm/route.ts: 77.77% statements, 80% branches
+
+### API Endpoint Documentation
+
+**POST /api/orders/[id]/confirm**
+
+```json
+POST /api/orders/{orderId}/confirm
+Authorization: Required (Supabase session)
+
+Response (200):
+{
+  "success": true,
+  "emailId": "email_123"
+}
+
+Response (401): Unauthorized
+Response (404): Order not found
+Response (500): Failed to send email
+```
+
+**GET /api/orders/[id]/confirm**
+
+```json
+GET /api/orders/{orderId}/confirm
+Authorization: Required (Supabase session)
+
+Response (200):
+{
+  "orderNumber": "FP-20231223-ABC123",
+  "status": "paid",
+  "items": [...],
+  "subtotal": 158,
+  "shipping": 25,
+  "total": 183,
+  "shippingAddress": {...},
+  "whatsappUrl": "https://wa.me/?text=..."
+}
+
+Response (401): Unauthorized
+Response (404): Order not found
+```
+
+### Files Changed
+| File | Change |
+|------|--------|
+| footprint/lib/email/resend.ts | Created |
+| footprint/lib/email/resend.test.ts | Created |
+| footprint/app/api/orders/[id]/confirm/route.ts | Created |
+| footprint/app/api/orders/[id]/confirm/route.test.ts | Created |
+| footprint/vitest.config.ts | Modified (added email/orders coverage) |
+
+### Environment Variables Required
+```bash
+RESEND_API_KEY=re_xxxxx
+EMAIL_FROM=orders@footprint.co.il  # optional, defaults to noreply@footprint.co.il
+```
+
+### Notes
+- TypeScript clean
+- Lint clean
+- Email HTML template includes responsive design
+- WhatsApp URL supports custom messages and phone numbers
+- Order ownership verified before sending email
+
+> Ready for QA validation
+
 ---
