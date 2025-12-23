@@ -281,8 +281,8 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1841',
     title: 'Ship to Recipient',
     description: 'Separate address form, recipient name, delivery estimate',
-    status: 'in-progress',  // 🟡 Sprint 3 Active (shared)
-    agent: 'Frontend-B',
+    status: 'in-review',  // 🔵 In QA Review - 51 tests, 100% coverage
+    agent: 'Backend-1',
     points: 3,
     component: 'Gift',
   },
