@@ -41,57 +41,21 @@ When work is ready for testing:
 
 ## Pending Messages
 
-## 2025-12-23 - Frontend-B: GF-01 Mark Order as Gift
-
-**Story**: GF-01 (2 SP)
-**Branch**: `feature/gf-01-gift-toggle`
-**Priority**: P0
-
-### Completed
-- [x] GiftToggle component with toggle switch
-- [x] Gift wrap option (+₪15)
-- [x] Price notice (green, Hebrew)
-- [x] orderStore integration (isGift, giftWrap)
-- [x] Full test suite (TDD)
-
-### Test Results
-- **Tests**: 20 passing
-- **Coverage**: 100% statements, 85% branch
-- **TypeScript**: Clean
-- **ESLint**: Clean
-
-### Files Created
-| File | Description |
-|------|-------------|
-| `components/gift/GiftToggle.tsx` | Toggle switch, gift wrap checkbox, price notice |
-| `components/gift/GiftToggle.test.tsx` | 20 TDD tests |
-
-### Features
-- Prominent toggle switch with "שליחה כמתנה" label
-- Gift wrap option appears when gift is ON
-- Keyboard accessible (Enter/Space)
-- Hebrew RTL UI
-
-→ **Ready for QA validation**
-
----
-
 ## 2025-12-23 - PM: Sprint 3 ACTIVE - Awaiting Dev Submissions
 
 **Sprint**: 3 - Checkout & Gifting
-**Status**: Development in progress
-
-QA Agent, Sprint 3 Backend-2 stories are complete!
+**Status**: Development in progress - 50% complete!
 
 **Completed:**
 - ✅ CO-02 (PayPlus Payment) - 5 SP - Merged
 - ✅ CO-04 (Order Confirmation) - 2 SP - Merged
+- ✅ GF-01 (Mark Order as Gift) - 2 SP - Merged
 
 **Expect submissions from:**
-- Frontend-B: GF-01, GF-02, CO-01, GF-03 (UI)
+- Frontend-B: GF-02, CO-01, GF-03 (UI)
 - Backend-1: GF-03 (Logic)
 
-**Sprint 3 Progress**: 7/18 SP (39%) - 2/6 stories complete
+**Sprint 3 Progress**: 9/18 SP (50%) - 3/6 stories complete
 
 Stand by for Frontend-B and Backend-1 validation requests.
 
@@ -100,6 +64,20 @@ Stand by for Frontend-B and Backend-1 validation requests.
 ---
 
 ## Completed Validations
+
+## 2025-12-23 - GF-01 Mark Order as Gift Validation ✅
+
+### GF-01 Mark Order as Gift (Frontend-B)
+- **Result**: APPROVED
+- **Tests**: 20 passing
+- **Coverage**: 100% statements, 85% branch
+- **Security**: Full accessibility (role="switch", aria-checked)
+- **Features**: Gift toggle, gift wrap (+₪15), Hebrew RTL
+- **Merged**: ✅ to main
+
+**Sprint 3 Progress**: 3/6 stories complete (9/18 SP - 50%)
+
+---
 
 ## 2025-12-23 - CO-04 Order Confirmation Validation ✅
 

@@ -12,7 +12,7 @@
 
 | Story | Title | SP | Agent | Status | Branch |
 |-------|-------|-----|-------|--------|--------|
-| GF-01 | Mark Order as Gift | 2 | Frontend-B | 🔵 In Review | `feature/gf-01-gift-toggle` |
+| GF-01 | Mark Order as Gift | 2 | Frontend-B | ✅ Complete | `feature/gf-01-gift-toggle` |
 | GF-02 | Add Personal Message | 3 | Frontend-B | 🟡 Assigned | TBD |
 | GF-03 | Ship to Recipient | 3 | Frontend-B + Backend-1 | 🟡 Assigned | TBD |
 | CO-01 | Enter Shipping Address | 3 | Frontend-B | 🟡 Assigned | TBD |
@@ -72,11 +72,11 @@
 ## Progress Summary
 
 - **Total Stories**: 6 (18 SP)
-- **Assigned**: 4/6 stories
+- **Assigned**: 3/6 stories
 - **In Review**: 0/6 stories
-- **Completed**: 2/6 stories (CO-02 - 5 SP, CO-04 - 2 SP)
+- **Completed**: 3/6 stories (CO-02 - 5 SP, CO-04 - 2 SP, GF-01 - 2 SP)
 - **Blocked**: 0 stories
-- **Progress**: 7/18 SP (39%)
+- **Progress**: 9/18 SP (50%)
 
 ---
 
@@ -90,7 +90,8 @@
 | 2025-12-23 | CO-02 PayPlus submitted for QA (5 SP) |
 | 2025-12-23 | CO-02 QA Approved & Merged (204 tests, 88.13% coverage) |
 | 2025-12-23 | CO-04 QA Approved & Merged (229 tests, 87.93% coverage) |
-| Pending | Frontend-B: GF-01, GF-02, CO-01, GF-03 |
+| 2025-12-23 | GF-01 QA Approved & Merged (20 tests, 100% statement coverage) |
+| Pending | Frontend-B: GF-02, CO-01, GF-03 |
 | Pending | Backend-1: GF-03 (shared) |
 
 ---
