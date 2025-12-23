@@ -16,7 +16,7 @@
 | GF-02 | Add Personal Message | 3 | Frontend-B | 🟡 Assigned | TBD |
 | GF-03 | Ship to Recipient | 3 | Frontend-B + Backend-1 | 🟡 Assigned | TBD |
 | CO-01 | Enter Shipping Address | 3 | Frontend-B | 🟡 Assigned | TBD |
-| CO-02 | PayPlus Payment | 5 | Backend-2 | 🔵 In Review | `feature/CO-02-payplus-payment` |
+| CO-02 | PayPlus Payment | 5 | Backend-2 | ✅ Complete | `feature/CO-02-payplus-payment` |
 | CO-04 | Order Confirmation | 2 | Backend-2 | 🟡 Assigned | TBD |
 
 **Legend**: 🔴 Blocked | 🟡 Assigned | 🔵 In Review | ✅ Complete | ⚪ Not Started
@@ -73,9 +73,10 @@
 
 - **Total Stories**: 6 (18 SP)
 - **Assigned**: 5/6 stories
-- **In Review**: 1/6 stories (CO-02 - 5 SP)
-- **Completed**: 0/6 stories
+- **In Review**: 0/6 stories
+- **Completed**: 1/6 stories (CO-02 - 5 SP)
 - **Blocked**: 0 stories
+- **Progress**: 5/18 SP (28%)
 
 ---
 

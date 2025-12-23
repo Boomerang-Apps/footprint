@@ -110,14 +110,14 @@ PayPlus integration APPROVED as complementary to Stripe.
 - Critical Path: CO-02 (Stripe Payment)
 - Sprint 3 tracker: `.claudecode/milestones/sprint-3/SPRINT-3-TRACKER.md`
 
-**🔵 CO-02 PayPlus IN QA REVIEW (2025-12-23):**
+**✅ CO-02 PayPlus MERGED (2025-12-23):**
 - Backend-2 completed CO-02 using PayPlus (CTO approved architecture change)
 - PayPlus benefits: Bit support, Israeli cards, lower fees for IL market
 - Tests: 204 passing (41 new for PayPlus)
-- Coverage: 96.66% lib/payments, 100% checkout
-- Branch: `feature/CO-02-payplus-payment`
-- Status: Routed to QA for validation
-- CO-04 unblocked when QA approves
+- Coverage: 88.13% overall (100% lib/payments, 100% checkout)
+- QA Approved: Security verified (HMAC-SHA256, timing-safe)
+- Merged to main: `feature/CO-02-payplus-payment`
+- CO-04 (Order Confirmation) now UNBLOCKED
 
 ---
 
