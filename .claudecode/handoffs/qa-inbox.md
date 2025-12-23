@@ -291,30 +291,30 @@ REPLICATE_API_TOKEN=r8_xxxxx
 
 ---
 
-## 2025-12-23 - Backend-2: CO-02 Stripe Payment
+## 2025-12-23 - Backend-2: CO-02 PayPlus Payment
 
 **Story**: CO-02
-**Branch**: feature/CO-02-stripe-payment
+**Branch**: feature/CO-02-payplus-payment
 **Sprint**: 3
 **Priority**: P0 - CRITICAL PATH
 **Story Points**: 5
 
 ### Completed
-- [x] lib/payments/stripe.ts - Stripe client with checkout session
-- [x] app/api/checkout/route.ts - Create session endpoint
-- [x] app/api/webhooks/stripe/route.ts - Webhook handler
-- [x] ILS currency support
-- [x] Webhook signature verification
+- [x] lib/payments/payplus.ts - PayPlus API client with createPaymentLink
+- [x] app/api/checkout/route.ts - Create payment link endpoint
+- [x] app/api/webhooks/payplus/route.ts - Webhook handler with HMAC-SHA256 verification
+- [x] ILS currency support (amounts in agorot)
+- [x] Webhook signature verification (hash + user-agent)
 - [x] Order status update on payment success
 - [x] All tests written (TDD)
-- [x] 100% coverage on lib/payments/
+- [x] 96.66% coverage on lib/payments/
 
 ### Test Results
-- **Tests**: 38 passing (16 stripe + 13 checkout + 9 webhook)
+- **Tests**: 41 passing (17 payplus + 15 checkout + 9 webhook)
 - **Coverage**:
-  - lib/payments/stripe.ts: 100% statements, 100% functions
+  - lib/payments/payplus.ts: 96.66% statements, 90% branches
   - app/api/checkout/route.ts: 100% statements
-  - app/api/webhooks/stripe/route.ts: 100% statements
+  - app/api/webhooks/payplus/route.ts: 93.33% statements
 
 ### API Endpoint Documentation
 
@@ -328,71 +328,67 @@ Authorization: Required (Supabase session)
 Request:
 {
   "orderId": "order_123",
-  "amount": 15800  // in agorot (158.00 ILS)
+  "amount": 15800,  // in agorot (158.00 ILS)
+  "customerName": "John Doe",
+  "customerEmail": "john@example.com",  // optional
+  "customerPhone": "0501234567"  // optional
 }
 
 Response (200):
 {
-  "sessionId": "cs_test_...",
-  "url": "https://checkout.stripe.com/..."
+  "pageRequestUid": "xxx-xxx-xxx",
+  "paymentUrl": "https://payments.payplus.co.il/..."
 }
 
 Response (401): Unauthorized
-Response (400): Missing orderId/amount or invalid amount
-Response (500): Stripe API error
+Response (400): Missing required fields or invalid amount
+Response (500): PayPlus API error
 ```
 
-**POST /api/webhooks/stripe**
+**POST /api/webhooks/payplus**
 
 ```
-Stripe webhook endpoint for payment events.
-Requires stripe-signature header for verification.
+PayPlus webhook endpoint for payment callbacks.
+Requires headers:
+- hash: HMAC-SHA256 signature (base64)
+- user-agent: Must be "PayPlus"
 
-Events handled:
-- checkout.session.completed: Updates order to 'paid'
-- payment_intent.payment_failed: Logs failure
+Status codes:
+- "000": Payment successful - updates order to 'paid'
+- Other: Payment failed - logs failure
 ```
 
 ### Files Changed
 | File | Change |
 |------|--------|
-| footprint/lib/payments/stripe.ts | Created |
-| footprint/lib/payments/stripe.test.ts | Created |
-| footprint/app/api/checkout/route.ts | Created |
-| footprint/app/api/checkout/route.test.ts | Created |
-| footprint/app/api/webhooks/stripe/route.ts | Created |
-| footprint/app/api/webhooks/stripe/route.test.ts | Created |
-| footprint/vitest.config.ts | Modified (added payments coverage) |
-
-### Dependencies
-- stripe: Stripe SDK (already in package.json)
+| footprint/lib/payments/payplus.ts | Created |
+| footprint/lib/payments/payplus.test.ts | Created |
+| footprint/app/api/checkout/route.ts | Modified (PayPlus) |
+| footprint/app/api/checkout/route.test.ts | Modified |
+| footprint/app/api/webhooks/payplus/route.ts | Created |
+| footprint/app/api/webhooks/payplus/route.test.ts | Created |
+| footprint/vitest.config.ts | Modified |
 
 ### Environment Variables Required
 ```bash
-STRIPE_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
+PAYPLUS_API_KEY=your_api_key
+PAYPLUS_SECRET_KEY=your_secret_key
+PAYPLUS_PAYMENT_PAGE_UID=your_payment_page_uid
+PAYPLUS_SANDBOX=true  # false for production
 ```
 
-### Testing Stripe Locally
-```bash
-# Install Stripe CLI
-brew install stripe/stripe-cli/stripe
+### Test Cards (Sandbox)
+- **Success**: 5326-1402-8077-9844 (Exp: 05/26, CVV: 000)
+- **Decline**: 5326-1402-0001-0120 (Exp: 05/26, CVV: 000)
 
-# Login to Stripe
-stripe login
-
-# Forward webhooks to localhost
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
-
-# Trigger test events
-stripe trigger checkout.session.completed
-```
+### PayPlus API Endpoints
+- **Sandbox**: `https://restapidev.payplus.co.il/api/v1.0/`
+- **Production**: `https://restapi.payplus.co.il/api/v1.0/`
 
 ### Notes
 - TypeScript clean
-- Uses Stripe Checkout (hosted page) for PCI compliance
-- 3D Secure handled automatically by Stripe
+- Uses PayPlus hosted payment page for PCI compliance
+- HMAC-SHA256 webhook verification
 - Order status update function is a placeholder (TODO: integrate with Supabase)
 
 > Ready for QA validation
