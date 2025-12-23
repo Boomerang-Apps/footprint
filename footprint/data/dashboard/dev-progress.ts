@@ -323,7 +323,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1844',
     title: 'Order Confirmation',
     description: 'Email sent, order number shown, WhatsApp option',
-    status: 'in-review',  // 🔵 In QA Review - 229 tests, 87.93% coverage
+    status: 'done',  // ✅ QA Approved & Merged - 229 tests, 87.93% coverage
     agent: 'Backend-2',
     points: 2,
     component: 'Checkout',
