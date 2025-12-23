@@ -203,82 +203,89 @@ npm run dev  # Manual testing
 
 ---
 
-## 2025-12-22 - Frontend-B: Style Gallery & Product Config (AI-01, PC-01-03, AI-03, AI-04)
+## 2025-12-23 - Backend-2: AI-02 Style Transformation API
 
-**Stories**: AI-01, PC-01, PC-02, PC-03, AI-03, AI-04
-**Branch**: feature/sprint-2-style-config
+**Story**: AI-02
+**Branch**: feature/AI-02-style-transform
 **Sprint**: 2
 **Priority**: P0
 
 ### Completed
-- [x] StyleGallery - 9 AI styles with thumbnails, selection, popular badges
-- [x] SizeSelector - A5/A4/A3/A2 with dimensions and live pricing
-- [x] PaperSelector - Matte/Glossy/Canvas with descriptions and price modifiers
-- [x] FrameSelector - None/Black/White/Oak with color previews
-- [x] Original photo as first option in gallery (AI-03)
-- [x] Free style browsing without paywall (AI-04 frontend)
-- [x] Hebrew UI with RTL support
-- [x] Keyboard accessibility
-- [x] Integration with orderStore
-- [x] TypeScript strict mode clean
-- [x] ESLint clean (no warnings or errors)
-- [x] Tests written with TDD approach
+- [x] Replicate AI client with Flux Kontext Pro model
+- [x] 8 artistic styles: pop_art, watercolor, line_art, oil_painting, romantic, comic_book, vintage, original_enhanced
+- [x] Style prompt templates optimized for print quality
+- [x] Retry logic with exponential backoff (1s, 2s, 4s)
+- [x] Transform API endpoint with authentication
+- [x] Transformed images stored in R2 (not Replicate URLs)
+- [x] Input validation (style, URL format)
+- [x] Comprehensive error handling
+- [x] TDD approach with 100% coverage on lib/ai
 
 ### Test Results
-- **Tests**: 97 passing (52 new + 45 from Sprint 1)
-  - StyleGallery: 17 tests
-  - SizeSelector: 11 tests
-  - PaperSelector: 11 tests
-  - FrameSelector: 13 tests
-- **Coverage**: 90.47% overall
-  - product-config/*: 100%
-  - style-picker/*: 80%
-  - upload/*: 89.13%
+- **Tests**: 45 passing (30 replicate + 15 API route)
+- **Coverage**:
+  - lib/ai/replicate.ts: 100% statements, 94% branches, 100% functions
+  - app/api/transform/route.ts: 92.5% statements, 93.75% branches
+
+### API Endpoint Documentation
+
+**POST /api/transform**
+
+```json
+POST /api/transform
+Content-Type: application/json
+Authorization: Required (Supabase session)
+
+Request:
+{
+  "imageUrl": "https://images.footprint.co.il/uploads/user123/photo.jpg",
+  "style": "pop_art"
+}
+
+Response (200):
+{
+  "transformedUrl": "https://images.footprint.co.il/transformed/user123/abc123.png",
+  "style": "pop_art",
+  "processingTime": 6500
+}
+
+Response (401): Unauthorized
+Response (400): Invalid style or missing imageUrl
+Response (500): Transformation failed
+```
+
+**Supported Styles:**
+- `pop_art` - Bold colors, halftone dots, Warhol-inspired
+- `watercolor` - Soft edges, translucent washes
+- `line_art` - Clean lines, minimalist
+- `oil_painting` - Thick brushstrokes, classical
+- `romantic` - Soft focus, warm tones
+- `comic_book` - Bold outlines, vibrant colors
+- `vintage` - Sepia tones, film grain
+- `original_enhanced` - Professional color grading
 
 ### Files Changed
 | File | Change |
 |------|--------|
-| `components/style-picker/StyleGallery.tsx` | Created |
-| `components/style-picker/StyleGallery.test.tsx` | Created |
-| `components/product-config/SizeSelector.tsx` | Created |
-| `components/product-config/SizeSelector.test.tsx` | Created |
-| `components/product-config/PaperSelector.tsx` | Created |
-| `components/product-config/PaperSelector.test.tsx` | Created |
-| `components/product-config/FrameSelector.tsx` | Created |
-| `components/product-config/FrameSelector.test.tsx` | Created |
-| `.claudecode/milestones/sprint-2/START.md` | Created |
-| `.claudecode/milestones/sprint-2/ROLLBACK-PLAN.md` | Created |
+| footprint/lib/ai/replicate.ts | Created |
+| footprint/lib/ai/replicate.test.ts | Created |
+| footprint/app/api/transform/route.ts | Created |
+| footprint/app/api/transform/route.test.ts | Created |
+| footprint/vitest.config.ts | Modified (added lib/ai coverage) |
 
-### How to Test
+### Dependencies
+- replicate: Replicate API client (already in package.json)
+
+### Environment Variables Required
 ```bash
-cd footprint
-npm test -- --coverage
-npm run type-check
-npm run lint
-npm run dev  # Manual testing
+REPLICATE_API_TOKEN=r8_xxxxx
 ```
 
-### Manual Test Cases
-1. **Style Gallery**: Navigate to /create/style, verify 9 styles visible
-2. **Style Selection**: Click different styles, verify selection updates
-3. **Original First**: Verify "מקורי" (Original) is first option
-4. **Popular Badges**: Verify Pop Art and Oil Painting show "פופולרי"
-5. **Size Selection**: Navigate to /create/customize, select sizes, verify prices
-6. **Paper Selection**: Select papers, verify price modifiers (+₪20, +₪50)
-7. **Frame Selection**: Select frames, verify color previews and prices
-8. **Keyboard Nav**: Tab through options, Enter to select
-9. **RTL Layout**: Verify Hebrew text renders correctly
-
-### Note on AI-04
-Frontend allows unlimited free browsing of styles. Watermark and quality restrictions are backend concerns (AI-02) and will be added when Backend-2 integrates Replicate API.
-
-### Gate Status
-- [x] Gate 0: Research (N/A)
-- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
-- [x] Gate 2: Implementation (TDD - 52 new tests)
-- [ ] Gate 3: QA Validation (PENDING)
-- [x] Gate 4: Review (TypeScript clean, Lint clean, 90.47% coverage)
-- [ ] Gate 5: Deployment (pending QA)
+### Notes
+- TypeScript clean
+- Target transformation time: < 10 seconds
+- Uses flux-kontext-pro model for optimal speed/quality
+- Fetches transformed image from Replicate and stores in R2
 
 > Ready for QA validation
 
