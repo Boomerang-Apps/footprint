@@ -1,4 +1,4 @@
-# START.md - CO-02: Pay with Credit Card (Stripe)
+# START.md - CO-02: Pay with Credit Card (PayPlus)
 
 **Story**: CO-02
 **Sprint**: 3
@@ -6,22 +6,23 @@
 **Story Points**: 5
 **Priority**: P0 - CRITICAL PATH
 **Created**: 2025-12-23
+**Updated**: 2025-12-23 (Stripe → PayPlus)
 
 ---
 
 ## Story Description
 
-Implement Stripe Checkout for secure payment processing. Users complete payment via Stripe's hosted checkout page, which handles card validation, 3D Secure, and PCI compliance.
+Implement PayPlus payment integration for Footprint. Users complete payment via PayPlus hosted checkout page, which handles card validation, 3D Secure, and PCI compliance for Israeli market.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] Stripe Checkout session creation
-- [ ] Credit card validation (handled by Stripe)
-- [ ] 3D Secure support (automatic with Stripe)
+- [ ] PayPlus generateLink API integration
+- [ ] Credit card validation (handled by PayPlus)
+- [ ] 3D Secure support (automatic with PayPlus)
 - [ ] ILS currency support
-- [ ] Webhook signature verification
+- [ ] Webhook signature verification (HMAC-SHA256)
 - [ ] Order status update on payment success
 - [ ] Handle payment failures gracefully
 
@@ -30,16 +31,18 @@ Implement Stripe Checkout for secure payment processing. Users complete payment 
 ## Scope
 
 ### In Scope
-- Stripe Checkout session creation
+- PayPlus payment page link generation
 - Webhook handling for payment confirmation
 - Order status updates (paid/failed)
 - ILS currency support
-- Test mode implementation
+- Sandbox mode for testing
 
 ### Out of Scope (for now)
-- Apple Pay / Google Pay (auto-handled by Stripe, but UI in CO-03)
-- Discount codes (CO-05)
-- Refunds (post-MVP)
+- Bit payment method
+- Installments (תשלומים)
+- Apple Pay / Google Pay
+- Paddle international fallback
+- Recurring payments
 
 ---
 
@@ -47,25 +50,32 @@ Implement Stripe Checkout for secure payment processing. Users complete payment 
 
 | File | Purpose |
 |------|---------|
-| `lib/payments/stripe.ts` | Stripe client, checkout session, webhook utils |
-| `lib/payments/stripe.test.ts` | Unit tests for Stripe module |
-| `app/api/checkout/route.ts` | POST endpoint to create checkout session |
+| `lib/payments/payplus.ts` | PayPlus API client |
+| `lib/payments/payplus.test.ts` | Unit tests for PayPlus module |
+| `app/api/checkout/route.ts` | POST endpoint to create payment link |
 | `app/api/checkout/route.test.ts` | API route tests |
-| `app/api/webhooks/stripe/route.ts` | Webhook handler for Stripe events |
-| `app/api/webhooks/stripe/route.test.ts` | Webhook tests |
+| `app/api/webhooks/payplus/route.ts` | Webhook handler for PayPlus callbacks |
+| `app/api/webhooks/payplus/route.test.ts` | Webhook tests |
+
+## Files to Remove (Stripe)
+
+| File | Reason |
+|------|--------|
+| `lib/payments/stripe.ts` | Replaced by PayPlus |
+| `lib/payments/stripe.test.ts` | Replaced by PayPlus |
+| `app/api/webhooks/stripe/route.ts` | Replaced by PayPlus webhook |
+| `app/api/webhooks/stripe/route.test.ts` | Replaced by PayPlus webhook |
 
 ---
 
 ## Technical Approach
 
-### 1. Stripe Client (`lib/payments/stripe.ts`)
+### 1. PayPlus Client (`lib/payments/payplus.ts`)
 
 ```typescript
 // Core exports
-export const stripe: Stripe;
-export function createCheckoutSession(params: CheckoutSessionParams): Promise<CheckoutSessionResult>;
-export function retrieveSession(sessionId: string): Promise<Stripe.Checkout.Session>;
-export function constructWebhookEvent(payload, signature, secret): Stripe.Event;
+export function createPaymentLink(params: CreatePaymentParams): Promise<PaymentLinkResult>;
+export function validateWebhook(body: string, hash: string, secretKey: string): boolean;
 ```
 
 ### 2. Checkout API (`app/api/checkout/route.ts`)
@@ -78,69 +88,84 @@ Authorization: Required
 Request:
 {
   "orderId": "order_123",
-  "amount": 15800  // in agorot (158.00 ILS)
+  "amount": 15800,  // in agorot (158.00 ILS)
+  "customerEmail": "user@example.com",
+  "customerName": "John Doe"
 }
 
 Response (200):
 {
-  "sessionId": "cs_test_...",
-  "url": "https://checkout.stripe.com/..."
+  "pageRequestUid": "xxx-xxx-xxx",
+  "paymentUrl": "https://payments.payplus.co.il/..."
 }
 ```
 
-### 3. Webhook Handler (`app/api/webhooks/stripe/route.ts`)
+### 3. Webhook Handler (`app/api/webhooks/payplus/route.ts`)
 
-Handles events:
-- `checkout.session.completed` - Update order to 'paid'
-- `payment_intent.payment_failed` - Log failure
+Validates:
+- `user-agent` header equals "PayPlus"
+- `hash` header matches HMAC-SHA256 of body
+
+Updates order to 'paid' on successful transaction.
 
 ---
 
 ## Environment Variables Required
 
 ```bash
-STRIPE_SECRET_KEY=sk_test_...          # Stripe secret key
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...  # Client-side key
-STRIPE_WEBHOOK_SECRET=whsec_...        # Webhook signing secret
+PAYPLUS_API_KEY=xxx                    # PayPlus API key
+PAYPLUS_SECRET_KEY=xxx                 # PayPlus secret key
+PAYPLUS_PAYMENT_PAGE_UID=xxx           # Payment page UID
+PAYPLUS_SANDBOX=true                   # true for testing
 ```
 
 ---
 
-## Dependencies
+## PayPlus API Details
 
-- `stripe` package (already in package.json)
+### Base URLs
+- **Sandbox**: `https://restapidev.payplus.co.il/api/v1.0/`
+- **Production**: `https://restapi.payplus.co.il/api/v1.0/`
+
+### Endpoint
+`POST /PaymentPages/generateLink`
+
+### Test Cards
+- Success: `5326-1402-8077-9844` (05/26, CVV: 000)
+- Decline: `5326-1402-0001-0120` (05/26, CVV: 000)
 
 ---
 
 ## Testing Strategy (TDD)
 
-### Unit Tests (`lib/payments/stripe.test.ts`)
-1. createCheckoutSession returns session ID and URL
-2. createCheckoutSession includes orderId in metadata
-3. createCheckoutSession uses ILS currency
-4. retrieveSession returns session data
-5. constructWebhookEvent validates signature
-6. constructWebhookEvent throws on invalid signature
+### Unit Tests (`lib/payments/payplus.test.ts`)
+1. createPaymentLink returns pageRequestUid and paymentUrl
+2. createPaymentLink includes orderId in more_info
+3. createPaymentLink uses correct charge_method
+4. validateWebhook returns true for valid hash
+5. validateWebhook returns false for invalid hash
+6. validateWebhook returns false for wrong user-agent
 
 ### API Tests (`app/api/checkout/route.test.ts`)
 1. Returns 401 for unauthenticated users
 2. Returns 400 for missing orderId
 3. Returns 400 for missing amount
 4. Returns 400 for invalid amount (negative, non-integer)
-5. Returns 200 with session URL for valid request
+5. Returns 200 with payment URL for valid request
 
-### Webhook Tests (`app/api/webhooks/stripe/route.test.ts`)
-1. Returns 400 for missing signature header
-2. Returns 400 for invalid signature
-3. Returns 200 and processes checkout.session.completed
-4. Returns 200 for unhandled event types
+### Webhook Tests (`app/api/webhooks/payplus/route.test.ts`)
+1. Returns 400 for missing hash header
+2. Returns 400 for invalid user-agent
+3. Returns 400 for invalid hash
+4. Returns 200 and updates order on valid callback
 
 ---
 
 ## Security Checklist
 
-- [ ] STRIPE_SECRET_KEY in environment only
-- [ ] Webhook signature verification
+- [ ] PAYPLUS_SECRET_KEY in environment only
+- [ ] Webhook hash verification
+- [ ] Webhook user-agent verification
 - [ ] Authentication required for checkout creation
 - [ ] Amount validated (positive integer)
 - [ ] No sensitive data logged
@@ -149,10 +174,10 @@ STRIPE_WEBHOOK_SECRET=whsec_...        # Webhook signing secret
 
 ## Rollback Trigger Conditions
 
-- Stripe API consistently failing
+- PayPlus API consistently failing
 - Webhook signature verification issues
 - Security vulnerability discovered
-- Test keys exposed
+- API keys exposed
 
 ---
 

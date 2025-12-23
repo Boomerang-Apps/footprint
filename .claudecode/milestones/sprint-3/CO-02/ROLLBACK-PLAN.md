@@ -1,9 +1,10 @@
-# ROLLBACK-PLAN.md - CO-02: Pay with Credit Card (Stripe)
+# ROLLBACK-PLAN.md - CO-02: Pay with Credit Card (PayPlus)
 
 **Story**: CO-02
-**Branch**: `feature/CO-02-stripe-payment`
+**Branch**: `feature/CO-02-payplus-payment`
 **Tag**: `CO-02-start`
 **Created**: 2025-12-23
+**Updated**: 2025-12-23 (Stripe → PayPlus)
 
 ---
 
@@ -11,9 +12,9 @@
 
 Initiate rollback if any of the following occur:
 
-1. **API Failure**: Stripe API consistently failing
-2. **Security Issue**: API keys exposed or signature verification bypassed
-3. **Integration Issues**: Webhooks not receiving events
+1. **API Failure**: PayPlus API consistently failing
+2. **Security Issue**: API keys exposed or hash verification bypassed
+3. **Integration Issues**: Webhooks not receiving callbacks
 4. **Breaking Changes**: Conflicts with existing checkout flow
 
 ---
@@ -24,14 +25,14 @@ These files are new and can be safely deleted:
 
 ```bash
 # Payment module
-rm footprint/lib/payments/stripe.ts
-rm footprint/lib/payments/stripe.test.ts
+rm footprint/lib/payments/payplus.ts
+rm footprint/lib/payments/payplus.test.ts
 
-# Checkout API
+# Checkout API (if new)
 rm -rf footprint/app/api/checkout/
 
 # Webhook handler
-rm -rf footprint/app/api/webhooks/stripe/
+rm -rf footprint/app/api/webhooks/payplus/
 ```
 
 ---
@@ -41,7 +42,7 @@ rm -rf footprint/app/api/webhooks/stripe/
 ### Quick Rollback (Keep Branch)
 
 ```bash
-# From feature/CO-02-stripe-payment branch
+# From feature/CO-02-payplus-payment branch
 git reset --hard CO-02-start
 git clean -fd
 ```
@@ -50,8 +51,8 @@ git clean -fd
 
 ```bash
 git checkout main
-git branch -D feature/CO-02-stripe-payment
-git push origin --delete feature/CO-02-stripe-payment  # If pushed
+git branch -D feature/CO-02-payplus-payment
+git push origin --delete feature/CO-02-payplus-payment  # If pushed
 ```
 
 ### Selective Rollback
@@ -60,15 +61,15 @@ git push origin --delete feature/CO-02-stripe-payment  # If pushed
 # Remove only payment-related files
 git rm -rf footprint/lib/payments/
 git rm -rf footprint/app/api/checkout/
-git rm -rf footprint/app/api/webhooks/stripe/
-git commit -m "rollback(CO-02): remove Stripe payment integration"
+git rm -rf footprint/app/api/webhooks/payplus/
+git commit -m "rollback(CO-02): remove PayPlus payment integration"
 ```
 
 ---
 
 ## Fallback Behavior
 
-If Stripe integration is rolled back:
+If PayPlus integration is rolled back:
 
 1. **Immediate**:
    - Disable checkout button in UI
@@ -82,8 +83,8 @@ If Stripe integration is rolled back:
 
 3. **Alternative Payment**:
    - Manual bank transfer
-   - PayPal (if available)
-   - Bit payment (Israeli alternative)
+   - Paddle integration (if implemented)
+   - Direct PayPlus dashboard payment
 
 ---
 
@@ -91,9 +92,10 @@ If Stripe integration is rolled back:
 
 Remove from `.env.local` if rolling back permanently:
 ```bash
-# STRIPE_SECRET_KEY=
-# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-# STRIPE_WEBHOOK_SECRET=
+# PAYPLUS_API_KEY=
+# PAYPLUS_SECRET_KEY=
+# PAYPLUS_PAYMENT_PAGE_UID=
+# PAYPLUS_SANDBOX=
 ```
 
 ---
@@ -102,8 +104,8 @@ Remove from `.env.local` if rolling back permanently:
 
 Before rollback, verify:
 - [ ] No frontend code calling `/api/checkout`
-- [ ] No orders with pending Stripe payments
-- [ ] Stripe CLI webhook forwarding stopped
+- [ ] No orders with pending PayPlus payments
+- [ ] PayPlus webhook URL removed from dashboard
 
 ---
 
@@ -113,7 +115,7 @@ After rollback:
 
 ```bash
 # Tests should still pass
-npm test
+cd footprint && npm test
 
 # Type check should pass
 npm run type-check
