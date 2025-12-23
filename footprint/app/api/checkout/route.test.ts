@@ -10,11 +10,11 @@ vi.mock('next/headers', () => ({
 }));
 
 // Mock dependencies
-const mockCreateCheckoutSession = vi.fn();
+const mockCreatePaymentLink = vi.fn();
 const mockGetUser = vi.fn();
 
-vi.mock('@/lib/payments/stripe', () => ({
-  createCheckoutSession: (...args: unknown[]) => mockCreateCheckoutSession(...args),
+vi.mock('@/lib/payments/payplus', () => ({
+  createPaymentLink: (...args: unknown[]) => mockCreatePaymentLink(...args),
 }));
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -27,7 +27,9 @@ vi.mock('@/lib/supabase/server', () => ({
 
 // Mock environment variables
 const mockEnv = {
-  STRIPE_SECRET_KEY: 'sk_test_123',
+  PAYPLUS_API_KEY: 'test_api_key',
+  PAYPLUS_SECRET_KEY: 'test_secret_key',
+  PAYPLUS_PAYMENT_PAGE_UID: 'test_page_uid',
   NEXT_PUBLIC_APP_URL: 'https://footprint.co.il',
 };
 
@@ -45,9 +47,9 @@ describe('POST /api/checkout', () => {
     });
 
     // Default mock return
-    mockCreateCheckoutSession.mockResolvedValue({
-      sessionId: 'cs_test_123',
-      url: 'https://checkout.stripe.com/test',
+    mockCreatePaymentLink.mockResolvedValue({
+      pageRequestUid: 'page_request_123',
+      paymentUrl: 'https://payments.payplus.co.il/test',
     });
   });
 
@@ -56,13 +58,14 @@ describe('POST /api/checkout', () => {
   });
 
   describe('Successful checkout', () => {
-    it('should create checkout session and return URL', async () => {
+    it('should create payment link and return URL', async () => {
       const request = new Request('http://localhost/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: 'order_123',
           amount: 15800,
+          customerName: 'Test User',
         }),
       });
 
@@ -70,47 +73,51 @@ describe('POST /api/checkout', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.sessionId).toBe('cs_test_123');
-      expect(data.url).toBe('https://checkout.stripe.com/test');
+      expect(data.pageRequestUid).toBe('page_request_123');
+      expect(data.paymentUrl).toBe('https://payments.payplus.co.il/test');
     });
 
-    it('should call createCheckoutSession with correct parameters', async () => {
+    it('should call createPaymentLink with correct parameters', async () => {
       const request = new Request('http://localhost/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: 'order_456',
           amount: 25000,
+          customerName: 'Test User',
         }),
       });
 
       await POST(request);
 
-      expect(mockCreateCheckoutSession).toHaveBeenCalledWith(
+      expect(mockCreatePaymentLink).toHaveBeenCalledWith(
         expect.objectContaining({
           orderId: 'order_456',
           amount: 25000,
           customerEmail: 'test@example.com',
+          customerName: 'Test User',
         })
       );
     });
 
-    it('should include success and cancel URLs', async () => {
+    it('should include success, failure, and callback URLs', async () => {
       const request = new Request('http://localhost/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: 'order_123',
           amount: 15800,
+          customerName: 'Test User',
         }),
       });
 
       await POST(request);
 
-      expect(mockCreateCheckoutSession).toHaveBeenCalledWith(
+      expect(mockCreatePaymentLink).toHaveBeenCalledWith(
         expect.objectContaining({
           successUrl: expect.stringContaining('/create/complete'),
-          cancelUrl: expect.stringContaining('/create/checkout'),
+          failureUrl: expect.stringContaining('/create/checkout'),
+          callbackUrl: expect.stringContaining('/api/webhooks/payplus'),
         })
       );
     });
@@ -127,15 +134,38 @@ describe('POST /api/checkout', () => {
         body: JSON.stringify({
           orderId: 'order_123',
           amount: 15800,
+          customerName: 'Test User',
+          customerEmail: 'provided@example.com',
         }),
       });
 
       const response = await POST(request);
       expect(response.status).toBe(200);
 
-      expect(mockCreateCheckoutSession).toHaveBeenCalledWith(
+      expect(mockCreatePaymentLink).toHaveBeenCalledWith(
         expect.objectContaining({
-          customerEmail: undefined,
+          customerEmail: 'provided@example.com',
+        })
+      );
+    });
+
+    it('should include phone number if provided', async () => {
+      const request = new Request('http://localhost/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: 'order_123',
+          amount: 15800,
+          customerName: 'Test User',
+          customerPhone: '0501234567',
+        }),
+      });
+
+      await POST(request);
+
+      expect(mockCreatePaymentLink).toHaveBeenCalledWith(
+        expect.objectContaining({
+          customerPhone: '0501234567',
         })
       );
     });
@@ -154,6 +184,7 @@ describe('POST /api/checkout', () => {
         body: JSON.stringify({
           orderId: 'order_123',
           amount: 15800,
+          customerName: 'Test User',
         }),
       });
 
@@ -172,6 +203,7 @@ describe('POST /api/checkout', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: 15800,
+          customerName: 'Test User',
         }),
       });
 
@@ -188,6 +220,7 @@ describe('POST /api/checkout', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: 'order_123',
+          customerName: 'Test User',
         }),
       });
 
@@ -198,6 +231,23 @@ describe('POST /api/checkout', () => {
       expect(data.error).toContain('amount');
     });
 
+    it('should return 400 for missing customerName', async () => {
+      const request = new Request('http://localhost/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: 'order_123',
+          amount: 15800,
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('customerName');
+    });
+
     it('should return 400 for negative amount', async () => {
       const request = new Request('http://localhost/api/checkout', {
         method: 'POST',
@@ -205,6 +255,7 @@ describe('POST /api/checkout', () => {
         body: JSON.stringify({
           orderId: 'order_123',
           amount: -100,
+          customerName: 'Test User',
         }),
       });
 
@@ -222,6 +273,7 @@ describe('POST /api/checkout', () => {
         body: JSON.stringify({
           orderId: 'order_123',
           amount: 0,
+          customerName: 'Test User',
         }),
       });
 
@@ -239,6 +291,7 @@ describe('POST /api/checkout', () => {
         body: JSON.stringify({
           orderId: 'order_123',
           amount: 158.5,
+          customerName: 'Test User',
         }),
       });
 
@@ -262,8 +315,8 @@ describe('POST /api/checkout', () => {
   });
 
   describe('Error handling', () => {
-    it('should return 500 when Stripe fails', async () => {
-      mockCreateCheckoutSession.mockRejectedValue(new Error('Stripe error'));
+    it('should return 500 when PayPlus fails', async () => {
+      mockCreatePaymentLink.mockRejectedValue(new Error('PayPlus error'));
 
       const request = new Request('http://localhost/api/checkout', {
         method: 'POST',
@@ -271,6 +324,7 @@ describe('POST /api/checkout', () => {
         body: JSON.stringify({
           orderId: 'order_123',
           amount: 15800,
+          customerName: 'Test User',
         }),
       });
 
@@ -278,7 +332,7 @@ describe('POST /api/checkout', () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toContain('checkout session');
+      expect(data.error).toContain('payment');
     });
   });
 
@@ -290,16 +344,17 @@ describe('POST /api/checkout', () => {
         body: JSON.stringify({
           orderId: 'order_123',
           amount: 15800,
+          customerName: 'Test User',
         }),
       });
 
       const response = await POST(request);
       const data = await response.json();
 
-      expect(data).toHaveProperty('sessionId');
-      expect(data).toHaveProperty('url');
-      expect(typeof data.sessionId).toBe('string');
-      expect(typeof data.url).toBe('string');
+      expect(data).toHaveProperty('pageRequestUid');
+      expect(data).toHaveProperty('paymentUrl');
+      expect(typeof data.pageRequestUid).toBe('string');
+      expect(typeof data.paymentUrl).toBe('string');
     });
   });
 });
