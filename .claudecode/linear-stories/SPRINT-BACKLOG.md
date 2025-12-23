@@ -44,7 +44,7 @@
 | PC-01 | Select print size | A5/A4/A3 options, size visualization, live price update | 3 | Must | Frontend-B | ✅ Done |
 | PC-02 | Choose paper type | Matte/Glossy options, tooltips, price difference | 2 | Must | Frontend-B | ✅ Done |
 | PC-03 | Add frame option | None/Black/White, frame preview, price update | 3 | Must | Frontend-B | ✅ Done |
-| PC-04 | Real-time price calculation | Live calculation, breakdown visible, shipping estimate | 3 | Must | Backend-1 + Frontend-B | 🟡 Pending |
+| PC-04 | Real-time price calculation | Live calculation, breakdown visible, shipping estimate | 3 | Must | Backend-1 + Frontend-B | 🔵 In Review |
 
 ### Sprint 2 Dependencies
 - **Gate 0 Required**: Replicate AI integration (AI-02) ✅ APPROVED

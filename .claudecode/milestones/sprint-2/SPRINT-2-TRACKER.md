@@ -19,7 +19,7 @@
 | PC-01 | Select Print Size | 3 | Frontend-B | ✅ Complete | `feature/sprint-2-style-config` |
 | PC-02 | Choose Paper Type | 2 | Frontend-B | ✅ Complete | `feature/sprint-2-style-config` |
 | PC-03 | Add Frame Option | 3 | Frontend-B | ✅ Complete | `feature/sprint-2-style-config` |
-| PC-04 | Real-time Price Calculation | 3 | Backend-1 + Frontend-B | 🟢 Ready | TBD |
+| PC-04 | Real-time Price Calculation | 3 | Backend-1 + Frontend-B | 🔵 In Review | `feature/PC-04-price-calculation` |
 
 **Legend**: 🔴 Blocked | 🟡 In Progress | 🔵 In Review | ✅ Complete | 🟢 Ready | ⚪ Not Started
 
@@ -78,12 +78,12 @@
 
 - **Total Stories**: 8 (27 SP)
 - **Completed**: 7/8 stories (24 SP) - AI-01, AI-02, AI-03, AI-04, PC-01, PC-02, PC-03
-- **Pending**: 1/8 stories (3 SP) - PC-04 (Backend-1)
+- **In Review**: 1/8 stories (3 SP) - PC-04 (Backend-1) awaiting QA
 - **Blocked**: 0 stories
 
 **Frontend-B**: ✅ Complete (16 SP merged to main)
 **Backend-2**: ✅ Complete (8 SP merged to main)
-**Backend-1**: 🟡 PC-04 pending (3 SP)
+**Backend-1**: 🔵 PC-04 submitted for QA (127 tests, 100% coverage)
 
 ---
 
@@ -100,7 +100,8 @@
 | 2025-12-23 | Backend-2 submits AI-02 for QA (45 tests, 100% lib coverage) |
 | 2025-12-23 | QA approves AI-02 (163 tests, 85.98% coverage) |
 | 2025-12-23 | PM merges AI-02 to main |
-| Pending | Backend-1: PC-04 (Price Calculation) |
+| 2025-12-23 | Backend-1 submits PC-04 for QA (127 tests, 100% coverage) |
+| In Review | PC-04 awaiting final QA validation |
 
 ---
 
