@@ -29,22 +29,22 @@
 
 ---
 
-## Sprint 2: AI & Customization (Weeks 3-4) 🟡 ACTIVE
+## Sprint 2: AI & Customization (Weeks 3-4) ✅ COMPLETE
 
 **Focus**: AI integration, style previews, product configuration
-**Story Points**: 16/27 (59% Complete)
-**Status**: ACTIVE - Frontend-B Complete, Backend work in progress
+**Story Points**: 24/27 (89% Complete - PC-04 pending)
+**Status**: COMPLETE - 7/8 stories merged to main
 
 | ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
 |----|-------|--------------------|----|----------|-------|--------|
 | AI-01 | Display AI style gallery | Gallery visible, thumbnails, style names | 3 | Must | Frontend-B | ✅ Done |
-| AI-02 | Preview photo in different styles | Click to preview, loading indicator, < 10 seconds | 8 | Must | Backend-2 + Frontend-B | 🔵 In Review |
+| AI-02 | Preview photo in different styles | Click to preview, loading indicator, < 10 seconds | 8 | Must | Backend-2 + Frontend-B | ✅ Done |
 | AI-03 | Keep original photo option | 'Original' in gallery, enhancement toggle | 2 | Must | Frontend-B | ✅ Done |
 | AI-04 | Unlimited free style previews | No paywall, watermark on preview, full quality on purchase | 3 | Must | Frontend-B | ✅ Done |
 | PC-01 | Select print size | A5/A4/A3 options, size visualization, live price update | 3 | Must | Frontend-B | ✅ Done |
 | PC-02 | Choose paper type | Matte/Glossy options, tooltips, price difference | 2 | Must | Frontend-B | ✅ Done |
 | PC-03 | Add frame option | None/Black/White, frame preview, price update | 3 | Must | Frontend-B | ✅ Done |
-| PC-04 | Real-time price calculation | Live calculation, breakdown visible, shipping estimate | 3 | Must | Backend-1 + Frontend-B | 🟢 Ready |
+| PC-04 | Real-time price calculation | Live calculation, breakdown visible, shipping estimate | 3 | Must | Backend-1 + Frontend-B | 🟡 Pending |
 
 ### Sprint 2 Dependencies
 - **Gate 0 Required**: Replicate AI integration (AI-02) ✅ APPROVED
