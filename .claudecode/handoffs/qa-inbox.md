@@ -41,6 +41,67 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-23 - Frontend-B: Gift Toggle (GF-01)
+
+**Story**: GF-01 - Mark Order as Gift
+**Branch**: feature/gf-01-gift-toggle
+**Sprint**: 3
+**Priority**: P0
+
+### Completed
+- [x] GiftToggle component - Prominent toggle switch for gift mode
+- [x] Gift wrap checkbox option (+₪15) - shown when gift is ON
+- [x] Price notice - "מחיר לא יופיע" indicator when gift active
+- [x] Integration with orderStore (isGift, giftWrap states)
+- [x] Hebrew UI with RTL support
+- [x] Keyboard accessibility (Enter/Space keys)
+- [x] TypeScript strict mode clean
+- [x] ESLint clean (no warnings or errors)
+- [x] Tests written with TDD approach
+
+### Test Results
+- **Tests**: 20 passing (GiftToggle component)
+- **Coverage**: 100% statements, 85.18% branch coverage
+  - GiftToggle.tsx: 100%
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `components/gift/GiftToggle.tsx` | Created |
+| `components/gift/GiftToggle.test.tsx` | Created |
+| `.claudecode/milestones/sprint-3/GF-01/START.md` | Created |
+| `.claudecode/milestones/sprint-3/GF-01/ROLLBACK-PLAN.md` | Created |
+
+### How to Test
+```bash
+cd footprint
+npm test -- --coverage
+npm run type-check
+npm run lint
+npm run dev  # Manual testing
+```
+
+### Manual Test Cases
+1. **Toggle ON/OFF**: Click toggle switch, verify visual state change
+2. **Store Update**: Toggle should update orderStore.isGift
+3. **Gift Wrap Visible**: When toggle ON, gift wrap checkbox appears
+4. **Gift Wrap Click**: Click checkbox, verify orderStore.giftWrap updates
+5. **Price Notice**: Green notice box visible when gift is ON
+6. **Gift Wrap Reset**: Turning gift OFF should reset giftWrap to false
+7. **Keyboard Nav**: Tab to toggle, press Enter/Space to activate
+
+### Gate Status
+- [x] Gate 0: Research (N/A - standard UI component)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 20 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean, 100% coverage)
+- [ ] Gate 5: Deployment (pending QA)
+
+> Ready for QA validation
+
+---
+
 ## 2025-12-22 - Frontend-B: Upload Components (UP-01, UP-02, UP-04)
 
 **Stories**: UP-01, UP-02, UP-04
