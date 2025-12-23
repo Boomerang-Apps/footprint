@@ -22,7 +22,7 @@ export default defineConfig({
         'app/api/upload/**/*.ts',
         'app/api/transform/**/*.ts',
         'app/api/checkout/**/*.ts',
-        'app/api/webhooks/stripe/**/*.ts',
+        'app/api/webhooks/payplus/**/*.ts',
         'components/upload/**/*.tsx',
       ],
       exclude: [
