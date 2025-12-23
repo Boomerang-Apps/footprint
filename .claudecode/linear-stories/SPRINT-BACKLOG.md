@@ -3,49 +3,52 @@
 **Total Story Points**: 89
 **Sprint Duration**: 2 weeks each
 **MVP Timeline**: 8 weeks (4 sprints)
+**Last Updated**: 2025-12-22 by PM Agent
 
 ---
 
-## Sprint 1: Foundation (Weeks 1-2)
+## Sprint 1: Foundation (Weeks 1-2) ✅ COMPLETED
 
 **Focus**: Project setup, photo upload, basic UI
-**Story Points**: 16
+**Story Points**: 16/16 ✅
+**Status**: COMPLETED - All stories merged to main
 
-| ID | Story | Acceptance Criteria | SP | Priority | Agent |
-|----|-------|--------------------|----|----------|-------|
-| UP-01 | Upload photo from camera roll | Camera roll opens, JPG/PNG/HEIC support, preview shown | 5 | Must | Frontend-B |
-| UP-02 | Drag-and-drop upload on desktop | Drop zone visible, multi-file support, progress shown | 3 | Must | Frontend-B |
-| UP-03 | Auto-optimize photo for print | Resize to print DPI, color profile conversion, 20MB max | 5 | Must | Backend-2 |
-| UP-04 | Preview uploaded photo | Full preview, zoom, replace option | 3 | Must | Frontend-B |
+| ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
+|----|-------|--------------------|----|----------|-------|--------|
+| UP-01 | Upload photo from camera roll | Camera roll opens, JPG/PNG/HEIC support, preview shown | 5 | Must | Frontend-B | ✅ Done |
+| UP-02 | Drag-and-drop upload on desktop | Drop zone visible, multi-file support, progress shown | 3 | Must | Frontend-B | ✅ Done |
+| UP-03 | Auto-optimize photo for print | Resize to print DPI, color profile conversion, 20MB max | 5 | Must | Backend-2 | ✅ Done |
+| UP-04 | Preview uploaded photo | Full preview, zoom, replace option | 3 | Must | Frontend-B | ✅ Done |
 
 ### Sprint 1 Definition of Done
-- [ ] All 4 stories completed
-- [ ] 80%+ test coverage
-- [ ] TypeScript clean
-- [ ] Linter clean
-- [ ] QA approved
+- [x] All 4 stories completed ✅
+- [x] 80%+ test coverage ✅ (163 tests, 82%+ coverage)
+- [x] TypeScript clean ✅
+- [x] Linter clean ✅
+- [x] QA approved ✅
 
 ---
 
-## Sprint 2: AI & Customization (Weeks 3-4)
+## Sprint 2: AI & Customization (Weeks 3-4) 🟡 ACTIVE
 
 **Focus**: AI integration, style previews, product configuration
-**Story Points**: 27
+**Story Points**: 16/27 (59% Complete)
+**Status**: ACTIVE - Frontend-B Complete, Backend work in progress
 
-| ID | Story | Acceptance Criteria | SP | Priority | Agent |
-|----|-------|--------------------|----|----------|-------|
-| AI-01 | Display AI style gallery | Gallery visible, thumbnails, style names | 3 | Must | Frontend-B |
-| AI-02 | Preview photo in different styles | Click to preview, loading indicator, < 10 seconds | 8 | Must | Backend-2 + Frontend-B |
-| AI-03 | Keep original photo option | 'Original' in gallery, enhancement toggle | 2 | Must | Frontend-B |
-| AI-04 | Unlimited free style previews | No paywall, watermark on preview, full quality on purchase | 3 | Must | Frontend-B |
-| PC-01 | Select print size | A5/A4/A3 options, size visualization, live price update | 3 | Must | Frontend-B |
-| PC-02 | Choose paper type | Matte/Glossy options, tooltips, price difference | 2 | Must | Frontend-B |
-| PC-03 | Add frame option | None/Black/White, frame preview, price update | 3 | Must | Frontend-B |
-| PC-04 | Real-time price calculation | Live calculation, breakdown visible, shipping estimate | 3 | Must | Backend-1 + Frontend-B |
+| ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
+|----|-------|--------------------|----|----------|-------|--------|
+| AI-01 | Display AI style gallery | Gallery visible, thumbnails, style names | 3 | Must | Frontend-B | ✅ Done |
+| AI-02 | Preview photo in different styles | Click to preview, loading indicator, < 10 seconds | 8 | Must | Backend-2 + Frontend-B | 🟡 In Progress |
+| AI-03 | Keep original photo option | 'Original' in gallery, enhancement toggle | 2 | Must | Frontend-B | ✅ Done |
+| AI-04 | Unlimited free style previews | No paywall, watermark on preview, full quality on purchase | 3 | Must | Frontend-B | ✅ Done |
+| PC-01 | Select print size | A5/A4/A3 options, size visualization, live price update | 3 | Must | Frontend-B | ✅ Done |
+| PC-02 | Choose paper type | Matte/Glossy options, tooltips, price difference | 2 | Must | Frontend-B | ✅ Done |
+| PC-03 | Add frame option | None/Black/White, frame preview, price update | 3 | Must | Frontend-B | ✅ Done |
+| PC-04 | Real-time price calculation | Live calculation, breakdown visible, shipping estimate | 3 | Must | Backend-1 + Frontend-B | 🟢 Ready |
 
 ### Sprint 2 Dependencies
-- **Gate 0 Required**: Replicate AI integration (AI-02)
-- UP-01 to UP-04 must be complete before AI-02
+- **Gate 0 Required**: Replicate AI integration (AI-02) ✅ APPROVED
+- UP-01 to UP-04 must be complete before AI-02 ✅ DONE
 
 ### Sprint 2 Definition of Done
 - [ ] All 8 stories completed

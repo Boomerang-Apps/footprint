@@ -41,6 +41,55 @@ When work is ready for testing:
 
 ## Pending Messages
 
-*No pending messages*
+*No pending messages - Sprint 2 in progress*
+
+---
+
+## 2025-12-23 - PM: Frontend-B Sprint 2 Merged
+
+**Sprint**: 2 - AI & Customization
+**Status**: Frontend-B work merged, awaiting Backend submissions
+
+QA Agent, Frontend-B's Sprint 2 work has been approved and merged to main.
+
+**Merged Stories:**
+| Story | Title | Tests | Coverage |
+|-------|-------|-------|----------|
+| AI-01 | Display AI Style Gallery | ✅ | 90.47% |
+| AI-03 | Keep Original Photo Option | ✅ | 90.47% |
+| AI-04 | Unlimited Free Style Previews | ✅ | 90.47% |
+| PC-01 | Select Print Size | ✅ | 90.47% |
+| PC-02 | Choose Paper Type | ✅ | 90.47% |
+| PC-03 | Add Frame Option | ✅ | 90.47% |
+
+**Total**: 97 tests, 90.47% coverage
+
+**Expect submissions from:**
+- Backend-2: AI-02 (Replicate API) - In progress
+- Backend-1: PC-04 (Price Calculation) - Dependencies now met
+
+---
+
+---
+
+## Completed Validations
+
+## 2025-12-22 - Sprint 1 Validation Complete ✅
+
+### UP-01, UP-02, UP-04 (Frontend-B)
+- **Result**: APPROVED
+- **Tests**: 45 passing
+- **Coverage**: 89.13%
+- **Merged**: ✅ to main
+
+### UP-03 (Backend-2)
+- **Result**: APPROVED
+- **Tests**: 118 passing
+- **Coverage**: 82.7% (100% core libs)
+- **Merged**: ✅ to main
+
+**Sprint 1 Total**: 163 tests, 80%+ coverage requirement met.
+
+---
 
 ---
