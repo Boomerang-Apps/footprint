@@ -53,21 +53,135 @@ Assign work related to:
 
 ## Pending Messages
 
-## 2025-12-23 - PM: AI-02 MERGED ✅
+## 2025-12-23 - PM: Sprint 3 KICKOFF - Stripe Payment Integration
 
-**Story**: AI-02
-**Priority**: P0 - Critical Path
-**Status**: ✅ COMPLETE - Merged to main
-
-Excellent work! AI-02 has been:
-- QA approved (163 tests, 85.98% coverage)
-- Merged to main
-
-Sprint 2 is 89% complete (24/27 SP). Only PC-04 (Backend-1) remains.
+**Sprint**: 3 - Checkout & Gifting
+**Priority**: P0 - CRITICAL PATH
+**Gate**: 1 (Planning) → 2 (Implementation)
+**Status**: ✅ ACTIVE - Begin Implementation
 
 ---
 
-## 2025-12-23 - PM: AI-02 Dependencies Complete - Continue Implementation [COMPLETED]
+### Overview
+
+Sprint 2 is COMPLETE! All stories merged to main. You are now assigned Sprint 3 stories.
+
+**Sprint 3 Total**: 7 SP (Backend-2 portion)
+
+---
+
+### Your Sprint 3 Stories
+
+| Story | Title | SP | Priority | Description |
+|-------|-------|-----|----------|-------------|
+| CO-02 | Pay with Credit Card | 5 | P0 | Stripe Checkout integration |
+| CO-04 | Order Confirmation | 2 | P1 | Email + WhatsApp notification |
+
+---
+
+### Recommended Order
+
+1. **CO-02** first (Stripe) - critical path, unblocks confirmation
+2. **CO-04** after CO-02 complete
+
+---
+
+### CO-02: Pay with Credit Card (5 SP) - CRITICAL PATH
+
+**Acceptance Criteria:**
+- Stripe Checkout integration
+- Credit card validation
+- 3D Secure support
+- ILS currency
+- Apple Pay / Google Pay detection
+
+**Gate 0 Reference:** `.claudecode/research/GATE0-stripe-payments.md`
+
+**Implementation (from Gate 0):**
+```typescript
+// Use Stripe Checkout (server-side)
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+// Create checkout session
+const session = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  line_items: [{ price_data: {...}, quantity: 1 }],
+  mode: 'payment',
+  success_url: `${baseUrl}/create/complete?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `${baseUrl}/create/checkout`,
+  metadata: { orderId },
+});
+```
+
+**Files to Create:**
+| File | Action |
+|------|--------|
+| `lib/payments/stripe.ts` | Create - Stripe client |
+| `app/api/checkout/route.ts` | Create - Create session |
+| `app/api/webhooks/stripe/route.ts` | Create - Handle webhooks |
+
+**Webhook Events:**
+- `checkout.session.completed` → Update order to 'paid'
+- `payment_intent.payment_failed` → Handle failure
+
+---
+
+### CO-04: Order Confirmation (2 SP)
+
+**Acceptance Criteria:**
+- Confirmation email sent
+- Order number displayed
+- WhatsApp share option
+- Order summary shown
+
+**Depends On:** CO-02 (payment must complete first)
+
+**Files to Create:**
+| File | Action |
+|------|--------|
+| `lib/notifications/email.ts` | Create - Email sender |
+| `lib/notifications/whatsapp.ts` | Create - WhatsApp link |
+| `app/(app)/create/complete/page.tsx` | Enhance |
+
+---
+
+### Gate 1 Requirements
+
+```bash
+git checkout -b feature/CO-02-stripe-payment
+mkdir -p .claudecode/milestones/sprint-3/CO-02/
+# Create START.md and ROLLBACK-PLAN.md
+git tag CO-02-start
+```
+
+---
+
+### Environment Variables Required
+
+```bash
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+---
+
+### Handoff
+
+When stories complete, write to `qa-inbox.md` with:
+- Branch name
+- Test results (mock Stripe in tests)
+- Coverage report (100% for lib/payments/)
+
+**TDD Required: Write tests FIRST.**
+
+→ **ACTION**: Begin CO-02 (Stripe) immediately - CRITICAL PATH
+
+---
+
+## 2025-12-23 - PM: AI-02 MERGED ✅ [COMPLETED]
 
 **Story**: AI-02
 **Priority**: P0 - Critical Path

@@ -66,23 +66,24 @@
 
 ---
 
-## Sprint 3: Checkout & Gifting (Weeks 5-6)
+## Sprint 3: Checkout & Gifting (Weeks 5-6) 🟡 ACTIVE
 
 **Focus**: Payment integration, gift flow, order confirmation
-**Story Points**: 18
+**Story Points**: 0/18 (In Progress)
+**Status**: ACTIVE - Started 2025-12-23
 
-| ID | Story | Acceptance Criteria | SP | Priority | Agent |
-|----|-------|--------------------|----|----------|-------|
-| GF-01 | Mark order as gift | Gift toggle prominent, gift wrap option, no price on slip | 2 | Must | Frontend-B |
-| GF-02 | Add personal message | 150 char limit, preview shown, printed on card | 3 | Must | Frontend-B |
-| GF-03 | Ship to recipient | Separate address form, recipient name, delivery estimate | 3 | Must | Frontend-B + Backend-1 |
-| CO-01 | Enter shipping address | Autocomplete, save for future, validation | 3 | Must | Frontend-B |
-| CO-02 | Pay with credit card | Stripe integration, card validation, 3D Secure | 5 | Must | Backend-2 |
-| CO-04 | Order confirmation | Email sent, order number shown, WhatsApp option | 2 | Must | Backend-2 |
+| ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
+|----|-------|--------------------|----|----------|-------|--------|
+| GF-01 | Mark order as gift | Gift toggle prominent, gift wrap option, no price on slip | 2 | Must | Frontend-B | 🟡 In Progress |
+| GF-02 | Add personal message | 150 char limit, preview shown, printed on card | 3 | Must | Frontend-B | 🟡 In Progress |
+| GF-03 | Ship to recipient | Separate address form, recipient name, delivery estimate | 3 | Must | Frontend-B + Backend-1 | 🟡 In Progress |
+| CO-01 | Enter shipping address | Autocomplete, save for future, validation | 3 | Must | Frontend-B | 🟡 In Progress |
+| CO-02 | Pay with credit card | Stripe integration, card validation, 3D Secure | 5 | Must | Backend-2 | 🟡 In Progress |
+| CO-04 | Order confirmation | Email sent, order number shown, WhatsApp option | 2 | Must | Backend-2 | 🟡 In Progress |
 
 ### Sprint 3 Dependencies
-- **Gate 0 Required**: Stripe integration (CO-02)
-- AI and product config must be complete
+- **Gate 0 Required**: Stripe integration (CO-02) ✅ APPROVED
+- AI and product config must be complete ✅ DONE
 
 ### Sprint 3 Definition of Done
 - [ ] All 6 stories completed

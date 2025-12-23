@@ -55,36 +55,106 @@ Assign work related to:
 
 ## Pending Messages
 
-## 2025-12-23 - PM: Sprint 2 Stories MERGED ✅
+## 2025-12-23 - PM: Sprint 3 KICKOFF - Checkout & Gifting
 
-**Sprint**: 2 - AI & Customization
-**Status**: ✅ YOUR WORK COMPLETE
-
-Frontend-B, excellent work! Your Sprint 2 stories have been:
-- QA approved (97 tests, 90.47% coverage)
-- Merged to main
-
-**Completed Stories:**
-| Story | Title | SP | Status |
-|-------|-------|-----|--------|
-| AI-01 | Display AI Style Gallery | 3 | ✅ Merged |
-| AI-03 | Keep Original Photo Option | 2 | ✅ Merged |
-| AI-04 | Unlimited Free Style Previews | 3 | ✅ Merged |
-| PC-01 | Select Print Size | 3 | ✅ Merged |
-| PC-02 | Choose Paper Type | 2 | ✅ Merged |
-| PC-03 | Add Frame Option | 3 | ✅ Merged |
-
-**Total**: 16 SP completed
-
-### Next Steps
-
-Wait for Backend-2 (AI-02) to complete the Replicate API integration. You may need to integrate the `/api/transform` endpoint with your StyleGallery component.
-
-PM will notify when AI-02 is ready for UI integration.
+**Sprint**: 3 - Checkout & Gifting
+**Priority**: P0
+**Gate**: 1 (Planning) → 2 (Implementation)
+**Status**: ✅ ACTIVE - Begin Implementation
 
 ---
 
-## 2025-12-22 - PM: Sprint 2 ACTIVE - Begin Implementation [COMPLETED]
+### Overview
+
+Sprint 2 is COMPLETE! All stories merged to main. You are now assigned Sprint 3 stories.
+
+**Sprint 3 Total**: 11 SP (Frontend-B portion)
+
+---
+
+### Your Sprint 3 Stories
+
+| Story | Title | SP | Priority | Description |
+|-------|-------|-----|----------|-------------|
+| GF-01 | Mark Order as Gift | 2 | P0 | Gift toggle, wrap option |
+| GF-02 | Add Personal Message | 3 | P0 | 150 char message for card |
+| GF-03 | Ship to Recipient | 3 | P0 | Recipient address form (shared with Backend-1) |
+| CO-01 | Enter Shipping Address | 3 | P0 | Address autocomplete, validation |
+
+---
+
+### Recommended Order
+
+1. **CO-01** first (Shipping Address) - foundation for checkout
+2. **GF-01, GF-02** (Gift options) - can parallel
+3. **GF-03** (Recipient shipping) - after CO-01
+
+---
+
+### Acceptance Criteria
+
+**GF-01: Mark Order as Gift**
+- Gift toggle prominently displayed
+- Gift wrap option available
+- Price hidden on packing slip when gift
+
+**GF-02: Add Personal Message**
+- 150 character limit with counter
+- Preview of message shown
+- Message printed on gift card
+
+**GF-03: Ship to Recipient**
+- Separate address form for recipient
+- Recipient name field
+- Delivery estimate shown
+- Coordinate with Backend-1 for address validation
+
+**CO-01: Enter Shipping Address**
+- Address autocomplete (Google Places or similar)
+- Save address for future orders
+- Validation for Israeli addresses
+- Support international shipping
+
+---
+
+### Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `components/checkout/GiftToggle.tsx` | Create |
+| `components/checkout/GiftMessage.tsx` | Create |
+| `components/checkout/RecipientAddress.tsx` | Create |
+| `components/checkout/ShippingAddress.tsx` | Create |
+| `components/checkout/AddressAutocomplete.tsx` | Create |
+| `app/(app)/create/checkout/page.tsx` | Enhance |
+
+---
+
+### Gate 1 Requirements
+
+```bash
+git checkout -b feature/GF-01-gift-toggle
+mkdir -p .claudecode/milestones/sprint-3/GF-01/
+# Create START.md and ROLLBACK-PLAN.md
+git tag GF-01-start
+```
+
+---
+
+### Handoff
+
+When stories complete, write to `qa-inbox.md` with:
+- Branch name
+- Test results
+- Coverage report (80%+ required)
+
+**TDD Required: Write tests FIRST.**
+
+→ **ACTION**: Begin with CO-01 (Shipping Address) as foundation.
+
+---
+
+## 2025-12-23 - PM: Sprint 2 Stories MERGED ✅ [COMPLETED]
 
 **Sprint**: 2 - AI & Customization
 **Priority**: P0

@@ -102,7 +102,13 @@ PayPlus integration APPROVED as complementary to Stripe.
 - All 8 stories merged to main (27/27 SP)
 - PC-04 merged: 127 tests, 100% lib/pricing coverage
 - Total Sprint 2 tests: 387+
-- Ready for Sprint 3 kickoff
+
+**✅ Sprint 3 KICKED OFF (2025-12-23):**
+- Frontend-B assigned: GF-01, GF-02, CO-01, GF-03 (11 SP)
+- Backend-2 assigned: CO-02, CO-04 (7 SP)
+- Backend-1 assigned: GF-03 shared (3 SP)
+- Critical Path: CO-02 (Stripe Payment)
+- Sprint 3 tracker: `.claudecode/milestones/sprint-3/SPRINT-3-TRACKER.md`
 
 ---
 

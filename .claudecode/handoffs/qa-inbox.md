@@ -41,9 +41,21 @@ When work is ready for testing:
 
 ## Pending Messages
 
-*No pending messages - Sprint 2 complete!*
+## 2025-12-23 - PM: Sprint 3 ACTIVE - Awaiting Dev Submissions
 
-**Next Sprint**: Sprint 3 - Checkout & Gifting (18 SP)
+**Sprint**: 3 - Checkout & Gifting
+**Status**: Development in progress
+
+QA Agent, Sprint 2 is complete! All stories merged to main. Sprint 3 has kicked off.
+
+**Expect submissions from:**
+- Frontend-B: GF-01, GF-02, CO-01, GF-03 (UI)
+- Backend-2: CO-02 (Stripe - Critical Path), CO-04
+- Backend-1: GF-03 (Logic)
+
+**Critical Path**: CO-02 (Stripe Payment) - 5 SP
+
+Stand by for QA validation requests.
 
 ---
 

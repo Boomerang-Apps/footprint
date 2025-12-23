@@ -53,23 +53,120 @@ Assign work related to:
 
 ## Pending Messages
 
-## 2025-12-23 - PM: PC-04 MERGED ✅ - Sprint 2 Complete!
+## 2025-12-23 - PM: Sprint 3 KICKOFF - Recipient Shipping
 
-**Story**: PC-04 - Real-time Price Calculation
-**Story Points**: 3
-**Status**: ✅ COMPLETE - Merged to main
-
-Excellent work! PC-04 has been:
-- QA approved (127 tests, 100% coverage)
-- Merged to main
-
-**🎉 SPRINT 2 IS NOW 100% COMPLETE!**
-
-All 8 stories merged (27/27 SP). Stand by for Sprint 3 assignment.
+**Sprint**: 3 - Checkout & Gifting
+**Priority**: P0
+**Gate**: 1 (Planning) → 2 (Implementation)
+**Status**: ✅ ACTIVE - Begin Implementation
 
 ---
 
-## 2025-12-23 - PM: PC-04 FINAL SPRINT 2 STORY - Complete Implementation Guide [COMPLETED]
+### Overview
+
+Sprint 2 is COMPLETE! All stories merged to main. You are now assigned Sprint 3 stories.
+
+**Sprint 3 Total**: 3 SP (Backend-1 portion, shared with Frontend-B)
+
+---
+
+### Your Sprint 3 Story
+
+| Story | Title | SP | Priority | Description |
+|-------|-------|-----|----------|-------------|
+| GF-03 | Ship to Recipient | 3 | P0 | Address validation & delivery estimate (shared) |
+
+---
+
+### GF-03: Ship to Recipient (3 SP) - Shared with Frontend-B
+
+**Your Responsibility (Backend Logic):**
+- Address validation service
+- Delivery estimate calculation
+- Recipient data storage
+- Integration with shipping providers
+
+**Frontend-B Responsibility:**
+- Recipient address form UI
+- Address autocomplete integration
+- Display delivery estimates
+
+**Acceptance Criteria:**
+- Validate Israeli and international addresses
+- Calculate delivery estimates based on zone
+- Store recipient info separate from billing
+- Support gift shipping (no invoice in package)
+
+---
+
+### Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `lib/shipping/validation.ts` | Create - Address validation |
+| `lib/shipping/estimates.ts` | Create - Delivery time calculation |
+| `stores/orderStore.ts` | Modify - Add recipient address state |
+
+---
+
+### Integration with Existing Code
+
+Use your `lib/pricing/shipping.ts` from PC-04:
+```typescript
+import { getShippingEstimate, getShippingZone } from '@/lib/pricing/shipping';
+
+// Extend for recipient-specific logic
+export function getRecipientDeliveryEstimate(
+  recipientCountry: string,
+  expressShipping: boolean
+): DeliveryEstimate {
+  const zone = getShippingZone(recipientCountry);
+  const base = getShippingEstimate(zone);
+  // Add gift packaging time if needed
+  return {
+    ...base,
+    minDays: base.minDays + (expressShipping ? 0 : 1),
+    maxDays: base.maxDays + (expressShipping ? 0 : 2),
+  };
+}
+```
+
+---
+
+### Dependencies
+
+| Dependency | Status | Notes |
+|------------|--------|-------|
+| PC-04 (Pricing/Shipping) | ✅ Complete | Your shipping logic ready |
+| CO-01 (Address Form) | 🟡 Frontend-B | Coordinate with them |
+
+---
+
+### Gate 1 Requirements
+
+```bash
+git checkout -b feature/GF-03-recipient-shipping
+mkdir -p .claudecode/milestones/sprint-3/GF-03/
+# Create START.md and ROLLBACK-PLAN.md
+git tag GF-03-start
+```
+
+---
+
+### Handoff
+
+When complete, write to `qa-inbox.md` with:
+- Branch name
+- Test results
+- Coverage report (100% for lib/shipping/)
+
+**TDD Required: Write tests FIRST.**
+
+→ **ACTION**: Begin GF-03 after coordinating with Frontend-B on CO-01 (Address Form)
+
+---
+
+## 2025-12-23 - PM: PC-04 MERGED ✅ - Sprint 2 Complete! [COMPLETED]
 
 **Story**: PC-04 - Real-time Price Calculation
 **Priority**: P0 - LAST STORY TO COMPLETE SPRINT 2
