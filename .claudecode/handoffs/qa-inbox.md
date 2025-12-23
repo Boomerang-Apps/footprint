@@ -41,60 +41,9 @@ When work is ready for testing:
 
 ## Pending Messages
 
-## 2025-12-23 - Backend-1: PC-04 Price Calculation 🔴 FINAL SPRINT 2 STORY
+*No pending messages - Sprint 2 complete!*
 
-**Story**: PC-04 (3 SP)
-**Branch**: `feature/PC-04-price-calculation`
-**Priority**: P0 - Last story to complete Sprint 2
-
-### Completed
-
-- [x] `lib/pricing/calculator.ts` - Price calculation with full breakdown
-- [x] `lib/pricing/shipping.ts` - Shipping zones, carriers, express options
-- [x] `lib/pricing/discounts.ts` - Discount code validation system
-- [x] Gate 1 planning (START.md, ROLLBACK-PLAN.md)
-- [x] TDD implementation (tests first)
-- [x] Fixed pre-existing type errors in types/order.ts
-
-### Test Results
-
-- **Tests**: 127 passing
-- **Coverage**: 100% on `lib/pricing/`
-
-| Component | Tests |
-|-----------|-------|
-| calculator.ts | 71 |
-| shipping.ts | 25 |
-| discounts.ts | 31 |
-
-### Files Changed
-
-| File | Change |
-|------|--------|
-| `lib/pricing/calculator.ts` | Created - Price calculation |
-| `lib/pricing/calculator.test.ts` | Created - 71 tests |
-| `lib/pricing/shipping.ts` | Created - Shipping zones |
-| `lib/pricing/shipping.test.ts` | Created - 25 tests |
-| `lib/pricing/discounts.ts` | Created - Discount validation |
-| `lib/pricing/discounts.test.ts` | Created - 31 tests |
-| `lib/pricing/index.ts` | Created - Barrel export |
-| `types/order.ts` | Fixed - Type imports |
-
-### Features Implemented
-
-**Pricing (ILS):**
-- Base: A5=89, A4=129, A3=179, A2=249
-- Paper: Matte=+0, Glossy=+20, Canvas=+50
-- Frame: None=+0, Black/White=+79, Oak=+99
-
-**Shipping:**
-- Israel: Standard ₪29 (3-5d), Express ₪49 (1-2d)
-- International: Standard ₪79 (7-14d), Express ₪129 (3-5d)
-
-**Discount Codes:**
-- SAVE10/SAVE20, FLAT20/FLAT50, VIP25, WELCOME
-
-→ **Ready for QA validation - FINAL SPRINT 2 STORY**
+**Next Sprint**: Sprint 3 - Checkout & Gifting (18 SP)
 
 ---
 
@@ -116,8 +65,14 @@ When work is ready for testing:
 - **Coverage**: 85.98% (lib/ai: 100%)
 - **Merged**: ✅ to main
 
-**Sprint 2 Total**: 260 tests, 80%+ coverage requirement met.
-**Pending**: PC-04 (Backend-1)
+### PC-04 (Backend-1)
+- **Result**: APPROVED
+- **Tests**: 127 passing
+- **Coverage**: 100% (lib/pricing)
+- **Merged**: ✅ to main
+
+**Sprint 2 Total**: 387 tests, 80%+ coverage requirement met.
+**Status**: 🎉 SPRINT 2 COMPLETE - All 8 stories merged (27/27 SP)
 
 ---
 

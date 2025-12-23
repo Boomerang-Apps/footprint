@@ -98,9 +98,11 @@ PayPlus integration APPROVED as complementary to Stripe.
 - QA approved: 163 tests, 85.98% coverage
 - Merged to main: `feature/AI-02-style-transform`
 
-**Sprint 2 Progress**: 24/27 SP (89%)
-- ✅ Completed: AI-01, AI-02, AI-03, AI-04, PC-01, PC-02, PC-03
-- 🟡 Pending: PC-04 (Backend-1, 3 SP)
+**🎉 Sprint 2 COMPLETE (2025-12-23):**
+- All 8 stories merged to main (27/27 SP)
+- PC-04 merged: 127 tests, 100% lib/pricing coverage
+- Total Sprint 2 tests: 387+
+- Ready for Sprint 3 kickoff
 
 ---
 
