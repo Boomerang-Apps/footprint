@@ -167,6 +167,15 @@ export const stories: Record<string, Story> = {
     blockedBy: ['UP-01'],
     component: 'Upload',
   },
+  'UP-05': {
+    id: 'UP-05',
+    title: 'Face Detection Cropping',
+    description: 'Auto-detect face in photo, smart crop suggestions, manual override',
+    status: 'backlog',
+    agent: 'Backend-2',
+    points: 2,
+    component: 'Upload',
+  },
 
   // Sprint 2 - AI Style (ACTIVE)
   'AI-01': {
@@ -254,6 +263,15 @@ export const stories: Record<string, Story> = {
     blockedBy: ['PC-01', 'PC-02', 'PC-03'],
     component: 'Pricing',
   },
+  'PC-05': {
+    id: 'PC-05',
+    title: 'Realistic Mockup Preview',
+    description: 'Room environment preview, wall visualization, size context',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 2,
+    component: 'ProductConfig',
+  },
 
   // Sprint 3 - Gift (ACTIVE)
   'GF-01': {
@@ -282,6 +300,24 @@ export const stories: Record<string, Story> = {
     title: 'Ship to Recipient',
     description: 'Separate address form, recipient name, delivery estimate',
     status: 'done',  // ✅ QA Approved & Merged - 51 tests, 100% coverage
+    agent: 'Backend-1',
+    points: 3,
+    component: 'Gift',
+  },
+  'GF-04': {
+    id: 'GF-04',
+    title: 'Gift Wrapping Option',
+    description: 'Premium gift wrap selection, gift box preview, price addon',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 2,
+    component: 'Gift',
+  },
+  'GF-05': {
+    id: 'GF-05',
+    title: 'Scheduled Delivery Date',
+    description: 'Date picker for delivery, arrive by date, calendar integration',
+    status: 'backlog',
     agent: 'Backend-1',
     points: 3,
     component: 'Gift',
@@ -401,6 +437,141 @@ export const stories: Record<string, Story> = {
     points: 5,
     component: 'AI',
   },
+
+  // User Account
+  'UA-01': {
+    id: 'UA-01',
+    title: 'Order History Page',
+    description: 'List of past orders, status badges, reorder option',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 3,
+    component: 'UserAccount',
+  },
+  'UA-02': {
+    id: 'UA-02',
+    title: 'Order Detail Page',
+    description: 'Full order details, tracking timeline, download files',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 3,
+    component: 'UserAccount',
+  },
+
+  // Authentication
+  'AUTH-01': {
+    id: 'AUTH-01',
+    title: 'User Login Page',
+    description: 'Email/password login, social login options, Hebrew RTL',
+    status: 'backlog',
+    agent: 'Frontend-A',
+    points: 3,
+    component: 'Auth',
+  },
+  'AUTH-02': {
+    id: 'AUTH-02',
+    title: 'Guest Checkout Option',
+    description: 'Purchase without account, email capture, optional signup',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 2,
+    component: 'Auth',
+  },
+
+  // UI Implementation - Mockup Screens (Sprint 4)
+  // REORGANIZED: Parallel tracks for Frontend-A (primitives) and Frontend-B (pages)
+
+  // === FRONTEND-A TRACK: UI Primitives ===
+  'UI-07': {
+    id: 'UI-07',
+    title: 'Base UI Primitives (components/ui/)',
+    description: 'Create foundational UI components: Button, Card, Input, Select, Checkbox, Badge. RTL-ready with Tailwind.',
+    status: 'in-progress',  // ✅ Assigned to Frontend-A 2025-12-24
+    agent: 'Frontend-A',
+    points: 3,
+    component: 'UI',
+  },
+  'UI-08': {
+    id: 'UI-08',
+    title: 'Step Progress Indicator',
+    description: 'Create reusable 5-step progress indicator for order flow. Shows current step, completed steps, Hebrew labels.',
+    status: 'backlog',
+    agent: 'Frontend-A',
+    points: 2,
+    blockedBy: ['UI-07'],
+    component: 'UI',
+  },
+  'UI-09': {
+    id: 'UI-09',
+    title: 'Price Display & Timeline Components',
+    description: 'PriceDisplay (ILS formatting with ₪), OrderTimeline (4-step order status tracker). Shared by multiple pages.',
+    status: 'backlog',
+    agent: 'Frontend-A',
+    points: 2,
+    blockedBy: ['UI-07'],
+    component: 'UI',
+  },
+
+  // === FRONTEND-B TRACK: Feature Pages ===
+  'UI-06': {
+    id: 'UI-06',
+    title: 'Demo Data & Mock Images',
+    description: 'Create mock data for orders, users, sample images for style previews. Foundation for UI testing.',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-24 (51 tests, 100% coverage)
+    agent: 'Frontend-B',
+    points: 2,
+    component: 'UI',
+  },
+  'UI-01': {
+    id: 'UI-01',
+    title: 'Upload Page UI (01-upload.html)',
+    description: 'Implement upload mockup: drag-drop zone, camera button, progress states, Hebrew RTL',
+    status: 'in-progress',  // ✅ Assigned to Frontend-B 2025-12-24
+    agent: 'Frontend-B',
+    points: 3,
+    blockedBy: ['UI-06'],
+    component: 'UI',
+  },
+  'UI-02': {
+    id: 'UI-02',
+    title: 'Style Selection UI (02-style-selection.html)',
+    description: 'Implement style picker: 8 AI styles gallery, before/after preview, loading states',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 3,
+    blockedBy: ['UI-06'],  // Can start in parallel with UI-01 after demo data
+    component: 'UI',
+  },
+  'UI-03': {
+    id: 'UI-03',
+    title: 'Customize Page UI (03-customize.html)',
+    description: 'Implement product config: size/paper/frame selectors, live price, mockup preview',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 3,
+    blockedBy: ['UI-06'],  // Can start in parallel after demo data
+    component: 'UI',
+  },
+  'UI-04': {
+    id: 'UI-04',
+    title: 'Checkout Page UI (04-checkout.html)',
+    description: 'Implement checkout: gift toggle, address form, payment section, price breakdown',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 5,
+    blockedBy: ['UI-06'],  // Can start in parallel after demo data
+    component: 'UI',
+  },
+  'UI-05': {
+    id: 'UI-05',
+    title: 'Confirmation Page UI (05-confirmation.html)',
+    description: 'Implement confirmation: order summary, timeline tracker, WhatsApp share',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 2,
+    blockedBy: ['UI-06', 'UI-09'],  // Needs Timeline component from Frontend-A
+    component: 'UI',
+  },
 };
 
 // =============================================================================
@@ -435,6 +606,7 @@ export const features: Record<string, Feature> = {
       stories['UP-02'],
       stories['UP-03'],
       stories['UP-04'],
+      stories['UP-05'],
     ],
   },
   'F2': {
@@ -461,6 +633,7 @@ export const features: Record<string, Feature> = {
       stories['PC-02'],
       stories['PC-03'],
       stories['PC-04'],
+      stories['PC-05'],
     ],
   },
   'F4': {
@@ -473,6 +646,8 @@ export const features: Record<string, Feature> = {
       stories['GF-01'],
       stories['GF-02'],
       stories['GF-03'],
+      stories['GF-04'],
+      stories['GF-05'],
     ],
   },
   'F5': {
@@ -513,6 +688,55 @@ export const features: Record<string, Feature> = {
       stories['AI-05'],
     ],
   },
+  'F7': {
+    id: 'F7',
+    name: 'User Account',
+    description: 'Order history, order details, user profile',
+    prdRef: 'Mockups: 07-order-history.html, 08-order-detail.html',
+    priority: 'P2',
+    stories: [
+      stories['UA-01'],
+      stories['UA-02'],
+    ],
+  },
+  'F8': {
+    id: 'F8',
+    name: 'Authentication',
+    description: 'User login, registration, and guest checkout',
+    prdRef: 'Mockups: 11-login.html',
+    priority: 'P2',
+    stories: [
+      stories['AUTH-01'],
+      stories['AUTH-02'],
+    ],
+  },
+  'F9': {
+    id: 'F9',
+    name: 'UI Implementation (Order Flow)',
+    description: 'Implement mockup screens 01-05 with demo data. Frontend-B track.',
+    prdRef: 'design_mockups/01-05, .claudecode/milestones/SPRINT-4-UI-PLAN.md',
+    priority: 'P0',
+    stories: [
+      stories['UI-06'],  // Foundation - demo data
+      stories['UI-01'],  // Upload page
+      stories['UI-02'],  // Style selection
+      stories['UI-03'],  // Customize
+      stories['UI-04'],  // Checkout
+      stories['UI-05'],  // Confirmation
+    ],
+  },
+  'F10': {
+    id: 'F10',
+    name: 'UI Primitives (Shared Components)',
+    description: 'Base UI components and shared primitives. Frontend-A track - runs parallel to F9.',
+    prdRef: 'components/ui/, CLAUDE.md - Components',
+    priority: 'P0',
+    stories: [
+      stories['UI-07'],  // Base primitives: Button, Card, Input
+      stories['UI-08'],  // Step progress indicator
+      stories['UI-09'],  // Price display & timeline
+    ],
+  },
 };
 
 // =============================================================================
@@ -551,9 +775,23 @@ export const sprints: Sprint[] = [
   {
     id: 4,
     name: 'Sprint 4',
+    focus: 'UI Implementation & Demo',
+    status: 'active',
+    features: ['F9', 'F10'],  // Parallel tracks: F9 (Frontend-B pages) + F10 (Frontend-A primitives)
+  },
+  {
+    id: 5,
+    name: 'Sprint 5',
     focus: 'Admin & Polish',
     status: 'planned',
     features: ['F5b', 'F6'],
+  },
+  {
+    id: 6,
+    name: 'Sprint 6',
+    focus: 'User Accounts & Post-MVP',
+    status: 'planned',
+    features: ['F7', 'F8'],
   },
 ];
 
@@ -578,6 +816,9 @@ export const components = [
   'Checkout',
   'Payment',
   'Admin',
+  'UserAccount',
+  'Auth',
+  'UI',
 ] as const;
 
 export type ComponentType = typeof components[number];
@@ -629,6 +870,157 @@ export function getOverallProgress(): { done: number; total: number; percentage:
   const percentage = total > 0 ? Math.round((done / total) * 100) : 0;
   return { done, total, percentage };
 }
+
+// =============================================================================
+// PAGES (for Pages tab with links)
+// =============================================================================
+
+export interface Page {
+  id: string;
+  name: string;
+  nameHe: string;          // Hebrew name
+  route: string;           // App route
+  mockup?: string;         // Mockup file reference
+  storyId?: string;        // Related story ID
+  status: 'implemented' | 'in-progress' | 'not-started';
+  description: string;
+}
+
+export const pages: Page[] = [
+  // Order Flow (5-step)
+  {
+    id: 'create',
+    name: 'Upload Photo',
+    nameHe: 'העלאת תמונה',
+    route: '/create',
+    mockup: '01-upload.html',
+    storyId: 'UI-01',
+    status: 'not-started',
+    description: 'Step 1: Upload photo from camera or drag-drop',
+  },
+  {
+    id: 'style',
+    name: 'Choose Style',
+    nameHe: 'בחירת סגנון',
+    route: '/create/style',
+    mockup: '02-style-selection.html',
+    storyId: 'UI-02',
+    status: 'not-started',
+    description: 'Step 2: Select AI art style transformation',
+  },
+  {
+    id: 'customize',
+    name: 'Customize Print',
+    nameHe: 'התאמה אישית',
+    route: '/create/customize',
+    mockup: '03-customize.html',
+    storyId: 'UI-03',
+    status: 'not-started',
+    description: 'Step 3: Choose size, paper, and frame options',
+  },
+  {
+    id: 'checkout',
+    name: 'Checkout',
+    nameHe: 'תשלום',
+    route: '/create/checkout',
+    mockup: '04-checkout.html',
+    storyId: 'UI-04',
+    status: 'not-started',
+    description: 'Step 4: Enter shipping, gift options, and pay',
+  },
+  {
+    id: 'complete',
+    name: 'Order Complete',
+    nameHe: 'הזמנה הושלמה',
+    route: '/create/complete',
+    mockup: '05-confirmation.html',
+    storyId: 'UI-05',
+    status: 'not-started',
+    description: 'Step 5: Confirmation with order tracking',
+  },
+  // Marketing
+  {
+    id: 'landing',
+    name: 'Landing Page',
+    nameHe: 'דף נחיתה',
+    route: '/',
+    mockup: '06-landing.html',
+    storyId: 'INF-06',
+    status: 'implemented',
+    description: 'Marketing homepage with hero upload',
+  },
+  // User Account
+  {
+    id: 'order-history',
+    name: 'Order History',
+    nameHe: 'היסטוריית הזמנות',
+    route: '/account/orders',
+    mockup: '07-order-history.html',
+    storyId: 'UA-01',
+    status: 'not-started',
+    description: 'User order history list',
+  },
+  {
+    id: 'order-detail',
+    name: 'Order Detail',
+    nameHe: 'פרטי הזמנה',
+    route: '/account/orders/[id]',
+    mockup: '08-order-detail.html',
+    storyId: 'UA-02',
+    status: 'not-started',
+    description: 'Single order details and tracking',
+  },
+  // Admin
+  {
+    id: 'admin-orders',
+    name: 'Admin Orders',
+    nameHe: 'ניהול הזמנות',
+    route: '/admin/orders',
+    mockup: '09-admin-orders.html',
+    storyId: 'OM-01',
+    status: 'not-started',
+    description: 'Admin order management dashboard',
+  },
+  {
+    id: 'admin-order-detail',
+    name: 'Admin Order Detail',
+    nameHe: 'פרטי הזמנה (אדמין)',
+    route: '/admin/orders/[id]',
+    mockup: '10-admin-order-detail.html',
+    storyId: 'OM-02',
+    status: 'not-started',
+    description: 'Admin view of single order with actions',
+  },
+  // Auth
+  {
+    id: 'login',
+    name: 'Login',
+    nameHe: 'התחברות',
+    route: '/login',
+    mockup: '11-login.html',
+    storyId: 'AUTH-01',
+    status: 'not-started',
+    description: 'User login and registration',
+  },
+  // Dev Tools
+  {
+    id: 'dev-dashboard',
+    name: 'Dev Dashboard',
+    nameHe: 'לוח פיתוח',
+    route: '/dev-dashboard',
+    status: 'implemented',
+    description: 'Development progress tracking (this page)',
+  },
+];
+
+export const pageGroups = [
+  { id: 'order-flow', name: 'Order Flow', icon: '🛒', pageIds: ['create', 'style', 'customize', 'checkout', 'complete'] },
+  { id: 'marketing', name: 'Marketing', icon: '📢', pageIds: ['landing'] },
+  { id: 'user-account', name: 'User Account', icon: '👤', pageIds: ['order-history', 'order-detail'] },
+  { id: 'admin', name: 'Admin', icon: '⚙️', pageIds: ['admin-orders', 'admin-order-detail'] },
+  { id: 'auth', name: 'Authentication', icon: '🔐', pageIds: ['login'] },
+  { id: 'dev', name: 'Dev Tools', icon: '🛠️', pageIds: ['dev-dashboard'] },
+];
 
 export const statusConfig: Record<StoryStatus, { label: string; color: string; bgColor: string }> = {
   'done': { label: 'Done', color: 'text-green-700', bgColor: 'bg-green-100' },

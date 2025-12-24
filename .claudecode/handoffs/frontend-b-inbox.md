@@ -55,11 +55,80 @@ Assign work related to:
 
 ## Pending Messages
 
-*No pending messages*
+## 2025-12-24 - PM: UI-01 Assignment - Upload Page UI
+
+**Story**: UI-01
+**Priority**: P0
+**Type**: Sprint 4 - UI Implementation
+**Sprint**: 4
+
+### Context
+UI-06 (Demo Data) is now merged. You can start UI-01 immediately.
+
+### Assignment
+You are assigned UI-01: Upload Page UI
+
+**Points**: 3
+**Mockup**: `design_mockups/01-upload.html`
+**Route**: `/create`
+**Dependencies**: UI-06 ✅ (merged)
+
+### Requirements
+Implement the upload page matching the mockup exactly:
+
+**Key UI Elements**:
+- Hero section with Hebrew headline: "העלה תמונה והפוך אותה ליצירת אמנות"
+- Large drag-drop zone (dashed border)
+- Camera/gallery button for mobile
+- File type hints (JPG, PNG, HEIC - 20MB max)
+- Upload progress indicator
+- Error states for invalid files
+
+**Files to Modify/Create**:
+```
+app/(app)/create/page.tsx           # Main upload page
+components/create/UploadZone.tsx    # Upload component (can reuse existing DropZone)
+```
+
+### Technical Notes
+- Use demo data from `data/demo/` for any needed test data
+- RTL layout with `dir="rtl"`
+- Mobile-first responsive (375px+)
+- Use Tailwind CSS only
+
+### Acceptance Criteria
+- [ ] Matches mockup visually
+- [ ] RTL layout correct
+- [ ] Mobile responsive
+- [ ] Drag-drop works on desktop
+- [ ] Camera button works on mobile
+- [ ] Progress indicator shows during upload
+- [ ] Error states display properly
+- [ ] Tests written (TDD)
+- [ ] Coverage: 80%+ minimum
+
+### Gate 1 Checklist (MANDATORY - Before Coding)
+- [ ] Create branch: `git checkout -b feature/UI-01-upload-page`
+- [ ] Create START.md: `.claudecode/milestones/sprint-4/UI-01/START.md`
+- [ ] Create ROLLBACK-PLAN.md
+- [ ] Create tag: `git tag UI-01-start`
+
+### On Completion
+Write handoff to: `.claudecode/handoffs/qa-inbox.md`
+
+---
 
 ---
 
 ## Completed Messages
+
+## 2025-12-24 - PM: UI-06 Assignment [COMPLETED]
+
+**Story**: UI-06
+**Status**: ✅ QA APPROVED & MERGED (2025-12-24)
+**Results**: 51 tests, 100% coverage
+
+---
 
 ## 2025-12-21 - PM: Sprint 1 Assignment - Upload Stories [COMPLETED 2025-12-22]
 
