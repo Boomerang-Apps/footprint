@@ -73,6 +73,54 @@ PayPlus integration APPROVED as complementary to Stripe.
 
 ---
 
+## 2025-12-24 - Frontend-B: UI-06 Ready for QA
+
+**Story**: UI-06 - Demo Data & Mock Images
+**Branch**: feature/ui-06-demo-data
+**Sprint**: 4
+**Priority**: P0 (Foundation for Sprint 4 UI)
+
+### Summary
+Implemented centralized demo data module for UI testing:
+- Sample orders covering all 6 statuses (pending → delivered)
+- Sample users (regular + admin) with Hebrew names
+- Sample addresses (Israel, 7-digit postal codes)
+- Style preview images for 8 AI styles
+- Utility functions for dynamic data generation
+
+### Key Deliverables
+- `data/demo/users.ts` - 4 demo users, 5 demo addresses
+- `data/demo/orders.ts` - 7 demo orders, createDemoOrder utility
+- `data/demo/products.ts` - 8 styles, sizes, papers, frames
+- `data/demo/images.ts` - Placeholder URLs for testing
+- `data/demo/index.ts` - Unified exports
+
+### Test Results
+- **Tests**: 51 passing
+- **Coverage**: 100% statements, 89.28% branches
+- **TypeScript**: 0 errors in demo files
+- **Lint**: Clean (0 warnings/errors)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/data/demo/*.ts` | Created (6 files) |
+| `footprint/types/user.ts` | Modified (added Address type alias) |
+| `footprint/vitest.config.ts` | Modified (added data/ to coverage) |
+
+### Gate Status
+- [x] Gate 0: Research (N/A)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 51 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean)
+
+**Ready for Gate 3 QA validation.**
+
+QA handoff also written to: `.claudecode/handoffs/qa-inbox.md`
+
+---
+
 ## 2025-12-22 - Backend-2: UP-03 Ready for QA
 
 **Story**: UP-03

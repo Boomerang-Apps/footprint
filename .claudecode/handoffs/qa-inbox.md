@@ -41,6 +41,73 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-24 - Frontend-B: Demo Data Module (UI-06)
+
+**Story**: UI-06 - Demo Data & Mock Images
+**Branch**: feature/ui-06-demo-data
+**Sprint**: 4
+**Priority**: P0
+
+### Completed
+- [x] Demo data module with typed sample data
+- [x] 7 sample orders covering all OrderStatus values
+- [x] 4 sample users (regular + admin)
+- [x] 5 sample addresses (Hebrew, Israel)
+- [x] Style preview images for 8 AI styles
+- [x] Utility functions (createDemoOrder, createDemoUser, getDemoOrderByStatus, etc.)
+- [x] TypeScript strict mode clean
+- [x] ESLint clean (no warnings or errors)
+- [x] Tests written with TDD approach
+
+### Test Results
+- **Tests**: 51 passing
+- **Coverage**: 100% statements, 89.28% branches
+  - users.ts: 100%
+  - orders.ts: 100%
+  - products.ts: 100%
+  - images.ts: 100%
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `footprint/data/demo/users.ts` | Created |
+| `footprint/data/demo/orders.ts` | Created |
+| `footprint/data/demo/products.ts` | Created |
+| `footprint/data/demo/images.ts` | Created |
+| `footprint/data/demo/index.ts` | Created |
+| `footprint/data/demo/index.test.ts` | Created |
+| `footprint/types/user.ts` | Modified (Address type alias) |
+| `footprint/vitest.config.ts` | Modified (data/ coverage) |
+
+### How to Test
+```bash
+cd footprint
+npm test -- --run data/demo/index.test.ts
+npm test -- --coverage data/demo/index.test.ts
+npm run type-check
+npm run lint
+```
+
+### Manual Verification
+1. Import and use demo data in any component:
+   ```typescript
+   import { demoOrders, demoUsers, createDemoOrder } from '@/data/demo';
+   ```
+2. Verify orders cover all statuses
+3. Verify users include admin and regular users
+4. Verify addresses are Hebrew with valid Israeli postal codes
+
+### Gate Status
+- [x] Gate 0: Research (N/A - standard data module)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 51 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean)
+
+> Ready for QA validation
+
+---
+
 ## 2025-12-23 - Frontend-B: Shipping Address Form (CO-01)
 
 **Story**: CO-01 - Enter Shipping Address
