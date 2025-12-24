@@ -114,4 +114,42 @@ QA handoff written to: `.claudecode/handoffs/qa-inbox.md`
 
 ---
 
+## 2025-12-24 - QA: UP-03 BLOCKED - Branch Coverage Fails
+
+**Story**: UP-03 - Auto-Optimize Photo for Print
+**Branch**: feature/UP-03-image-optimization
+**Gate**: 3 (QA Validation)
+**Status**: ❌ **BLOCKED**
+
+### Validation Summary
+| Check | Result |
+|-------|--------|
+| Tests | ✅ 118 passing, 5 skipped |
+| Statement Coverage | ✅ 82.7% (≥80%) |
+| **Branch Coverage** | ❌ **69.33%** (< 75% threshold) |
+| TypeScript | ✅ Clean |
+| ESLint | ✅ Clean |
+
+### Blocking Issue
+Branch coverage of **69.33%** does not meet the global threshold of **75%**.
+
+### Coverage Gaps
+| File | Stmt | Branch | Uncovered Lines |
+|------|------|--------|-----------------|
+| `app/api/upload/route.ts` | 46.55% | 45.45% | 75-85, 163-232 |
+| `lib/image/optimize.ts` | 100% | 70.96% | 109, 169-174, 197 |
+
+### Discrepancy Note
+Backend-2 reported "78 tests, 100% coverage" but validation found 118 tests with 69.33% branch coverage. Branch appears to have merged with other code (UP-01, main).
+
+### Action Required
+BLOCK message written to `backend-2-inbox.md`. Backend-2 needs to:
+1. Add tests for uncovered branches
+2. Achieve ≥75% branch coverage
+3. Re-submit to QA inbox
+
+→ UP-03 returned to Backend-2 for fixes
+
+---
+
 ---

@@ -154,4 +154,35 @@ When complete, write to `qa-inbox.md` with:
 
 ---
 
+## 2025-12-24 - QA: UP-03 BLOCKED - Branch Coverage Fails
+
+**Story**: UP-03 - Auto-Optimize Photo for Print
+**Branch**: feature/UP-03-image-optimization
+**Gate**: 3 (QA Validation)
+**Status**: ❌ BLOCKED
+
+### Test Results
+- **Tests**: 118 passing, 5 skipped
+- **Statement Coverage**: 82.7% ✅ (≥80%)
+- **Branch Coverage**: 69.33% ❌ (< 75% threshold)
+- **TypeScript**: Clean ✅
+- **ESLint**: Clean ✅
+
+### Blocking Issue
+Branch coverage of **69.33%** does not meet the global threshold of **75%**.
+
+### Coverage Gaps
+| File | Stmt | Branch | Uncovered Lines |
+|------|------|--------|-----------------|
+| `app/api/upload/route.ts` | 46.55% | 45.45% | 75-85, 163-232 |
+| `lib/image/optimize.ts` | 100% | 70.96% | 109, 169-174, 197 |
+
+### Required Actions
+1. Add tests for uncovered branches in `app/api/upload/route.ts` (lines 75-85, 163-232)
+2. Add tests for uncovered branches in `lib/image/optimize.ts` (lines 109, 169-174, 197)
+3. Achieve ≥75% branch coverage
+4. Re-submit to QA inbox when fixed
+
+→ Return to Backend-2 for branch coverage fixes
+
 ---
