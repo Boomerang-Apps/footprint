@@ -59,4 +59,49 @@ Awaiting CTO approval.
 
 ---
 
+## 2025-12-23 - Backend-2: Gate 0 Research Complete - PayPlus API
+
+**Story**: CO-02
+**Priority**: P0 - CRITICAL PATH
+**Type**: Gate 0 Research Submission
+
+### Research Completed
+
+Gate 0 research for PayPlus API integration is complete.
+
+**Research Document**: `.claudecode/research/GATE0-payplus-payments.md`
+
+### Key Findings
+
+| Item | Details |
+|------|---------|
+| **Base URL (Prod)** | `https://restapi.payplus.co.il/api/v1.0/` |
+| **Base URL (Dev)** | `https://restapidev.payplus.co.il/api/v1.0/` |
+| **Auth** | `api_key` + `secret_key` headers |
+| **Payment Endpoint** | `POST /PaymentPages/generateLink` |
+| **Webhook Validation** | HMAC-SHA256 hash + user-agent check |
+
+### Payment Methods Available
+- Credit Cards (Visa, MC, Isracard, Diners)
+- Bit (6M+ Israeli users)
+- Apple Pay / Google Pay
+- Installments (תשלומים)
+
+### Test Cards
+- Success: `5326-1402-8077-9844` (05/26, CVV: 000)
+- Decline: `5326-1402-0001-0120` (05/26, CVV: 000)
+
+### Questions for CTO
+
+1. **Confirm PayPlus as PRIMARY** (no Stripe)?
+2. **Paddle for international** - implement now or defer?
+3. **Installments (תשלומים)** - enable in v1?
+4. **Bit integration** - enable in v1?
+
+### Action Required
+
+CTO approval needed to proceed to Gate 1 (Planning).
+
+---
+
 ---
