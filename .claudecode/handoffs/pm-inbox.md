@@ -194,6 +194,24 @@ BLOCK message written to `backend-2-inbox.md`. Backend-2 needs to:
 
 ---
 
+#### UP-03: Image Optimization (Re-validated)
+**Branch**: `feature/UP-03-image-optimization`
+**Status**: ✅ **APPROVED** (previously blocked, now fixed)
+
+| Check | Result |
+|-------|--------|
+| Tests | ✅ 132 passing |
+| Statement Coverage | ✅ 94.56% |
+| Branch Coverage | ✅ 88.15% (was 69.33%) |
+| lib/image/optimize.ts | ✅ 100% stmt, 96.77% branch |
+| app/api/upload/route.ts | ✅ 95% stmt, 91.3% branch |
+| TypeScript | ✅ Clean |
+| ESLint | ✅ Clean |
+
+**Recommendation**: Merge to main
+
+---
+
 #### UI-06: Demo Data Module
 **Branch**: `feature/ui-06-demo-data`
 **Status**: ✅ **APPROVED**
@@ -219,6 +237,8 @@ The following stories are BLOCKED due to **project-level test configuration issu
 | GF-01 | feature/gf-01-gift-toggle | Test infrastructure |
 | GF-02 | feature/gf-02-gift-message | Test infrastructure |
 | UP-01/02/04 | feature/UP-01-camera-upload | Test infrastructure |
+
+> **Note**: UP-03 was previously blocked but is now APPROVED after coverage fix.
 
 #### Root Cause Analysis
 
@@ -262,8 +282,8 @@ The following stories are BLOCKED due to **project-level test configuration issu
 
 | Status | Count | Stories |
 |--------|-------|---------|
-| ✅ APPROVED | 3 | AI-02, CO-02, UI-06 |
-| ❌ BLOCKED | 5 | UP-03, CO-01, GF-01, GF-02, UP-01/02/04 |
+| ✅ APPROVED | 4 | AI-02, CO-02, UP-03, UI-06 |
+| ❌ BLOCKED | 4 | CO-01, GF-01, GF-02, UP-01/02/04 |
 
 ---
 
