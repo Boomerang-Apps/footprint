@@ -194,6 +194,21 @@ BLOCK message written to `backend-2-inbox.md`. Backend-2 needs to:
 
 ---
 
+#### UI-06: Demo Data Module
+**Branch**: `feature/ui-06-demo-data`
+**Status**: ✅ **APPROVED**
+
+| Check | Result |
+|-------|--------|
+| Tests | ✅ 51 passing |
+| data/demo/* | ✅ 100% stmt, 89.28% branch, 100% lines |
+| TypeScript | ✅ Clean (UI-06 files) |
+| ESLint | ✅ Clean |
+
+**Recommendation**: Merge to main
+
+---
+
 ### ❌ BLOCKED Stories (Test Infrastructure Issues)
 
 The following stories are BLOCKED due to **project-level test configuration issues** affecting all component tests:
@@ -247,7 +262,7 @@ The following stories are BLOCKED due to **project-level test configuration issu
 
 | Status | Count | Stories |
 |--------|-------|---------|
-| ✅ APPROVED | 2 | AI-02, CO-02 |
+| ✅ APPROVED | 3 | AI-02, CO-02, UI-06 |
 | ❌ BLOCKED | 5 | UP-03, CO-01, GF-01, GF-02, UP-01/02/04 |
 
 ---
