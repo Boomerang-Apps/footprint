@@ -2,43 +2,18 @@
 
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDropzone } from 'react-dropzone';
-import { Upload, Image, ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
-import toast from 'react-hot-toast';
+import DropZone from '@/components/upload/DropZone';
 
 export default function CreatePage() {
   const router = useRouter();
-  const { setOriginalImage, setStep } = useOrderStore();
+  const { setStep } = useOrderStore();
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    // Validate file size (max 20MB)
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error('הקובץ גדול מדי. גודל מקסימלי: 20MB');
-      return;
-    }
-
-    // Create preview URL
-    const previewUrl = URL.createObjectURL(file);
-    setOriginalImage(previewUrl, file);
+  const handleUploadComplete = useCallback(() => {
     setStep('style');
     router.push('/create/style');
-    
-    toast.success('התמונה הועלתה בהצלחה!');
-  }, [setOriginalImage, setStep, router]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/heic': ['.heic'],
-    },
-    maxFiles: 1,
-  });
+  }, [setStep, router]);
 
   return (
     <main className="min-h-screen bg-white">
@@ -94,49 +69,7 @@ export default function CreatePage() {
         </div>
 
         {/* Upload Zone */}
-        <div
-          {...getRootProps()}
-          className={`
-            card p-12 cursor-pointer transition-all duration-200
-            flex flex-col items-center justify-center text-center
-            ${isDragActive
-              ? 'border-brand-purple bg-brand-purple/5'
-              : 'hover:border-zinc-400'
-            }
-          `}
-        >
-          <input {...getInputProps()} />
-
-          <div className={`
-            w-20 h-20 rounded-2xl mb-6 flex items-center justify-center
-            ${isDragActive
-              ? 'bg-brand-purple/20 text-brand-purple'
-              : 'bg-zinc-100 text-zinc-500'
-            }
-          `}>
-            {isDragActive ? (
-              <Image className="w-10 h-10" />
-            ) : (
-              <Upload className="w-10 h-10" />
-            )}
-          </div>
-
-          <h3 className="text-xl font-semibold mb-2 text-zinc-900">
-            {isDragActive ? 'שחררו כאן' : 'גררו תמונה לכאן'}
-          </h3>
-
-          <p className="text-zinc-500 mb-6">
-            או לחצו לבחירה מהמכשיר
-          </p>
-
-          <button className="btn btn-secondary">
-            בחירת תמונה
-          </button>
-
-          <p className="text-xs text-zinc-500 mt-6">
-            JPG, PNG, HEIC עד 20MB
-          </p>
-        </div>
+        <DropZone onUploadComplete={handleUploadComplete} />
 
         {/* Tips */}
         <div className="mt-8 p-6 bg-zinc-50 rounded-xl border border-zinc-200">
