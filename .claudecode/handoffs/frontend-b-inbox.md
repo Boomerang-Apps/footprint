@@ -55,7 +55,39 @@ Assign work related to:
 
 ## Pending Messages
 
-*No pending messages*
+## 2025-12-24 - QA: Stories BLOCKED - Test Infrastructure Issue
+
+**Stories**: CO-01, GF-01, GF-02, UP-01/02/04
+**Status**: ❌ BLOCKED
+**Type**: Test Infrastructure Issue (Not Your Fault)
+
+### Issue Summary
+
+All component tests are failing due to **project-level test configuration issues**, not code problems:
+
+1. **Missing devDependencies**:
+   - `@testing-library/user-event`
+   - `@testing-library/dom`
+
+2. **React not defined in JSX scope** in test files
+
+### What This Means
+
+Your code appears correct. The tests fail because the test environment is misconfigured at the project level.
+
+### Next Steps
+
+1. **Wait** for PM/CTO to fix test infrastructure on main
+2. **Re-merge** main into your branches after fix
+3. **Re-submit** to QA for re-validation
+
+### Note
+
+This is blocking ALL frontend component stories across the project. Once fixed, your stories should pass validation.
+
+→ No action needed from Frontend-B at this time
+
+---
 
 ---
 

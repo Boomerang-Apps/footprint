@@ -152,4 +152,104 @@ BLOCK message written to `backend-2-inbox.md`. Backend-2 needs to:
 
 ---
 
+## 2025-12-24 - QA: Batch Validation Report
+
+**Date**: 2025-12-24
+**QA Agent**: Comprehensive Gate 3 validation of pending stories
+
+---
+
+### ✅ APPROVED Stories (Ready for Merge)
+
+#### AI-02: Style Transformation API
+**Branch**: `feature/AI-02-style-transform`
+**Status**: ✅ **APPROVED**
+
+| Check | Result |
+|-------|--------|
+| Tests | ✅ 45 passing |
+| lib/ai/replicate.ts | ✅ 100% stmt, 94.11% branch |
+| app/api/transform/route.ts | ✅ 92.68% stmt, 93.75% branch |
+| TypeScript | ✅ Clean |
+| ESLint | ✅ Clean |
+
+**Recommendation**: Merge to main
+
+---
+
+#### CO-02: PayPlus Payment Integration
+**Branch**: `feature/CO-02-payplus-payment`
+**Status**: ✅ **APPROVED**
+
+| Check | Result |
+|-------|--------|
+| Tests | ✅ 41 passing |
+| lib/payments/payplus.ts | ✅ 96.66% stmt, 90% branch, 100% lines |
+| app/api/checkout/route.ts | ✅ 100% stmt, 90.47% branch |
+| app/api/webhooks/payplus/route.ts | ✅ 93.33% stmt, 100% branch |
+| TypeScript | ✅ Clean |
+| ESLint | ✅ Clean |
+
+**Recommendation**: Merge to main
+
+---
+
+### ❌ BLOCKED Stories (Test Infrastructure Issues)
+
+The following stories are BLOCKED due to **project-level test configuration issues** affecting all component tests:
+
+| Story | Branch | Issue |
+|-------|--------|-------|
+| CO-01 | feature/co-01-shipping-address | Test infrastructure |
+| GF-01 | feature/gf-01-gift-toggle | Test infrastructure |
+| GF-02 | feature/gf-02-gift-message | Test infrastructure |
+| UP-01/02/04 | feature/UP-01-camera-upload | Test infrastructure |
+
+#### Root Cause Analysis
+
+**173 component tests failing** with two issues:
+
+1. **Missing devDependencies** in `package.json`:
+   ```bash
+   npm install --save-dev @testing-library/user-event @testing-library/dom
+   ```
+
+2. **React not defined in JSX scope** - vitest config needs:
+   ```typescript
+   // vitest.config.ts
+   esbuild: {
+     jsxInject: `import React from 'react'`
+   }
+   ```
+   Or tests need explicit React import.
+
+#### Affected Test Files (10 files, 173 tests)
+- components/checkout/ShippingAddressForm.test.tsx
+- components/gift/GiftMessage.test.tsx
+- components/gift/GiftToggle.test.tsx
+- components/upload/CameraRollUpload.test.tsx
+- components/upload/DropZone.test.tsx
+- components/upload/ImagePreview.test.tsx
+- components/style-picker/StyleGallery.test.tsx
+- components/product-config/SizeSelector.test.tsx
+- components/product-config/PaperSelector.test.tsx
+- components/product-config/FrameSelector.test.tsx
+
+### Recommended Actions
+
+1. **PM/CTO**: Fix test infrastructure on main branch
+2. **Backend-2**: Address UP-03 branch coverage issue
+3. **Frontend-B**: Re-submit after test infrastructure fixed
+
+---
+
+### Summary
+
+| Status | Count | Stories |
+|--------|-------|---------|
+| ✅ APPROVED | 2 | AI-02, CO-02 |
+| ❌ BLOCKED | 5 | UP-03, CO-01, GF-01, GF-02, UP-01/02/04 |
+
+---
+
 ---
