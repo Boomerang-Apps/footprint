@@ -28,6 +28,9 @@ export interface SavedAddress {
   isDefault?: boolean;
 }
 
+// Address alias for order compatibility
+export type Address = SavedAddress;
+
 export interface AuthState {
   user: User | null;
   isLoading: boolean;
