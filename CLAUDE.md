@@ -366,9 +366,31 @@ npm test -- --coverage      # Tests with coverage
 | Agent Definitions | `.claudecode/agents/*.md` |
 | Safety Framework | `.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md` |
 | Sprint Stories | `.claudecode/linear-stories/` |
+| **Dev Dashboard** | `http://localhost:3002/dev-dashboard` |
+| **Dev Progress (Source of Truth)** | `footprint/data/dashboard/dev-progress.ts` |
+
+---
+
+## Dev Dashboard
+
+The dev dashboard provides real-time project tracking with Linear integration.
+
+**URL**: http://localhost:3002/dev-dashboard (when dev server running)
+
+**Features**:
+- Sprint/Feature/Component views
+- Story modal with agent kickstart prompts
+- Linear sync (individual and bulk)
+- Progress tracking with status badges
+
+**Source of Truth**: `footprint/data/dashboard/dev-progress.ts`
+- All story statuses, assignments, and progress
+- Update this file to reflect current sprint state
+- Dashboard reads from this file
 
 ---
 
 **[CTO-DECISION] This protocol is approved and enforced.**
 
 *Document created by CTO Agent - 2025-12-19*
+*Updated by PM Agent - 2025-12-23: Added dev-dashboard documentation*

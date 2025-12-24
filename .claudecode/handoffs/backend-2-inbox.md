@@ -53,6 +53,54 @@ Assign work related to:
 
 ## Pending Messages
 
+## 2025-12-21 - PM: ⚠️ GATE 1 COMPLIANCE REQUIRED - URGENT
+
+**From**: PM Agent
+**To**: Backend-2 Agent
+**Priority**: P0 - BLOCKING
+**Type**: Safety Protocol Reminder
+
+---
+
+### ⚠️ Gate 1 Files Required BEFORE Implementation
+
+Backend-2, before starting any code implementation, you MUST complete Gate 1 requirements.
+
+**Required Actions (BEFORE any code)**:
+
+1. **Create milestone directory**:
+```bash
+mkdir -p .claudecode/milestones/sprint-1/UP-03/
+```
+
+2. **Create START.md** with:
+   - Story ID: UP-03
+   - Title: Auto-Optimize Photo for Print
+   - Acceptance criteria (from assignment below)
+   - Implementation approach
+   - Files to create: `lib/image/optimize.ts`, `app/api/upload/route.ts`, `lib/storage/r2.ts`
+   - Dependencies: Sharp library, Cloudflare R2
+
+3. **Create ROLLBACK-PLAN.md** with:
+   - Rollback steps if implementation fails
+   - Files that can be safely deleted
+   - Git commands to revert
+
+4. **Create git tag**:
+```bash
+git tag UP-03-start
+```
+
+5. **Write tests FIRST** (TDD required - 100% coverage for lib/image/)
+
+6. **Then reply to PM inbox** confirming Gate 1 complete
+
+**Reference**: `.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md`
+
+**This is a BLOCKING requirement. Do not write implementation code until Gate 1 is complete.**
+
+---
+
 ## 2025-12-21 - PM: Sprint 1 Assignment - Image Optimization
 
 **Story**: UP-03

@@ -1,207 +1,245 @@
-# Research: PayPlus Israeli Payment Integration
+# Research: PayPlus Payment Integration (CO-02)
 
-**Date**: 2025-12-21
-**Author**: CTO Agent
+**Date**: 2025-12-23 (Updated)
+**Author**: Backend-2 Agent (Gate 0 Research)
 **Story**: CO-02 (Payment Integration)
 **Gate**: 0 - Research
-**Status**: APPROVED (Complementary to Stripe)
+**Status**: PENDING CTO APPROVAL
 
 ---
 
 ## Objective
 
-Evaluate PayPlus as a complementary payment provider for the Israeli market, offering local payment methods alongside Stripe for international payments.
+Implement PayPlus as the **PRIMARY** payment provider for Footprint. PayPlus handles all Israeli market payments including credit cards, Bit, and installments.
+
+**Note**: Paddle may be added later as secondary provider for international customers.
 
 ---
 
-## Questions Answered
+## API Documentation Summary
 
-### 1. What payment methods does PayPlus support?
+### Base URLs
+
+| Environment | URL |
+|-------------|-----|
+| **Staging** | `https://restapidev.payplus.co.il/api/v1.0/` |
+| **Production** | `https://restapi.payplus.co.il/api/v1.0/` |
+
+### Authentication
+
+All requests require two headers:
+```
+api_key: {your_api_key}
+secret_key: {your_secret_key}
+```
+
+### Key Endpoint: Generate Payment Link
+
+**Endpoint**: `POST /PaymentPages/generateLink`
+
+**Request Body**:
+```json
+{
+  "payment_page_uid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "charge_method": 1,
+  "amount": 15800,
+  "currency_code": "ILS",
+  "customer": {
+    "customer_name": "John Doe",
+    "email": "customer@example.com",
+    "phone": "0501234567"
+  },
+  "refURL_callback": "https://footprint.co.il/api/webhooks/payplus",
+  "refURL_success": "https://footprint.co.il/create/complete",
+  "refURL_failure": "https://footprint.co.il/create/checkout?error=payment_failed",
+  "more_info": "order_123",
+  "more_info_1": "additional_data"
+}
+```
+
+**Charge Method Values**:
+| Value | Type | Description |
+|-------|------|-------------|
+| 0 | Card Check (J2) | Validates card without charging |
+| 1 | Charge (J4) | Immediate payment |
+| 2 | Approval (J5) | Authorization hold |
+| 3 | Recurring | Setup recurring payments |
+| 4 | Refund | Immediate refund |
+| 5 | Token Charge | Charge saved token |
+
+**Response**:
+```json
+{
+  "results": {
+    "status": "success",
+    "code": 0,
+    "description": "payment page link has been generated"
+  },
+  "data": {
+    "page_request_uid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "payment_page_link": "https://payments.payplus.co.il/..."
+  }
+}
+```
+
+### Webhook Callback Validation
+
+PayPlus sends transaction results to `refURL_callback`. Validate authenticity:
+
+**Required Headers**:
+- `hash`: HMAC-SHA256 signature (base64)
+- `user-agent`: Must equal `"PayPlus"`
+
+**Validation Code**:
+```typescript
+import crypto from 'crypto';
+
+function validatePayPlusWebhook(
+  body: string,
+  hash: string,
+  secretKey: string
+): boolean {
+  const computedHash = crypto
+    .createHmac('sha256', secretKey)
+    .update(body)
+    .digest('base64');
+
+  return computedHash === hash;
+}
+```
+
+### Test Cards (Sandbox)
+
+| Card Number | Result | Expiry | CVV |
+|-------------|--------|--------|-----|
+| 5326-1402-8077-9844 | Success | 05/26 | 000 |
+| 5326-1402-0001-0120 | Decline | 05/26 | 000 |
+
+---
+
+## Payment Methods Supported
 
 | Method | Supported | Notes |
 |--------|-----------|-------|
 | Credit Cards | Yes | Visa, Mastercard, Isracard, Diners |
-| Bit | Yes | #1 APM in Israel (Bank Hapoalim) |
+| Bit | Yes | #1 APM in Israel (6M+ users) |
 | Apple Pay | Yes | Native support |
 | Google Pay | Yes | Native support |
-| PayPal | Yes | For international |
-| Max Payments | Yes | Israeli payment app |
 | Hever | Yes | Israeli club card |
 | Installments (תשלומים) | Yes | Native Israeli credit installments |
 
-### 2. Transaction Fees (Estimated)
+---
 
-| Method | PayPlus | Stripe |
-|--------|---------|--------|
-| Credit Card | ~2.5% + ₪0.25 | 2.9% + ₪0.30 |
-| Bit | ~1.5% | Not supported |
-| Apple/Google Pay | ~2.5% | 2.9% + ₪0.30 |
-| Installments | ~3.0% | Not supported |
+## Environment Variables Required
 
-**Note**: Exact fees require direct contact with PayPlus sales.
+```bash
+# PayPlus Credentials
+PAYPLUS_API_KEY=your_api_key
+PAYPLUS_SECRET_KEY=your_secret_key
+PAYPLUS_PAYMENT_PAGE_UID=your_payment_page_uid
 
-### 3. API Integration
-
-PayPlus provides:
-- RESTful API for programmatic integration
-- Payment Page UID for hosted checkout
-- API Key authentication
-- Webhooks for payment notifications
-- SDKs for major e-commerce platforms
-
-```typescript
-// Example: PayPlus API initialization
-const payplus = new PayPlus({
-  apiKey: process.env.PAYPLUS_API_KEY,
-  secretKey: process.env.PAYPLUS_SECRET_KEY,
-  sandbox: process.env.NODE_ENV !== 'production'
-});
+# Environment
+PAYPLUS_SANDBOX=true  # false for production
 ```
-
-### 4. Stripe vs PayPlus Strategy
-
-**Recommendation: Use Both (Complementary)**
-
-| Use Case | Provider |
-|----------|----------|
-| International cards | Stripe |
-| Israeli cards + Bit | PayPlus |
-| Apple Pay (Israel) | PayPlus |
-| Apple Pay (International) | Stripe |
-| Installments (תשלומים) | PayPlus |
-| Recurring subscriptions | Stripe |
-
-### 5. Settlement Timeline
-
-| Provider | Settlement |
-|----------|------------|
-| PayPlus | T+1 to T+3 (Israeli banks) |
-| Stripe | T+2 to T+7 (International) |
-
-### 6. Security Certifications
-
-- **PCI DSS Level 1**: Highest level of compliance
-- Bank of Israel regulated
-- Israeli Privacy Protection Authority compliant
 
 ---
 
-## Technical Architecture
+## Implementation Architecture
 
-### Dual Payment Provider Setup
+### File Structure
+```
+lib/payments/
+├── payplus.ts          # PayPlus API client
+├── payplus.test.ts     # Unit tests
+└── types.ts            # TypeScript interfaces
 
-```typescript
-// lib/payments/router.ts
-export async function createCheckoutSession(
-  order: Order,
-  paymentMethod: 'card' | 'bit' | 'applepay'
-): Promise<CheckoutSession> {
-  // Route to appropriate provider
-  if (paymentMethod === 'bit') {
-    return payplus.createBitSession(order);
-  }
-
-  if (isIsraeliCard(order.billingCountry)) {
-    return payplus.createCardSession(order);
-  }
-
-  // Default to Stripe for international
-  return stripe.createCheckoutSession(order);
-}
+app/api/
+├── checkout/
+│   └── route.ts        # Create payment session
+└── webhooks/
+    └── payplus/
+        └── route.ts    # Handle PayPlus callbacks
 ```
 
-### Provider Detection
+### TypeScript Interfaces
 
 ```typescript
-// Detect optimal provider based on user location
-function getPaymentProvider(country: string): 'stripe' | 'payplus' {
-  return country === 'IL' ? 'payplus' : 'stripe';
+interface PayPlusConfig {
+  apiKey: string;
+  secretKey: string;
+  paymentPageUid: string;
+  sandbox: boolean;
+}
+
+interface CreatePaymentParams {
+  orderId: string;
+  amount: number;  // in agorot (ILS cents)
+  customerEmail: string;
+  customerName: string;
+  successUrl: string;
+  failureUrl: string;
+  callbackUrl: string;
+}
+
+interface PaymentLinkResponse {
+  pageRequestUid: string;
+  paymentPageLink: string;
+}
+
+interface WebhookPayload {
+  transaction_uid: string;
+  page_request_uid: string;
+  status_code: string;
+  amount: number;
+  more_info: string;  // orderId
 }
 ```
 
 ---
 
-## Implementation Considerations
+## Security Considerations
 
-### Advantages of PayPlus for Israeli Market
-
-1. **Bit Integration**: 6+ million Israeli users
-2. **Lower fees**: ~0.4% savings on Israeli transactions
-3. **Installments**: Native support for credit installments
-4. **Local support**: Hebrew support, Israeli business hours
-5. **Faster settlement**: T+1 for Israeli banks
-
-### Challenges
-
-1. **Dual integration**: More code to maintain
-2. **Webhook handling**: Two webhook endpoints
-3. **Reporting**: Consolidated reporting needed
-4. **Testing**: Two test environments
-
----
-
-## Supabase Integration
-
-```sql
--- Add payment provider tracking
-ALTER TABLE footprint_orders
-ADD COLUMN payment_provider VARCHAR(20) DEFAULT 'stripe',
-ADD COLUMN payment_provider_id VARCHAR(255);
-
--- Payment provider values: 'stripe', 'payplus'
-```
+1. **PCI DSS Level 1**: PayPlus is fully PCI compliant
+2. **Server-side only**: All API calls must be server-side
+3. **Webhook verification**: Always validate `hash` and `user-agent`
+4. **HTTPS only**: All endpoints use TLS
 
 ---
 
 ## Rollback Plan
 
 If PayPlus integration fails:
-1. **Immediate**: Route all payments to Stripe
-2. **Short-term**: Disable Bit/local payment options
-3. **Long-term**: Consider alternative Israeli providers
+1. **Immediate**: Display "payment unavailable" message
+2. **Short-term**: Enable Paddle fallback (if implemented)
+3. **Long-term**: Contact PayPlus support or consider alternatives
 
 ---
 
-## CTO Decision
+## Documentation Sources
 
-### [CTO-DECISION] PayPlus Integration - APPROVED
-
-**Status**: ✅ APPROVED (Complementary to Stripe)
-
-**Decision**: Implement PayPlus as a complementary payment provider for Israeli customers, alongside existing Stripe integration.
-
-**Rationale**:
-1. Bit support covers 6+ million Israeli users
-2. Lower transaction fees for local payments
-3. Native installment (תשלומים) support
-4. Maintains Stripe for international customers
-
-**Implementation Scope**:
-- Add PayPlus as secondary provider for IL customers
-- Enable Bit payment method
-- Enable credit installments
-- Keep Stripe as primary for international
-
-**Priority**: P1 (After core Stripe integration in CO-02)
-
-**Sprint Assignment**: Sprint 3 or 4
-
-**New Story Required**:
-- [CO-06] PayPlus Israeli Payment Integration
+- [PayPlus Introduction](https://docs.payplus.co.il/reference/introduction)
+- [REST API URLs](https://docs.payplus.co.il/reference/payplus-rest-api-urls)
+- [Generate Payment Link](https://docs.payplus.co.il/reference/post_paymentpages-generatelink)
+- [Webhook Validation](https://docs.payplus.co.il/reference/validate-requests-received-from-payplus)
+- [PayPlus GitHub](https://github.com/PayPlus-Gateway)
 
 ---
 
-## Next Steps
+## CTO Decision Required
 
-1. PM to create CO-06 story in Linear
-2. Backend-2 to implement after CO-02 (Stripe) completes
-3. QA to test both payment paths
+### Questions for CTO:
 
----
-
-**Approved by**: CTO Agent
-**Date**: 2025-12-21
+1. **Confirm PayPlus as PRIMARY** (replacing Stripe)?
+2. **Paddle for international** - implement now or defer?
+3. **Installments (תשלומים)** - enable in v1?
+4. **Bit integration** - enable in v1?
 
 ---
 
-*Research completed by CTO Agent - 2025-12-21*
+**Submitted by**: Backend-2 Agent
+**Date**: 2025-12-23
+**Status**: PENDING CTO APPROVAL
+
+---
+
+*Gate 0 Research - Awaiting CTO review*
