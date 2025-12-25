@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Footprint - בחירת סגנון</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #7c3aed;
+      --primary-light: #a78bfa;
+      --accent: #ec4899;
+      --success: #10b981;
+      --gray-50: #fafafa;
+      --gray-100: #f4f4f5;
+      --gray-200: #e4e4e7;
+      --gray-300: #d4d4d8;
+      --gray-400: #a1a1aa;
+      --gray-500: #71717a;
+      --gray-600: #52525b;
+      --gray-700: #3f3f46;
+      --gray-900: #18181b;
+      --white: #ffffff;
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+      --content-padding: 16px;
+      --max-content-width: 1200px;
+    }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .icon-sm { width: 18px; height: 18px; }
+    
+    /* Header */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 12px var(--content-padding);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+    }
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      border-radius: 12px;
+    }
+    .header-title { font-size: 17px; font-weight: 600; }
+    .header-action { width: 40px; }
+    
+    /* Progress */
+    .progress {
+      background: var(--white);
+      padding: 16px var(--content-padding);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .progress-inner { 
+      max-width: var(--max-content-width); 
+      margin: 0 auto; 
+    }
+    .progress-bar {
+      height: 4px;
+      background: var(--gray-200);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to left, var(--primary), var(--accent));
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-step {
+      font-size: 12px;
+      color: var(--gray-400);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .progress-step.active { color: var(--primary); font-weight: 600; }
+    .progress-step.completed { color: var(--success); }
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray-300);
+    }
+    .progress-step.active .step-dot { background: var(--primary); }
+    .progress-step.completed .step-dot { background: var(--success); }
+    
+    /* Main Content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+      padding: 0 var(--content-padding);
+      padding-bottom: 100px;
+    }
+    
+    /* Preview Section */
+    .preview-section {
+      padding: 20px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .preview-container {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 4/5;
+      background: var(--gray-100);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Close Button */
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+      border-radius: 50%;
+      color: var(--gray-600);
+      box-shadow: var(--shadow-md);
+    }
+    .close-btn .icon { width: 18px; height: 18px; }
+    
+    /* Style Badge on Image */
+    .style-badge {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-900);
+      box-shadow: var(--shadow-md);
+    }
+    .style-badge .icon { color: var(--primary); width: 16px; height: 16px; }
+    
+    /* AI Loading Overlay */
+    .ai-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .ai-overlay.show { display: flex; }
+    .ai-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--gray-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ai-text { font-size: 14px; color: var(--gray-600); font-weight: 500; }
+    
+    /* Styles Section */
+    .styles-section {
+      padding: 20px 0;
+    }
+    .styles-header {
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .styles-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .styles-subtitle { font-size: 13px; color: var(--gray-500); }
+    
+    /* Horizontal Style Strip */
+    .styles-strip {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+    }
+    .styles-strip::-webkit-scrollbar { display: none; }
+    
+    .style-item {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      scroll-snap-align: start;
+    }
+    .style-icon-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .style-icon-btn .icon {
+      width: 26px;
+      height: 26px;
+      color: white;
+    }
+    .style-item:active .style-icon-btn { transform: scale(0.95); }
+    .style-item.selected .style-icon-btn {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+    .style-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--gray-600);
+      text-align: center;
+      max-width: 65px;
+    }
+    .style-item.selected .style-name {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    /* Style Icon Colors */
+    .style-pop-art { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+    .style-watercolor { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+    .style-line-art { background: linear-gradient(135deg, #6b7280, #9ca3af); }
+    .style-oil { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .style-romantic { background: linear-gradient(135deg, #ec4899, #f472b6); }
+    .style-comic { background: linear-gradient(135deg, #f97316, #ef4444); }
+    .style-vintage { background: linear-gradient(135deg, #92400e, #b45309); }
+    .style-original { background: linear-gradient(135deg, #10b981, #34d399); }
+    
+    /* Selected Check */
+    .style-check {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+    .style-check .icon { width: 10px; height: 10px; color: white; stroke-width: 3; }
+    .style-item.selected .style-check { display: flex; }
+    
+    /* Popular Badge */
+    .popular-badge {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      font-size: 8px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+    
+    /* Free Notice */
+    .free-notice {
+      margin: 16px 0;
+      padding: 12px;
+      background: rgba(124, 58, 237, 0.06);
+      border-radius: 12px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .free-notice .icon { width: 16px; height: 16px; }
+    
+    /* Bottom CTA */
+    .bottom-cta {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      padding: 12px var(--content-padding);
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    .bottom-inner {
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-primary {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: var(--white);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      box-shadow: var(--shadow-md);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-secondary {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+      border: 2px solid var(--gray-200);
+      color: var(--gray-700);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .btn-secondary:hover { border-color: var(--gray-300); background: var(--gray-50); }
+    
+    /* Tablet - 640px+ */
+    @media (min-width: 640px) {
+      :root {
+        --content-padding: 24px;
+      }
+      .preview-container { 
+        max-width: 400px;
+        border-radius: 24px;
+      }
+      .close-btn { width: 40px; height: 40px; top: 16px; left: 16px; }
+      .style-badge { padding: 10px 16px; font-size: 14px; }
+      .styles-strip { gap: 16px; justify-content: center; }
+      .style-icon-btn { width: 68px; height: 68px; border-radius: 18px; }
+      .style-icon-btn .icon { width: 30px; height: 30px; }
+      .style-name { font-size: 12px; max-width: 75px; }
+      .btn-primary { padding: 16px 24px; font-size: 16px; border-radius: 14px; }
+      .btn-secondary { padding: 16px 24px; font-size: 16px; border-radius: 14px; }
+    }
+    
+    /* Desktop - 1024px+ */
+    @media (min-width: 1024px) {
+      :root {
+        --content-padding: 40px;
+      }
+      .preview-container { 
+        max-width: 420px;
+        border-radius: 28px;
+      }
+      .close-btn { width: 44px; height: 44px; }
+      .close-btn .icon { width: 22px; height: 22px; }
+      .style-badge { padding: 12px 20px; font-size: 15px; bottom: 16px; right: 16px; }
+      .styles-title { font-size: 20px; }
+      .styles-subtitle { font-size: 14px; }
+      .styles-strip { gap: 20px; }
+      .style-icon-btn { width: 76px; height: 76px; border-radius: 20px; }
+      .style-icon-btn .icon { width: 34px; height: 34px; }
+      .style-name { font-size: 13px; max-width: 85px; }
+      .style-check { width: 22px; height: 22px; }
+      .style-check .icon { width: 12px; height: 12px; }
+      .popular-badge { font-size: 9px; padding: 3px 7px; }
+      .free-notice { padding: 16px; font-size: 14px; border-radius: 14px; }
+      .btn-primary { padding: 18px 32px; font-size: 17px; }
+      .btn-secondary { padding: 18px 32px; font-size: 17px; }
+    }
+    
+    /* Large Desktop - 1280px+ */
+    @media (min-width: 1280px) {
+      :root {
+        --content-padding: 60px;
+      }
+      .preview-container { max-width: 450px; }
+      .style-icon-btn { width: 84px; height: 84px; }
+      .style-icon-btn .icon { width: 38px; height: 38px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="display:none">
+    <defs>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3"/></symbol>
+      <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+      <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+      <symbol id="i-brush" viewBox="0 0 24 24"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+      <symbol id="i-film" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18M17 3v18"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <button class="back-btn" onclick="window.location.href='01-upload.html'">
+        <svg class="icon"><use href="#i-arrow-right"/></svg>
+      </button>
+      <h1 class="header-title">בחירת סגנון</h1>
+      <div class="header-action"></div>
+    </div>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress">
+    <div class="progress-inner">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 40%"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-step completed"><span class="step-dot"></span>העלאה</div>
+        <div class="progress-step active"><span class="step-dot"></span>סגנון</div>
+        <div class="progress-step"><span class="step-dot"></span>התאמה</div>
+        <div class="progress-step"><span class="step-dot"></span>תשלום</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Preview Image -->
+    <div class="preview-section">
+      <div class="preview-container">
+        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&h=1000&fit=crop&crop=face" alt="התמונה שלך" class="preview-image" id="previewImage">
+        
+        <!-- AI Loading Overlay -->
+        <div class="ai-overlay" id="aiOverlay">
+          <div class="ai-spinner"></div>
+          <span class="ai-text">מעבד בסגנון פופ ארט...</span>
+        </div>
+        
+        <!-- Close Button -->
+        <button class="close-btn" onclick="window.location.href='01-upload.html'">
+          <svg class="icon"><use href="#i-x"/></svg>
+        </button>
+        
+        <!-- Current Style Badge -->
+        <div class="style-badge">
+          <svg class="icon"><use href="#i-sparkles"/></svg>
+          <span id="currentStyleName">פופ ארט</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Style Strip -->
+    <div class="styles-section">
+      <div class="styles-header">
+        <h2 class="styles-title">בחרו סגנון אמנות</h2>
+        <p class="styles-subtitle">הקישו על סגנון לתצוגה מקדימה בזמן אמת</p>
+      </div>
+      
+      <div class="styles-strip">
+        <div class="style-item selected" onclick="selectStyle(this, 'פופ ארט')">
+          <div class="style-icon-btn style-pop-art">
+            <svg class="icon"><use href="#i-zap"/></svg>
+            <span class="popular-badge">פופולרי</span>
+            <div class="style-check"><svg class="icon"><use href="#i-check"/></svg></div>
+          </div>
+          <span class="style-name">פופ ארט</span>
+        </div>
+        
+        <div class="style-item" onclick="selectStyle(this, 'צבעי מים')">
+          <div class="style-icon-btn style-watercolor">
+            <svg class="icon"><use href="#i-droplet"/></svg>
+            <div class="style-check"><svg class="icon"><use href="#i-check"/></svg></div>
+          </div>
+          <span class="style-name">צבעי מים</span>
+        </div>
+        
+        <div class="style-item" onclick="selectStyle(this, 'ציור קווי')">
+          <div class="style-icon-btn style-line-art">
+            <svg class="icon"><use href="#i-pen"/></svg>
+            <div class="style-check"><svg class="icon"><use href="#i-check"/></svg></div>
+          </div>
+          <span class="style-name">ציור קווי</span>
+        </div>
+        
+        <div class="style-item" onclick="selectStyle(this, 'ציור שמן')">
+          <div class="style-icon-btn style-oil">
+            <svg class="icon"><use href="#i-brush"/></svg>
+            <div class="style-check"><svg class="icon"><use href="#i-check"/></svg></div>
+          </div>
+          <span class="style-name">ציור שמן</span>
+        </div>
+        
+        <div class="style-item" onclick="selectStyle(this, 'רומנטי')">
+          <div class="style-icon-btn style-romantic">
+            <svg class="icon"><use href="#i-heart"/></svg>
+            <span class="popular-badge">חדש</span>
+            <div class="style-check"><svg class="icon"><use href="#i-check"/></svg></div>
+          </div>
+          <span class="style-name">רומנטי</span>
+        </div>
+        
+        <div class="style-item" onclick="selectStyle(this, 'קומיקס')">
+          <div class="style-icon-btn style-comic">
+            <svg class="icon"><use href="#i-zap"/></svg>
+            <div class="style-check"><svg class="icon"><use href="#i-check"/></svg></div>
+          </div>
+          <span class="style-name">קומיקס</span>
+        </div>
+        
+        <div class="style-item" onclick="selectStyle(this, 'וינטג׳')">
+          <div class="style-icon-btn style-vintage">
+            <svg class="icon"><use href="#i-film"/></svg>
+            <div class="style-check"><svg class="icon"><use href="#i-check"/></svg></div>
+          </div>
+          <span class="style-name">וינטג׳</span>
+        </div>
+        
+        <div class="style-item" onclick="selectStyle(this, 'מקורי משופר')">
+          <div class="style-icon-btn style-original">
+            <svg class="icon"><use href="#i-sun"/></svg>
+            <div class="style-check"><svg class="icon"><use href="#i-check"/></svg></div>
+          </div>
+          <span class="style-name">מקורי משופר</span>
+        </div>
+      </div>
+      
+      <div class="free-notice">
+        <svg class="icon"><use href="#i-sparkles"/></svg>
+        תצוגה מקדימה חינם ללא הגבלה
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom CTA -->
+  <div class="bottom-cta">
+    <div class="bottom-inner">
+      <button class="btn-secondary" onclick="window.location.href='01-upload.html'">
+        <span>חזרה</span>
+      </button>
+      <button class="btn-primary" onclick="window.location.href='03-customize.html'">
+        <span>אהבתי! המשך</span>
+        <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function selectStyle(element, styleName) {
+      document.querySelectorAll('.style-item').forEach(item => {
+        item.classList.remove('selected');
+      });
+      element.classList.add('selected');
+      document.getElementById('currentStyleName').textContent = styleName;
+      
+      const overlay = document.getElementById('aiOverlay');
+      overlay.querySelector('.ai-text').textContent = `מעבד בסגנון ${styleName}...`;
+      overlay.classList.add('show');
+      
+      setTimeout(() => {
+        overlay.classList.remove('show');
+      }, 1500);
+    }
+  </script>
+</body>
+</html>

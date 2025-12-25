@@ -546,7 +546,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-03',
     title: 'Customize Page UI (03-customize.html)',
     description: 'Implement product config: size/paper/frame selectors, live price, mockup preview',
-    status: 'in-review',  // ✅ Gate 2 Complete 2025-12-25 - 43 tests, ready for QA
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (35 tests, 100% coverage)
     agent: 'Frontend-B',
     points: 3,
     blockedBy: ['UI-06'],  // Can start in parallel after demo data
@@ -556,7 +556,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-04',
     title: 'Checkout Page UI (04-checkout.html)',
     description: 'Implement checkout: gift toggle, address form, payment section, price breakdown',
-    status: 'backlog',
+    status: 'in-progress',  // ✅ Assigned to Frontend-B 2025-12-25
     agent: 'Frontend-B',
     points: 5,
     blockedBy: ['UI-06'],  // Can start in parallel after demo data

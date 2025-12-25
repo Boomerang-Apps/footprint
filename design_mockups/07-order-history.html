@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Footprint - ההזמנות שלי</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #7c3aed;
+      --primary-light: #a78bfa;
+      --accent: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --gray-50: #fafafa;
+      --gray-100: #f4f4f5;
+      --gray-200: #e4e4e7;
+      --gray-300: #d4d4d8;
+      --gray-400: #a1a1aa;
+      --gray-500: #71717a;
+      --gray-600: #52525b;
+      --gray-700: #3f3f46;
+      --gray-800: #27272a;
+      --gray-900: #18181b;
+      --white: #ffffff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .icon-sm { width: 18px; height: 18px; }
+    
+    /* Header */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      border-radius: 12px;
+    }
+    .header-title { font-size: 17px; font-weight: 600; }
+    .header-action {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-500);
+    }
+    
+    /* Main */
+    .main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 100px;
+    }
+    
+    /* Stats Summary */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-top: 2px;
+    }
+    
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .filter-tab {
+      padding: 8px 16px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-600);
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .filter-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    /* Orders List */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .order-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .order-card:active {
+      transform: scale(0.99);
+    }
+    
+    .order-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .order-number {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    .order-date {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    
+    .order-content {
+      display: flex;
+      gap: 14px;
+      padding: 16px;
+    }
+    .order-thumb {
+      width: 70px;
+      height: 70px;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--gray-100);
+    }
+    .order-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .order-details { flex: 1; }
+    .order-style {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .order-specs {
+      font-size: 13px;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+    .order-price {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-top: 6px;
+    }
+    
+    .order-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-100);
+    }
+    
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-badge .icon { width: 14px; height: 14px; }
+    .status-badge.pending {
+      background: rgba(251, 191, 36, 0.15);
+      color: #b45309;
+    }
+    .status-badge.processing {
+      background: rgba(59, 130, 246, 0.15);
+      color: #1d4ed8;
+    }
+    .status-badge.shipped {
+      background: rgba(139, 92, 246, 0.15);
+      color: #6d28d9;
+    }
+    .status-badge.delivered {
+      background: rgba(16, 185, 129, 0.15);
+      color: #047857;
+    }
+    
+    .order-action {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    .order-action .icon { width: 16px; height: 16px; }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .empty-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--gray-100);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .empty-icon .icon {
+      width: 36px;
+      height: 36px;
+      color: var(--gray-400);
+    }
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .empty-desc {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 24px;
+    }
+    .empty-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      padding: 8px 16px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+    .bottom-nav-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      color: var(--gray-400);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .nav-item.active {
+      color: var(--primary);
+    }
+    .nav-item .icon { width: 22px; height: 22px; }
+    
+    /* Tablet - 640px+ */
+    @media (min-width: 640px) {
+      .header-inner { padding: 14px 24px; }
+      .main { max-width: 800px; padding: 24px; }
+      .stats-row { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .stat-card { padding: 20px; }
+      .stat-value { font-size: 24px; }
+      .order-card { border-radius: 18px; }
+      .order-content { padding: 20px; gap: 16px; }
+      .order-thumb { width: 80px; height: 80px; }
+      .order-style { font-size: 16px; }
+      .bottom-nav-inner { max-width: 500px; }
+    }
+    
+    /* Desktop - 1024px+ */
+    @media (min-width: 1024px) {
+      .header { border-bottom: none; }
+      .header-inner { max-width: 1200px; padding: 16px 40px; }
+      .main { max-width: 1000px; padding: 32px 40px; }
+      .stats-row { gap: 20px; }
+      .stat-card { padding: 24px; border-radius: 16px; }
+      .stat-value { font-size: 28px; }
+      .stat-label { font-size: 13px; }
+      .filter-tabs { gap: 12px; margin-bottom: 24px; }
+      .filter-tab { padding: 10px 20px; font-size: 14px; }
+      .orders-list { gap: 14px; }
+      .order-card { border-radius: 20px; }
+      .order-header { padding: 16px 20px; }
+      .order-number { font-size: 15px; }
+      .order-content { padding: 20px; gap: 18px; }
+      .order-thumb { width: 90px; height: 90px; border-radius: 14px; }
+      .order-style { font-size: 17px; }
+      .order-specs { font-size: 14px; }
+      .order-price { font-size: 18px; }
+      .order-footer { padding: 14px 20px; }
+      .status-badge { padding: 8px 14px; font-size: 13px; }
+      .order-action { font-size: 14px; }
+      .bottom-nav { display: none; }
+    }
+    
+    /* Large Desktop - 1280px+ */
+    @media (min-width: 1280px) {
+      .main { max-width: 1100px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="display:none">
+    <defs>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-package" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+      <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+      <symbol id="i-shopping-bag" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <button class="back-btn" onclick="window.location.href='06-landing.html'">
+        <svg class="icon"><use href="#i-arrow-right"/></svg>
+      </button>
+      <h1 class="header-title">ההזמנות שלי</h1>
+      <div class="header-action"></div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">5</div>
+        <div class="stat-label">הזמנות</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">₪847</div>
+        <div class="stat-label">סה״כ</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">1</div>
+        <div class="stat-label">בדרך</div>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active">הכל</button>
+      <button class="filter-tab">בהכנה</button>
+      <button class="filter-tab">נשלח</button>
+      <button class="filter-tab">הגיע</button>
+    </div>
+
+    <!-- Orders List -->
+    <div class="orders-list">
+      <!-- Order 1 - Shipped -->
+      <a href="08-order-detail.html" class="order-card">
+        <div class="order-header">
+          <span class="order-number">FP-2024-1847</span>
+          <span class="order-date">היום, 14:30</span>
+        </div>
+        <div class="order-content">
+          <div class="order-thumb">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=140&h=140&fit=crop&crop=face" alt="">
+          </div>
+          <div class="order-details">
+            <div class="order-style">פורטרט AI - פופ ארט</div>
+            <div class="order-specs">A4 • מסגרת שחורה</div>
+            <div class="order-price">₪209</div>
+          </div>
+        </div>
+        <div class="order-footer">
+          <div class="status-badge shipped">
+            <svg class="icon"><use href="#i-truck"/></svg>
+            נשלח
+          </div>
+          <div class="order-action">
+            מעקב משלוח
+            <svg class="icon"><use href="#i-arrow-left"/></svg>
+          </div>
+        </div>
+      </a>
+
+      <!-- Order 2 - Processing -->
+      <a href="08-order-detail.html" class="order-card">
+        <div class="order-header">
+          <span class="order-number">FP-2024-1832</span>
+          <span class="order-date">אתמול, 10:15</span>
+        </div>
+        <div class="order-content">
+          <div class="order-thumb">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=140&h=140&fit=crop&crop=face" alt="">
+          </div>
+          <div class="order-details">
+            <div class="order-style">פורטרט משפחתי - צבעי מים</div>
+            <div class="order-specs">A3 • מסגרת לבנה</div>
+            <div class="order-price">₪309</div>
+          </div>
+        </div>
+        <div class="order-footer">
+          <div class="status-badge processing">
+            <svg class="icon"><use href="#i-clock"/></svg>
+            בהכנה
+          </div>
+          <div class="order-action">
+            פרטים
+            <svg class="icon"><use href="#i-arrow-left"/></svg>
+          </div>
+        </div>
+      </a>
+
+      <!-- Order 3 - Delivered -->
+      <a href="08-order-detail.html" class="order-card">
+        <div class="order-header">
+          <span class="order-number">FP-2024-1798</span>
+          <span class="order-date">20/12/2024</span>
+        </div>
+        <div class="order-content">
+          <div class="order-thumb">
+            <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=140&h=140&fit=crop" alt="">
+          </div>
+          <div class="order-details">
+            <div class="order-style">פורטרט חיית מחמד - קומיקס</div>
+            <div class="order-specs">A4 • ללא מסגרת</div>
+            <div class="order-price">₪149</div>
+          </div>
+        </div>
+        <div class="order-footer">
+          <div class="status-badge delivered">
+            <svg class="icon"><use href="#i-check-circle"/></svg>
+            הגיע
+          </div>
+          <div class="order-action">
+            הזמנה חוזרת
+            <svg class="icon"><use href="#i-arrow-left"/></svg>
+          </div>
+        </div>
+      </a>
+
+      <!-- Order 4 - Delivered -->
+      <a href="08-order-detail.html" class="order-card">
+        <div class="order-header">
+          <span class="order-number">FP-2024-1756</span>
+          <span class="order-date">15/12/2024</span>
+        </div>
+        <div class="order-content">
+          <div class="order-thumb">
+            <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=140&h=140&fit=crop&crop=face" alt="">
+          </div>
+          <div class="order-details">
+            <div class="order-style">פורטרט AI - רומנטי</div>
+            <div class="order-specs">A5 • מסגרת אלון</div>
+            <div class="order-price">₪180</div>
+          </div>
+        </div>
+        <div class="order-footer">
+          <div class="status-badge delivered">
+            <svg class="icon"><use href="#i-check-circle"/></svg>
+            הגיע
+          </div>
+          <div class="order-action">
+            הזמנה חוזרת
+            <svg class="icon"><use href="#i-arrow-left"/></svg>
+          </div>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="06-landing.html" class="nav-item">
+        <svg class="icon"><use href="#i-home"/></svg>
+        בית
+      </a>
+      <a href="01-upload.html" class="nav-item">
+        <svg class="icon"><use href="#i-plus"/></svg>
+        יצירה
+      </a>
+      <a href="07-order-history.html" class="nav-item active">
+        <svg class="icon"><use href="#i-shopping-bag"/></svg>
+        הזמנות
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="icon"><use href="#i-user"/></svg>
+        חשבון
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // Filter tabs functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

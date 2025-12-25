@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Footprint - העלאת תמונה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #7c3aed;
+      --primary-light: #a78bfa;
+      --primary-dark: #5b21b6;
+      --accent: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --gray-50: #fafafa;
+      --gray-100: #f4f4f5;
+      --gray-200: #e4e4e7;
+      --gray-300: #d4d4d8;
+      --gray-400: #a1a1aa;
+      --gray-500: #71717a;
+      --gray-600: #52525b;
+      --gray-700: #3f3f46;
+      --gray-800: #27272a;
+      --gray-900: #18181b;
+      --white: #ffffff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+      --content-padding: 16px;
+      --max-content-width: 1200px;
+    }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.5;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    
+    /* Icons */
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .icon-sm { width: 18px; height: 18px; }
+    .icon-lg { width: 28px; height: 28px; }
+    .icon-xl { width: 40px; height: 40px; }
+    
+    /* Header */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 12px var(--content-padding);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+    }
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background: var(--gray-100); }
+    .header-title {
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .header-action {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-400);
+    }
+    
+    /* Progress */
+    .progress {
+      background: var(--white);
+      padding: 16px var(--content-padding);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .progress-inner {
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+    }
+    .progress-bar {
+      height: 4px;
+      background: var(--gray-200);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-step {
+      font-size: 12px;
+      color: var(--gray-400);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .progress-step.active { color: var(--primary); font-weight: 600; }
+    .progress-step.completed { color: var(--success); }
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray-300);
+    }
+    .progress-step.active .step-dot { background: var(--primary); }
+    .progress-step.completed .step-dot { background: var(--success); }
+    
+    /* Main Content */
+    .main {
+      flex: 1;
+      padding: 20px var(--content-padding);
+      display: flex;
+      flex-direction: column;
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+      width: 100%;
+    }
+    
+    /* Page Header */
+    .page-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+    .page-subtitle {
+      font-size: 15px;
+      color: var(--gray-500);
+    }
+    
+    /* Upload Zone */
+    .upload-zone {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+      border: 2px dashed var(--gray-300);
+      border-radius: 20px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 320px;
+      position: relative;
+    }
+    .upload-zone:active {
+      transform: scale(0.99);
+    }
+    .upload-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(124, 58, 237, 0.04);
+    }
+    .upload-zone.has-image {
+      border-style: solid;
+      border-color: var(--gray-200);
+      padding: 16px;
+      cursor: default;
+    }
+    
+    .upload-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .upload-icon-wrapper {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(236,72,153,0.1));
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .upload-icon-wrapper .icon {
+      width: 36px;
+      height: 36px;
+      color: var(--primary);
+    }
+    
+    .upload-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+    .upload-subtitle {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 24px;
+    }
+    
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: var(--white);
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .upload-btn:active {
+      transform: scale(0.97);
+    }
+    
+    .upload-formats {
+      font-size: 13px;
+      color: var(--gray-400);
+      margin-top: 16px;
+    }
+    
+    /* Camera Button for Mobile */
+    .camera-options {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .camera-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: var(--gray-100);
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+    .camera-btn:active {
+      background: var(--gray-200);
+    }
+    
+    /* Preview State */
+    .preview-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-zone.has-image .upload-content { display: none; }
+    .upload-zone.has-image .preview-container { display: flex; }
+    
+    .preview-image-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--gray-100);
+    }
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .preview-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--success);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--white);
+    }
+    
+    .preview-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      width: 100%;
+    }
+    .preview-action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .preview-action-btn.replace {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    .preview-action-btn.replace:active { background: var(--gray-200); }
+    
+    /* Loading State */
+    .upload-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .upload-zone.loading .upload-content { display: none; }
+    .upload-zone.loading .upload-loading { display: flex; }
+    
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--gray-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-size: 15px;
+      color: var(--gray-500);
+    }
+    
+    /* Tips */
+    .tips {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 14px;
+    }
+    .tips-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 12px;
+    }
+    .tips-title .icon { color: var(--warning); width: 18px; height: 18px; }
+    .tips-list {
+      list-style: none;
+    }
+    .tips-list li {
+      font-size: 13px;
+      color: var(--gray-500);
+      padding-right: 20px;
+      position: relative;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .tips-list li:last-child { margin-bottom: 0; }
+    .tips-list li::before {
+      content: "✓";
+      position: absolute;
+      right: 0;
+      color: var(--success);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    /* Bottom CTA */
+    .bottom-cta {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      padding: 12px var(--content-padding);
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    .bottom-inner {
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+    }
+    .btn-primary {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--gray-200);
+      color: var(--gray-400);
+      padding: 16px 24px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.2s;
+      pointer-events: none;
+    }
+    .btn-primary.active {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: var(--white);
+      box-shadow: var(--shadow-lg);
+      pointer-events: auto;
+    }
+    .btn-primary.active:active {
+      transform: scale(0.98);
+    }
+    
+    /* Hidden file input */
+    .file-input { display: none; }
+    
+    /* Safe area for bottom */
+    .bottom-spacer {
+      height: 88px;
+    }
+    
+    /* Tablet - 640px+ */
+    @media (min-width: 640px) {
+      :root { --content-padding: 24px; }
+      .page-header { margin-bottom: 28px; }
+      .page-title { font-size: 28px; }
+      .page-subtitle { font-size: 16px; }
+      .upload-zone { min-height: 400px; padding: 48px 32px; border-radius: 20px; }
+      .upload-icon { width: 80px; height: 80px; }
+      .upload-text { font-size: 18px; }
+      .upload-hint { font-size: 14px; }
+      .camera-btn { width: 56px; height: 56px; }
+      .tips-card { padding: 20px; }
+    }
+    
+    /* Desktop - 1024px+ */
+    @media (min-width: 1024px) {
+      :root { --content-padding: 40px; }
+      .progress-bar { height: 6px; }
+      .progress-step { font-size: 14px; }
+      .main { 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .main-content { 
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .page-header { 
+        margin-bottom: 32px; 
+        text-align: center;
+        width: 100%;
+      }
+      .page-title { font-size: 32px; }
+      .upload-zone { 
+        width: 100%;
+        max-width: 800px;
+        min-height: 480px; 
+        padding: 60px 60px; 
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .upload-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 400px;
+      }
+      .upload-icon-wrapper { width: 96px; height: 96px; border-radius: 28px; }
+      .upload-icon-wrapper .icon { width: 44px; height: 44px; }
+      .upload-title { font-size: 22px; }
+      .upload-subtitle { font-size: 16px; }
+      .upload-btn { padding: 16px 40px; font-size: 17px; min-width: 220px; }
+      .camera-btn { padding: 12px 24px; font-size: 15px; }
+      .upload-formats { font-size: 14px; margin-top: 20px; }
+      .sidebar { 
+        width: 100%;
+        max-width: 800px;
+        margin-top: 24px;
+      }
+      .tips { 
+        padding: 24px; 
+        border-radius: 18px;
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+      }
+      .tips-title { font-size: 16px; margin-bottom: 16px; }
+      .tips-list li { font-size: 14px; padding: 8px 0; }
+      .bottom-cta { padding: 24px 40px; }
+      .bottom-inner { max-width: 900px; }
+      .btn-primary { padding: 16px 32px; font-size: 17px; border-radius: 16px; max-width: 400px; margin: 0 auto; }
+    }
+    
+    /* Large Desktop - 1280px+ */
+    @media (min-width: 1280px) {
+    /* Large Desktop - 1280px+ */
+    @media (min-width: 1280px) {
+      :root { --content-padding: 60px; }
+      .upload-zone { 
+        max-width: 900px;
+        min-height: 520px; 
+        padding: 70px 80px;
+      }
+      .upload-content { max-width: 450px; }
+      .upload-icon-wrapper { width: 100px; height: 100px; }
+      .upload-title { font-size: 24px; }
+      .upload-btn { padding: 18px 48px; font-size: 18px; min-width: 260px; }
+      .sidebar { max-width: 900px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- SVG Icons -->
+  <svg style="display:none">
+    <defs>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
+      <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+      <symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <button class="back-btn" onclick="history.back()">
+        <svg class="icon"><use href="#i-arrow-right"/></svg>
+      </button>
+      <h1 class="header-title">יצירת תמונה</h1>
+      <div class="header-action"></div>
+    </div>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress">
+    <div class="progress-inner">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 20%"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-step active">
+          <span class="step-dot"></span>
+          העלאה
+        </div>
+        <div class="progress-step">
+          <span class="step-dot"></span>
+          סגנון
+        </div>
+        <div class="progress-step">
+          <span class="step-dot"></span>
+          התאמה
+        </div>
+        <div class="progress-step">
+          <span class="step-dot"></span>
+          תשלום
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="main-content">
+      <div class="page-header">
+        <h2 class="page-title">בחרו תמונה</h2>
+        <p class="page-subtitle">העלו תמונה מהגלריה או צלמו חדשה</p>
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="upload-zone" id="uploadZone" onclick="triggerUpload()">
+      <!-- Default Upload State -->
+      <div class="upload-content">
+        <div class="upload-icon-wrapper">
+          <svg class="icon"><use href="#i-image"/></svg>
+        </div>
+        <h3 class="upload-title">הקישו לבחירת תמונה</h3>
+        <p class="upload-subtitle">או גררו תמונה לכאן</p>
+        
+        <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+          <svg class="icon icon-sm"><use href="#i-image"/></svg>
+          <span>בחירה מהגלריה</span>
+        </button>
+        
+        <div class="camera-options">
+          <button class="camera-btn" onclick="event.stopPropagation(); document.getElementById('cameraInput').click()">
+            <svg class="icon icon-sm"><use href="#i-camera"/></svg>
+            צילום
+          </button>
+        </div>
+        
+        <p class="upload-formats">JPG, PNG, HEIC • עד 20MB</p>
+      </div>
+
+      <!-- Loading State -->
+      <div class="upload-loading">
+        <div class="spinner"></div>
+        <p class="loading-text">מעבד את התמונה...</p>
+      </div>
+
+      <!-- Preview State -->
+      <div class="preview-container">
+        <div class="preview-image-wrapper">
+          <img src="" alt="התמונה שלך" class="preview-image" id="previewImage">
+          <div class="preview-badge">
+            <svg class="icon icon-sm"><use href="#i-check"/></svg>
+            מוכן
+          </div>
+        </div>
+        <div class="preview-actions">
+          <button class="preview-action-btn replace" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+            <svg class="icon icon-sm"><use href="#i-refresh"/></svg>
+            החלפת תמונה
+          </button>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div class="sidebar">
+    <!-- Tips -->
+    <div class="tips">
+      <div class="tips-title">
+        <svg class="icon"><use href="#i-lightbulb"/></svg>
+        טיפים לתוצאה מושלמת
+      </div>
+      <ul class="tips-list">
+        <li>תמונות באיכות גבוהה נותנות תוצאות טובות יותר</li>
+        <li>פנים ברורות עובדות הכי טוב לפורטרטים</li>
+        <li>תאורה טבעית משפרת את התוצאה</li>
+      </ul>
+    </div>
+    </div>
+
+    <div class="bottom-spacer"></div>
+  </main>
+
+  <!-- Bottom CTA -->
+  <div class="bottom-cta">
+    <div class="bottom-inner">
+      <button class="btn-primary" id="nextBtn" onclick="goToStyleSelection()">
+        <span>המשך לבחירת סגנון</span>
+        <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hidden File Inputs -->
+  <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/png,image/heic,image/heif">
+  <input type="file" id="cameraInput" class="file-input" accept="image/*" capture="environment">
+
+  <script>
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const cameraInput = document.getElementById('cameraInput');
+    const previewImage = document.getElementById('previewImage');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function triggerUpload() {
+      if (!uploadZone.classList.contains('has-image')) {
+        fileInput.click();
+      }
+    }
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (!uploadZone.classList.contains('has-image')) {
+        uploadZone.classList.add('dragover');
+      }
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    cameraInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/heic', 'image/heif'];
+      if (!validTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|heic|heif)$/i)) {
+        alert('סוג קובץ לא נתמך. אנא העלו JPG, PNG או HEIC.');
+        return;
+      }
+
+      // Validate file size (20MB max)
+      if (file.size > 20 * 1024 * 1024) {
+        alert('הקובץ גדול מדי. הגודל המקסימלי הוא 20MB.');
+        return;
+      }
+
+      // Show loading state
+      uploadZone.classList.add('loading');
+      uploadZone.classList.remove('has-image');
+
+      // Simulate processing
+      setTimeout(() => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImage.src = e.target.result;
+          
+          uploadZone.classList.remove('loading');
+          uploadZone.classList.add('has-image');
+          
+          // Enable next button
+          nextBtn.classList.add('active');
+        };
+        reader.readAsDataURL(file);
+      }, 600);
+    }
+
+    function goToStyleSelection() {
+      if (nextBtn.classList.contains('active')) {
+        window.location.href = '02-style-selection.html';
+      }
+    }
+  </script>
+</body>
+</html>

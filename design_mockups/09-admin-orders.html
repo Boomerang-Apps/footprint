@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Footprint Admin - הזמנות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #7c3aed;
+      --accent: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+      --gray-50: #fafafa;
+      --gray-100: #f4f4f5;
+      --gray-200: #e4e4e7;
+      --gray-300: #d4d4d8;
+      --gray-400: #a1a1aa;
+      --gray-500: #71717a;
+      --gray-600: #52525b;
+      --gray-700: #3f3f46;
+      --gray-800: #27272a;
+      --gray-900: #18181b;
+      --white: #ffffff;
+    }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: var(--gray-100);
+      color: var(--gray-900);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .icon-sm { width: 18px; height: 18px; }
+    .icon-lg { width: 28px; height: 28px; }
+    
+    /* Admin Header */
+    .admin-header {
+      background: var(--gray-900);
+      color: var(--white);
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .admin-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .admin-logo-icon .icon { width: 18px; height: 18px; color: white; }
+    .admin-badge {
+      background: var(--primary);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .admin-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .admin-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--gray-700);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Main */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+    
+    /* Page Header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-icon .icon { width: 18px; height: 18px; }
+    .stat-icon.purple { background: rgba(124, 58, 237, 0.1); color: var(--primary); }
+    .stat-icon.yellow { background: rgba(251, 191, 36, 0.15); color: #b45309; }
+    .stat-icon.blue { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+    .stat-icon.green { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    .stat-change {
+      font-size: 12px;
+      color: var(--success);
+      margin-top: 4px;
+    }
+    
+    /* Filters */
+    .filters-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .filters-bar::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      padding: 8px 16px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-600);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .filter-count {
+      background: rgba(0,0,0,0.1);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    .filter-btn.active .filter-count {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    /* Search */
+    .search-bar {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      padding-right: 44px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--primary); }
+    .search-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+    }
+    
+    /* Orders Table */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .order-row {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: box-shadow 0.2s;
+    }
+    .order-row:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .order-thumb {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--gray-100);
+    }
+    .order-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .order-info { flex: 1; min-width: 0; }
+    .order-id {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 2px;
+    }
+    .order-meta {
+      font-size: 12px;
+      color: var(--gray-500);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .order-price {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-900);
+      white-space: nowrap;
+    }
+    
+    /* Status Badge */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status .icon { width: 12px; height: 12px; }
+    .status.pending { background: rgba(251, 191, 36, 0.15); color: #b45309; }
+    .status.processing { background: rgba(59, 130, 246, 0.15); color: #1d4ed8; }
+    .status.shipped { background: rgba(139, 92, 246, 0.15); color: #6d28d9; }
+    .status.delivered { background: rgba(16, 185, 129, 0.15); color: #047857; }
+    
+    .order-action {
+      width: 36px;
+      height: 36px;
+      background: var(--gray-50);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-500);
+      flex-shrink: 0;
+    }
+    
+    /* Bottom Nav */
+    .admin-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      padding: 8px 16px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+    .admin-nav-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      color: var(--gray-400);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item .icon { width: 22px; height: 22px; }
+    .nav-badge {
+      position: absolute;
+      top: 2px;
+      right: 10px;
+      background: var(--error);
+      color: white;
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .nav-item-wrapper { position: relative; }
+    
+    /* Tablet - 640px+ */
+    @media (min-width: 640px) {
+      .admin-header-inner { padding: 14px 24px; }
+      .main { padding: 24px; }
+      .page-header { margin-bottom: 24px; }
+      .page-title { font-size: 28px; }
+      .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .stat-card { padding: 20px; border-radius: 16px; }
+      .stat-value { font-size: 32px; }
+      .search-input { padding: 14px 18px; padding-right: 48px; }
+      .filter-tabs { gap: 12px; }
+      .filter-btn { padding: 10px 20px; font-size: 14px; }
+      .order-row { padding: 16px 20px; border-radius: 16px; gap: 16px; }
+      .order-thumb { width: 56px; height: 56px; }
+      .order-id { font-size: 15px; }
+      .order-meta { font-size: 13px; }
+      .order-price { font-size: 16px; }
+    }
+    
+    /* Desktop - 1024px+ */
+    @media (min-width: 1024px) {
+      .admin-header-inner { max-width: 1400px; padding: 16px 40px; }
+      .main { max-width: 1400px; padding: 32px 40px 120px; }
+      .page-header { margin-bottom: 28px; }
+      .page-title { font-size: 32px; }
+      .stats-grid { gap: 20px; }
+      .stat-card { padding: 24px; }
+      .stat-label { font-size: 14px; }
+      .stat-value { font-size: 36px; }
+      .stat-change { font-size: 13px; }
+      .search-bar { max-width: 400px; }
+      .filters-bar { margin-bottom: 20px; }
+      .orders-list { gap: 12px; }
+      .order-row { 
+        padding: 18px 24px; 
+        border-radius: 18px;
+        display: grid;
+        grid-template-columns: 60px 1fr auto auto 120px 40px;
+        gap: 20px;
+        align-items: center;
+      }
+      .order-thumb { width: 60px; height: 60px; border-radius: 12px; }
+      .order-info { min-width: 200px; }
+      .order-id { font-size: 16px; }
+      .order-meta { font-size: 14px; }
+      .status { padding: 6px 14px; font-size: 13px; }
+      .order-price { font-size: 18px; text-align: center; min-width: 80px; }
+      .order-action { width: 40px; height: 40px; border-radius: 12px; }
+      .admin-nav { padding: 12px 40px; }
+      .admin-nav-inner { max-width: 600px; }
+      .nav-item { font-size: 13px; padding: 10px 20px; }
+    }
+    
+    /* Large Desktop - 1280px+ */
+    @media (min-width: 1280px) {
+      .main { max-width: 1600px; }
+      .order-row { grid-template-columns: 70px 1fr auto auto 140px 44px; gap: 24px; }
+      .order-thumb { width: 70px; height: 70px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="display:none">
+    <defs>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+      <symbol id="i-filter" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-package" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+      <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+      <symbol id="i-bar-chart" viewBox="0 0 24 24"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <div class="admin-logo">
+        <div class="admin-logo-icon"><svg class="icon"><use href="#i-sparkles"/></svg></div>
+        Footprint
+        <span class="admin-badge">Admin</span>
+      </div>
+      <div class="admin-user">
+        <div class="admin-avatar">א</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main" style="padding-bottom: 100px;">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">הזמנות</h1>
+      <div class="header-actions">
+        <button class="btn-icon"><svg class="icon icon-sm"><use href="#i-refresh"/></svg></button>
+        <button class="btn-icon"><svg class="icon icon-sm"><use href="#i-filter"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">היום</span>
+          <div class="stat-icon purple"><svg class="icon"><use href="#i-package"/></svg></div>
+        </div>
+        <div class="stat-value">12</div>
+        <div class="stat-change">+3 מאתמול</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">ממתינות</span>
+          <div class="stat-icon yellow"><svg class="icon"><use href="#i-clock"/></svg></div>
+        </div>
+        <div class="stat-value">5</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">בדרך</span>
+          <div class="stat-icon blue"><svg class="icon"><use href="#i-truck"/></svg></div>
+        </div>
+        <div class="stat-value">8</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">הכנסות היום</span>
+          <div class="stat-icon green"><svg class="icon"><use href="#i-bar-chart"/></svg></div>
+        </div>
+        <div class="stat-value">₪2,450</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="חיפוש הזמנה, לקוח או טלפון...">
+      <svg class="icon icon-sm search-icon"><use href="#i-search"/></svg>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <button class="filter-btn active">הכל <span class="filter-count">25</span></button>
+      <button class="filter-btn">ממתינות <span class="filter-count">5</span></button>
+      <button class="filter-btn">בהכנה <span class="filter-count">4</span></button>
+      <button class="filter-btn">נשלחו <span class="filter-count">8</span></button>
+      <button class="filter-btn">הגיעו <span class="filter-count">8</span></button>
+    </div>
+
+    <!-- Orders List -->
+    <div class="orders-list">
+      <a href="10-admin-order-detail.html" class="order-row">
+        <div class="order-thumb">
+          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face" alt="">
+        </div>
+        <div class="order-info">
+          <div class="order-id">FP-2024-1847</div>
+          <div class="order-meta">
+            <span>ישראל ישראלי</span>
+            <span>•</span>
+            <span>לפני 5 דק׳</span>
+          </div>
+        </div>
+        <div class="status pending"><svg class="icon"><use href="#i-clock"/></svg> ממתין</div>
+        <div class="order-price">₪209</div>
+        <div class="order-action"><svg class="icon icon-sm"><use href="#i-arrow-left"/></svg></div>
+      </a>
+
+      <a href="10-admin-order-detail.html" class="order-row">
+        <div class="order-thumb">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="">
+        </div>
+        <div class="order-info">
+          <div class="order-id">FP-2024-1846</div>
+          <div class="order-meta">
+            <span>דנה כהן</span>
+            <span>•</span>
+            <span>לפני 20 דק׳</span>
+          </div>
+        </div>
+        <div class="status pending"><svg class="icon"><use href="#i-clock"/></svg> ממתין</div>
+        <div class="order-price">₪309</div>
+        <div class="order-action"><svg class="icon icon-sm"><use href="#i-arrow-left"/></svg></div>
+      </a>
+
+      <a href="10-admin-order-detail.html" class="order-row">
+        <div class="order-thumb">
+          <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop" alt="">
+        </div>
+        <div class="order-info">
+          <div class="order-id">FP-2024-1845</div>
+          <div class="order-meta">
+            <span>יעל לוי</span>
+            <span>•</span>
+            <span>לפני שעה</span>
+          </div>
+        </div>
+        <div class="status processing"><svg class="icon"><use href="#i-package"/></svg> בהכנה</div>
+        <div class="order-price">₪149</div>
+        <div class="order-action"><svg class="icon icon-sm"><use href="#i-arrow-left"/></svg></div>
+      </a>
+
+      <a href="10-admin-order-detail.html" class="order-row">
+        <div class="order-thumb">
+          <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face" alt="">
+        </div>
+        <div class="order-info">
+          <div class="order-id">FP-2024-1844</div>
+          <div class="order-meta">
+            <span>רון אברהם</span>
+            <span>•</span>
+            <span>לפני 2 שעות</span>
+          </div>
+        </div>
+        <div class="status shipped"><svg class="icon"><use href="#i-truck"/></svg> נשלח</div>
+        <div class="order-price">₪180</div>
+        <div class="order-action"><svg class="icon icon-sm"><use href="#i-arrow-left"/></svg></div>
+      </a>
+
+      <a href="10-admin-order-detail.html" class="order-row">
+        <div class="order-thumb">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" alt="">
+        </div>
+        <div class="order-info">
+          <div class="order-id">FP-2024-1843</div>
+          <div class="order-meta">
+            <span>שירה גולן</span>
+            <span>•</span>
+            <span>אתמול</span>
+          </div>
+        </div>
+        <div class="status delivered"><svg class="icon"><use href="#i-check-circle"/></svg> הגיע</div>
+        <div class="order-price">₪249</div>
+        <div class="order-action"><svg class="icon icon-sm"><use href="#i-arrow-left"/></svg></div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Admin Bottom Nav -->
+  <nav class="admin-nav">
+    <div class="admin-nav-inner">
+      <a href="09-admin-orders.html" class="nav-item active">
+        <div class="nav-item-wrapper">
+          <svg class="icon"><use href="#i-package"/></svg>
+          <span class="nav-badge">5</span>
+        </div>
+        הזמנות
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="icon"><use href="#i-bar-chart"/></svg>
+        דוחות
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="icon"><use href="#i-settings"/></svg>
+        הגדרות
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

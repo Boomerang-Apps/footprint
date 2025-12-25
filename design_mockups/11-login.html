@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Footprint - התחברות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #7c3aed;
+      --accent: #ec4899;
+      --gray-50: #fafafa;
+      --gray-100: #f4f4f5;
+      --gray-200: #e4e4e7;
+      --gray-400: #a1a1aa;
+      --gray-500: #71717a;
+      --gray-700: #3f3f46;
+      --gray-900: #18181b;
+      --white: #ffffff;
+    }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    input { font-family: inherit; }
+    a { text-decoration: none; color: inherit; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .icon-sm { width: 18px; height: 18px; }
+    
+    .header {
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-icon .icon { color: white; width: 22px; height: 22px; }
+    
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      max-width: 400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    
+    .auth-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      padding: 32px 24px;
+      width: 100%;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+    }
+    
+    .auth-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .auth-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .auth-subtitle {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+    
+    .auth-tabs {
+      display: flex;
+      background: var(--gray-100);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-500);
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .auth-tab.active {
+      background: var(--white);
+      color: var(--gray-900);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--primary); }
+    .form-input::placeholder { color: var(--gray-400); }
+    
+    .forgot-link {
+      display: block;
+      text-align: left;
+      font-size: 13px;
+      color: var(--primary);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+    
+    .btn-primary {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 16px 24px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-top: 24px;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--gray-200);
+    }
+    .divider-text {
+      font-size: 13px;
+      color: var(--gray-400);
+    }
+    
+    .social-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-700);
+      background: var(--white);
+    }
+    .social-btn:hover { background: var(--gray-50); }
+    
+    .terms-text {
+      text-align: center;
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+    .terms-text a {
+      color: var(--gray-500);
+      text-decoration: underline;
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+    .auth-footer a {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .register-form { display: none; }
+    .register-form.active { display: block; }
+    .login-form { display: block; }
+    .login-form:not(.active) { display: none; }
+    
+    /* Tablet - 640px+ */
+    @media (min-width: 640px) {
+      .header { padding: 24px; }
+      .logo { font-size: 24px; }
+      .logo-icon { width: 44px; height: 44px; border-radius: 14px; }
+      .main { padding: 32px 24px; }
+      .auth-card { 
+        max-width: 440px;
+        padding: 40px 32px; 
+        border-radius: 24px;
+      }
+      .auth-title { font-size: 28px; }
+      .auth-subtitle { font-size: 15px; }
+      .auth-tabs { margin-bottom: 28px; }
+      .auth-tab { padding: 12px; font-size: 15px; }
+      .form-group { margin-bottom: 20px; }
+      .form-label { font-size: 14px; margin-bottom: 8px; }
+      .form-input { padding: 16px 18px; font-size: 16px; border-radius: 14px; }
+      .btn-primary { padding: 18px 28px; font-size: 17px; border-radius: 16px; }
+      .social-buttons { gap: 14px; }
+      .social-btn { padding: 16px; font-size: 15px; border-radius: 14px; }
+      .auth-footer { font-size: 14px; margin-top: 28px; }
+    }
+    
+    /* Desktop - 1024px+ */
+    @media (min-width: 1024px) {
+      body {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+      }
+      .header { padding: 28px 40px; }
+      .logo { font-size: 26px; }
+      .logo-icon { width: 48px; height: 48px; }
+      .main { 
+        min-height: calc(100vh - 100px);
+        padding: 48px 40px;
+      }
+      .auth-card { 
+        max-width: 480px;
+        padding: 48px 40px; 
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      }
+      .auth-header { margin-bottom: 32px; }
+      .auth-title { font-size: 32px; }
+      .auth-subtitle { font-size: 16px; }
+      .form-input { padding: 18px 20px; }
+      .forgot-link { font-size: 14px; }
+      .btn-primary { padding: 20px 32px; font-size: 18px; margin-top: 28px; }
+      .divider { margin: 28px 0; }
+      .divider-text { font-size: 14px; }
+      .social-btn { padding: 18px; font-size: 16px; }
+      .terms-text { font-size: 13px; margin-top: 24px; }
+      .auth-footer { font-size: 15px; margin-top: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="display:none">
+    <defs>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon"><svg class="icon"><use href="#i-sparkles"/></svg></div>
+      Footprint
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1 class="auth-title">ברוכים הבאים</h1>
+        <p class="auth-subtitle">התחברו כדי לצפות בהזמנות שלכם</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="showLogin()">התחברות</button>
+        <button class="auth-tab" onclick="showRegister()">הרשמה</button>
+      </div>
+
+      <form class="login-form active" id="loginForm">
+        <div class="form-group">
+          <label class="form-label">אימייל</label>
+          <input type="email" class="form-input" placeholder="your@email.com" dir="ltr">
+        </div>
+        <div class="form-group">
+          <label class="form-label">סיסמה</label>
+          <input type="password" class="form-input" placeholder="••••••••" dir="ltr">
+          <a href="#" class="forgot-link">שכחתי סיסמה</a>
+        </div>
+        <button type="button" class="btn-primary" onclick="window.location.href='07-order-history.html'">
+          <span>התחברות</span>
+          <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg>
+        </button>
+      </form>
+
+      <form class="register-form" id="registerForm">
+        <div class="form-group">
+          <label class="form-label">שם מלא</label>
+          <input type="text" class="form-input" placeholder="ישראל ישראלי">
+        </div>
+        <div class="form-group">
+          <label class="form-label">אימייל</label>
+          <input type="email" class="form-input" placeholder="your@email.com" dir="ltr">
+        </div>
+        <div class="form-group">
+          <label class="form-label">טלפון</label>
+          <input type="tel" class="form-input" placeholder="050-0000000" dir="ltr">
+        </div>
+        <div class="form-group">
+          <label class="form-label">סיסמה</label>
+          <input type="password" class="form-input" placeholder="לפחות 8 תווים" dir="ltr">
+        </div>
+        <button type="button" class="btn-primary" onclick="window.location.href='07-order-history.html'">
+          <span>יצירת חשבון</span>
+          <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg>
+        </button>
+      </form>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">או</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="social-buttons">
+        <button class="social-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          המשך עם Google
+        </button>
+        <button class="social-btn">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#000">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+          המשך עם Apple
+        </button>
+      </div>
+
+      <p class="terms-text">
+        בהמשך אתם מסכימים ל<a href="#">תנאי השימוש</a> ול<a href="#">מדיניות הפרטיות</a>
+      </p>
+    </div>
+
+    <p class="auth-footer">
+      רוצים ליצור יצירה? <a href="01-upload.html">התחילו בלי חשבון</a>
+    </p>
+  </main>
+
+  <script>
+    function showLogin() {
+      document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+      document.getElementById('loginForm').classList.add('active');
+      document.getElementById('registerForm').classList.remove('active');
+    }
+    
+    function showRegister() {
+      document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', i === 1));
+      document.getElementById('loginForm').classList.remove('active');
+      document.getElementById('registerForm').classList.add('active');
+    }
+  </script>
+</body>
+</html>

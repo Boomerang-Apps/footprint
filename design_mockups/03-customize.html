@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Footprint - התאמה אישית</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #7c3aed;
+      --primary-light: #a78bfa;
+      --accent: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --gray-50: #fafafa;
+      --gray-100: #f4f4f5;
+      --gray-200: #e4e4e7;
+      --gray-300: #d4d4d8;
+      --gray-400: #a1a1aa;
+      --gray-500: #71717a;
+      --gray-600: #52525b;
+      --gray-700: #3f3f46;
+      --gray-800: #27272a;
+      --gray-900: #18181b;
+      --white: #ffffff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+      --content-padding: 16px var(--content-padding);
+      --max-content-width: 1200px;
+    }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.5;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .icon-sm { width: 18px; height: 18px; }
+    
+    /* Header */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 12px var(--content-padding);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+    }
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      border-radius: 12px;
+    }
+    .header-title { font-size: 17px; font-weight: 600; }
+    .header-action { width: 40px; }
+    
+    /* Progress */
+    .progress {
+      background: var(--white);
+      padding: 16px var(--content-padding);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .progress-inner { max-width: var(--max-content-width); margin: 0 auto; }
+    .progress-bar {
+      height: 4px;
+      background: var(--gray-200);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 2px;
+    }
+    .progress-steps { display: flex; justify-content: space-between; }
+    .progress-step {
+      font-size: 12px;
+      color: var(--gray-400);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .progress-step.active { color: var(--primary); font-weight: 600; }
+    .progress-step.completed { color: var(--success); }
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray-300);
+    }
+    .progress-step.active .step-dot { background: var(--primary); }
+    .progress-step.completed .step-dot { background: var(--success); }
+    
+    /* Main */
+    .main {
+      flex: 1;
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+      width: 100%;
+      padding-bottom: 160px;
+    }
+    
+    /* Preview Mockup */
+    .preview-section {
+      background: var(--white);
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .mockup-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, var(--gray-100), var(--gray-50));
+      border-radius: 16px;
+      min-height: 200px;
+    }
+    .mockup-frame {
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-lg);
+    }
+    .mockup-frame.no-frame {
+      padding: 0;
+      box-shadow: var(--shadow-md);
+    }
+    .mockup-frame.black-frame {
+      padding: 6px;
+      background: #1a1a1a;
+    }
+    .mockup-frame.white-frame {
+      padding: 6px;
+      background: #ffffff;
+      box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--gray-200);
+    }
+    .mockup-frame.oak-frame {
+      padding: 8px;
+      background: linear-gradient(135deg, #b8860b, #daa520, #b8860b);
+    }
+    .mockup-image {
+      display: block;
+      max-width: 140px;
+      max-height: 140px;
+      object-fit: cover;
+      border-radius: 2px;
+    }
+    .size-label {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+    
+    /* Options Section */
+    .options-section {
+      padding: 20px 16px;
+    }
+    
+    .option-group {
+      margin-bottom: 24px;
+    }
+    .option-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .option-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    .option-info {
+      font-size: 12px;
+      color: var(--gray-400);
+    }
+    
+    /* Size Options */
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .size-option {
+      background: var(--white);
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .size-option:active { transform: scale(0.98); }
+    .size-option.selected {
+      border-color: var(--primary);
+      background: rgba(124, 58, 237, 0.04);
+    }
+    .size-option.popular::before {
+      content: 'פופולרי';
+      position: absolute;
+      top: -8px;
+      right: 12px;
+      background: var(--primary);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .size-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 2px;
+    }
+    .size-dimensions {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+    }
+    .size-price {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    /* Paper Options */
+    .paper-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .paper-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--white);
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.2s;
+    }
+    .paper-option:active { transform: scale(0.99); }
+    .paper-option.selected {
+      border-color: var(--primary);
+      background: rgba(124, 58, 237, 0.04);
+    }
+    .paper-radio {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gray-300);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .paper-option.selected .paper-radio {
+      border-color: var(--primary);
+    }
+    .paper-option.selected .paper-radio::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+    .paper-info { flex: 1; }
+    .paper-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 2px;
+    }
+    .paper-desc {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    .paper-price {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+    .paper-price.included {
+      color: var(--success);
+      font-size: 12px;
+    }
+    
+    /* Frame Options */
+    .frame-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .frame-option {
+      background: var(--white);
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 12px 8px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .frame-option:active { transform: scale(0.97); }
+    .frame-option.selected {
+      border-color: var(--primary);
+      background: rgba(124, 58, 237, 0.04);
+    }
+    .frame-preview {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .frame-preview.no-frame {
+      background: var(--gray-100);
+      border: 2px dashed var(--gray-300);
+    }
+    .frame-preview.black-frame {
+      background: #1a1a1a;
+    }
+    .frame-preview.white-frame {
+      background: #ffffff;
+      border: 1px solid var(--gray-300);
+    }
+    .frame-preview.oak-frame {
+      background: linear-gradient(135deg, #b8860b, #daa520);
+    }
+    .frame-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 2px;
+    }
+    .frame-price {
+      font-size: 11px;
+      color: var(--gray-500);
+    }
+    .frame-price.free {
+      color: var(--success);
+    }
+    
+    /* Bottom CTA */
+    .bottom-cta {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      padding: 16px var(--content-padding);
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+    .bottom-inner {
+      max-width: var(--max-content-width);
+      margin: 0 auto;
+    }
+    .price-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .price-label {
+      font-size: 14px;
+      color: var(--gray-600);
+    }
+    .price-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    .price-value span {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--gray-500);
+    }
+    .bottom-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .btn-secondary {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-100);
+      border-radius: 14px;
+      color: var(--gray-600);
+    }
+    .btn-primary {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: var(--white);
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    
+    /* Tablet - 640px+ */
+    @media (min-width: 640px) {
+      :root { --content-padding: 24px; }
+      .header-inner { padding: 14px 24px; }
+      .progress-inner { max-width: 600px; }
+      .main { max-width: 700px; }
+      .preview-section { padding: 28px 24px; }
+      .mockup-container { padding: 32px; min-height: 240px; }
+      .mockup-image { max-width: 180px; max-height: 180px; }
+      .options-section { padding: 24px; }
+      .size-grid { grid-template-columns: repeat(4, 1fr); }
+      .bottom-inner { max-width: 600px; }
+    }
+    
+    /* Desktop - 1024px+ */
+    @media (min-width: 1024px) {
+      :root { --content-padding: 40px; }
+      .header-inner { max-width: 1200px; padding: 16px 40px; }
+      .progress { padding: 20px 40px; }
+      .progress-inner { max-width: 900px; }
+      .main { 
+        max-width: 1100px;
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        padding-bottom: 140px;
+      }
+      .preview-section { 
+        padding: 32px;
+        border-bottom: none;
+        border-left: 1px solid var(--gray-200);
+        position: sticky;
+        top: 70px;
+        height: fit-content;
+      }
+      .mockup-container { padding: 40px; min-height: 280px; border-radius: 20px; }
+      .mockup-image { max-width: 220px; max-height: 220px; }
+      .size-label { font-size: 14px; margin-top: 16px; }
+      .options-section { padding: 32px 40px; }
+      .option-group { margin-bottom: 32px; }
+      .option-title { font-size: 18px; }
+      .size-grid { gap: 14px; }
+      .size-option { padding: 18px 14px; border-radius: 14px; }
+      .size-name { font-size: 18px; }
+      .size-dimensions { font-size: 13px; }
+      .size-price { font-size: 16px; }
+      .paper-list { gap: 12px; }
+      .paper-option { padding: 16px; border-radius: 14px; }
+      .paper-name { font-size: 15px; }
+      .paper-desc { font-size: 13px; }
+      .frame-grid { gap: 12px; }
+      .frame-option { padding: 14px 10px; border-radius: 14px; }
+      .frame-preview { width: 48px; height: 48px; }
+      .frame-name { font-size: 12px; }
+      .bottom-cta { padding: 20px 40px; }
+      .bottom-inner { max-width: 1100px; }
+      .price-value { font-size: 28px; }
+      .btn-primary { padding: 16px 32px; font-size: 17px; }
+    }
+    
+    /* Large Desktop - 1280px+ */
+    @media (min-width: 1280px) {
+      :root { --content-padding: 60px; }
+      .main { max-width: 1200px; grid-template-columns: 450px 1fr; }
+      .preview-section { padding: 40px; }
+      .mockup-container { min-height: 320px; }
+      .options-section { padding: 40px 48px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="display:none">
+    <defs>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <button class="back-btn" onclick="window.location.href='02-style-selection.html'">
+        <svg class="icon"><use href="#i-arrow-right"/></svg>
+      </button>
+      <h1 class="header-title">התאמה אישית</h1>
+      <div class="header-action"></div>
+    </div>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress">
+    <div class="progress-inner">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 60%"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-step completed"><span class="step-dot"></span>העלאה</div>
+        <div class="progress-step completed"><span class="step-dot"></span>סגנון</div>
+        <div class="progress-step active"><span class="step-dot"></span>התאמה</div>
+        <div class="progress-step"><span class="step-dot"></span>תשלום</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Preview Mockup -->
+    <div class="preview-section">
+      <div class="mockup-container">
+        <div class="mockup-frame black-frame" id="mockupFrame">
+          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face" 
+               alt="תצוגה מקדימה" class="mockup-image" id="mockupImage">
+        </div>
+      </div>
+      <div class="size-label" id="sizeLabel">A4 • 21×29.7 ס״מ</div>
+    </div>
+
+    <!-- Options -->
+    <div class="options-section">
+      <!-- Size -->
+      <div class="option-group">
+        <div class="option-header">
+          <span class="option-title">גודל הדפסה</span>
+        </div>
+        <div class="size-grid">
+          <div class="size-option" data-size="A5" data-price="89" onclick="selectSize(this)">
+            <div class="size-name">A5</div>
+            <div class="size-dimensions">14.8×21 ס״מ</div>
+            <div class="size-price">₪89</div>
+          </div>
+          <div class="size-option popular selected" data-size="A4" data-price="149" onclick="selectSize(this)">
+            <div class="size-name">A4</div>
+            <div class="size-dimensions">21×29.7 ס״מ</div>
+            <div class="size-price">₪149</div>
+          </div>
+          <div class="size-option" data-size="A3" data-price="249" onclick="selectSize(this)">
+            <div class="size-name">A3</div>
+            <div class="size-dimensions">29.7×42 ס״מ</div>
+            <div class="size-price">₪249</div>
+          </div>
+          <div class="size-option" data-size="A2" data-price="379" onclick="selectSize(this)">
+            <div class="size-name">A2</div>
+            <div class="size-dimensions">42×59.4 ס״מ</div>
+            <div class="size-price">₪379</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paper -->
+      <div class="option-group">
+        <div class="option-header">
+          <span class="option-title">סוג נייר</span>
+        </div>
+        <div class="paper-list">
+          <div class="paper-option selected" data-paper="matte" data-price="0" onclick="selectPaper(this)">
+            <div class="paper-radio"></div>
+            <div class="paper-info">
+              <div class="paper-name">Fine Art Matte</div>
+              <div class="paper-desc">נייר פיין ארט מט, איכות מוזיאון</div>
+            </div>
+            <div class="paper-price included">כלול</div>
+          </div>
+          <div class="paper-option" data-paper="glossy" data-price="20" onclick="selectPaper(this)">
+            <div class="paper-radio"></div>
+            <div class="paper-info">
+              <div class="paper-name">Glossy Photo</div>
+              <div class="paper-desc">נייר צילום מבריק, צבעים עזים</div>
+            </div>
+            <div class="paper-price">+₪20</div>
+          </div>
+          <div class="paper-option" data-paper="canvas" data-price="40" onclick="selectPaper(this)">
+            <div class="paper-radio"></div>
+            <div class="paper-info">
+              <div class="paper-name">Canvas Texture</div>
+              <div class="paper-desc">טקסטורת קנבס, מראה ציורי</div>
+            </div>
+            <div class="paper-price">+₪40</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame -->
+      <div class="option-group">
+        <div class="option-header">
+          <span class="option-title">מסגרת</span>
+        </div>
+        <div class="frame-grid">
+          <div class="frame-option" data-frame="none" data-price="0" onclick="selectFrame(this)">
+            <div class="frame-preview no-frame">
+              <svg class="icon icon-sm" style="color: var(--gray-400)"><use href="#i-x"/></svg>
+            </div>
+            <div class="frame-name">ללא</div>
+            <div class="frame-price free">חינם</div>
+          </div>
+          <div class="frame-option selected" data-frame="black" data-price="60" onclick="selectFrame(this)">
+            <div class="frame-preview black-frame"></div>
+            <div class="frame-name">שחור</div>
+            <div class="frame-price">+₪60</div>
+          </div>
+          <div class="frame-option" data-frame="white" data-price="60" onclick="selectFrame(this)">
+            <div class="frame-preview white-frame"></div>
+            <div class="frame-name">לבן</div>
+            <div class="frame-price">+₪60</div>
+          </div>
+          <div class="frame-option" data-frame="oak" data-price="80" onclick="selectFrame(this)">
+            <div class="frame-preview oak-frame"></div>
+            <div class="frame-name">אלון</div>
+            <div class="frame-price">+₪80</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom CTA -->
+  <div class="bottom-cta">
+    <div class="bottom-inner">
+      <div class="price-summary">
+        <span class="price-label">סה״כ</span>
+        <span class="price-value" id="totalPrice">₪209 <span>+ משלוח</span></span>
+      </div>
+      <div class="bottom-buttons">
+        <button class="btn-secondary" onclick="window.location.href='02-style-selection.html'">
+          <svg class="icon"><use href="#i-arrow-right"/></svg>
+        </button>
+        <button class="btn-primary" onclick="window.location.href='04-checkout.html'">
+          <span>המשך לתשלום</span>
+          <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedSize = 149;
+    let selectedPaper = 0;
+    let selectedFrame = 60;
+
+    const sizeDimensions = {
+      'A5': '14.8×21 ס״מ',
+      'A4': '21×29.7 ס״מ',
+      'A3': '29.7×42 ס״מ',
+      'A2': '42×59.4 ס״מ'
+    };
+
+    function selectSize(el) {
+      document.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedSize = parseInt(el.dataset.price);
+      document.getElementById('sizeLabel').textContent = el.dataset.size + ' • ' + sizeDimensions[el.dataset.size];
+      updateTotal();
+      updateMockupSize(el.dataset.size);
+    }
+
+    function selectPaper(el) {
+      document.querySelectorAll('.paper-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedPaper = parseInt(el.dataset.price);
+      updateTotal();
+    }
+
+    function selectFrame(el) {
+      document.querySelectorAll('.frame-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedFrame = parseInt(el.dataset.price);
+      updateTotal();
+      updateMockupFrame(el.dataset.frame);
+    }
+
+    function updateTotal() {
+      const total = selectedSize + selectedPaper + selectedFrame;
+      document.getElementById('totalPrice').innerHTML = '₪' + total + ' <span>+ משלוח</span>';
+    }
+
+    function updateMockupSize(size) {
+      const img = document.getElementById('mockupImage');
+      const sizes = { 'A5': 100, 'A4': 120, 'A3': 140, 'A2': 160 };
+      img.style.maxWidth = sizes[size] + 'px';
+      img.style.maxHeight = sizes[size] + 'px';
+    }
+
+    function updateMockupFrame(frame) {
+      const mockup = document.getElementById('mockupFrame');
+      mockup.className = 'mockup-frame ' + frame + '-frame';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Footprint - פרטי הזמנה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #7c3aed;
+      --accent: #ec4899;
+      --success: #10b981;
+      --gray-50: #fafafa;
+      --gray-100: #f4f4f5;
+      --gray-200: #e4e4e7;
+      --gray-400: #a1a1aa;
+      --gray-500: #71717a;
+      --gray-600: #52525b;
+      --gray-700: #3f3f46;
+      --gray-900: #18181b;
+      --white: #ffffff;
+    }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .icon-sm { width: 18px; height: 18px; }
+    
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      border-radius: 12px;
+    }
+    .header-title { font-size: 17px; font-weight: 600; }
+    .header-action { width: 40px; }
+    
+    .main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 120px;
+    }
+    
+    .order-header-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .order-id {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .order-date {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(139, 92, 246, 0.15);
+      color: #6d28d9;
+    }
+    .status-badge .icon { width: 16px; height: 16px; }
+    
+    .product-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .product-content {
+      display: flex;
+      gap: 14px;
+    }
+    .product-thumb {
+      width: 90px;
+      height: 90px;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--gray-100);
+    }
+    .product-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-details { flex: 1; }
+    .product-style {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .product-specs {
+      font-size: 13px;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+    
+    .section-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header .icon {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .section-content { padding: 16px; }
+    
+    .timeline {
+      display: flex;
+      flex-direction: column;
+    }
+    .timeline-step {
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+    .timeline-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 28px;
+      right: 13px;
+      width: 2px;
+      height: calc(100% - 12px);
+      background: var(--gray-200);
+    }
+    .timeline-step.completed:not(:last-child)::after {
+      background: var(--success);
+    }
+    .timeline-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .timeline-step.completed .timeline-dot { background: var(--success); }
+    .timeline-step.active .timeline-dot {
+      background: var(--primary);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(124, 58, 237, 0); }
+    }
+    .timeline-dot .icon { width: 14px; height: 14px; color: white; }
+    .timeline-info { padding-bottom: 24px; flex: 1; }
+    .timeline-step:last-child .timeline-info { padding-bottom: 0; }
+    .timeline-label { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .timeline-date { font-size: 12px; color: var(--gray-500); }
+    .timeline-step.pending .timeline-label,
+    .timeline-step.pending .timeline-date { color: var(--gray-400); }
+    
+    .tracking-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      background: rgba(124, 58, 237, 0.06);
+      border-radius: 12px;
+      margin-top: 12px;
+    }
+    .tracking-label { font-size: 13px; color: var(--gray-600); }
+    .tracking-number {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tracking-number .icon { width: 16px; height: 16px; }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 13px; color: var(--gray-500); }
+    .info-value { font-size: 13px; font-weight: 500; color: var(--gray-900); }
+    
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+    .price-row.total {
+      font-size: 16px;
+      font-weight: 700;
+      padding-top: 12px;
+      margin-top: 8px;
+      border-top: 1px solid var(--gray-200);
+    }
+    .price-label { color: var(--gray-600); }
+    .price-value { font-weight: 500; }
+    .price-value.free { color: var(--success); }
+    
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .action-btn.secondary { background: var(--gray-100); color: var(--gray-700); }
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+    }
+    .action-btn .icon { width: 18px; height: 18px; }
+    
+    .bottom-cta {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      padding: 16px;
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+    .bottom-inner { max-width: 600px; margin: 0 auto; }
+    .btn-primary {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--gray-100);
+      color: var(--gray-700);
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    /* Tablet - 640px+ */
+    @media (min-width: 640px) {
+      .header-inner { padding: 14px 24px; }
+      .main { max-width: 700px; padding: 24px; }
+      .order-header-card { padding: 20px; border-radius: 18px; }
+      .order-id { font-size: 20px; }
+      .product-card { border-radius: 18px; }
+      .product-content { padding: 20px; gap: 18px; }
+      .product-thumb { width: 100px; height: 100px; }
+      .section-card { border-radius: 18px; }
+      .section-content { padding: 20px; }
+      .action-buttons { gap: 16px; }
+      .action-btn { padding: 14px; font-size: 15px; }
+      .bottom-inner { max-width: 600px; }
+    }
+    
+    /* Desktop - 1024px+ */
+    @media (min-width: 1024px) {
+      .header-inner { max-width: 1200px; padding: 16px 40px; }
+      .main { 
+        max-width: 1000px; 
+        padding: 32px 40px 140px;
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 28px;
+        align-items: start;
+      }
+      .main-content { order: 1; display: contents; }
+      .order-header-card { 
+        grid-column: 1 / -1;
+        padding: 24px; 
+        border-radius: 20px; 
+      }
+      .order-id { font-size: 22px; }
+      .status-badge { padding: 10px 18px; font-size: 14px; }
+      .product-card { 
+        grid-column: 1;
+        border-radius: 20px; 
+      }
+      .product-content { padding: 24px; gap: 20px; }
+      .product-thumb { width: 120px; height: 120px; border-radius: 14px; }
+      .product-style { font-size: 18px; }
+      .product-specs { font-size: 14px; }
+      .section-card { border-radius: 20px; }
+      .section-header { padding: 16px 20px; }
+      .section-title { font-size: 15px; }
+      .section-content { padding: 24px; }
+      .timeline-dot { width: 32px; height: 32px; }
+      .timeline-label { font-size: 15px; }
+      .tracking-link { padding: 16px; }
+      .info-row { padding: 12px 0; }
+      .info-label, .info-value { font-size: 14px; }
+      .price-row { font-size: 15px; }
+      .price-row.total { font-size: 18px; }
+      .action-buttons { 
+        grid-column: 1 / -1;
+        justify-content: center;
+        gap: 20px;
+      }
+      .action-btn { 
+        flex: none;
+        min-width: 180px;
+        padding: 16px 28px; 
+        font-size: 16px; 
+        border-radius: 14px;
+      }
+      .bottom-cta { padding: 20px 40px; }
+      .bottom-inner { max-width: 1000px; }
+      .btn-primary { max-width: 300px; margin: 0 auto; padding: 16px 32px; }
+    }
+    
+    /* Large Desktop - 1280px+ */
+    @media (min-width: 1280px) {
+      .main { max-width: 1100px; grid-template-columns: 1fr 420px; gap: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="display:none">
+    <defs>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+      <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="i-credit-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></symbol>
+      <symbol id="i-external-link" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></symbol>
+      <symbol id="i-message-circle" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="header">
+    <div class="header-inner">
+      <button class="back-btn" onclick="window.location.href='07-order-history.html'">
+        <svg class="icon"><use href="#i-arrow-right"/></svg>
+      </button>
+      <h1 class="header-title">פרטי הזמנה</h1>
+      <div class="header-action"></div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="order-header-card">
+      <div>
+        <div class="order-id">FP-2024-1847</div>
+        <div class="order-date">הוזמן: 23/12/2024, 14:30</div>
+      </div>
+      <div class="status-badge">
+        <svg class="icon"><use href="#i-truck"/></svg>
+        נשלח
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-content">
+        <div class="product-thumb">
+          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=180&h=180&fit=crop&crop=face" alt="">
+        </div>
+        <div class="product-details">
+          <div class="product-style">פורטרט AI - פופ ארט</div>
+          <div class="product-specs">
+            גודל: A4 (21×29.7 ס״מ)<br>
+            נייר: Fine Art Matte<br>
+            מסגרת: שחור
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <svg class="icon"><use href="#i-truck"/></svg>
+        <span class="section-title">סטטוס משלוח</span>
+      </div>
+      <div class="section-content">
+        <div class="timeline">
+          <div class="timeline-step completed">
+            <div class="timeline-dot"><svg class="icon"><use href="#i-check"/></svg></div>
+            <div class="timeline-info">
+              <div class="timeline-label">ההזמנה התקבלה</div>
+              <div class="timeline-date">23/12/2024, 14:30</div>
+            </div>
+          </div>
+          <div class="timeline-step completed">
+            <div class="timeline-dot"><svg class="icon"><use href="#i-check"/></svg></div>
+            <div class="timeline-info">
+              <div class="timeline-label">הודפס ונארז</div>
+              <div class="timeline-date">23/12/2024, 18:45</div>
+            </div>
+          </div>
+          <div class="timeline-step active">
+            <div class="timeline-dot"><svg class="icon"><use href="#i-truck"/></svg></div>
+            <div class="timeline-info">
+              <div class="timeline-label">בדרך אליכם</div>
+              <div class="timeline-date">24/12/2024, 09:00</div>
+            </div>
+          </div>
+          <div class="timeline-step pending">
+            <div class="timeline-dot"></div>
+            <div class="timeline-info">
+              <div class="timeline-label">נמסר</div>
+              <div class="timeline-date">צפוי: 25-26/12/2024</div>
+            </div>
+          </div>
+        </div>
+        <div class="tracking-link">
+          <span class="tracking-label">מספר מעקב:</span>
+          <a href="#" class="tracking-number">
+            IL123456789
+            <svg class="icon"><use href="#i-external-link"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <svg class="icon"><use href="#i-map-pin"/></svg>
+        <span class="section-title">כתובת למשלוח</span>
+      </div>
+      <div class="section-content">
+        <div class="info-row">
+          <span class="info-label">שם</span>
+          <span class="info-value">ישראל ישראלי</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">כתובת</span>
+          <span class="info-value">רוטשילד 1, דירה 5</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">עיר</span>
+          <span class="info-value">תל אביב</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">טלפון</span>
+          <span class="info-value">050-0000000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <svg class="icon"><use href="#i-credit-card"/></svg>
+        <span class="section-title">פרטי תשלום</span>
+      </div>
+      <div class="section-content">
+        <div class="price-row">
+          <span class="price-label">הדפסה A4</span>
+          <span class="price-value">₪149</span>
+        </div>
+        <div class="price-row">
+          <span class="price-label">מסגרת שחורה</span>
+          <span class="price-value">₪60</span>
+        </div>
+        <div class="price-row">
+          <span class="price-label">משלוח</span>
+          <span class="price-value free">חינם</span>
+        </div>
+        <div class="price-row total">
+          <span class="price-label">סה״כ שולם</span>
+          <span class="price-value">₪209</span>
+        </div>
+        <div class="info-row" style="margin-top: 12px; padding-top: 12px;">
+          <span class="info-label">שולם באמצעות</span>
+          <span class="info-value">Visa •••• 4242</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="action-btn secondary">
+        <svg class="icon"><use href="#i-message-circle"/></svg>
+        צור קשר
+      </button>
+      <button class="action-btn primary" onclick="window.location.href='01-upload.html'">
+        <svg class="icon"><use href="#i-refresh"/></svg>
+        הזמנה חוזרת
+      </button>
+    </div>
+  </main>
+
+  <div class="bottom-cta">
+    <div class="bottom-inner">
+      <button class="btn-primary" onclick="window.location.href='07-order-history.html'">
+        <svg class="icon"><use href="#i-arrow-right"/></svg>
+        חזרה להזמנות
+      </button>
+    </div>
+  </div>
+</body>
+</html>
