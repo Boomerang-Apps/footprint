@@ -1,47 +1,50 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, Check, Sparkles, Gift, MessageSquare, Frame, FileText, Maximize } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import type { SizeType, PaperType, FrameType } from '@/types';
 
+// Prices matching mockup 03-customize.html
 const sizes: { id: SizeType; name: string; dimensions: string; price: number; popular?: boolean }[] = [
-  { id: 'A5', name: 'A5', dimensions: '14.8 × 21 ס״מ', price: 89 },
-  { id: 'A4', name: 'A4', dimensions: '21 × 29.7 ס״מ', price: 129, popular: true },
-  { id: 'A3', name: 'A3', dimensions: '29.7 × 42 ס״מ', price: 179 },
-  { id: 'A2', name: 'A2', dimensions: '42 × 59.4 ס״מ', price: 249 },
+  { id: 'A5', name: 'A5', dimensions: '14.8×21 ס״מ', price: 89 },
+  { id: 'A4', name: 'A4', dimensions: '21×29.7 ס״מ', price: 149, popular: true },
+  { id: 'A3', name: 'A3', dimensions: '29.7×42 ס״מ', price: 249 },
+  { id: 'A2', name: 'A2', dimensions: '42×59.4 ס״מ', price: 379 },
 ];
 
-const papers: { id: PaperType; name: string; description: string; modifier: number }[] = [
-  { id: 'matte', name: 'מט פיין ארט', description: 'נייר איכותי ללא ברק', modifier: 0 },
-  { id: 'glossy', name: 'מבריק', description: 'צבעים חיים עם ברק', modifier: 20 },
-  { id: 'canvas', name: 'קנבס', description: 'מרקם אמנותי אותנטי', modifier: 50 },
+const papers: { id: PaperType; name: string; englishName: string; description: string; extraPrice: number }[] = [
+  { id: 'matte', name: 'נייר פיין ארט מט', englishName: 'Fine Art Matte', description: 'איכות מוזיאון', extraPrice: 0 },
+  { id: 'glossy', name: 'נייר צילום מבריק', englishName: 'Glossy Photo', description: 'צבעים עזים', extraPrice: 20 },
+  { id: 'canvas', name: 'קנבס', englishName: 'Canvas Texture', description: 'מראה ציורי', extraPrice: 40 },
 ];
 
-const frames: { id: FrameType; name: string; color: string; price: number; popular?: boolean }[] = [
-  { id: 'none', name: 'ללא מסגרת', color: 'transparent', price: 0 },
-  { id: 'black', name: 'שחור', color: '#1a1a1a', price: 79, popular: true },
-  { id: 'white', name: 'לבן', color: '#ffffff', price: 79 },
-  { id: 'oak', name: 'אלון טבעי', color: '#c4a574', price: 99 },
+const frames: { id: FrameType; name: string; color: string; extraPrice: number }[] = [
+  { id: 'none', name: 'ללא', color: 'transparent', extraPrice: 0 },
+  { id: 'black', name: 'שחור', color: '#1a1a1a', extraPrice: 60 },
+  { id: 'white', name: 'לבן', color: '#ffffff', extraPrice: 60 },
+  { id: 'oak', name: 'אלון', color: '#daa520', extraPrice: 80 },
+];
+
+const progressSteps = [
+  { key: 'upload', label: 'העלאה' },
+  { key: 'style', label: 'סגנון' },
+  { key: 'customize', label: 'התאמה' },
+  { key: 'checkout', label: 'תשלום' },
 ];
 
 export default function CustomizePage() {
   const router = useRouter();
   const {
     originalImage,
-    selectedStyle,
     size,
     paperType,
     frameType,
-    isGift,
-    giftMessage,
     setSize,
     setPaperType,
     setFrameType,
-    setIsGift,
-    setGiftMessage,
     setStep,
   } = useOrderStore();
 
@@ -67,291 +70,276 @@ export default function CustomizePage() {
   }
 
   // Calculate price
-  const basePrice = sizes.find(s => s.id === size)?.price || 0;
-  const paperModifier = papers.find(p => p.id === paperType)?.modifier || 0;
-  const framePrice = frames.find(f => f.id === frameType)?.price || 0;
-  const total = basePrice + paperModifier + framePrice;
+  const sizePrice = sizes.find(s => s.id === size)?.price || 0;
+  const paperPrice = papers.find(p => p.id === paperType)?.extraPrice || 0;
+  const framePrice = frames.find(f => f.id === frameType)?.extraPrice || 0;
+  const total = sizePrice + paperPrice + framePrice;
+
+  const currentSize = sizes.find(s => s.id === size);
+  const currentFrame = frames.find(f => f.id === frameType);
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-zinc-50 pb-40">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-zinc-200">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition"
+            className="w-10 h-10 flex items-center justify-center text-zinc-600 rounded-xl"
+            aria-label="חזרה"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>חזרה</span>
+            <ArrowRight className="w-6 h-6" />
           </button>
 
-          <div className="flex items-center gap-2 text-zinc-900">
-            <Sparkles className="w-5 h-5 text-brand-purple" />
-            <span className="font-semibold">התאמה אישית</span>
-          </div>
+          <h1 className="text-[17px] font-semibold text-zinc-900">התאמה אישית</h1>
 
-          <div className="w-20" />
+          <div className="w-10" />
         </div>
       </header>
 
-      {/* Progress Steps */}
-      <div className="border-b border-zinc-200">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-2">
-            {['העלאה', 'סגנון', 'התאמה', 'תשלום'].map((step, i) => (
-              <div key={step} className="flex items-center gap-2">
-                <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                  ${i <= 2 ? 'bg-brand-purple text-white' : 'bg-zinc-100 text-zinc-500'}
-                `}>
-                  {i < 2 ? <Check className="w-4 h-4" /> : i + 1}
+      {/* Progress Bar */}
+      <div className="bg-white border-b border-zinc-200 py-4 px-4">
+        <div className="max-w-xl mx-auto">
+          {/* Progress fill bar */}
+          <div className="h-1 bg-zinc-200 rounded-full overflow-hidden mb-3">
+            <div
+              data-testid="progress-fill"
+              className="h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full"
+              style={{ width: '60%' }}
+            />
+          </div>
+
+          {/* Step labels */}
+          <div className="flex justify-between">
+            {progressSteps.map((step, i) => {
+              const isCompleted = i < 2; // Steps 0 and 1 are completed
+              const isActive = i === 2; // Step 2 (customize) is active
+
+              return (
+                <div
+                  key={step.key}
+                  data-step={step.key}
+                  data-completed={isCompleted ? 'true' : undefined}
+                  data-active={isActive ? 'true' : undefined}
+                  className="flex items-center gap-1"
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isCompleted
+                        ? 'bg-emerald-500'
+                        : isActive
+                        ? 'bg-violet-500'
+                        : 'bg-zinc-300'
+                    }`}
+                  />
+                  <span
+                    className={`text-xs ${
+                      isCompleted
+                        ? 'text-emerald-500'
+                        : isActive
+                        ? 'text-violet-500 font-semibold'
+                        : 'text-zinc-400'
+                    }`}
+                  >
+                    {step.label}
+                  </span>
                 </div>
-                <span className={`text-sm ${i <= 2 ? 'text-zinc-900' : 'text-zinc-500'}`}>
-                  {step}
-                </span>
-                {i < 3 && <div className={`w-8 h-px ${i < 2 ? 'bg-brand-purple' : 'bg-zinc-200'}`} />}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Preview */}
-          <div className="order-2 lg:order-1">
-            <div className="sticky top-32">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">תצוגה מקדימה</h2>
-              <div className="relative">
-                {/* Frame preview */}
-                <div
-                  className={`
-                    relative aspect-[4/3] rounded-lg overflow-hidden
-                    ${frameType !== 'none' ? 'p-3' : ''}
-                  `}
-                  style={{
-                    backgroundColor: frameType !== 'none' ? frames.find(f => f.id === frameType)?.color : 'transparent',
-                    boxShadow: frameType !== 'none' ? '0 8px 32px rgba(0,0,0,0.15)' : 'none',
-                  }}
-                >
-                  <div className="relative w-full h-full rounded overflow-hidden bg-zinc-100">
-                    <Image
-                      src={originalImage}
-                      alt="Preview"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Price Summary */}
-              <div className="mt-6 p-4 bg-zinc-50 rounded-xl border border-zinc-200">
-                <h3 className="font-semibold text-zinc-900 mb-3">סיכום מחיר</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-zinc-500">הדפסה {size}</span>
-                    <span className="text-zinc-900">₪{basePrice}</span>
-                  </div>
-                  {paperModifier > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">נייר {papers.find(p => p.id === paperType)?.name}</span>
-                      <span className="text-zinc-900">+₪{paperModifier}</span>
-                    </div>
-                  )}
-                  {framePrice > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">מסגרת {frames.find(f => f.id === frameType)?.name}</span>
-                      <span className="text-zinc-900">+₪{framePrice}</span>
-                    </div>
-                  )}
-                  <div className="pt-2 border-t border-zinc-200 flex justify-between font-semibold">
-                    <span className="text-zinc-900">סה״כ</span>
-                    <span className="text-brand-purple text-lg">₪{total}</span>
-                  </div>
-                </div>
-              </div>
+      <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-[400px_1fr]">
+        {/* Preview Section */}
+        <div className="bg-white border-b lg:border-b-0 lg:border-l border-zinc-200 p-5 lg:sticky lg:top-[70px] lg:h-fit">
+          <div
+            data-testid="mockup-container"
+            className="flex items-center justify-center p-6 bg-gradient-to-br from-zinc-100 to-zinc-50 rounded-2xl min-h-[200px]"
+          >
+            <div
+              className={`relative transition-all shadow-lg ${
+                frameType !== 'none' ? 'p-1.5' : ''
+              }`}
+              style={{
+                backgroundColor: currentFrame?.color || 'transparent',
+                boxShadow: frameType === 'white' ? '0 10px 15px rgba(0,0,0,0.1), inset 0 0 0 1px #e4e4e7' : undefined,
+              }}
+            >
+              <Image
+                src={originalImage}
+                alt="תצוגה מקדימה"
+                width={140}
+                height={140}
+                className="object-cover rounded-sm"
+              />
             </div>
           </div>
+          <div data-testid="size-label" className="text-center mt-3 text-sm text-zinc-500">
+            {currentSize?.name} • {currentSize?.dimensions}
+          </div>
+        </div>
 
-          {/* Options */}
-          <div className="order-1 lg:order-2 space-y-8">
-            {/* Size Selection */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Maximize className="w-5 h-5 text-brand-purple" />
-                <h2 className="text-lg font-semibold text-zinc-900">גודל הדפסה</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {sizes.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setSize(s.id)}
+        {/* Options Section */}
+        <div className="p-5 space-y-6">
+          {/* Size Selection */}
+          <section>
+            <h2 className="text-base font-semibold text-zinc-900 mb-3">גודל הדפסה</h2>
+            <div data-testid="size-grid" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {sizes.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setSize(s.id)}
+                  data-selected={size === s.id ? 'true' : undefined}
+                  aria-label={s.name}
+                  className={`
+                    relative p-3.5 rounded-xl border-2 text-center transition-all
+                    ${size === s.id
+                      ? 'border-violet-500 bg-violet-500/5'
+                      : 'border-zinc-200 bg-white hover:border-zinc-300'
+                    }
+                  `}
+                >
+                  {s.popular && (
+                    <span className="absolute -top-2 right-3 px-2 py-0.5 bg-violet-500 text-white text-[9px] font-bold rounded-md">
+                      פופולרי
+                    </span>
+                  )}
+                  <div className="text-base font-bold text-zinc-900">{s.name}</div>
+                  <div className="text-xs text-zinc-500 mb-1">{s.dimensions}</div>
+                  <div className="text-sm font-semibold text-violet-500">₪{s.price}</div>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Paper Selection */}
+          <section>
+            <h2 className="text-base font-semibold text-zinc-900 mb-3">סוג נייר</h2>
+            <div className="space-y-2.5">
+              {papers.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPaperType(p.id)}
+                  data-selected={paperType === p.id ? 'true' : undefined}
+                  aria-label={p.englishName}
+                  className={`
+                    w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-right transition-all
+                    ${paperType === p.id
+                      ? 'border-violet-500 bg-violet-500/5'
+                      : 'border-zinc-200 bg-white hover:border-zinc-300'
+                    }
+                  `}
+                >
+                  {/* Radio circle */}
+                  <div
                     className={`
-                      relative p-4 rounded-xl border-2 text-right transition-all
-                      ${size === s.id
-                        ? 'border-brand-purple bg-brand-purple/5'
-                        : 'border-zinc-200 hover:border-zinc-300'
-                      }
+                      w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
+                      ${paperType === p.id ? 'border-violet-500' : 'border-zinc-300'}
                     `}
                   >
-                    {s.popular && (
-                      <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-brand-purple text-white text-[10px] font-semibold rounded-full">
-                        פופולרי
-                      </span>
+                    {paperType === p.id && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-violet-500" />
                     )}
-                    {size === s.id && (
-                      <div className="absolute top-2 left-2 w-5 h-5 bg-brand-purple rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
-                    )}
-                    <div className="text-lg font-bold text-zinc-900">{s.name}</div>
-                    <div className="text-sm text-zinc-500">{s.dimensions}</div>
-                    <div className="text-sm font-semibold text-brand-purple mt-1">₪{s.price}</div>
-                  </button>
-                ))}
-              </div>
-            </section>
+                  </div>
 
-            {/* Paper Selection */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-brand-purple" />
-                <h2 className="text-lg font-semibold text-zinc-900">סוג נייר</h2>
-              </div>
-              <div className="space-y-3">
-                {papers.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setPaperType(p.id)}
-                    className={`
-                      w-full p-4 rounded-xl border-2 text-right transition-all flex items-center justify-between
-                      ${paperType === p.id
-                        ? 'border-brand-purple bg-brand-purple/5'
-                        : 'border-zinc-200 hover:border-zinc-300'
-                      }
-                    `}
+                  {/* Info */}
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-zinc-900">{p.englishName}</div>
+                    <div className="text-xs text-zinc-500">{p.description}</div>
+                  </div>
+
+                  {/* Price */}
+                  <span
+                    className={`text-sm font-medium ${
+                      p.extraPrice === 0 ? 'text-emerald-500' : 'text-zinc-600'
+                    }`}
                   >
-                    <div className="flex items-center gap-3">
-                      {paperType === p.id && (
-                        <div className="w-5 h-5 bg-brand-purple rounded-full flex items-center justify-center">
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                      <div>
-                        <div className="font-semibold text-zinc-900">{p.name}</div>
-                        <div className="text-sm text-zinc-500">{p.description}</div>
-                      </div>
-                    </div>
-                    {p.modifier > 0 && (
-                      <span className="text-sm font-medium text-zinc-500">+₪{p.modifier}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </section>
+                    {p.extraPrice === 0 ? 'כלול' : `+₪${p.extraPrice}`}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
 
-            {/* Frame Selection */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Frame className="w-5 h-5 text-brand-purple" />
-                <h2 className="text-lg font-semibold text-zinc-900">מסגרת</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {frames.map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => setFrameType(f.id)}
+          {/* Frame Selection */}
+          <section>
+            <h2 className="text-base font-semibold text-zinc-900 mb-3">מסגרת</h2>
+            <div data-testid="frame-grid" className="grid grid-cols-4 gap-2.5">
+              {frames.map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setFrameType(f.id)}
+                  data-selected={frameType === f.id ? 'true' : undefined}
+                  aria-label={f.name}
+                  className={`
+                    p-3 rounded-xl border-2 text-center transition-all
+                    ${frameType === f.id
+                      ? 'border-violet-500 bg-violet-500/5'
+                      : 'border-zinc-200 bg-white hover:border-zinc-300'
+                    }
+                  `}
+                >
+                  {/* Frame preview */}
+                  <div
+                    data-testid={f.id !== 'none' ? `frame-preview-${f.id}` : undefined}
                     className={`
-                      relative p-4 rounded-xl border-2 text-right transition-all
-                      ${frameType === f.id
-                        ? 'border-brand-purple bg-brand-purple/5'
-                        : 'border-zinc-200 hover:border-zinc-300'
+                      w-10 h-10 mx-auto mb-2 rounded flex items-center justify-center
+                      ${f.id === 'none'
+                        ? 'bg-zinc-100 border-2 border-dashed border-zinc-300'
+                        : ''
                       }
+                      ${f.id === 'white' ? 'border border-zinc-300' : ''}
                     `}
+                    style={{
+                      backgroundColor: f.id !== 'none' ? f.color : undefined,
+                      background: f.id === 'oak' ? 'linear-gradient(135deg, #b8860b, #daa520)' : undefined,
+                    }}
                   >
-                    {f.popular && (
-                      <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-brand-purple text-white text-[10px] font-semibold rounded-full">
-                        פופולרי
-                      </span>
+                    {f.id === 'none' && (
+                      <span className="text-zinc-400 text-xs">✕</span>
                     )}
-                    {frameType === f.id && (
-                      <div className="absolute top-2 left-2 w-5 h-5 bg-brand-purple rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 mb-2">
-                      {f.id !== 'none' && (
-                        <div
-                          className="w-6 h-6 rounded border border-zinc-300"
-                          style={{ backgroundColor: f.color }}
-                        />
-                      )}
-                      <span className="font-semibold text-zinc-900">{f.name}</span>
-                    </div>
-                    <div className="text-sm font-medium text-brand-purple">
-                      {f.price > 0 ? `+₪${f.price}` : 'חינם'}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* Gift Option */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Gift className="w-5 h-5 text-brand-purple" />
-                <h2 className="text-lg font-semibold text-zinc-900">אפשרויות מתנה</h2>
-              </div>
-              <button
-                onClick={() => setIsGift(!isGift)}
-                className={`
-                  w-full p-4 rounded-xl border-2 text-right transition-all flex items-center justify-between
-                  ${isGift
-                    ? 'border-brand-purple bg-brand-purple/5'
-                    : 'border-zinc-200 hover:border-zinc-300'
-                  }
-                `}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`
-                    w-5 h-5 rounded border-2 flex items-center justify-center transition-all
-                    ${isGift ? 'bg-brand-purple border-brand-purple' : 'border-zinc-300'}
-                  `}>
-                    {isGift && <Check className="w-3 h-3 text-white" />}
                   </div>
-                  <div>
-                    <div className="font-semibold text-zinc-900">זו מתנה</div>
-                    <div className="text-sm text-zinc-500">הוסיפו הודעה אישית ואריזת מתנה</div>
+                  <div className="text-[11px] font-semibold text-zinc-700">{f.name}</div>
+                  <div
+                    className={`text-[11px] ${
+                      f.extraPrice === 0 ? 'text-emerald-500' : 'text-zinc-500'
+                    }`}
+                  >
+                    {f.extraPrice === 0 ? 'חינם' : `+₪${f.extraPrice}`}
                   </div>
-                </div>
-              </button>
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
 
-              {isGift && (
-                <div className="mt-3">
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
-                    <MessageSquare className="w-4 h-4 inline ml-1" />
-                    הודעה אישית (עד 150 תווים)
-                  </label>
-                  <textarea
-                    value={giftMessage}
-                    onChange={(e) => setGiftMessage(e.target.value.slice(0, 150))}
-                    placeholder="כתבו הודעה אישית למקבל המתנה..."
-                    className="input min-h-[100px] resize-none"
-                    maxLength={150}
-                  />
-                  <div className="text-xs text-zinc-500 mt-1 text-left">
-                    {giftMessage.length}/150
-                  </div>
-                </div>
-              )}
-            </section>
+      {/* Bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 p-4 pb-[max(16px,env(safe-area-inset-bottom))]">
+        <div className="max-w-6xl mx-auto">
+          {/* Price summary */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-zinc-600">סה״כ</span>
+            <span data-testid="total-price" className="text-2xl font-bold text-zinc-900">
+              ₪{total} <span className="text-sm font-normal text-zinc-500">+ משלוח</span>
+            </span>
+          </div>
 
-            {/* Continue Button */}
+          {/* Buttons */}
+          <div className="flex gap-3">
+            <button
+              data-testid="bottom-back-button"
+              onClick={handleBack}
+              className="w-12 h-12 flex items-center justify-center bg-zinc-100 text-zinc-600 rounded-2xl"
+              aria-label="חזרה"
+            >
+              <ArrowRight className="w-6 h-6" />
+            </button>
             <button
               onClick={handleContinue}
-              className="btn btn-primary w-full py-4 text-base"
+              className="flex-1 flex items-center justify-center gap-2 h-12 bg-gradient-to-r from-violet-500 to-pink-500 text-white font-semibold rounded-2xl shadow-lg"
             >
               <span>המשך לתשלום</span>
               <ArrowLeft className="w-5 h-5" />
