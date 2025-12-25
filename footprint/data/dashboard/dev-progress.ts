@@ -349,7 +349,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1850',
     title: 'Apple Pay / Google Pay',
     description: 'Wallet detection, one-tap payment, same confirmation',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (35 tests, 100% stmt, 90.9% branch)
     agent: 'Backend-2',
     points: 3,
     component: 'Payment',

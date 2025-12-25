@@ -90,7 +90,7 @@
 ## Sprint 4: Admin & Polish (Weeks 7-8) 🟡 ACTIVE
 
 **Focus**: Admin dashboard, additional features, launch prep
-**Story Points**: 2/19 (In Progress)
+**Story Points**: 5/19 (In Progress)
 **Started**: 2025-12-25
 
 | ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
@@ -100,7 +100,7 @@
 | OM-03 | Download print-ready files | High-res download, correct dimensions, color profile | 2 | Must | Backend-2 | ⬜ Backlog |
 | OM-04 | Add tracking numbers | Tracking input, carrier selection, auto-notify | 2 | Must | Backend-2 | ⬜ Backlog |
 | AI-05 | Fast AI transformation | Target < 10 seconds, progress shown, retry on failure | 5 | Should | Backend-2 | ⬜ Backlog |
-| CO-03 | Apple Pay / Google Pay | Wallet detection, one-tap payment, same confirmation | 3 | Should | Backend-2 | ⬜ Backlog |
+| CO-03 | Apple Pay / Google Pay | Wallet detection, one-tap payment, same confirmation | 3 | Should | Backend-2 | ✅ Done |
 | CO-05 | Apply discount codes | Code input, validation feedback, discount shown | 2 | Should | Backend-1 | ✅ Done |
 
 ### Sprint 4 Definition of Done
