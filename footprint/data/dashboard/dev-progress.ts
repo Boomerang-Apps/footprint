@@ -350,13 +350,13 @@ export const stories: Record<string, Story> = {
     component: 'Payment',
   },
 
-  // Sprint 4 - Admin
+  // Sprint 4 - Admin (ACTIVE)
   'OM-01': {
     id: 'OM-01',
     linearId: 'UZF-1845',
     title: 'Admin Order Dashboard',
     description: 'Order list, filter by status, search by order number',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Sprint 4 Start - Assigned to Frontend-B
     agent: 'Frontend-B',
     points: 3,
     component: 'Admin',
@@ -366,7 +366,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1846',
     title: 'Update Order Status',
     description: 'Status dropdown, timestamp logged, customer notified',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Sprint 4 Start - Assigned to Backend-2
     agent: 'Backend-2',
     points: 2,
     component: 'Admin',
@@ -552,7 +552,7 @@ export const sprints: Sprint[] = [
     id: 4,
     name: 'Sprint 4',
     focus: 'Admin & Polish',
-    status: 'planned',
+    status: 'active',  // 🚀 STARTED 2025-12-25
     features: ['F5b', 'F6'],
   },
 ];
