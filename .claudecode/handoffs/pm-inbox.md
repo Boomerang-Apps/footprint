@@ -318,6 +318,143 @@ QA handoff also written to: `.claudecode/handoffs/qa-inbox.md`
 
 ---
 
+## 2025-12-25 - Frontend-B: UI-03 Ready for QA
+
+**Story**: UI-03 - Customize Page UI
+**Branch**: feature/ui-03-customize-page
+**Sprint**: 4
+**Priority**: P0
+
+### Summary
+Implemented Customize Page UI matching 03-customize.html mockup exactly:
+- Header with back button and title "התאמה אישית"
+- 4-step progress bar at 60% (Steps 1-2 completed, Step 3 active)
+- Preview mockup container with frame visualization
+- Size selector grid (2x2):
+  - A5 = ₪89
+  - A4 = ₪149 (פופולרי badge)
+  - A3 = ₪249
+  - A2 = ₪379
+- Paper selector with radio buttons:
+  - Fine Art Matte (כלול)
+  - Glossy Photo (+₪20)
+  - Canvas Texture (+₪40)
+- Frame selector grid (4-column):
+  - ללא (חינם)
+  - שחור (+₪60)
+  - לבן (+₪60)
+  - אלון (+₪80)
+- Live price calculation with "סה״כ ₪X + משלוח"
+- Fixed bottom CTA with back button and "המשך לתשלום"
+- Hebrew RTL layout throughout
+
+### Key Deliverables
+- `app/(app)/create/customize/page.tsx` - Complete page rewrite matching mockup
+- `app/(app)/create/customize/page.test.tsx` - 43 TDD tests
+
+### Test Results
+- **Tests**: 43 passing (page-specific)
+- **Total**: 829 passing (all tests)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+Note: Pre-existing TypeScript/lint errors exist in `src/app/cockpit/page.tsx` (not my changes)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/app/(app)/create/customize/page.tsx` | Modified - complete rewrite matching mockup |
+| `footprint/app/(app)/create/customize/page.test.tsx` | Created - 43 TDD tests |
+| `.claudecode/milestones/sprint-4/UI-03/*` | Created - planning docs |
+
+### Gate Status
+- [x] Gate 0: Research (N/A - UI implementation)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 43 tests)
+- [x] Gate 3: QA Validation (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `b757a92a`
+
+**Ready for Gate 4 PM/QA validation.**
+
+**Requires**: UI-02 (Style Selection) - provides selectedStyle
+**Unblocks**: UI-04 (Checkout Page UI)
+
+---
+
+## 2025-12-25 - Frontend-B: UI-04 Ready for QA
+
+**Story**: UI-04 - Checkout Page UI
+**Branch**: feature/ui-04-checkout-page
+**Sprint**: 4
+**Priority**: P0
+
+### Summary
+Implemented Checkout Page UI matching 04-checkout.html mockup exactly:
+- Header with back button and title "תשלום"
+- 4-step progress bar at 80% (Steps 1-3 completed, Step 4 active)
+- Order summary card with product thumbnail and edit button
+- Gift toggle section with:
+  - Toggle switch for gift mode
+  - Message textarea (150 character limit)
+  - Live character count
+- Shipping form section:
+  - Full name input
+  - Phone input (dir="ltr")
+  - Address input
+  - City and postal code row
+- Payment methods section:
+  - Credit Card, Apple Pay, Google Pay options
+  - Radio button selection
+- Coupon code input with apply button
+- Price breakdown:
+  - Print size price (A4 = ₪149)
+  - Frame price (e.g., black = ₪60)
+  - Shipping (free >= ₪299, otherwise ₪29)
+  - Total calculation
+- Fixed bottom CTA with:
+  - Secure payment badge (SSL)
+  - "לתשלום ₪X" button
+- Hebrew RTL layout throughout
+- Desktop layout with sidebar order summary
+
+### Key Deliverables
+- `app/(app)/create/checkout/page.tsx` - Complete page rewrite matching mockup
+- `app/(app)/create/checkout/page.test.tsx` - 57 TDD tests
+
+### Test Results
+- **Tests**: 57 passing (page-specific)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+Note: Pre-existing TypeScript/lint errors exist in `src/app/cockpit/page.tsx` (not my changes)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/app/(app)/create/checkout/page.tsx` | Modified - complete rewrite matching mockup |
+| `footprint/app/(app)/create/checkout/page.test.tsx` | Created - 57 TDD tests |
+| `.claudecode/milestones/sprint-4/UI-04/*` | Created - planning docs |
+
+### Gate Status
+- [x] Gate 0: Research (N/A - UI implementation)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 57 tests)
+- [x] Gate 3: QA Validation (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `7f16df82`
+
+**Ready for Gate 4 PM/QA validation.**
+
+**Requires**: UI-03 (Customize Page) - provides size, paper, frame selections
+**Unblocks**: UI-05 (Confirmation Page UI)
+
+---
+
 ## 2025-12-22 - Backend-2: UP-03 Ready for QA
 
 **Story**: UP-03
