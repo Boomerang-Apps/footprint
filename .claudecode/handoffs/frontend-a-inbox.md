@@ -53,114 +53,129 @@ Assign work related to:
 
 ## Pending Messages
 
-## 2025-12-24 - PM: ✅ RESOLVED - Test Infrastructure Fix
+## 2025-12-25 - PM: UI-08 Assignment - Step Progress Indicator
 
-**Status**: COMPLETE
-**Fixed By**: Frontend-A (2025-12-24)
-
-### Results
-- Tests: 535 passing (25 files)
-- TypeScript: 0 errors
-- ESLint: Clean
-
-### Fixes Applied
-- Installed @testing-library/user-event, @testing-library/dom
-- Added @vitejs/plugin-react to vitest config
-- Added Address type export
-
-**→ Proceed to UI-07 below**
-
----
-
-## 2025-12-24 - PM: UI-07 Assignment - Base UI Primitives
-
-**Story**: UI-07
+**Story**: UI-08
 **Priority**: P0 - Start Immediately
 **Type**: Sprint 4 - UI Primitives (Parallel Track)
 **Sprint**: 4
 
 ### Context
-Sprint 4 has been reorganized with **two parallel tracks**:
-- **Frontend-A (You)**: UI Primitives (UI-07 → UI-08 → UI-09) = 7 SP
-- **Frontend-B**: Feature Pages (UI-01 → UI-05) = 16 SP
+UI-07 (Base UI Primitives) is now merged ✅. You can start UI-08 immediately.
 
-Your work runs in parallel. Frontend-B's UI-05 (Confirmation) depends on your UI-09 (Timeline).
+Your components from UI-07 are available: Button, Card, Input, Select, Checkbox, Badge.
 
 ### Assignment
-You are assigned UI-07: Base UI Primitives (components/ui/)
+You are assigned UI-08: Step Progress Indicator
 
-**Points**: 3
-**Dependencies**: None - start immediately
+**Points**: 2
+**Dependencies**: UI-07 ✅ (merged)
 
 ### Requirements
-Create the `components/ui/` folder with foundational UI components:
+Create a reusable step progress indicator for the 5-step order flow.
+
+**Reference**: See mockups `01-upload.html` through `05-confirmation.html` - all have a progress bar at the top.
 
 **Files to Create**:
 ```
 footprint/components/ui/
-├── Button.tsx           # Primary, secondary, outline, ghost variants
-├── Button.test.tsx
-├── Card.tsx             # Container with header, body, footer
-├── Card.test.tsx
-├── Input.tsx            # Text input with label, error state
-├── Input.test.tsx
-├── Select.tsx           # Dropdown select with options
-├── Select.test.tsx
-├── Checkbox.tsx         # Checkbox with label
-├── Checkbox.test.tsx
-├── Badge.tsx            # Status badges (pending, success, etc.)
-├── Badge.test.tsx
-└── index.ts             # Export all components
+├── StepProgress.tsx       # Main progress indicator component
+├── StepProgress.test.tsx  # TDD tests
+└── index.ts               # Update exports
 ```
 
-### Component Requirements
-1. **RTL Support**: All components must work with `dir="rtl"`
-2. **Tailwind CSS**: Use Tailwind classes only (no CSS modules)
-3. **TypeScript**: Strict types, proper interfaces
-4. **Accessibility**: ARIA labels, keyboard navigation
-5. **Hebrew Labels**: Support Hebrew text without breaking
-6. **Variants**: Each component should have size/color variants
-
-### Button Variants Example
+### Component Interface
 ```typescript
-interface ButtonProps {
-  variant: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size: 'sm' | 'md' | 'lg';
-  disabled?: boolean;
-  loading?: boolean;
-  children: React.ReactNode;
-  onClick?: () => void;
+interface Step {
+  id: number;
+  label: string;      // Hebrew label
+  labelEn?: string;   // Optional English label
 }
+
+interface StepProgressProps {
+  steps: Step[];              // Array of steps
+  currentStep: number;        // Current active step (1-based)
+  className?: string;         // Optional additional styling
+}
+
+// Default steps for Footprint order flow:
+const defaultSteps: Step[] = [
+  { id: 1, label: 'העלאה', labelEn: 'Upload' },
+  { id: 2, label: 'סגנון', labelEn: 'Style' },
+  { id: 3, label: 'התאמה', labelEn: 'Customize' },
+  { id: 4, label: 'תשלום', labelEn: 'Checkout' },
+];
 ```
+
+### Visual Requirements (from mockups)
+1. **Progress Bar**:
+   - Height: 4px
+   - Background: gray-200
+   - Fill: gradient purple→pink (`from-violet-500 to-pink-500`)
+   - Fill width: (currentStep / totalSteps) * 100%
+   - Rounded corners
+
+2. **Step Labels**:
+   - Display below progress bar
+   - Space evenly across width
+   - Font: 12px, gray-400 for inactive
+   - Active step: purple color, font-weight 600
+   - Completed steps: green color with checkmark dot
+
+3. **Step Dots**:
+   - Small circles (8px) next to labels
+   - Gray for pending, purple for active, green for completed
+
+### RTL Support
+- Labels are Hebrew by default
+- Progress bar fills from RIGHT to LEFT in RTL mode
+- `dir="rtl"` must work correctly
 
 ### Acceptance Criteria
-- [ ] All 6 components created with TypeScript interfaces
+- [ ] StepProgress component renders correctly
+- [ ] Shows current step highlighted
+- [ ] Shows completed steps with green styling
+- [ ] Progress bar fills proportionally
 - [ ] RTL layout works correctly
-- [ ] Tailwind styling only
+- [ ] Responsive (mobile-first)
 - [ ] Tests written (TDD)
 - [ ] Coverage: 80%+ minimum
 - [ ] TypeScript clean
 - [ ] ESLint clean
 
 ### Gate 1 Checklist (MANDATORY - Before Coding)
-- [ ] Create branch: `git checkout -b feature/UI-07-ui-primitives`
-- [ ] Create START.md: `.claudecode/milestones/sprint-4/UI-07/START.md`
+- [ ] Create branch: `git checkout -b feature/UI-08-step-progress`
+- [ ] Create START.md: `.claudecode/milestones/sprint-4/UI-08/START.md`
 - [ ] Create ROLLBACK-PLAN.md
-- [ ] Create tag: `git tag UI-07-start`
+- [ ] Create tag: `git tag UI-08-start`
 
-### Next Stories (After UI-07)
-- **UI-08**: Step Progress Indicator (2 SP)
+### Next Story (After UI-08)
 - **UI-09**: Price Display & Timeline (2 SP) - Frontend-B's UI-05 depends on this
 
 ### On Completion
 Write handoff to: `.claudecode/handoffs/qa-inbox.md`
 
-Include:
-- Branch name
-- Test results (`npm test -- --coverage`)
-- TypeScript check (`npm run type-check`)
-- Files created
+**Unblocks**: All order flow pages can use this component
 
 ---
+
+---
+
+## Completed Messages
+
+## 2025-12-25 - PM: UI-07 Assignment [COMPLETED]
+
+**Story**: UI-07
+**Status**: ✅ QA APPROVED & MERGED (2025-12-25)
+**Results**: 134 tests, 100% statement coverage, 98% branch coverage
+
+**Components Delivered**: Button, Card, Input, Select, Checkbox, Badge, utils
+
+---
+
+## 2025-12-24 - PM: Test Infrastructure Fix [COMPLETED]
+
+**Status**: ✅ RESOLVED
+**Fixed By**: Frontend-A (2025-12-24)
 
 ---

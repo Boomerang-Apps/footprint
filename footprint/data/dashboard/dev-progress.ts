@@ -486,7 +486,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-07',
     title: 'Base UI Primitives (components/ui/)',
     description: 'Create foundational UI components: Button, Card, Input, Select, Checkbox, Badge. RTL-ready with Tailwind.',
-    status: 'in-progress',  // ✅ Assigned to Frontend-A 2025-12-24
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (134 tests, 100% coverage)
     agent: 'Frontend-A',
     points: 3,
     component: 'UI',
@@ -495,7 +495,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-08',
     title: 'Step Progress Indicator',
     description: 'Create reusable 5-step progress indicator for order flow. Shows current step, completed steps, Hebrew labels.',
-    status: 'backlog',
+    status: 'in-progress',  // ✅ Assigned to Frontend-A 2025-12-25
     agent: 'Frontend-A',
     points: 2,
     blockedBy: ['UI-07'],
@@ -526,7 +526,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-01',
     title: 'Upload Page UI (01-upload.html)',
     description: 'Implement upload mockup: drag-drop zone, camera button, progress states, Hebrew RTL',
-    status: 'in-review',  // ✅ Complete, routed to QA 2025-12-24 (24 tests)
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-24 (24 tests)
     agent: 'Frontend-B',
     points: 3,
     blockedBy: ['UI-06'],
@@ -536,17 +536,17 @@ export const stories: Record<string, Story> = {
     id: 'UI-02',
     title: 'Style Selection UI (02-style-selection.html)',
     description: 'Implement style picker: 8 AI styles gallery, before/after preview, loading states',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (28 tests, 100% coverage)
     agent: 'Frontend-B',
     points: 3,
-    blockedBy: ['UI-06'],  // Can start in parallel with UI-01 after demo data
+    blockedBy: ['UI-06'],
     component: 'UI',
   },
   'UI-03': {
     id: 'UI-03',
     title: 'Customize Page UI (03-customize.html)',
     description: 'Implement product config: size/paper/frame selectors, live price, mockup preview',
-    status: 'backlog',
+    status: 'in-progress',  // ✅ Assigned to Frontend-B 2025-12-25
     agent: 'Frontend-B',
     points: 3,
     blockedBy: ['UI-06'],  // Can start in parallel after demo data

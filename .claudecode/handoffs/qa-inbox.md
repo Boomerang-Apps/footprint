@@ -41,6 +41,189 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-25 - Frontend-B: UI-02 Style Selection Ready for QA
+
+**Story**: UI-02 - Style Selection UI
+**Branch**: `feature/ui-02-style-selection`
+**Sprint**: 4
+**Priority**: P0
+
+### Summary
+Frontend-B implemented the Style Selection Page matching `02-style-selection.html` mockup:
+
+| Feature | Status |
+|---------|--------|
+| Header with "בחירת סגנון" | ✅ |
+| Progress bar at 40% (Step 2) | ✅ |
+| Step 1 (העלאה) completed indicator | ✅ |
+| Large preview container (4:5 ratio) | ✅ |
+| Close button (X) | ✅ |
+| Style badge showing current style | ✅ |
+| AI processing overlay on style change | ✅ |
+| 8 style options in horizontal strip | ✅ |
+| Gradient icon buttons | ✅ |
+| "פופולרי" badge on Pop Art | ✅ |
+| "חדש" badge on Romantic | ✅ |
+| Free preview notice | ✅ |
+| Bottom CTA buttons | ✅ |
+| Hebrew RTL layout | ✅ |
+
+### Test Results
+- **Tests**: 28 passing (TDD)
+- **Total**: 652 passing (no regressions)
+- **TypeScript**: Clean
+- **ESLint**: Clean
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `app/(app)/create/style/page.tsx` | Complete rewrite |
+| `app/(app)/create/style/page.test.tsx` | Created (28 tests) |
+
+### Validation Required
+```bash
+cd footprint
+git fetch && git checkout feature/ui-02-style-selection
+npm install
+npm test -- --coverage
+npm run type-check
+npm run lint
+npm run dev  # Visual check against mockup
+```
+
+### Visual Verification
+Compare against: `design_mockups/02-style-selection.html`
+
+### On Approval
+Write to PM inbox: UI-02 APPROVED
+**Unblocks**: UI-03 (Customize Page UI)
+
+---
+
+## 2025-12-25 - Frontend-A: UI-07 Base UI Primitives Ready for QA
+
+**Story**: UI-07 - Base UI Primitives
+**Branch**: `feature/ui-07-base-primitives`
+**Sprint**: 4
+**Priority**: P0
+
+### Summary
+Frontend-A implemented foundational UI components in `components/ui/`:
+
+| Component | Tests | Key Features |
+|-----------|-------|--------------|
+| Button | 24 | 4 variants, 3 sizes, loading state, disabled |
+| Card | - | Container with header, body, footer |
+| Input | - | Text input with label, error state |
+| Select | - | Dropdown with options |
+| Checkbox | - | Checkbox with label |
+| Badge | 18 | 6 variants, dot indicator, icon slot |
+
+### Test Results
+- **UI Component Tests**: 134 passing
+- **All Tests**: 669 passing
+- **TypeScript**: 0 errors
+- **ESLint**: Clean
+- **TDD**: Tests written first
+
+### Files Created
+| File | Type |
+|------|------|
+| `components/ui/Button.tsx` | Component |
+| `components/ui/Button.test.tsx` | Tests |
+| `components/ui/Card.tsx` | Component |
+| `components/ui/Card.test.tsx` | Tests |
+| `components/ui/Input.tsx` | Component |
+| `components/ui/Input.test.tsx` | Tests |
+| `components/ui/Select.tsx` | Component |
+| `components/ui/Select.test.tsx` | Tests |
+| `components/ui/Checkbox.tsx` | Component |
+| `components/ui/Checkbox.test.tsx` | Tests |
+| `components/ui/Badge.tsx` | Component |
+| `components/ui/Badge.test.tsx` | Tests |
+| `components/ui/index.ts` | Exports |
+| `components/ui/utils.ts` | Utilities |
+
+### Validation Required
+```bash
+cd footprint
+git fetch && git checkout feature/ui-07-base-primitives
+npm install
+npm test -- --coverage
+npm run type-check
+npm run lint
+```
+
+### Component Checklist
+- [ ] All 6 components render correctly
+- [ ] RTL layout works (dir="rtl")
+- [ ] Tailwind styling only (no CSS modules)
+- [ ] TypeScript interfaces defined
+- [ ] Accessibility (ARIA labels)
+- [ ] Hebrew text displays correctly
+
+### On Approval
+Write to PM inbox: UI-07 APPROVED
+**Unblocks**: UI-08 (Step Progress), UI-09 (Price Display & Timeline)
+
+---
+
+## 2025-12-24 - PM: UI-01 Upload Page Ready for QA
+
+**Story**: UI-01 - Upload Page UI
+**Branch**: `feature/ui-01-upload-page`
+**Sprint**: 4
+**Priority**: P0
+
+### Summary
+Frontend-B implemented the Upload Page UI matching `01-upload.html` mockup.
+
+### Features Implemented
+| Feature | Status |
+|---------|--------|
+| Header with "יצירת תמונה" | ✅ |
+| Progress bar (20% gradient) | ✅ |
+| 4 steps: העלאה, סגנון, התאמה, תשלום | ✅ |
+| Upload zone with drag-drop | ✅ |
+| Gallery button ("בחירה מהגלריה") | ✅ |
+| Camera button ("צילום") | ✅ |
+| Preview state with "מוכן" badge | ✅ |
+| Replace button ("החלפת תמונה") | ✅ |
+| Tips section | ✅ |
+| Bottom CTA (disabled until image) | ✅ |
+| Hebrew RTL layout | ✅ |
+
+### Test Results
+- **Tests**: 24 passing (component tests)
+- **Total**: 624 tests passing
+- **TypeScript**: Clean
+- **ESLint**: Clean
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `app/(app)/create/page.tsx` | Complete rewrite |
+| `app/(app)/create/page.test.tsx` | Created (24 tests) |
+| `vitest.config.ts` | Modified (React plugin) |
+| `types/index.ts` | Fixed missing export |
+
+### Validation Required
+```bash
+cd footprint
+npm test -- --coverage
+npm run type-check
+npm run lint
+npm run dev  # Visual check against mockup
+```
+
+### Visual Verification
+Compare against: `design_mockups/01-upload.html`
+
+### On Approval
+Write to PM inbox with APPROVED status.
+
+---
+
 ## 2025-12-24 - PM: UP-03 Re-validation (Coverage Fixed)
 
 **Story**: UP-03 - Auto-Optimize Photo for Print
