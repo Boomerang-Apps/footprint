@@ -366,19 +366,23 @@ npm test -- --coverage      # Tests with coverage
 | Agent Definitions | `.claudecode/agents/*.md` |
 | Safety Framework | `.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md` |
 | Sprint Stories | `.claudecode/linear-stories/` |
-| **Dev Dashboard** | `http://localhost:3002/dev-dashboard` |
+| **Cockpit** | `http://localhost:3004/cockpit` |
 | **Dev Progress (Source of Truth)** | `footprint/data/dashboard/dev-progress.ts` |
 
 ---
 
-## Dev Dashboard
+## Cockpit (PM Dashboard)
 
-The dev dashboard provides real-time project tracking with Linear integration.
+The cockpit provides real-time project tracking with Linear integration.
 
-**URL**: http://localhost:3002/dev-dashboard (when dev server running)
+**URL**: http://localhost:3004/cockpit (when dev server running)
 
 **Features**:
-- Sprint/Feature/Component views
+- **Sprints** - Sprint progress with collapsible story lists
+- **Features** - Feature-based view with priorities
+- **Pages** - UI pages grouped by category with Open Page buttons
+- **Components** - Stories grouped by component
+- **Agents** - Agent roster with status and roles
 - Story modal with agent kickstart prompts
 - Linear sync (individual and bulk)
 - Progress tracking with status badges

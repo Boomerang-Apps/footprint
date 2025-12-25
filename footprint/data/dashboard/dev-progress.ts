@@ -648,3 +648,152 @@ export const agentConfig: Record<string, { label: string; color: string }> = {
   'Backend-1': { label: 'Backend-1', color: 'text-orange-600' },
   'Backend-2': { label: 'Backend-2', color: 'text-pink-600' },
 };
+
+// =============================================================================
+// UI PAGES (for Pages tab)
+// =============================================================================
+
+export interface UIPage {
+  name: string;
+  route: string;
+  status: 'done' | 'planned';
+  description?: string;
+}
+
+export interface UIPageCategory {
+  category: string;
+  icon: string;
+  pages: UIPage[];
+}
+
+export const uiPages: UIPageCategory[] = [
+  {
+    category: 'Public',
+    icon: '🌐',
+    pages: [
+      { name: 'Landing Page', route: '/', status: 'done', description: 'Hero, products, testimonials' },
+    ],
+  },
+  {
+    category: 'Order Flow',
+    icon: '🛒',
+    pages: [
+      { name: 'Step 1 - Upload', route: '/create', status: 'done', description: 'Photo upload from camera roll or drag-drop' },
+      { name: 'Step 2 - Style', route: '/create/style', status: 'done', description: 'AI style selection gallery' },
+      { name: 'Step 3 - Customize', route: '/create/customize', status: 'done', description: 'Size, paper, frame selection' },
+      { name: 'Step 4 - Checkout', route: '/create/checkout', status: 'done', description: 'Address and payment' },
+      { name: 'Step 5 - Complete', route: '/create/complete', status: 'done', description: 'Order confirmation' },
+    ],
+  },
+  {
+    category: 'Admin',
+    icon: '⚙️',
+    pages: [
+      { name: 'Order Dashboard', route: '/admin', status: 'planned', description: 'Order list with filters' },
+      { name: 'Order Details', route: '/admin/orders/[id]', status: 'planned', description: 'Single order management' },
+    ],
+  },
+  {
+    category: 'Dev Tools',
+    icon: '🔧',
+    pages: [
+      { name: 'Cockpit', route: '/cockpit', status: 'done', description: 'PM dashboard' },
+    ],
+  },
+];
+
+// =============================================================================
+// AGENTS (for Agents tab)
+// =============================================================================
+
+export interface Agent {
+  id: string;
+  name: string;
+  model: string;
+  role: string;
+  worktree: string;
+  branch: string;
+  status: 'active' | 'offline' | 'standby';
+  stories: string[];
+  color: string;
+}
+
+export const agents: Agent[] = [
+  {
+    id: 'pm',
+    name: 'PM Agent',
+    model: 'Opus 4.5',
+    role: 'Orchestration',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/agent-pm',
+    branch: 'agent/agent-pm',
+    status: 'active',
+    stories: [],
+    color: 'bg-purple-100 text-purple-800',
+  },
+  {
+    id: 'cto',
+    name: 'CTO Agent',
+    model: 'Opus 4.5',
+    role: 'Architecture, Security',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/agent-cto',
+    branch: 'cto-workspace',
+    status: 'offline',
+    stories: [],
+    color: 'bg-red-100 text-red-800',
+  },
+  {
+    id: 'frontend-a',
+    name: 'Frontend-A',
+    model: 'Sonnet 4',
+    role: 'Layout, Design System',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/frontend-a',
+    branch: 'develop',
+    status: 'offline',
+    stories: [],
+    color: 'bg-blue-100 text-blue-800',
+  },
+  {
+    id: 'frontend-b',
+    name: 'Frontend-B',
+    model: 'Sonnet 4',
+    role: 'Features, Components',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/frontend-b',
+    branch: 'develop',
+    status: 'offline',
+    stories: [],
+    color: 'bg-indigo-100 text-indigo-800',
+  },
+  {
+    id: 'backend-1',
+    name: 'Backend-1',
+    model: 'Sonnet 4',
+    role: 'Database, Auth, State',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/backend-1',
+    branch: 'develop',
+    status: 'offline',
+    stories: [],
+    color: 'bg-orange-100 text-orange-800',
+  },
+  {
+    id: 'backend-2',
+    name: 'Backend-2',
+    model: 'Sonnet 4',
+    role: 'API, AI, Storage, Payment',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/backend-2',
+    branch: 'develop',
+    status: 'offline',
+    stories: [],
+    color: 'bg-pink-100 text-pink-800',
+  },
+  {
+    id: 'qa',
+    name: 'QA Agent',
+    model: 'Sonnet 4',
+    role: 'Testing, Quality',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/qa',
+    branch: 'qa-validation',
+    status: 'standby',
+    stories: [],
+    color: 'bg-teal-100 text-teal-800',
+  },
+];
