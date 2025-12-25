@@ -8,6 +8,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { StyleType, SizeType, PaperType, FrameType, Address, PriceBreakdown } from '@/types';
+import { applyDiscount, type ApplyDiscountResult } from '@/lib/pricing/discounts';
+
+/**
+ * Discount validation state
+ */
+export interface DiscountValidation {
+  isValidating: boolean;
+  error: string | null;
+  appliedDiscount: ApplyDiscountResult | null;
+}
 
 interface OrderState {
   // Step tracking
@@ -45,7 +55,8 @@ interface OrderState {
   // Pricing
   pricing: PriceBreakdown | null;
   discountCode: string;
-  
+  discountValidation: DiscountValidation;
+
   // Order result
   orderId: string | null;
 }
@@ -87,10 +98,16 @@ interface OrderActions {
   // Pricing
   setPricing: (pricing: PriceBreakdown) => void;
   setDiscountCode: (code: string) => void;
-  
+
+  // Discount
+  applyDiscountCode: () => void;
+  clearDiscount: () => void;
+  hasAppliedDiscount: () => boolean;
+  getDiscountAmount: () => number;
+
   // Order
   setOrderId: (id: string) => void;
-  
+
   // Reset
   reset: () => void;
 }
@@ -116,6 +133,11 @@ const initialState: OrderState = {
   useRecipientAddress: false,
   pricing: null,
   discountCode: '',
+  discountValidation: {
+    isValidating: false,
+    error: null,
+    appliedDiscount: null,
+  },
   orderId: null,
 };
 
@@ -181,7 +203,92 @@ export const useOrderStore = create<OrderState & OrderActions>()(
 
       // Pricing
       setPricing: (pricing) => set({ pricing }),
-      setDiscountCode: (code) => set({ discountCode: code }),
+      setDiscountCode: (code) =>
+        set({
+          discountCode: code,
+          // Clear error when code changes
+          discountValidation: {
+            isValidating: false,
+            error: null,
+            appliedDiscount: null,
+          },
+        }),
+
+      // Discount
+      applyDiscountCode: () => {
+        const state = get();
+        const subtotal = state.pricing?.subtotal ?? 0;
+
+        // Apply discount using pricing library
+        const result = applyDiscount(state.discountCode, subtotal);
+
+        // Update pricing with discount
+        if (result.valid && state.pricing) {
+          set({
+            discountValidation: {
+              isValidating: false,
+              error: null,
+              appliedDiscount: result,
+            },
+            pricing: {
+              ...state.pricing,
+              discount: result.discount,
+              total: state.pricing.subtotal - result.discount + state.pricing.shipping,
+            },
+          });
+        } else {
+          set({
+            discountValidation: {
+              isValidating: false,
+              error: result.error ?? null,
+              appliedDiscount: result,
+            },
+          });
+        }
+      },
+
+      clearDiscount: () => {
+        const state = get();
+
+        // Reset pricing discount
+        if (state.pricing) {
+          set({
+            discountCode: '',
+            discountValidation: {
+              isValidating: false,
+              error: null,
+              appliedDiscount: null,
+            },
+            pricing: {
+              ...state.pricing,
+              discount: 0,
+              total: state.pricing.subtotal + state.pricing.shipping,
+            },
+          });
+        } else {
+          set({
+            discountCode: '',
+            discountValidation: {
+              isValidating: false,
+              error: null,
+              appliedDiscount: null,
+            },
+          });
+        }
+      },
+
+      hasAppliedDiscount: () => {
+        const state = get();
+        return state.discountValidation.appliedDiscount?.valid === true;
+      },
+
+      getDiscountAmount: () => {
+        const state = get();
+        if (state.discountValidation.appliedDiscount?.valid) {
+          return state.discountValidation.appliedDiscount.discount;
+        }
+        return 0;
+      },
 
       // Order
       setOrderId: (id) => set({ orderId: id }),
