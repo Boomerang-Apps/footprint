@@ -41,6 +41,146 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-25 - Backend-2: CO-03 Apple Pay / Google Pay
+
+**Story**: CO-03
+**Branch**: feature/CO-03-apple-google-pay
+**Sprint**: 4
+**Priority**: P1
+**Story Points**: 3
+**Linear**: UZF-1850
+
+### Completed
+- [x] lib/payments/stripe.ts - Stripe client with PaymentIntent creation
+- [x] Wallet payment support (Apple Pay, Google Pay via card type)
+- [x] app/api/checkout/wallet/create-intent/route.ts - Create PaymentIntent API
+- [x] app/api/webhooks/stripe/route.ts - Stripe webhook handler
+- [x] Webhook signature verification (Stripe SDK)
+- [x] Support for ILS, USD, EUR currencies
+- [x] Order metadata for tracking (orderId in PaymentIntent)
+- [x] Payment status handling (succeeded, failed, canceled)
+- [x] All tests written (TDD approach)
+- [x] 100% coverage on lib/payments/stripe.ts
+
+### Test Results
+- **Tests**: 35 passing (17 stripe lib + 9 wallet API + 9 webhook)
+- **Coverage**:
+  - lib/payments/stripe.ts: 100% statements, 90.9% branches, 100% lines
+  - lib/payments/ overall: 98.52% statements
+
+### API Endpoint Documentation
+
+**POST /api/checkout/wallet/create-intent**
+
+```json
+POST /api/checkout/wallet/create-intent
+Content-Type: application/json
+
+Request:
+{
+  "orderId": "order_123",
+  "amount": 15000,  // in smallest unit (agorot for ILS)
+  "currency": "ils",  // optional, defaults to 'ils'
+  "customerEmail": "customer@example.com",
+  "description": "Pop Art Print - A4"  // optional
+}
+
+Response (200):
+{
+  "paymentIntentId": "pi_xxx",
+  "clientSecret": "pi_xxx_secret_xxx"
+}
+
+Response (400): Validation error (missing fields, invalid amount)
+Response (500): Stripe API error
+```
+
+**POST /api/webhooks/stripe**
+
+```
+Stripe webhook endpoint for payment callbacks.
+Requires header:
+- stripe-signature: Stripe signature for verification
+
+Handled events:
+- payment_intent.succeeded: Order marked as paid
+- payment_intent.payment_failed: Payment failure logged
+- payment_intent.canceled: Cancellation handled
+
+Response always 200 with { received: true } to acknowledge
+```
+
+### Files Changed
+| File | Change |
+|------|--------|
+| footprint/lib/payments/stripe.ts | Created |
+| footprint/lib/payments/stripe.test.ts | Created |
+| footprint/app/api/checkout/wallet/create-intent/route.ts | Created |
+| footprint/app/api/checkout/wallet/create-intent/route.test.ts | Created |
+| footprint/app/api/webhooks/stripe/route.ts | Created |
+| footprint/app/api/webhooks/stripe/route.test.ts | Created |
+| .claudecode/milestones/sprint-4/CO-03/START.md | Created |
+| .claudecode/milestones/sprint-4/CO-03/ROLLBACK-PLAN.md | Created |
+
+### Environment Variables Required
+```bash
+STRIPE_SECRET_KEY=sk_test_xxx
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+```
+
+### Architecture Note
+This complements the PayPlus integration (CO-02):
+- **Israeli Customers**: PayPlus (Bit, local cards, installments)
+- **International + Wallet Users**: Stripe (Apple Pay, Google Pay)
+
+### Frontend Integration (Next Steps)
+The frontend will use Stripe's Express Checkout Element:
+```tsx
+import { ExpressCheckoutElement } from '@stripe/react-stripe-js';
+
+<ExpressCheckoutElement
+  onConfirm={async () => {
+    const res = await fetch('/api/checkout/wallet/create-intent', {
+      method: 'POST',
+      body: JSON.stringify({ orderId, amount, customerEmail }),
+    });
+    // Use clientSecret to confirm payment
+  }}
+/>
+```
+
+### How to Test
+```bash
+cd footprint
+npm test -- lib/payments/stripe.test.ts app/api/checkout/wallet app/api/webhooks/stripe
+npm run type-check
+npm run lint
+```
+
+### Ops Tasks (Post-Merge)
+1. Enable Apple Pay in Stripe Dashboard
+2. Enable Google Pay in Stripe Dashboard
+3. Add Apple Pay domain verification file
+4. Configure webhook URL in Stripe Dashboard
+
+### Gate Status
+- [x] Gate 0: Research (GATE0-stripe-payments.md approved)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tag CO-03-start)
+- [x] Gate 2: Implementation (TDD - 35 tests, 100% lib coverage)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean in my files, tests pass)
+- [ ] Gate 5: Deployment (pending QA)
+
+### Notes
+- TypeScript clean for my files (pre-existing errors in src/app/cockpit/page.tsx not mine)
+- Uses Stripe SDK v14.21.0 with API version 2023-10-16
+- Payment method type is 'card' which enables wallets automatically
+
+> Ready for QA validation
+
+---
+
 ## 2025-12-25 - Frontend-B: UI-03 Customize Page Ready for QA
 
 **Story**: UI-03 - Customize Page UI

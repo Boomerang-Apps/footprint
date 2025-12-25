@@ -35,6 +35,47 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
+## 2025-12-25 - Backend-2: CO-03 Ready for QA
+
+**Story**: CO-03 - Apple Pay / Google Pay
+**Priority**: P1
+**Type**: Gate 2 Complete - Ready for QA
+
+### Summary
+Implemented Stripe wallet payment integration for Apple Pay / Google Pay:
+- Stripe client library with PaymentIntent creation
+- Wallet payment API endpoint (/api/checkout/wallet/create-intent)
+- Stripe webhook handler (/api/webhooks/stripe)
+- Complements PayPlus (CO-02) for Israeli customers
+
+### Key Decisions
+- Used Stripe PaymentIntent with 'card' payment method (enables wallets automatically)
+- Webhook signature verification via Stripe SDK
+- Currency support: ILS (default), USD, EUR
+
+### Test Results
+- **Tests**: 35 passing (17 lib + 9 API + 9 webhook)
+- **Coverage**: 100% for lib/payments/stripe.ts
+- **TypeScript**: 0 errors in my files
+- **Lint**: Clean
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/lib/payments/stripe.ts | Created |
+| footprint/app/api/checkout/wallet/create-intent/route.ts | Created |
+| footprint/app/api/webhooks/stripe/route.ts | Created |
+| + test files for each | Created |
+
+### Branch
+`feature/CO-03-apple-google-pay` (commit `d77c34ec`)
+
+**Ready for Gate 3 QA validation.**
+
+QA handoff written to: `.claudecode/handoffs/qa-inbox.md`
+
+---
+
 ## 2025-12-24 - CTO: UI Implementation Sprint 4 Ready for Distribution
 
 **Priority**: P0
