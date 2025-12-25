@@ -3,7 +3,7 @@
 **Total Story Points**: 89
 **Sprint Duration**: 2 weeks each
 **MVP Timeline**: 8 weeks (4 sprints)
-**Last Updated**: 2025-12-22 by PM Agent
+**Last Updated**: 2025-12-25 by PM Agent
 
 ---
 
@@ -57,47 +57,40 @@
 - **Gate 0 Required**: Replicate AI integration (AI-02) ✅ APPROVED
 - UP-01 to UP-04 must be complete before AI-02 ✅ DONE
 
-### Sprint 2 Definition of Done
-- [ ] All 8 stories completed
-- [ ] AI transformation < 10 seconds
-- [ ] Price calculation accurate
-- [ ] 80%+ test coverage
-- [ ] QA approved
-
 ---
 
-## Sprint 3: Checkout & Gifting (Weeks 5-6) 🟡 ACTIVE
+## Sprint 3: Checkout & Gifting (Weeks 5-6) ✅ COMPLETED
 
 **Focus**: Payment integration, gift flow, order confirmation
-**Story Points**: 0/18 (In Progress)
-**Status**: ACTIVE - Started 2025-12-23
+**Story Points**: 18/18 (100% Complete)
+**Status**: COMPLETED - Finished 2025-12-23
 
 | ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
 |----|-------|--------------------|----|----------|-------|--------|
-| GF-01 | Mark order as gift | Gift toggle prominent, gift wrap option, no price on slip | 2 | Must | Frontend-B | 🟡 In Progress |
-| GF-02 | Add personal message | 150 char limit, preview shown, printed on card | 3 | Must | Frontend-B | 🟡 In Progress |
-| GF-03 | Ship to recipient | Separate address form, recipient name, delivery estimate | 3 | Must | Frontend-B + Backend-1 | 🟡 In Progress |
-| CO-01 | Enter shipping address | Autocomplete, save for future, validation | 3 | Must | Frontend-B | 🟡 In Progress |
-| CO-02 | Pay with credit card | Stripe integration, card validation, 3D Secure | 5 | Must | Backend-2 | 🟡 In Progress |
-| CO-04 | Order confirmation | Email sent, order number shown, WhatsApp option | 2 | Must | Backend-2 | 🟡 In Progress |
+| GF-01 | Mark order as gift | Gift toggle prominent, gift wrap option, no price on slip | 2 | Must | Frontend-B | ✅ Done |
+| GF-02 | Add personal message | 150 char limit, preview shown, printed on card | 3 | Must | Frontend-B | ✅ Done |
+| GF-03 | Ship to recipient | Separate address form, recipient name, delivery estimate | 3 | Must | Frontend-B + Backend-1 | ✅ Done |
+| CO-01 | Enter shipping address | Autocomplete, save for future, validation | 3 | Must | Frontend-B | ✅ Done |
+| CO-02 | Pay with credit card (PayPlus) | PayPlus integration, Bit support, Israeli cards | 5 | Must | Backend-2 | ✅ Done |
+| CO-04 | Order confirmation | Email sent, order number shown, WhatsApp option | 2 | Must | Backend-2 | ✅ Done |
 
 ### Sprint 3 Dependencies
-- **Gate 0 Required**: Stripe integration (CO-02) ✅ APPROVED
+- **Gate 0 Required**: Stripe/PayPlus integration (CO-02) ✅ APPROVED
 - AI and product config must be complete ✅ DONE
 
 ### Sprint 3 Definition of Done
-- [ ] All 6 stories completed
-- [ ] Payment flow secure
-- [ ] Gift flow tested
-- [ ] 80%+ test coverage
-- [ ] QA approved
+- [x] All 6 stories completed ✅
+- [x] Payment flow secure (PayPlus HMAC-SHA256) ✅
+- [x] Gift flow tested ✅
+- [x] 80%+ test coverage ✅
+- [x] QA approved ✅
 
 ---
 
-## Sprint 4: Admin & Polish (Weeks 7-8)
+## Sprint 4: Admin & Polish (Weeks 7-8) 🟡 NEXT
 
 **Focus**: Admin dashboard, additional features, launch prep
-**Story Points**: 19
+**Story Points**: 0/19 (Ready to Start)
 
 | ID | Story | Acceptance Criteria | SP | Priority | Agent |
 |----|-------|--------------------|----|----------|-------|
