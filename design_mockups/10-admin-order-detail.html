@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Footprint Admin - פרטי הזמנה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #7c3aed;
+      --accent: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+      --gray-50: #fafafa;
+      --gray-100: #f4f4f5;
+      --gray-200: #e4e4e7;
+      --gray-300: #d4d4d8;
+      --gray-400: #a1a1aa;
+      --gray-500: #71717a;
+      --gray-600: #52525b;
+      --gray-700: #3f3f46;
+      --gray-800: #27272a;
+      --gray-900: #18181b;
+      --white: #ffffff;
+    }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: var(--gray-100);
+      color: var(--gray-900);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .icon-sm { width: 18px; height: 18px; }
+    
+    /* Admin Header */
+    .admin-header {
+      background: var(--gray-900);
+      color: var(--white);
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-header-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-400);
+      border-radius: 8px;
+    }
+    .header-title {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .header-order-id {
+      font-size: 13px;
+      color: var(--primary-light);
+      background: rgba(124, 58, 237, 0.2);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    
+    /* Main */
+    .main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 180px;
+    }
+    
+    /* Status Banner */
+    .status-banner {
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-banner.pending {
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+    .status-banner.processing {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .status-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-banner.pending .status-icon { background: var(--warning); color: white; }
+    .status-banner.processing .status-icon { background: var(--info); color: white; }
+    .status-info { flex: 1; }
+    .status-title { font-size: 15px; font-weight: 600; }
+    .status-desc { font-size: 13px; color: var(--gray-600); }
+    
+    /* Section Card */
+    .section-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 14px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .icon { width: 18px; height: 18px; color: var(--primary); }
+    .section-action {
+      font-size: 13px;
+      color: var(--primary);
+      font-weight: 500;
+    }
+    .section-content { padding: 16px; }
+    
+    /* Product Preview */
+    .product-preview {
+      display: flex;
+      gap: 16px;
+    }
+    .product-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--gray-100);
+      flex-shrink: 0;
+    }
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-info { flex: 1; }
+    .product-style {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .product-specs {
+      font-size: 13px;
+      color: var(--gray-500);
+      line-height: 1.7;
+    }
+    .product-price {
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 10px;
+      color: var(--gray-900);
+    }
+    
+    /* Download Buttons */
+    .download-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .download-btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+    }
+    .download-btn.secondary {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    .download-btn .icon { width: 18px; height: 18px; }
+    
+    /* Info Rows */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 13px; color: var(--gray-500); }
+    .info-value { font-size: 13px; font-weight: 500; }
+    .info-value.gift {
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    /* Gift Message */
+    .gift-message {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(236, 72, 153, 0.08);
+      border-radius: 10px;
+      border-right: 3px solid var(--accent);
+    }
+    .gift-message-label {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .gift-message-text {
+      font-size: 14px;
+      color: var(--gray-700);
+      font-style: italic;
+    }
+    
+    /* Status Update */
+    .status-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .status-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--gray-50);
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    .status-option:active { transform: scale(0.99); }
+    .status-option.selected {
+      border-color: var(--primary);
+      background: rgba(124, 58, 237, 0.04);
+    }
+    .status-radio {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gray-300);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-option.selected .status-radio {
+      border-color: var(--primary);
+    }
+    .status-option.selected .status-radio::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+    .status-option-info { flex: 1; }
+    .status-option-label { font-size: 14px; font-weight: 600; }
+    .status-option-desc { font-size: 12px; color: var(--gray-500); }
+    
+    /* Tracking Input */
+    .tracking-input-group {
+      margin-top: 16px;
+      display: none;
+    }
+    .tracking-input-group.show { display: block; }
+    .input-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+    .text-input {
+      flex: 1;
+      padding: 12px 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+    }
+    .text-input:focus { border-color: var(--primary); }
+    
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+    }
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+    .timeline-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 24px;
+      right: 9px;
+      width: 2px;
+      height: calc(100% - 8px);
+      background: var(--gray-200);
+    }
+    .timeline-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .timeline-item.done .timeline-dot { background: var(--success); }
+    .timeline-content { padding-bottom: 20px; }
+    .timeline-item:last-child .timeline-content { padding-bottom: 0; }
+    .timeline-title { font-size: 13px; font-weight: 600; }
+    .timeline-time { font-size: 12px; color: var(--gray-500); }
+    
+    /* Bottom Actions */
+    .bottom-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      padding: 16px;
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+    .bottom-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .action-btn .icon { width: 20px; height: 20px; }
+    .action-btn.secondary {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+    }
+    .action-btn.success {
+      background: var(--success);
+      color: white;
+    }
+    
+    /* Tablet - 640px+ */
+    @media (min-width: 640px) {
+      .admin-header-inner { padding: 14px 24px; }
+      .main { max-width: 800px; padding: 24px; }
+      .status-banner { padding: 20px; border-radius: 16px; }
+      .status-icon { width: 52px; height: 52px; }
+      .section-card { border-radius: 18px; }
+      .section-header { padding: 16px 20px; }
+      .section-content { padding: 20px; }
+      .product-preview { gap: 20px; }
+      .product-image { width: 140px; height: 140px; }
+      .download-grid { gap: 14px; }
+      .download-btn { padding: 14px; font-size: 14px; }
+      .status-options { gap: 12px; }
+      .status-option { padding: 16px; }
+      .bottom-inner { max-width: 700px; gap: 12px; }
+      .btn-row { gap: 14px; }
+      .action-btn { padding: 16px; font-size: 16px; }
+    }
+    
+    /* Desktop - 1024px+ */
+    @media (min-width: 1024px) {
+      .admin-header-inner { max-width: 1200px; padding: 16px 40px; }
+      .main { 
+        max-width: 1100px; 
+        padding: 32px 40px 180px;
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 28px;
+        align-items: start;
+      }
+      .status-banner { 
+        grid-column: 1 / -1;
+        padding: 24px; 
+        border-radius: 18px;
+      }
+      .status-icon { width: 56px; height: 56px; border-radius: 14px; }
+      .status-title { font-size: 17px; }
+      .section-card { border-radius: 20px; }
+      .section-header { padding: 18px 24px; }
+      .section-title { font-size: 15px; }
+      .section-content { padding: 24px; }
+      .product-preview { gap: 24px; }
+      .product-image { width: 160px; height: 160px; border-radius: 16px; }
+      .product-style { font-size: 18px; }
+      .product-specs { font-size: 14px; }
+      .product-price { font-size: 24px; }
+      .download-grid { gap: 16px; margin-top: 20px; }
+      .download-btn { padding: 16px; font-size: 15px; border-radius: 12px; }
+      .info-row { padding: 12px 0; }
+      .info-label, .info-value { font-size: 14px; }
+      .gift-message { padding: 16px; }
+      .status-options { gap: 14px; }
+      .status-option { padding: 18px; border-radius: 14px; }
+      .status-option-label { font-size: 15px; }
+      .status-option-desc { font-size: 13px; }
+      .timeline-title { font-size: 14px; }
+      .bottom-actions { padding: 20px 40px; }
+      .bottom-inner { 
+        max-width: 1100px; 
+        flex-direction: row; 
+        justify-content: flex-end;
+        gap: 16px;
+      }
+      .btn-row { flex: none; gap: 16px; }
+      .action-btn { 
+        flex: none;
+        min-width: 160px;
+        padding: 16px 28px; 
+        font-size: 16px;
+        border-radius: 14px;
+      }
+    }
+    
+    /* Large Desktop - 1280px+ */
+    @media (min-width: 1280px) {
+      .main { max-width: 1200px; grid-template-columns: 450px 1fr; gap: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="display:none">
+    <defs>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+      <symbol id="i-package" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+      <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+      <symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></symbol>
+      <symbol id="i-message" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <button class="back-btn" onclick="window.location.href='09-admin-orders.html'">
+        <svg class="icon"><use href="#i-arrow-right"/></svg>
+      </button>
+      <h1 class="header-title">פרטי הזמנה</h1>
+      <span class="header-order-id">FP-2024-1847</span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Status Banner -->
+    <div class="status-banner pending">
+      <div class="status-icon">
+        <svg class="icon"><use href="#i-clock"/></svg>
+      </div>
+      <div class="status-info">
+        <div class="status-title">ממתין לטיפול</div>
+        <div class="status-desc">התקבל לפני 5 דקות</div>
+      </div>
+    </div>
+
+    <!-- Product -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title">
+          <svg class="icon"><use href="#i-package"/></svg>
+          פרטי המוצר
+        </span>
+      </div>
+      <div class="section-content">
+        <div class="product-preview">
+          <div class="product-image">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=240&h=240&fit=crop&crop=face" alt="">
+          </div>
+          <div class="product-info">
+            <div class="product-style">פורטרט AI - פופ ארט</div>
+            <div class="product-specs">
+              גודל: A4 (21×29.7 ס״מ)<br>
+              נייר: Fine Art Matte<br>
+              מסגרת: שחור<br>
+              DPI: 300
+            </div>
+            <div class="product-price">₪209</div>
+          </div>
+        </div>
+        <div class="download-grid">
+          <button class="download-btn primary">
+            <svg class="icon"><use href="#i-download"/></svg>
+            קובץ להדפסה
+          </button>
+          <button class="download-btn secondary">
+            <svg class="icon"><use href="#i-image"/></svg>
+            תמונה מקורית
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title">
+          <svg class="icon"><use href="#i-user"/></svg>
+          פרטי לקוח
+        </span>
+        <button class="section-action">
+          <svg class="icon icon-sm"><use href="#i-message"/></svg>
+        </button>
+      </div>
+      <div class="section-content">
+        <div class="info-row">
+          <span class="info-label">שם</span>
+          <span class="info-value">ישראל ישראלי</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">טלפון</span>
+          <span class="info-value">050-0000000</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">אימייל</span>
+          <span class="info-value">israel@email.com</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">הזמנה כמתנה</span>
+          <span class="info-value gift">
+            <svg class="icon icon-sm"><use href="#i-gift"/></svg>
+            כן
+          </span>
+        </div>
+        <div class="gift-message">
+          <div class="gift-message-label">הודעה אישית</div>
+          <div class="gift-message-text">"ליום ההולדת שלך, עם הרבה אהבה! ❤️"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipping -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title">
+          <svg class="icon"><use href="#i-map-pin"/></svg>
+          כתובת למשלוח
+        </span>
+      </div>
+      <div class="section-content">
+        <div class="info-row">
+          <span class="info-label">נמען</span>
+          <span class="info-value">דנה כהן (מקבלת המתנה)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">כתובת</span>
+          <span class="info-value">הרצל 50, דירה 12</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">עיר</span>
+          <span class="info-value">רמת גן</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">מיקוד</span>
+          <span class="info-value">5252525</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">טלפון</span>
+          <span class="info-value">052-1111111</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Status -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title">
+          <svg class="icon"><use href="#i-refresh"/></svg>
+          עדכון סטטוס
+        </span>
+      </div>
+      <div class="section-content">
+        <div class="status-options">
+          <div class="status-option selected" onclick="selectStatus(this, 'pending')">
+            <div class="status-radio"></div>
+            <div class="status-option-info">
+              <div class="status-option-label">ממתין לטיפול</div>
+              <div class="status-option-desc">ההזמנה התקבלה</div>
+            </div>
+          </div>
+          <div class="status-option" onclick="selectStatus(this, 'processing')">
+            <div class="status-radio"></div>
+            <div class="status-option-info">
+              <div class="status-option-label">בהכנה</div>
+              <div class="status-option-desc">בתהליך הדפסה ואריזה</div>
+            </div>
+          </div>
+          <div class="status-option" onclick="selectStatus(this, 'shipped')">
+            <div class="status-radio"></div>
+            <div class="status-option-info">
+              <div class="status-option-label">נשלח</div>
+              <div class="status-option-desc">נמסר לשליח</div>
+            </div>
+          </div>
+          <div class="status-option" onclick="selectStatus(this, 'delivered')">
+            <div class="status-radio"></div>
+            <div class="status-option-info">
+              <div class="status-option-label">הגיע</div>
+              <div class="status-option-desc">נמסר ללקוח</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tracking-input-group" id="trackingInput">
+          <label class="input-label">מספר מעקב</label>
+          <div class="input-row">
+            <input type="text" class="text-input" placeholder="IL123456789">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title">היסטוריית פעילות</span>
+      </div>
+      <div class="section-content">
+        <div class="timeline">
+          <div class="timeline-item done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">הזמנה התקבלה</div>
+              <div class="timeline-time">היום, 14:30</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">תשלום אושר</div>
+              <div class="timeline-time">היום, 14:30</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Actions -->
+  <div class="bottom-actions">
+    <div class="bottom-inner">
+      <div class="btn-row">
+        <button class="action-btn secondary">
+          <svg class="icon"><use href="#i-printer"/></svg>
+          הדפס תעודת משלוח
+        </button>
+      </div>
+      <div class="btn-row">
+        <button class="action-btn secondary" onclick="window.location.href='09-admin-orders.html'">
+          ביטול
+        </button>
+        <button class="action-btn success">
+          <svg class="icon"><use href="#i-check"/></svg>
+          שמור שינויים
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectStatus(el, status) {
+      document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      
+      const trackingInput = document.getElementById('trackingInput');
+      if (status === 'shipped') {
+        trackingInput.classList.add('show');
+      } else {
+        trackingInput.classList.remove('show');
+      }
+    }
+  </script>
+</body>
+</html>

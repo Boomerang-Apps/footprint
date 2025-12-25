@@ -302,5 +302,86 @@ describe('Image Optimization', () => {
       const result = await validateImage(buffer, 'IMAGE/JPEG');
       expect(result.valid).toBe(true);
     });
+
+    it('should optimize without resize when no max dimensions specified', async () => {
+      const buffer = Buffer.alloc(1024);
+      const options: ImageOptimizeOptions = {
+        targetDpi: 300,
+        maxWidth: 0,
+        maxHeight: 0,
+        quality: 90,
+      };
+
+      const result = await optimizeForPrint(buffer, options);
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    it('should optimize without resize when max dimensions are undefined', async () => {
+      const buffer = Buffer.alloc(1024);
+      const options: ImageOptimizeOptions = {
+        targetDpi: 300,
+        quality: 90,
+        // maxWidth and maxHeight explicitly not set
+      };
+      // Override defaults by passing partial options
+      const result = await optimizeForPrint(buffer, { ...options, maxWidth: undefined, maxHeight: undefined });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+  });
+
+  describe('Metadata fallbacks', () => {
+    it('should handle missing metadata values', async () => {
+      // Override mock to return partial metadata
+      const sharp = await import('sharp');
+      const mockSharpInstance = {
+        metadata: vi.fn().mockResolvedValue({
+          // No width, height, format, space, density, size
+        }),
+        resize: vi.fn().mockReturnThis(),
+        jpeg: vi.fn().mockReturnThis(),
+        png: vi.fn().mockReturnThis(),
+        webp: vi.fn().mockReturnThis(),
+        toBuffer: vi.fn().mockResolvedValue(Buffer.from('optimized-image-data')),
+        toFormat: vi.fn().mockReturnThis(),
+        withMetadata: vi.fn().mockReturnThis(),
+      };
+      vi.mocked(sharp.default).mockReturnValueOnce(mockSharpInstance as unknown as ReturnType<typeof sharp.default>);
+
+      const buffer = Buffer.alloc(1024);
+      const metadata = await getImageMetadata(buffer);
+
+      expect(metadata.width).toBe(0);
+      expect(metadata.height).toBe(0);
+      expect(metadata.format).toBe('unknown');
+      expect(metadata.colorSpace).toBe('unknown');
+      expect(metadata.density).toBe(72);
+    });
+
+    it('should use buffer length when size is missing from metadata', async () => {
+      const sharp = await import('sharp');
+      const mockSharpInstance = {
+        metadata: vi.fn().mockResolvedValue({
+          width: 100,
+          height: 100,
+          format: 'jpeg',
+          space: 'srgb',
+          density: 72,
+          // No size property
+        }),
+        resize: vi.fn().mockReturnThis(),
+        jpeg: vi.fn().mockReturnThis(),
+        png: vi.fn().mockReturnThis(),
+        webp: vi.fn().mockReturnThis(),
+        toBuffer: vi.fn().mockResolvedValue(Buffer.from('optimized-image-data')),
+        toFormat: vi.fn().mockReturnThis(),
+        withMetadata: vi.fn().mockReturnThis(),
+      };
+      vi.mocked(sharp.default).mockReturnValueOnce(mockSharpInstance as unknown as ReturnType<typeof sharp.default>);
+
+      const buffer = Buffer.alloc(2048);
+      const metadata = await getImageMetadata(buffer);
+
+      expect(metadata.size).toBe(2048);
+    });
   });
 });

@@ -172,16 +172,20 @@ async function handleDirectMode(
   const file = formData.get('file');
   const shouldOptimize = formData.get('optimize') === 'true';
 
-  if (!file || !(file instanceof Blob)) {
+  // Check if file is a Blob-like object (has arrayBuffer method)
+  const isBlob = file && typeof file === 'object' && 'arrayBuffer' in file && typeof (file as Blob).arrayBuffer === 'function';
+  if (!isBlob) {
     return NextResponse.json(
       { error: 'No file provided' },
       { status: 400 }
     );
   }
 
+  const blobFile = file as Blob;
+
   // Get file name from FormData or use default
-  const fileName = file instanceof File ? file.name : 'image.jpg';
-  const contentType = file.type || 'image/jpeg';
+  const fileName = 'name' in blobFile ? (blobFile as File).name : 'image.jpg';
+  const contentType = blobFile.type || 'image/jpeg';
 
   // Read file buffer
   const arrayBuffer = await file.arrayBuffer();

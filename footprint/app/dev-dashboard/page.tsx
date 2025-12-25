@@ -7,15 +7,19 @@ import {
   features,
   sprints,
   components,
+  pages,
+  pageGroups,
   getStoriesBySprint,
   getStoriesByComponent,
   statusConfig,
   agentConfig,
   type Story,
   type StoryStatus,
+  type Page,
 } from '@/data/dashboard/dev-progress';
+import Link from 'next/link';
 
-type ViewMode = 'sprints' | 'features' | 'components';
+type ViewMode = 'sprints' | 'features' | 'components' | 'pages';
 
 // Generate agent kickstart prompt
 function generateAgentPrompt(story: Story): string {
@@ -738,7 +742,7 @@ export default function DevDashboard() {
 
           {/* View Mode Tabs */}
           <div className="mt-5 flex items-center gap-2 flex-wrap">
-            {(['sprints', 'features', 'components'] as ViewMode[]).map(mode => (
+            {(['sprints', 'features', 'components', 'pages'] as ViewMode[]).map(mode => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
@@ -751,6 +755,7 @@ export default function DevDashboard() {
                 {mode === 'sprints' && '📅 Sprints'}
                 {mode === 'features' && '🎯 Features'}
                 {mode === 'components' && '🧩 Components'}
+                {mode === 'pages' && '📄 Pages'}
               </button>
             ))}
           </div>
@@ -821,6 +826,151 @@ export default function DevDashboard() {
               />
             );
           })}
+
+          {/* Pages View */}
+          {viewMode === 'pages' && (
+            <div className="space-y-6">
+              {pageGroups.map(group => {
+                const groupPages = pages.filter(p => group.pageIds.includes(p.id));
+                const implemented = groupPages.filter(p => p.status === 'implemented').length;
+                const total = groupPages.length;
+
+                return (
+                  <div key={group.id} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    {/* Group Header */}
+                    <div className="px-5 py-4 bg-gray-50 border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{group.icon}</span>
+                          <h3 className="font-semibold text-gray-900">{group.name}</h3>
+                          <span className="text-sm text-gray-500">
+                            {implemented}/{total} implemented
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pages List */}
+                    <div className="divide-y divide-gray-100">
+                      {groupPages.map(page => {
+                        const statusColors = {
+                          'implemented': 'bg-green-100 text-green-700',
+                          'in-progress': 'bg-blue-100 text-blue-700',
+                          'not-started': 'bg-gray-100 text-gray-600',
+                        };
+                        const statusLabels = {
+                          'implemented': 'Live',
+                          'in-progress': 'In Progress',
+                          'not-started': 'Not Started',
+                        };
+
+                        return (
+                          <div key={page.id} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+                            {/* Status Icon */}
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              page.status === 'implemented' ? 'bg-green-100' :
+                              page.status === 'in-progress' ? 'bg-blue-100' : 'bg-gray-100'
+                            }`}>
+                              {page.status === 'implemented' ? (
+                                <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              ) : page.status === 'in-progress' ? (
+                                <svg className="w-4 h-4 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                              )}
+                            </div>
+
+                            {/* Page Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-900">{page.name}</span>
+                                <span className="text-sm text-gray-400" dir="rtl">{page.nameHe}</span>
+                              </div>
+                              <div className="text-sm text-gray-500 truncate">{page.description}</div>
+                            </div>
+
+                            {/* Route */}
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono text-gray-600">
+                              {page.route}
+                            </code>
+
+                            {/* Status Badge */}
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusColors[page.status]}`}>
+                              {statusLabels[page.status]}
+                            </span>
+
+                            {/* Mockup Link */}
+                            {page.mockup && (
+                              <span className="text-xs text-purple-600 font-mono">
+                                {page.mockup}
+                              </span>
+                            )}
+
+                            {/* Story Link */}
+                            {page.storyId && (
+                              <button
+                                onClick={() => {
+                                  const story = stories[page.storyId!];
+                                  if (story) openStoryDetails(story);
+                                }}
+                                className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
+                              >
+                                {page.storyId}
+                              </button>
+                            )}
+
+                            {/* View Page Link */}
+                            {page.status === 'implemented' || page.route.startsWith('/create') || page.route === '/' ? (
+                              <Link
+                                href={page.route.includes('[') ? '#' : page.route}
+                                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                                  page.status === 'implemented'
+                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                }`}
+                                target={page.route === '/dev-dashboard' ? undefined : '_blank'}
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                                View
+                              </Link>
+                            ) : (
+                              <span className="text-xs text-gray-400 italic">Coming soon</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Pages Summary */}
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Pages Overview</h4>
+                    <p className="text-sm text-gray-600">
+                      {pages.filter(p => p.status === 'implemented').length} of {pages.length} pages implemented
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-indigo-600">
+                      {Math.round((pages.filter(p => p.status === 'implemented').length / pages.length) * 100)}%
+                    </div>
+                    <div className="text-xs text-gray-500">Complete</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Status Summary */}

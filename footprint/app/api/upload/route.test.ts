@@ -191,85 +191,6 @@ describe('POST /api/upload', () => {
     });
   });
 
-  // Note: Direct upload mode tests are skipped because FormData handling
-  // in jsdom environment causes tests to hang. The core lib/image and
-  // lib/storage modules have 100% test coverage. Direct mode functionality
-  // should be tested via integration tests or e2e tests.
-  describe.skip('Direct upload mode', () => {
-    it('should upload and optimize image directly', async () => {
-      const imageBuffer = Buffer.from('fake-image-data');
-      const formData = new FormData();
-      formData.append('file', new Blob([imageBuffer], { type: 'image/jpeg' }), 'photo.jpg');
-      formData.append('mode', 'direct');
-
-      const request = new Request('http://localhost/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data.publicUrl).toBeDefined();
-      expect(data.key).toBeDefined();
-    });
-
-    it('should optimize image for print', async () => {
-      const imageBuffer = Buffer.from('fake-image-data');
-      const formData = new FormData();
-      formData.append('file', new Blob([imageBuffer], { type: 'image/jpeg' }), 'photo.jpg');
-      formData.append('mode', 'direct');
-      formData.append('optimize', 'true');
-
-      const request = new Request('http://localhost/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      await POST(request);
-
-      expect(mockOptimizeForPrint).toHaveBeenCalled();
-    });
-
-    it('should convert HEIC to JPEG', async () => {
-      const imageBuffer = Buffer.from('fake-heic-data');
-      const formData = new FormData();
-      formData.append('file', new Blob([imageBuffer], { type: 'image/heic' }), 'photo.heic');
-      formData.append('mode', 'direct');
-
-      const request = new Request('http://localhost/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      await POST(request);
-
-      expect(mockConvertToJpeg).toHaveBeenCalled();
-    });
-
-    it('should reject invalid images', async () => {
-      mockValidateImage.mockResolvedValue({
-        valid: false,
-        error: 'Invalid image format',
-        code: 'INVALID_IMAGE',
-      });
-
-      const imageBuffer = Buffer.from('not-an-image');
-      const formData = new FormData();
-      formData.append('file', new Blob([imageBuffer], { type: 'image/jpeg' }), 'fake.jpg');
-      formData.append('mode', 'direct');
-
-      const request = new Request('http://localhost/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const response = await POST(request);
-      expect(response.status).toBe(400);
-    });
-  });
-
   describe('Authentication', () => {
     it('should require authentication', async () => {
       // Mock unauthenticated user
@@ -337,6 +258,240 @@ describe('POST /api/upload', () => {
       const response = await POST(request);
       expect(response.status).toBe(400);
     });
+
+    it('should reject invalid content type', async () => {
+      const request = new Request('http://localhost/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: 'some text data',
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('Invalid content type');
+    });
+  });
+
+  describe('Direct upload mode', () => {
+    // Helper to create a mock file with arrayBuffer
+    const createMockFile = (data: Buffer, name: string, type: string) => ({
+      name,
+      type,
+      arrayBuffer: () => Promise.resolve(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)),
+      [Symbol.toStringTag]: 'File',
+    });
+
+    // Helper to create a mock blob with arrayBuffer
+    const createMockBlob = (data: Buffer, type: string) => ({
+      type,
+      arrayBuffer: () => Promise.resolve(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)),
+      [Symbol.toStringTag]: 'Blob',
+    });
+
+    it('should handle direct upload with valid image', async () => {
+      const imageBuffer = Buffer.from('fake-image-data');
+      const mockFile = createMockFile(imageBuffer, 'photo.jpg', 'image/jpeg');
+
+      const mockFormData = {
+        get: (key: string) => {
+          if (key === 'file') return mockFile;
+          if (key === 'optimize') return null;
+          return null;
+        },
+      };
+
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockResolvedValue(mockFormData),
+      } as unknown as Request;
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.publicUrl).toBeDefined();
+      expect(data.key).toBeDefined();
+    });
+
+    it('should optimize image when optimize flag is true', async () => {
+      const imageBuffer = Buffer.from('fake-image-data');
+      const mockFile = createMockFile(imageBuffer, 'photo.jpg', 'image/jpeg');
+
+      const mockFormData = {
+        get: (key: string) => {
+          if (key === 'file') return mockFile;
+          if (key === 'optimize') return 'true';
+          return null;
+        },
+      };
+
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockResolvedValue(mockFormData),
+      } as unknown as Request;
+
+      await POST(request);
+
+      expect(mockOptimizeForPrint).toHaveBeenCalled();
+    });
+
+    it('should convert HEIC to JPEG', async () => {
+      const imageBuffer = Buffer.from('fake-heic-data');
+      const mockFile = createMockFile(imageBuffer, 'photo.heic', 'image/heic');
+
+      const mockFormData = {
+        get: (key: string) => {
+          if (key === 'file') return mockFile;
+          if (key === 'optimize') return null;
+          return null;
+        },
+      };
+
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockResolvedValue(mockFormData),
+      } as unknown as Request;
+
+      await POST(request);
+
+      expect(mockConvertToJpeg).toHaveBeenCalled();
+    });
+
+    it('should reject when no file is provided', async () => {
+      const mockFormData = {
+        get: (key: string) => {
+          if (key === 'file') return null;
+          return null;
+        },
+      };
+
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockResolvedValue(mockFormData),
+      } as unknown as Request;
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('No file');
+    });
+
+    it('should reject invalid image', async () => {
+      mockValidateImage.mockResolvedValue({
+        valid: false,
+        error: 'Invalid image format',
+        code: 'INVALID_IMAGE',
+      });
+
+      const imageBuffer = Buffer.from('not-an-image');
+      const mockFile = createMockFile(imageBuffer, 'fake.jpg', 'image/jpeg');
+
+      const mockFormData = {
+        get: (key: string) => {
+          if (key === 'file') return mockFile;
+          if (key === 'optimize') return null;
+          return null;
+        },
+      };
+
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockResolvedValue(mockFormData),
+      } as unknown as Request;
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('Invalid image');
+    });
+
+    it('should handle invalid formData', async () => {
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockRejectedValue(new Error('Invalid form data')),
+      } as unknown as Request;
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('Invalid form data');
+    });
+
+    it('should handle R2 upload errors in direct mode', async () => {
+      mockUploadToR2.mockRejectedValue(new Error('R2 upload failed'));
+
+      const imageBuffer = Buffer.from('fake-image-data');
+      const mockFile = createMockFile(imageBuffer, 'photo.jpg', 'image/jpeg');
+
+      const mockFormData = {
+        get: (key: string) => {
+          if (key === 'file') return mockFile;
+          if (key === 'optimize') return null;
+          return null;
+        },
+      };
+
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockResolvedValue(mockFormData),
+      } as unknown as Request;
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data.error).toContain('Failed to upload');
+    });
+
+    it('should handle blob without name (uses default filename)', async () => {
+      const imageBuffer = Buffer.from('fake-image-data');
+      const mockBlob = createMockBlob(imageBuffer, 'image/jpeg');
+
+      const mockFormData = {
+        get: (key: string) => {
+          if (key === 'file') return mockBlob;
+          if (key === 'optimize') return null;
+          return null;
+        },
+      };
+
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockResolvedValue(mockFormData),
+      } as unknown as Request;
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(200);
+      // uploadToR2 should be called with default filename
+      expect(mockUploadToR2).toHaveBeenCalledWith(
+        expect.any(Buffer),
+        'user123',
+        'image.jpg',
+        'image/jpeg'
+      );
+    });
   });
 
   describe('Response format', () => {
@@ -361,18 +516,29 @@ describe('POST /api/upload', () => {
       expect(data).toHaveProperty('expiresIn');
     });
 
-    // Note: Direct mode test skipped due to FormData timeout in jsdom.
-    // Core lib/image and lib/storage modules have 100% coverage.
-    it.skip('should return proper JSON response for direct mode', async () => {
+    it('should return proper JSON response for direct mode', async () => {
       const imageBuffer = Buffer.from('fake-image-data');
-      const formData = new FormData();
-      formData.append('file', new Blob([imageBuffer], { type: 'image/jpeg' }), 'photo.jpg');
-      formData.append('mode', 'direct');
+      const mockFile = {
+        name: 'photo.jpg',
+        type: 'image/jpeg',
+        arrayBuffer: () => Promise.resolve(imageBuffer.buffer.slice(imageBuffer.byteOffset, imageBuffer.byteOffset + imageBuffer.byteLength)),
+        [Symbol.toStringTag]: 'File',
+      };
 
-      const request = new Request('http://localhost/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const mockFormData = {
+        get: (key: string) => {
+          if (key === 'file') return mockFile;
+          if (key === 'optimize') return null;
+          return null;
+        },
+      };
+
+      const request = {
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'multipart/form-data' : null,
+        },
+        formData: vi.fn().mockResolvedValue(mockFormData),
+      } as unknown as Request;
 
       const response = await POST(request);
       const data = await response.json();
