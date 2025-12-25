@@ -234,6 +234,25 @@ BLOCK message written to `backend-2-inbox.md`. Backend-2 needs to:
 
 ---
 
+#### UI-07: Base UI Primitives
+**Branch**: `feature/ui-07-base-primitives`
+**Status**: ✅ **APPROVED** (excellent coverage)
+
+| Check | Result |
+|-------|--------|
+| Tests | ✅ 134 passing |
+| Statement Coverage | ✅ 100% |
+| Branch Coverage | ✅ 98% |
+| Functions | ✅ 100% |
+| TypeScript | ✅ Clean |
+| ESLint | ✅ Clean |
+
+**Components**: Button, Card, Input, Select, Checkbox, Badge + utils
+
+**Recommendation**: Merge to main
+
+---
+
 #### UI-06: Demo Data Module
 **Branch**: `feature/ui-06-demo-data`
 **Status**: ✅ **APPROVED**
@@ -304,7 +323,7 @@ The following stories are BLOCKED due to **project-level test configuration issu
 
 | Status | Count | Stories |
 |--------|-------|---------|
-| ✅ APPROVED | 5 | AI-02, CO-02, UP-03, UI-01, UI-06 |
+| ✅ APPROVED | 6 | AI-02, CO-02, UP-03, UI-01, UI-06, UI-07 |
 | ❌ BLOCKED | 4 | CO-01, GF-01, GF-02, UP-01/02/04 |
 
 **Note**: UI-01 branch fixed test infrastructure by adding missing @testing-library deps. Other blocked branches may now pass after merging UI-01 fixes.
