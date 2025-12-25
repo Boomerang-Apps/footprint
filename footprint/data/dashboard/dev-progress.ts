@@ -546,7 +546,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-03',
     title: 'Customize Page UI (03-customize.html)',
     description: 'Implement product config: size/paper/frame selectors, live price, mockup preview',
-    status: 'in-progress',  // ✅ Assigned to Frontend-B 2025-12-25
+    status: 'in-review',  // ✅ Gate 2 Complete 2025-12-25 - 43 tests, ready for QA
     agent: 'Frontend-B',
     points: 3,
     blockedBy: ['UI-06'],  // Can start in parallel after demo data

@@ -41,6 +41,80 @@ When work is ready for testing:
 
 ## Pending Messages
 
+## 2025-12-25 - Frontend-B: UI-03 Customize Page Ready for QA
+
+**Story**: UI-03 - Customize Page UI
+**Branch**: `feature/ui-03-customize-page`
+**Commit**: `b757a92a`
+**Sprint**: 4
+**Priority**: P0
+
+### Summary
+Frontend-B implemented the Customize Page matching `03-customize.html` mockup:
+
+| Feature | Status |
+|---------|--------|
+| Progress bar at 60% (Step 3) | ✅ |
+| Size grid (A5/A4/A3/A2) | ✅ |
+| "פופולרי" badge on A4 | ✅ |
+| Paper selector with radio buttons | ✅ |
+| Frame grid with color previews | ✅ |
+| Live price calculation | ✅ |
+| Bottom CTA with price summary | ✅ |
+| Hebrew RTL layout | ✅ |
+
+### Pricing (matching mockup)
+| Option | Price |
+|--------|-------|
+| A5 | ₪89 |
+| A4 | ₪149 |
+| A3 | ₪249 |
+| A2 | ₪379 |
+| Matte Paper | Included |
+| Glossy Paper | +₪20 |
+| Canvas | +₪40 |
+| No Frame | Free |
+| Black/White Frame | +₪60 |
+| Oak Frame | +₪80 |
+
+### Test Results
+- **Tests**: 43 passing (TDD)
+- **Total**: 829 passing (no regressions)
+- **TypeScript**: Clean
+- **ESLint**: Clean
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `app/(app)/create/customize/page.tsx` | Complete rewrite |
+| `app/(app)/create/customize/page.test.tsx` | Created (43 tests) |
+
+### Validation Required
+```bash
+cd footprint
+git fetch && git checkout feature/ui-03-customize-page
+npm install
+npm test -- --coverage
+npm run type-check
+npm run lint
+npm run dev  # Visual check against mockup
+```
+
+### Visual Verification
+Compare against: `design_mockups/03-customize.html`
+
+### Gate Status
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 43 tests)
+- [x] Gate 3: Code Quality (TypeScript/Lint clean)
+- [ ] Gate 4: QA Validation (PENDING)
+
+### On Approval
+Write to PM inbox: UI-03 APPROVED
+**Unblocks**: UI-04 (Checkout Page UI)
+
+---
+
 ## 2025-12-25 - Frontend-B: UI-02 Style Selection Ready for QA
 
 **Story**: UI-02 - Style Selection UI
