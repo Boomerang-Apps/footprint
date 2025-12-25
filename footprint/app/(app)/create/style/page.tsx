@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, Sparkles, Check, Palette, Heart, Brush, Camera, Pen, Zap, Flower2, Film } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, Heart, Film, Sun } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import type { StyleType } from '@/types';
 
@@ -11,102 +11,84 @@ interface StyleOption {
   id: StyleType;
   name: string;
   nameHe: string;
-  description: string;
   icon: React.ElementType;
-  color: string;
-  colorBg: string;
-  popular?: boolean;
+  gradient: string;
+  badge?: 'popular' | 'new';
 }
 
-const styles: StyleOption[] = [
-  {
-    id: 'original',
-    name: 'Original Enhanced',
-    nameHe: 'משופר מקורי',
-    description: 'שיפור צבעים ואיכות',
-    icon: Camera,
-    color: '#3b82f6',
-    colorBg: 'rgba(59,130,246,0.1)',
-  },
+const STYLES: StyleOption[] = [
   {
     id: 'pop_art',
     name: 'Pop Art',
     nameHe: 'פופ ארט',
-    description: 'צבעים נועזים בסגנון וורהול',
     icon: Zap,
-    color: '#ec4899',
-    colorBg: 'rgba(236,72,153,0.1)',
-    popular: true,
+    gradient: 'from-violet-500 to-pink-500',
+    badge: 'popular',
   },
   {
     id: 'watercolor',
     name: 'Watercolor',
     nameHe: 'צבעי מים',
-    description: 'רך וזורם כציור מים',
-    icon: Flower2,
-    color: '#14b8a6',
-    colorBg: 'rgba(20,184,166,0.1)',
+    icon: Droplet,
+    gradient: 'from-blue-500 to-cyan-400',
+  },
+  {
+    id: 'line_art',
+    name: 'Line Art',
+    nameHe: 'ציור קווי',
+    icon: Pen,
+    gradient: 'from-gray-500 to-gray-400',
   },
   {
     id: 'oil_painting',
     name: 'Oil Painting',
     nameHe: 'ציור שמן',
-    description: 'מכחולים עשירים קלאסיים',
     icon: Brush,
-    color: '#f59e0b',
-    colorBg: 'rgba(245,158,11,0.1)',
-    popular: true,
-  },
-  {
-    id: 'line_art',
-    name: 'Line Art',
-    nameHe: 'קווי מתאר',
-    description: 'מינימליסטי ואלגנטי',
-    icon: Pen,
-    color: '#6366f1',
-    colorBg: 'rgba(99,102,241,0.1)',
+    gradient: 'from-amber-500 to-amber-600',
   },
   {
     id: 'romantic',
     name: 'Romantic',
     nameHe: 'רומנטי',
-    description: 'רך וחלומי עם גוונים חמים',
     icon: Heart,
-    color: '#f43f5e',
-    colorBg: 'rgba(244,63,94,0.1)',
+    gradient: 'from-pink-500 to-pink-400',
+    badge: 'new',
   },
   {
     id: 'comic_book',
     name: 'Comic Book',
     nameHe: 'קומיקס',
-    description: 'קווים נועזים וצבעים חיים',
-    icon: Sparkles,
-    color: '#8b5cf6',
-    colorBg: 'rgba(139,92,246,0.1)',
+    icon: Zap,
+    gradient: 'from-orange-500 to-red-500',
   },
   {
     id: 'vintage',
     name: 'Vintage',
     nameHe: 'וינטג׳',
-    description: 'נוסטלגי עם גוון ספיה',
     icon: Film,
-    color: '#78716c',
-    colorBg: 'rgba(120,113,108,0.1)',
+    gradient: 'from-amber-800 to-amber-700',
   },
   {
-    id: 'minimalist',
-    name: 'Minimalist',
-    nameHe: 'מינימליסטי',
-    description: 'פשוט ונקי',
-    icon: Palette,
-    color: '#0ea5e9',
-    colorBg: 'rgba(14,165,233,0.1)',
+    id: 'original',
+    name: 'Original Enhanced',
+    nameHe: 'מקורי משופר',
+    icon: Sun,
+    gradient: 'from-emerald-500 to-emerald-400',
   },
+];
+
+const STEPS = [
+  { id: 'upload', label: 'העלאה' },
+  { id: 'style', label: 'סגנון' },
+  { id: 'customize', label: 'התאמה' },
+  { id: 'payment', label: 'תשלום' },
 ];
 
 export default function StylePage() {
   const router = useRouter();
   const { originalImage, selectedStyle, setSelectedStyle, setStep } = useOrderStore();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStyle, setProcessingStyle] = useState<string | null>(null);
 
   // Redirect to upload if no image
   useEffect(() => {
@@ -115,182 +97,234 @@ export default function StylePage() {
     }
   }, [originalImage, router]);
 
-  const handleStyleSelect = (styleId: StyleType) => {
-    setSelectedStyle(styleId);
-  };
+  // Set current step on mount
+  useEffect(() => {
+    setStep('style');
+  }, [setStep]);
 
-  const handleContinue = () => {
+  const handleStyleSelect = useCallback((styleId: StyleType, styleNameHe: string) => {
+    setSelectedStyle(styleId);
+    setIsProcessing(true);
+    setProcessingStyle(styleNameHe);
+
+    // Simulate AI processing
+    setTimeout(() => {
+      setIsProcessing(false);
+      setProcessingStyle(null);
+    }, 1500);
+  }, [setSelectedStyle]);
+
+  const handleContinue = useCallback(() => {
     setStep('customize');
     router.push('/create/customize');
-  };
+  }, [setStep, router]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setStep('upload');
     router.push('/create');
-  };
+  }, [setStep, router]);
 
   if (!originalImage) {
     return null;
   }
 
-  const selectedStyleData = styles.find(s => s.id === selectedStyle);
+  const currentStyle = STYLES.find(s => s.id === selectedStyle) || STYLES[0];
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-zinc-50" dir="rtl">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-zinc-200">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition"
+            className="w-10 h-10 flex items-center justify-center text-zinc-600 rounded-xl"
+            aria-label="חזרה"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>חזרה</span>
+            <ArrowRight className="w-6 h-6" />
           </button>
 
-          <div className="flex items-center gap-2 text-zinc-900">
-            <Sparkles className="w-5 h-5 text-brand-purple" />
-            <span className="font-semibold">בחירת סגנון</span>
-          </div>
+          <h1 className="text-lg font-semibold text-zinc-900">בחירת סגנון</h1>
 
-          <div className="w-20" />
+          <div className="w-10" />
         </div>
       </header>
 
-      {/* Progress Steps */}
-      <div className="border-b border-zinc-200">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-2">
-            {['העלאה', 'סגנון', 'התאמה', 'תשלום'].map((step, i) => (
-              <div key={step} className="flex items-center gap-2">
-                <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                  ${i <= 1 ? 'bg-brand-purple text-white' : 'bg-zinc-100 text-zinc-500'}
-                `}>
-                  {i < 1 ? <Check className="w-4 h-4" /> : i + 1}
+      {/* Progress Bar */}
+      <div className="bg-white border-b border-zinc-200 px-4 py-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Progress Track */}
+          <div className="h-1 bg-zinc-200 rounded-full mb-3">
+            <div
+              data-testid="progress-fill"
+              className="h-full bg-gradient-to-l from-purple-600 to-pink-500 rounded-full transition-all"
+              style={{ width: '40%' }}
+            />
+          </div>
+
+          {/* Steps */}
+          <div className="flex justify-between">
+            {STEPS.map((step, i) => {
+              const isCompleted = i < 1;
+              const isActive = i === 1;
+              return (
+                <div
+                  key={step.id}
+                  data-step={step.id}
+                  data-completed={isCompleted ? 'true' : 'false'}
+                  data-active={isActive ? 'true' : 'false'}
+                  className="flex items-center gap-1.5"
+                >
+                  <div className={`
+                    w-2 h-2 rounded-full
+                    ${isCompleted ? 'bg-emerald-500' : isActive ? 'bg-purple-600' : 'bg-zinc-300'}
+                  `} />
+                  <span className={`
+                    text-xs font-medium
+                    ${isCompleted ? 'text-emerald-600' : isActive ? 'text-purple-600' : 'text-zinc-400'}
+                  `}>
+                    {step.label}
+                  </span>
                 </div>
-                <span className={`text-sm ${i <= 1 ? 'text-zinc-900' : 'text-zinc-500'}`}>
-                  {step}
-                </span>
-                {i < 3 && <div className={`w-8 h-px ${i < 1 ? 'bg-brand-purple' : 'bg-zinc-200'}`} />}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Preview Side */}
-          <div className="order-2 lg:order-1">
-            <div className="sticky top-32">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">תצוגה מקדימה</h2>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-50">
-                <Image
-                  src={originalImage}
-                  alt="Preview"
-                  fill
-                  className="object-contain"
-                />
-                {selectedStyleData && (
-                  <div
-                    className="absolute bottom-4 right-4 px-4 py-2 rounded-full text-sm font-medium text-white"
-                    style={{ backgroundColor: selectedStyleData.color }}
-                  >
-                    {selectedStyleData.nameHe}
-                  </div>
-                )}
+      <div className="max-w-4xl mx-auto px-4 pb-28">
+        {/* Preview Section */}
+        <div className="py-5 flex justify-center">
+          <div className="relative w-full max-w-sm aspect-[4/5] bg-zinc-100 rounded-2xl overflow-hidden shadow-lg">
+            <Image
+              src={originalImage}
+              alt="התמונה שלך"
+              fill
+              className="object-cover"
+            />
+
+            {/* AI Processing Overlay */}
+            {isProcessing && (
+              <div
+                data-testid="ai-overlay"
+                className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center gap-3"
+              >
+                <div className="w-12 h-12 border-3 border-zinc-200 border-t-purple-600 rounded-full animate-spin" />
+                <span className="text-sm text-zinc-600 font-medium">
+                  מעבד בסגנון {processingStyle}...
+                </span>
               </div>
-              <p className="text-sm text-zinc-500 mt-3 text-center">
-                * התמונה המעובדת תיווצר לאחר הרכישה
-              </p>
+            )}
+
+            {/* Close Button */}
+            <button
+              onClick={handleBack}
+              className="absolute top-3 left-3 w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600"
+              aria-label="סגירה"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Style Badge */}
+            <div
+              data-testid="style-badge"
+              className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3.5 py-2 bg-white rounded-full shadow-md"
+            >
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span className="text-sm font-semibold text-zinc-900">{currentStyle.nameHe}</span>
             </div>
           </div>
+        </div>
 
-          {/* Style Selection */}
-          <div className="order-1 lg:order-2">
-            <div className="text-center lg:text-right mb-6">
-              <h1 className="text-2xl font-bold text-zinc-900 mb-2">בחרו סגנון אמנותי</h1>
-              <p className="text-zinc-500">
-                הבינה המלאכותית שלנו תהפוך את התמונה לאמנות בסגנון שתבחרו
-              </p>
-            </div>
+        {/* Styles Section */}
+        <div className="py-5">
+          <div className="text-center mb-4">
+            <h2 className="text-lg font-bold text-zinc-900 mb-1">בחרו סגנון אמנות</h2>
+            <p className="text-sm text-zinc-500">הקישו על סגנון לתצוגה מקדימה בזמן אמת</p>
+          </div>
 
-            {/* Style Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {styles.map((style) => {
-                const isSelected = selectedStyle === style.id;
-                const Icon = style.icon;
+          {/* Horizontal Style Strip */}
+          <div
+            data-testid="style-strip"
+            className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide"
+            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
+          >
+            {STYLES.map((style) => {
+              const isSelected = selectedStyle === style.id;
+              const Icon = style.icon;
 
-                return (
-                  <button
-                    key={style.id}
-                    onClick={() => handleStyleSelect(style.id)}
-                    className={`
-                      relative p-4 rounded-xl border-2 transition-all text-right
-                      ${isSelected
-                        ? 'border-brand-purple bg-brand-purple/5 shadow-md'
-                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                      }
-                    `}
-                  >
-                    {style.popular && (
-                      <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-brand-purple text-white text-[10px] font-semibold rounded-full">
+              return (
+                <button
+                  key={style.id}
+                  onClick={() => handleStyleSelect(style.id, style.nameHe)}
+                  data-selected={isSelected ? 'true' : 'false'}
+                  aria-label={style.nameHe}
+                  className="flex-shrink-0 flex flex-col items-center gap-2"
+                >
+                  <div className={`
+                    relative w-16 h-16 rounded-2xl flex items-center justify-center
+                    bg-gradient-to-br ${style.gradient}
+                    ${isSelected ? 'ring-2 ring-purple-600 ring-offset-2' : ''}
+                    transition-all active:scale-95
+                  `}>
+                    <Icon className="w-7 h-7 text-white" />
+
+                    {/* Badge */}
+                    {style.badge === 'popular' && (
+                      <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-pink-500 text-white text-[8px] font-bold rounded whitespace-nowrap">
                         פופולרי
                       </span>
                     )}
-
-                    {isSelected && (
-                      <div className="absolute top-2 left-2 w-5 h-5 bg-brand-purple rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
+                    {style.badge === 'new' && (
+                      <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-pink-500 text-white text-[8px] font-bold rounded whitespace-nowrap">
+                        חדש
+                      </span>
                     )}
 
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
-                      style={{ backgroundColor: style.colorBg, color: style.color }}
-                    >
-                      <Icon className="w-5 h-5" />
-                    </div>
+                    {/* Selection Check */}
+                    {isSelected && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center border-2 border-white">
+                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      </div>
+                    )}
+                  </div>
 
-                    <h3 className="font-semibold text-zinc-900 text-sm mb-1">
-                      {style.nameHe}
-                    </h3>
-                    <p className="text-xs text-zinc-500 leading-relaxed">
-                      {style.description}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Continue Button */}
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={handleContinue}
-                className="btn btn-primary flex-1 py-4 text-base"
-              >
-                <span>המשך להתאמה אישית</span>
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Info */}
-            <div className="mt-6 p-4 bg-zinc-50 rounded-xl border border-zinc-200">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-brand-purple/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-4 h-4 text-brand-purple" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-zinc-900 mb-1">תצוגה מקדימה חינם</h4>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
-                    לאחר הרכישה תקבלו את התמונה המעובדת באיכות גבוהה. אם לא תהיו מרוצים - נתקן או נחזיר כסף.
-                  </p>
-                </div>
-              </div>
-            </div>
+                  <span className={`
+                    text-xs font-medium text-center max-w-[65px]
+                    ${isSelected ? 'text-purple-600' : 'text-zinc-600'}
+                  `}>
+                    {style.nameHe}
+                  </span>
+                </button>
+              );
+            })}
           </div>
+
+          {/* Free Preview Notice */}
+          <div className="mt-4 p-3 bg-purple-50 rounded-xl text-center flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-600" />
+            <span className="text-sm text-purple-700 font-medium">תצוגה מקדימה חינם ללא הגבלה</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 p-3 pb-safe">
+        <div className="max-w-4xl mx-auto flex gap-3">
+          <button
+            onClick={handleBack}
+            className="flex-1 py-3.5 px-5 rounded-xl border-2 border-zinc-200 font-semibold text-zinc-700 hover:bg-zinc-50 transition"
+          >
+            חזרה
+          </button>
+
+          <button
+            onClick={handleContinue}
+            className="flex-[2] py-3.5 px-5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold shadow-md hover:opacity-90 transition flex items-center justify-center gap-2"
+          >
+            <span>אהבתי! המשך</span>
+            <ArrowRight className="w-5 h-5 rotate-180" />
+          </button>
         </div>
       </div>
     </main>
