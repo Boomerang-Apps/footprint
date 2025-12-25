@@ -526,7 +526,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-01',
     title: 'Upload Page UI (01-upload.html)',
     description: 'Implement upload mockup: drag-drop zone, camera button, progress states, Hebrew RTL',
-    status: 'in-progress',  // ✅ Assigned to Frontend-B 2025-12-24
+    status: 'in-review',  // ✅ Complete, routed to QA 2025-12-24 (24 tests)
     agent: 'Frontend-B',
     points: 3,
     blockedBy: ['UI-06'],
