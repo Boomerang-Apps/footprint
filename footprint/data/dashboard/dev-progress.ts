@@ -369,7 +369,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1851',
     title: 'Apply Discount Codes',
     description: 'Code input, validation feedback, discount shown',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (148 tests, 100% coverage on discounts.ts)
     agent: 'Backend-1',
     points: 2,
     component: 'Checkout',
