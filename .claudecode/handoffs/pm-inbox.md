@@ -114,4 +114,64 @@ QA handoff written to: `.claudecode/handoffs/qa-inbox.md`
 
 ---
 
+## 2025-12-25 - Backend-1: CO-05 Ready for QA
+
+**Story**: CO-05
+**Priority**: P1
+**Type**: Gate 2 Complete
+
+### Summary
+Implemented discount code validation and application in orderStore:
+- Discount code validation with error messages
+- Support for percentage and fixed discounts
+- Minimum purchase requirement enforcement
+- Integration with pricing breakdown
+- Discount clear/reset functionality
+
+### Key Decisions
+- Extended existing orderStore rather than creating separate store
+- Used existing `lib/pricing/discounts.ts` for validation logic
+- Added `discountValidation` state object for clean state management
+- Prices update automatically when discount applied
+
+### Test Results
+- **Tests**: 21 passing (discount store tests)
+- **Coverage**: lib/pricing 100%, store discount functions tested
+- **TypeScript**: 0 errors in my files (pre-existing errors in other test files)
+- **Lint**: Clean
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/stores/orderStore.ts | Modified |
+| footprint/stores/orderStore.test.ts | Created |
+| .claudecode/milestones/sprint-4/CO-05/START.md | Created |
+| .claudecode/milestones/sprint-4/CO-05/ROLLBACK-PLAN.md | Created |
+
+### API for Frontend
+
+```typescript
+// State
+discountCode: string
+discountValidation: {
+  isValidating: boolean
+  error: string | null
+  appliedDiscount: ApplyDiscountResult | null
+}
+
+// Actions
+setDiscountCode(code: string)  // Updates code, clears error
+applyDiscountCode()            // Validates and applies
+clearDiscount()                // Removes discount
+hasAppliedDiscount(): boolean  // Check if valid discount
+getDiscountAmount(): number    // Get discount value
+```
+
+### Branch
+`feature/co-05-discount-codes` (commit `f18b1a3f`)
+
+**Ready for Gate 3 QA validation.**
+
+---
+
 ---

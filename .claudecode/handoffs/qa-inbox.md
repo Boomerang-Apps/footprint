@@ -577,3 +577,97 @@ EMAIL_FROM=orders@footprint.co.il  # optional, defaults to noreply@footprint.co.
 > Ready for QA validation
 
 ---
+
+## 2025-12-25 - Backend-1: CO-05 Apply Discount Codes
+
+**Story**: CO-05
+**Branch**: feature/co-05-discount-codes
+**Sprint**: 4
+**Priority**: P1
+**Story Points**: 2
+
+### Completed
+- [x] Extended orderStore with discountValidation state
+- [x] applyDiscountCode() action - validates and applies discount
+- [x] clearDiscount() action - removes applied discount
+- [x] hasAppliedDiscount() helper - returns boolean
+- [x] getDiscountAmount() helper - returns discount value
+- [x] setDiscountCode() clears error on code change
+- [x] Integration with existing lib/pricing/discounts.ts
+- [x] Pricing updates automatically when discount applied
+- [x] TDD approach with 21 tests
+- [x] TypeScript clean (in my files)
+- [x] ESLint clean
+
+### Test Results
+- **Tests**: 21 passing (orderStore discount tests)
+- **Coverage**:
+  - lib/pricing/: 100% (discounts.ts, calculator.ts, shipping.ts)
+  - stores/orderStore.ts: 46% overall (discount functions tested)
+
+### Store API for Components
+
+```typescript
+// State
+const {
+  discountCode,        // Current discount code string
+  discountValidation,  // { isValidating, error, appliedDiscount }
+  pricing,             // Includes updated discount & total
+} = useOrderStore();
+
+// Actions
+setDiscountCode('SAVE10');  // Update code (clears error)
+applyDiscountCode();        // Validate and apply
+clearDiscount();            // Remove discount
+
+// Computed
+hasAppliedDiscount();       // true if valid discount applied
+getDiscountAmount();        // discount amount in ILS
+```
+
+### Available Discount Codes (for testing)
+| Code | Type | Value | Min Purchase |
+|------|------|-------|--------------|
+| SAVE10 | percentage | 10% | - |
+| SAVE20 | percentage | 20% | - |
+| FLAT20 | fixed | 20 ILS | - |
+| FLAT50 | fixed | 50 ILS | - |
+| VIP25 | percentage | 25% | 200 ILS |
+| WELCOME | percentage | 15% | - |
+| EXPIRED50 | percentage | 50% | - (expired) |
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `footprint/stores/orderStore.ts` | Modified |
+| `footprint/stores/orderStore.test.ts` | Created |
+| `.claudecode/milestones/sprint-4/CO-05/START.md` | Created |
+| `.claudecode/milestones/sprint-4/CO-05/ROLLBACK-PLAN.md` | Created |
+
+### How to Test
+```bash
+cd footprint
+npm test -- stores/orderStore.test.ts
+npm run type-check
+npm run lint
+```
+
+### Manual Test Cases
+1. **Valid code**: Enter SAVE10, apply, verify 10% discount shown
+2. **Invalid code**: Enter INVALID, apply, verify error message
+3. **Expired code**: Enter EXPIRED50, apply, verify expiration error
+4. **Min purchase**: Enter VIP25 with low subtotal, verify minimum error
+5. **Clear discount**: Apply SAVE10, then clear, verify discount removed
+6. **Case insensitive**: Enter save10 (lowercase), verify works
+
+### Gate Status
+- [x] Gate 0: Research (N/A - uses existing discount lib)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tagged CO-05-start)
+- [x] Gate 2: Implementation (TDD - 21 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean)
+- [ ] Gate 5: Deployment (pending QA)
+
+> Ready for QA validation
+
+---
