@@ -366,27 +366,46 @@ npm test -- --coverage      # Tests with coverage
 | Agent Definitions | `.claudecode/agents/*.md` |
 | Safety Framework | `.claudecode/workflows/MANDATORY-SAFETY-FRAMEWORK.md` |
 | Sprint Stories | `.claudecode/linear-stories/` |
-| **Dev Dashboard** | `http://localhost:3002/dev-dashboard` |
-| **Dev Progress (Source of Truth)** | `footprint/data/dashboard/dev-progress.ts` |
+| **Cockpit (Primary)** | `http://localhost:3005/cockpit` |
+| **Dev Dashboard (Legacy)** | `http://localhost:3005/dev-dashboard` |
+| **Dev Progress Data** | `footprint/data/dashboard/dev-progress.ts` |
 
 ---
 
-## Dev Dashboard
+## Cockpit Control Panel
 
-The dev dashboard provides real-time project tracking with Linear integration.
+The Cockpit is the **primary control panel** for monitoring multi-agent development progress.
 
-**URL**: http://localhost:3002/dev-dashboard (when dev server running)
+**URL**: http://localhost:3005/cockpit (when dev server running on port 3005)
 
 **Features**:
-- Sprint/Feature/Component views
-- Story modal with agent kickstart prompts
+- Sprint/Feature/Component/Agents views
+- Story cards with status badges and agent assignments
+- Agent kickstart prompts for recovery
 - Linear sync (individual and bulk)
-- Progress tracking with status badges
+- Real-time progress tracking
+- Database-backed story management (when Supabase configured)
 
-**Source of Truth**: `footprint/data/dashboard/dev-progress.ts`
-- All story statuses, assignments, and progress
-- Update this file to reflect current sprint state
-- Dashboard reads from this file
+**Data Sources**:
+| Source | Purpose |
+|--------|---------|
+| `footprint/data/dashboard/dev-progress.ts` | Local story data (always available) |
+| Supabase `stories` table | Database-backed stories (when configured) |
+| Linear API | Issue sync from Linear |
+
+**API Endpoints**:
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/stories` | Fetch all stories from database |
+| `GET /api/orchestration` | Get sprint overview, agent status, pipeline |
+| `GET /api/linear/sync?issueId=XX` | Sync single issue from Linear |
+
+**To enable database features**, add to `.env.local`:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+LINEAR_API_KEY=lin_api_...
+```
 
 ---
 
@@ -394,3 +413,4 @@ The dev dashboard provides real-time project tracking with Linear integration.
 
 *Document created by CTO Agent - 2025-12-19*
 *Updated by PM Agent - 2025-12-23: Added dev-dashboard documentation*
+*Updated by CTO Agent - 2025-12-26: Added Cockpit control panel documentation*
