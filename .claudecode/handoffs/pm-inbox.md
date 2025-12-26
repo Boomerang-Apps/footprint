@@ -35,58 +35,57 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
-## 2025-12-26 - CTO: Sprint 5 Parallel Assignment Plan
+## 2025-12-26 - CTO: Agent Domain Redistribution + Sprint 5 Plan
 
-**Type**: Sprint Planning
+**Type**: Architectural Decision + Sprint Planning
 **Priority**: P0 - ACTION REQUIRED
 
-### Objective: Maximize 4-Agent Parallelization
+### Domain Redistribution APPROVED ✅
 
-All 4 dev agents can work simultaneously on non-overlapping stories.
+Frontend workload has been **rebalanced** for even distribution.
 
-### Recommended Assignment Set A (Sprint 5 Priority)
+#### New Agent Domains
 
-| Agent | Story | Points | Component | Files Touched |
-|-------|-------|--------|-----------|---------------|
-| **Frontend-A** | AUTH-01: User Login Page | 3 | Auth | `app/login/`, `components/auth/` |
-| **Frontend-B** | UA-01: Order History Page | 3 | UserAccount | `app/account/orders/`, `components/account/` |
-| **Backend-1** | CO-05: Discount Codes | 2 | Pricing | `lib/pricing/`, `stores/orderStore` |
-| **Backend-2** | OM-04: Add Tracking Numbers | 2 | Admin | `app/api/admin/orders/`, `lib/shipping/` |
+| Agent | Domain | Scope |
+|-------|--------|-------|
+| **Frontend-A** | Shell + Primitives + **Auth** + **Standalone Pages** | Login, guest checkout, order history |
+| **Frontend-B** | Features + Order Flow + **User Account Detail** | Order detail, gift options, mockups |
 
-**Total: 10 SP in parallel | No file conflicts | No dependencies**
+#### Reassigned Stories
 
-### Alternative Set B (Higher Impact)
+| Story | From | To | Rationale |
+|-------|------|----|-----------|
+| UA-01 | Frontend-B | **Frontend-A** | Standalone list page |
+| AUTH-02 | Frontend-B | **Frontend-A** | Auth domain consolidation |
 
-| Agent | Story | Points | Component | Notes |
-|-------|-------|--------|-----------|-------|
-| **Frontend-A** | AUTH-01: User Login Page | 3 | Auth | Foundation for user accounts |
-| **Frontend-B** | PC-05: Realistic Mockup Preview | 2 | ProductConfig | Conversion booster |
-| **Backend-1** | GF-05: Scheduled Delivery Date | 3 | Gift | Gift experience polish |
-| **Backend-2** | AI-05: Fast AI Transformation | 5 | AI | Performance critical (<10s) |
+### New Balanced Backlog
 
-**Total: 13 SP in parallel**
+| Agent | Stories | Points | Balance |
+|-------|---------|--------|---------|
+| **Frontend-A** | AUTH-01, AUTH-02, UA-01 | 8 pts | ✅ |
+| **Frontend-B** | PC-05, GF-04, UA-02 | 7 pts | ✅ |
+| **Backend-1** | CO-05, GF-05 | 5 pts | ✅ |
+| **Backend-2** | OM-04, AI-05, CO-03, CO-06, UP-05 | 17 pts | ⚠️ Heavy |
 
-### CTO Recommendation
+---
 
-**Go with Set A first** - these complete Sprint 5 admin/checkout features. Set B can follow.
+### Sprint 5 Parallel Assignment (UPDATED)
+
+| Agent | Story | Points | Files |
+|-------|-------|--------|-------|
+| **Frontend-A** | AUTH-01: User Login Page | 3 | `app/login/`, `components/auth/` |
+| **Frontend-B** | UA-02: Order Detail Page | 3 | `app/account/orders/[id]/` |
+| **Backend-1** | CO-05: Discount Codes | 2 | `lib/pricing/`, `stores/` |
+| **Backend-2** | OM-04: Add Tracking Numbers | 2 | `app/api/admin/`, `lib/shipping/` |
+
+**Total: 10 SP in parallel | No conflicts | No dependencies**
 
 ### Action Required from PM
 
-1. Confirm assignment set (A or B)
+1. ✅ Domain redistribution approved - no further action
 2. Update story statuses to `in-progress`
-3. Notify agents with kickstart prompts
-4. Coordinate daily standups for blockers
-
-### Agent Workload Analysis
-
-| Agent | Backlog Stories | Total Points |
-|-------|-----------------|--------------|
-| Frontend-A | 1 story | 3 pts |
-| Frontend-B | 5 stories | 12 pts |
-| Backend-1 | 2 stories | 5 pts |
-| Backend-2 | 5 stories | 17 pts |
-
-**Note:** Backend-2 is heavily loaded. May need to redistribute after this sprint.
+3. Dispatch agents with kickstart prompts
+4. Monitor Backend-2 workload for potential redistribution
 
 **Signed**: CTO Agent - 2025-12-26
 

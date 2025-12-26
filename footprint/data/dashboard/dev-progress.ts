@@ -444,7 +444,7 @@ export const stories: Record<string, Story> = {
     title: 'Order History Page',
     description: 'List of past orders, status badges, reorder option',
     status: 'backlog',
-    agent: 'Frontend-B',
+    agent: 'Frontend-A',  // CTO reassigned 2025-12-26: standalone list page fits Frontend-A
     points: 3,
     component: 'UserAccount',
   },
@@ -473,7 +473,7 @@ export const stories: Record<string, Story> = {
     title: 'Guest Checkout Option',
     description: 'Purchase without account, email capture, optional signup',
     status: 'backlog',
-    agent: 'Frontend-B',
+    agent: 'Frontend-A',  // CTO reassigned 2025-12-26: auth domain consolidation
     points: 2,
     component: 'Auth',
   },
