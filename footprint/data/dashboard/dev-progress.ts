@@ -581,7 +581,7 @@ export const stories: Record<string, Story> = {
     id: 'INT-01',
     title: 'Connect Upload to R2 Storage',
     description: 'Call /api/upload on image select, store R2 URL in orderStore, show upload progress',
-    status: 'in-progress',  // 🚀 Assigned to Frontend-B 2025-12-26
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (35 tests, 84.41% coverage)
     agent: 'Frontend-B',
     points: 3,
     blockedBy: ['UI-01', 'UP-03'],
@@ -591,7 +591,7 @@ export const stories: Record<string, Story> = {
     id: 'INT-02',
     title: 'Connect Style Selection to AI Transform',
     description: 'Call /api/transform when style selected, show real AI preview instead of simulated, handle errors',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (39 tests, 100% stmt coverage)
     agent: 'Frontend-B',
     points: 5,
     blockedBy: ['UI-02', 'AI-02', 'INT-01'],
@@ -601,7 +601,7 @@ export const stories: Record<string, Story> = {
     id: 'INT-03',
     title: 'Connect Checkout to Payment APIs',
     description: 'Integrate PayPlus (Israeli) and Stripe (wallet) payment flows, handle success/failure callbacks',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Assigned to Frontend-B 2025-12-26
     agent: 'Frontend-B',
     points: 5,
     blockedBy: ['UI-04', 'CO-02', 'CO-03'],
@@ -1258,4 +1258,98 @@ export const agents: Agent[] = [
     stories: [],
     color: 'bg-teal-100 text-teal-800',
   },
+];
+
+// =============================================================================
+// EPICS (for Epics tab)
+// =============================================================================
+
+export interface Epic {
+  id: string;
+  name: string;
+  description: string;
+  features: string[];
+  status: 'done' | 'in-progress' | 'planned';
+}
+
+export const epics: Epic[] = [
+  {
+    id: 'EPIC-01',
+    name: 'Photo Upload',
+    description: 'Upload and process photos for printing',
+    features: ['F1'],
+    status: 'done',
+  },
+  {
+    id: 'EPIC-02',
+    name: 'AI Transformation',
+    description: 'Apply AI styles to photos',
+    features: ['F2'],
+    status: 'done',
+  },
+  {
+    id: 'EPIC-03',
+    name: 'Product Configuration',
+    description: 'Configure print options',
+    features: ['F3'],
+    status: 'done',
+  },
+  {
+    id: 'EPIC-04',
+    name: 'Checkout & Payment',
+    description: 'Payment and order processing',
+    features: ['F4', 'F5', 'F5b'],
+    status: 'done',
+  },
+  {
+    id: 'EPIC-05',
+    name: 'Admin Dashboard',
+    description: 'Order management for admins',
+    features: ['F6'],
+    status: 'done',
+  },
+  {
+    id: 'EPIC-06',
+    name: 'UI Implementation',
+    description: 'Frontend UI screens',
+    features: ['F9', 'F10'],
+    status: 'done',
+  },
+  {
+    id: 'EPIC-07',
+    name: 'Integration',
+    description: 'Connect UI to backend APIs',
+    features: ['F11'],
+    status: 'in-progress',
+  },
+];
+
+// =============================================================================
+// SCREENS (for Sitemap tab)
+// =============================================================================
+
+export interface Screen {
+  id: string;
+  name: string;
+  path: string;
+  status: 'done' | 'in-progress' | 'planned';
+  category: string;
+}
+
+export const screens: Screen[] = [
+  { id: 'home', name: 'Home', path: '/', status: 'done', category: 'marketing' },
+  { id: 'upload', name: 'Upload', path: '/create', status: 'done', category: 'order-flow' },
+  { id: 'style', name: 'Style Selection', path: '/create/style', status: 'done', category: 'order-flow' },
+  { id: 'customize', name: 'Customize', path: '/create/customize', status: 'done', category: 'order-flow' },
+  { id: 'checkout', name: 'Checkout', path: '/create/checkout', status: 'done', category: 'order-flow' },
+  { id: 'complete', name: 'Confirmation', path: '/create/complete', status: 'done', category: 'order-flow' },
+  { id: 'admin', name: 'Admin Dashboard', path: '/admin', status: 'done', category: 'admin' },
+  { id: 'cockpit', name: 'Dev Cockpit', path: '/cockpit', status: 'done', category: 'dev' },
+];
+
+export const screenCategories = [
+  { id: 'marketing', name: 'Marketing', screens: screens.filter(s => s.category === 'marketing') },
+  { id: 'order-flow', name: 'Order Flow', screens: screens.filter(s => s.category === 'order-flow') },
+  { id: 'admin', name: 'Admin', screens: screens.filter(s => s.category === 'admin') },
+  { id: 'dev', name: 'Development', screens: screens.filter(s => s.category === 'dev') },
 ];
