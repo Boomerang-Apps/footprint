@@ -4,6 +4,63 @@ Work assignments for QA validation appear here.
 
 ---
 
+## 2025-12-26 - Frontend-B: INT-05 Connect Confirmation to Order API
+
+**Story**: INT-05
+**Branch**: feature/int-05-confirmation-order-api
+**Commit**: a37986a5
+**Priority**: P0
+**Type**: Gate 3 QA Validation
+
+### Summary
+
+Connected confirmation page to order API for real data display:
+- Reads orderId from URL search params
+- Fetches order from `/api/orders/[orderId]/confirm`
+- Displays real order number from API
+- Uses WhatsApp URL from API for sharing
+- Loading state while fetching
+- Error state if order not found
+- Fallback to store data when no orderId
+
+### Files Changed
+
+| File | Description |
+|------|-------------|
+| `app/(app)/create/complete/page.tsx` | API integration |
+| `app/(app)/create/complete/page.test.tsx` | 9 new tests (54 total) |
+
+### Test Results
+
+- 54 tests passing (confirmation page)
+- 1236 tests passing (total project)
+- TypeScript clean
+- ESLint clean
+
+### Verification Commands
+
+```bash
+cd footprint
+npm test -- app/\\(app\\)/create/complete/page.test.tsx
+npm run type-check
+npm run lint
+```
+
+### Acceptance Criteria
+
+- [ ] Gets orderId from URL params
+- [ ] Fetches real order data from API
+- [ ] Displays actual order number from database
+- [ ] Shows loading state while fetching
+- [ ] Handles order not found gracefully
+- [ ] WhatsApp share uses API-provided URL
+- [ ] Tests cover API integration
+- [ ] 80%+ test coverage maintained
+
+→ Ready for QA validation
+
+---
+
 ## 2025-12-24 - Backend-2: UP-03 Coverage Fix
 
 **Story**: UP-03
