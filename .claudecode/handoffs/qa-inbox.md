@@ -640,3 +640,81 @@ npm run dev  # Manual testing
 > Ready for QA validation
 
 ---
+
+## 2025-12-26 - Frontend-A: Price Display & Timeline (UI-09)
+
+**Story**: UI-09 - Price Display & Timeline Components
+**Branch**: feature/ui-09-price-timeline
+**Sprint**: 2
+**Priority**: P1
+
+### Completed
+- [x] PriceDisplay component - ILS currency formatting with ₪ symbol
+- [x] Support for integers, decimals, thousands separator
+- [x] Strikethrough for original prices (discounts)
+- [x] "חינם" (Free) display for zero amounts
+- [x] Size variants (sm, md, lg, xl) and color variants
+- [x] OrderTimeline component - 4-step order status tracker
+- [x] Current step highlighting, completed step checkmarks
+- [x] Hebrew labels with RTL layout support
+- [x] Vertical and horizontal layout options
+- [x] Estimated dates display
+- [x] TypeScript strict mode clean
+- [x] ESLint clean (no warnings or errors)
+- [x] Tests written with TDD approach
+
+### Test Results
+- **Tests**: 62 passing (31 PriceDisplay + 31 OrderTimeline)
+- **Coverage**: 100% statements, 100% branches, 100% functions, 100% lines
+  - PriceDisplay.tsx: 100%
+  - OrderTimeline.tsx: 100%
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `components/ui/PriceDisplay.tsx` | Created |
+| `components/ui/PriceDisplay.test.tsx` | Created |
+| `components/ui/OrderTimeline.tsx` | Created |
+| `components/ui/OrderTimeline.test.tsx` | Created |
+| `components/ui/index.ts` | Modified (exports added) |
+| `.claudecode/milestones/sprint-2/UI-09/START.md` | Created |
+| `.claudecode/milestones/sprint-2/UI-09/ROLLBACK-PLAN.md` | Created |
+
+### How to Test
+```bash
+cd footprint
+npm test -- PriceDisplay OrderTimeline
+npm run type-check
+npm run lint
+npm run dev  # Manual testing
+```
+
+### Manual Test Cases
+
+**PriceDisplay:**
+1. **Basic price**: `<PriceDisplay amount={150} />` shows ₪150
+2. **Decimals**: `<PriceDisplay amount={99.50} />` shows ₪99.50
+3. **Thousands**: `<PriceDisplay amount={1500} showThousandsSeparator />` shows ₪1,500
+4. **Free**: `<PriceDisplay amount={0} />` shows חינם
+5. **Strikethrough**: `<PriceDisplay amount={200} strikethrough />` shows ~~₪200~~
+6. **Negative (discount)**: `<PriceDisplay amount={-50} />` shows -₪50 in green
+
+**OrderTimeline:**
+1. **First status**: `<OrderTimeline currentStatus="received" />` - first step highlighted
+2. **Middle status**: `<OrderTimeline currentStatus="processing" />` - first completed, second current
+3. **Shipped**: `<OrderTimeline currentStatus="shipped" />` - checkmarks on first two
+4. **Hebrew labels**: Default shows Hebrew labels in RTL
+5. **English**: `<OrderTimeline currentStatus="received" locale="en" />`
+6. **Horizontal**: `<OrderTimeline currentStatus="shipped" layout="horizontal" />`
+
+### Gate Status
+- [x] Gate 0: Research (N/A - standard UI components)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 62 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean, 100% coverage)
+- [ ] Gate 5: Deployment (pending QA)
+
+> Ready for QA validation
+
+---
