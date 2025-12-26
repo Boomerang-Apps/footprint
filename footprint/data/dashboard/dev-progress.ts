@@ -505,7 +505,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-09',
     title: 'Price Display & Timeline Components',
     description: 'PriceDisplay (ILS formatting with ₪), OrderTimeline (4-step order status tracker). Shared by multiple pages.',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (62 tests, 100% coverage)
     agent: 'Frontend-A',
     points: 2,
     blockedBy: ['UI-07'],
@@ -566,7 +566,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-05',
     title: 'Confirmation Page UI (05-confirmation.html)',
     description: 'Implement confirmation: order summary, timeline tracker, WhatsApp share',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (45 tests)
     agent: 'Frontend-B',
     points: 2,
     blockedBy: ['UI-06', 'UI-09'],  // Needs Timeline component from Frontend-A
@@ -776,7 +776,7 @@ export const sprints: Sprint[] = [
     id: 4,
     name: 'Sprint 4',
     focus: 'Admin, Payment & UI Polish',
-    status: 'active',  // 🚀 ACTIVE - 17/24 SP complete (70.8%) - UI-08 merged!
+    status: 'active',  // 🚀 ACTIVE - 21/24 SP complete (87.5%) - UI-09, UI-05 merged!
     features: ['F5b', 'F6', 'F9', 'F10'],  // Combined: Admin + Payment + UI Implementation
   },
   {
