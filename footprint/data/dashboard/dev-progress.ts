@@ -412,7 +412,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1847',
     title: 'Download Print-Ready Files',
     description: 'High-res download, correct dimensions, color profile',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (28 tests, 93.75% coverage)
     agent: 'Backend-2',
     points: 2,
     component: 'Admin',
@@ -776,7 +776,7 @@ export const sprints: Sprint[] = [
     id: 4,
     name: 'Sprint 4',
     focus: 'Admin, Payment & UI Polish',
-    status: 'active',  // 🚀 ACTIVE - 21/24 SP complete (87.5%) - UI-09, UI-05 merged!
+    status: 'active',  // 🚀 ACTIVE - 23/24 SP complete (95.8%) - OM-03 merged!
     features: ['F5b', 'F6', 'F9', 'F10'],  // Combined: Admin + Payment + UI Implementation
   },
   {
