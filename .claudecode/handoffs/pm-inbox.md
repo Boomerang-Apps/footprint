@@ -157,4 +157,57 @@ Implemented StepProgress component for 5-step order flow indicator:
 
 ---
 
+## 2025-12-26 - Frontend-A: UI-09 Ready for QA
+
+**Story**: UI-09
+**Priority**: P1
+**Type**: Gate 2 Complete
+
+### Summary
+Implemented two shared UI components:
+
+**PriceDisplay:**
+- ILS currency formatting with ₪ symbol
+- Support for integers, decimals, and thousands separator
+- Strikethrough for original prices
+- "חינם" (Free) display for zero amounts
+- Size and color variants
+- RTL support for Hebrew
+
+**OrderTimeline:**
+- 4-step order status tracker (received, processing, shipped, delivered)
+- Current step highlighting, completed step checkmarks
+- Hebrew labels with RTL layout support
+- Vertical and horizontal layout options
+- Estimated dates display
+
+### Key Decisions
+- PriceDisplay defaults to Hebrew locale (RTL) as primary market is Israel
+- OrderTimeline supports vertical (default for sidebar/mobile) and horizontal layouts
+- Both components follow existing design system patterns
+
+### Test Results
+- **Tests**: 62 passing (31 PriceDisplay + 31 OrderTimeline)
+- **Coverage**: 100% (both components)
+- **TypeScript**: 0 errors
+- **Lint**: Clean
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/components/ui/PriceDisplay.tsx | Created |
+| footprint/components/ui/PriceDisplay.test.tsx | Created |
+| footprint/components/ui/OrderTimeline.tsx | Created |
+| footprint/components/ui/OrderTimeline.test.tsx | Created |
+| footprint/components/ui/index.ts | Modified |
+| .claudecode/milestones/sprint-2/UI-09/START.md | Created |
+| .claudecode/milestones/sprint-2/UI-09/ROLLBACK-PLAN.md | Created |
+
+### Branch
+`feature/ui-09-price-timeline` (commit `34058e19`)
+
+**Ready for Gate 3 QA validation.**
+
+---
+
 ---
