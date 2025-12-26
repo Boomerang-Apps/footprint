@@ -35,6 +35,48 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
+## 2025-12-26 - Backend-2: UP-05 Ready for QA
+
+**Story**: UP-05 - Face Detection Cropping
+**Priority**: P1
+**Type**: Gate 2 Complete - Ready for QA
+
+### Summary
+Implemented intelligent face detection and smart cropping functionality using TDD:
+- Content-aware cropping using smartcrop-sharp library
+- Aspect ratio parsing and validation (1:1, 4:5, 3:4, 16:9, A-series)
+- Smart crop region calculation with confidence scores
+- POST /api/detect-crop API endpoint
+- R2 image fetching helpers (getImageFromR2, isR2Url)
+
+### Key Decisions
+- Used smartcrop-sharp for content-aware cropping (no external API calls)
+- Scores normalized to 0-1 range using sigmoid function
+- Fallback to centered crop if smartcrop fails
+- Only accepts R2 URLs for security (no external image fetching)
+
+### Test Results
+- **Tests**: 51 passing (35 lib/image/faceDetection + 16 API)
+- **Coverage**: 87.27% statements for faceDetection.ts
+- **TypeScript**: 0 errors in UP-05 files
+- **Lint**: Clean
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/lib/image/faceDetection.ts | Created |
+| footprint/lib/image/faceDetection.test.ts | Created |
+| footprint/app/api/detect-crop/route.ts | Created |
+| footprint/app/api/detect-crop/route.test.ts | Created |
+| footprint/lib/storage/r2.ts | Modified (added helpers) |
+
+### Branch
+`feature/UP-05-face-detection-cropping` (commit `5e632321`)
+
+**Ready for Gate 3 QA validation.**
+
+---
+
 ## 2025-12-26 - Backend-2: OM-03 Ready for QA
 
 **Story**: OM-03 - Download Print-Ready Files
