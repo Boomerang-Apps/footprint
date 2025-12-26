@@ -53,7 +53,101 @@ Assign work related to:
 
 ## Pending Messages
 
-## 2025-12-21 - PM: ⚠️ GATE 1 COMPLIANCE REQUIRED - URGENT
+## 2025-12-26 - PM: UP-05 Assignment - Face Detection Cropping
+
+**Story**: UP-05
+**Priority**: P1
+**Type**: Parallel Assignment (4 agents)
+**Sprint**: 6
+**Points**: 2
+
+### Context
+
+UP-03 (Image Optimization) is merged with 100% coverage. Now add intelligent face detection for smart cropping suggestions.
+
+### Assignment
+
+Implement face detection and smart crop suggestions for uploaded photos.
+
+### Requirements
+
+1. **Face Detection Library**
+   ```typescript
+   // lib/image/faceDetection.ts
+   import sharp from 'sharp';
+
+   interface FaceRegion {
+     x: number;
+     y: number;
+     width: number;
+     height: number;
+     confidence: number;
+   }
+
+   interface CropSuggestion {
+     region: { x: number; y: number; width: number; height: number };
+     aspectRatio: string;  // '1:1', '4:5', '3:4'
+     score: number;        // 0-1 confidence
+   }
+
+   export async function detectFaces(imageBuffer: Buffer): Promise<FaceRegion[]>;
+   export async function suggestCrops(imageBuffer: Buffer, targetRatios: string[]): Promise<CropSuggestion[]>;
+   ```
+
+2. **Smart Crop Algorithm**
+   - Use smartcrop-sharp or similar library
+   - Prioritize faces in crop region
+   - Support common aspect ratios: 1:1, 4:5, 3:4, 16:9
+   - Fallback to center crop if no faces detected
+
+3. **API Endpoint**
+   ```typescript
+   // POST /api/detect-crop
+   // Request: { imageUrl: string, aspectRatios: string[] }
+   // Response: { faces: FaceRegion[], suggestions: CropSuggestion[] }
+   ```
+
+### Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `lib/image/faceDetection.ts` | Create |
+| `lib/image/faceDetection.test.ts` | Create |
+| `app/api/detect-crop/route.ts` | Create |
+| `app/api/detect-crop/route.test.ts` | Create |
+
+### Acceptance Criteria
+
+- [ ] detectFaces returns face regions with confidence
+- [ ] suggestCrops returns ranked crop suggestions
+- [ ] API endpoint accepts image URL and returns suggestions
+- [ ] Handles images with no faces (fallback to center)
+- [ ] Handles multiple faces (prioritize largest/centered)
+- [ ] Performance: < 2 seconds for detection
+- [ ] Tests written (TDD)
+- [ ] Coverage: 80%+ minimum
+- [ ] TypeScript clean
+
+### Gate 1 Checklist (MANDATORY)
+
+- [ ] Create branch: `git checkout -b feature/UP-05-face-detection`
+- [ ] Create START.md: `.claudecode/milestones/sprint-6/UP-05/START.md`
+- [ ] Create ROLLBACK-PLAN.md
+- [ ] Create tag: `git tag UP-05-start`
+
+### Technical Notes
+
+- Consider using `smartcrop-sharp` npm package
+- R2 image URLs from UP-03 can be used as input
+- Cache detection results for same image
+
+### On Completion
+
+Write handoff to: `.claudecode/handoffs/qa-inbox.md`
+
+---
+
+## 2025-12-21 - PM: UP-03 Assignment [COMPLETED]
 
 **From**: PM Agent
 **To**: Backend-2 Agent

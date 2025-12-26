@@ -53,7 +53,82 @@ Assign work related to:
 
 ## Pending Messages
 
-## 2025-12-25 - PM: UI-08 Assignment - Step Progress Indicator
+## 2025-12-26 - PM: AUTH-02 Assignment - Guest Checkout Option
+
+**Story**: AUTH-02
+**Priority**: P1
+**Type**: Parallel Assignment (4 agents)
+**Sprint**: 6
+**Points**: 2
+
+### Context
+
+CTO has expanded your domain to include **Auth + Standalone Pages**. You successfully delivered AUTH-01 (User Login) with 100% coverage. Now handle the guest checkout flow.
+
+**Pairing**: Backend-1 will implement guest session state in orderStore. Coordinate if needed.
+
+### Assignment
+
+Implement guest checkout option allowing users to purchase without creating an account.
+
+### Requirements
+
+1. **Guest Checkout Toggle**
+   - Option on checkout page to continue as guest
+   - Clear distinction from logged-in flow
+   - Email capture for order updates
+
+2. **Guest Form**
+   ```typescript
+   interface GuestCheckoutForm {
+     email: string;           // Required - for order confirmation
+     firstName: string;       // Required
+     lastName: string;        // Required
+     phone?: string;          // Optional
+     marketingConsent: boolean; // Checkbox for future emails
+   }
+   ```
+
+3. **UI Components**
+   - GuestCheckoutForm component
+   - Email validation with real-time feedback
+   - "Create account after purchase" optional checkbox
+   - Hebrew labels with RTL support
+
+### Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `components/checkout/GuestCheckoutForm.tsx` | Create |
+| `components/checkout/GuestCheckoutForm.test.tsx` | Create |
+| `components/checkout/index.ts` | Modify (add export) |
+
+### Acceptance Criteria
+
+- [ ] Guest checkout form renders correctly
+- [ ] Email validation works (format check)
+- [ ] Form integrates with orderStore (Backend-1's work)
+- [ ] RTL Hebrew layout works
+- [ ] Marketing consent checkbox functional
+- [ ] Tests written (TDD)
+- [ ] Coverage: 80%+ minimum
+- [ ] TypeScript clean
+- [ ] ESLint clean
+
+### Gate 1 Checklist (MANDATORY)
+
+- [ ] Create branch: `git checkout -b feature/AUTH-02-guest-checkout`
+- [ ] Create START.md: `.claudecode/milestones/sprint-6/AUTH-02/START.md`
+- [ ] Create ROLLBACK-PLAN.md
+- [ ] Create tag: `git tag AUTH-02-start`
+
+### On Completion
+
+Write handoff to: `.claudecode/handoffs/qa-inbox.md`
+
+---
+
+## 2025-12-25 - PM: UI-08 Assignment - Step Progress Indicator [COMPLETED]
 
 **Story**: UI-08
 **Priority**: P0 - Start Immediately

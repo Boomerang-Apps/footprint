@@ -171,7 +171,7 @@ export const stories: Record<string, Story> = {
     id: 'UP-05',
     title: 'Face Detection Cropping',
     description: 'Auto-detect face in photo, smart crop suggestions, manual override',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Assigned to Backend-2 2025-12-26
     agent: 'Backend-2',
     points: 2,
     component: 'Upload',
@@ -308,7 +308,7 @@ export const stories: Record<string, Story> = {
     id: 'GF-04',
     title: 'Gift Wrapping Option',
     description: 'Premium gift wrap selection, gift box preview, price addon',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Assigned to Frontend-B 2025-12-26
     agent: 'Frontend-B',
     points: 2,
     component: 'Gift',
@@ -444,7 +444,7 @@ export const stories: Record<string, Story> = {
     title: 'Order History Page',
     description: 'List of past orders, status badges, reorder option',
     status: 'backlog',
-    agent: 'Frontend-B',
+    agent: 'Frontend-A',  // 🔄 CTO Reassigned 2025-12-26 (Auth + Standalone Pages domain)
     points: 3,
     component: 'UserAccount',
   },
@@ -472,8 +472,8 @@ export const stories: Record<string, Story> = {
     id: 'AUTH-02',
     title: 'Guest Checkout Option',
     description: 'Purchase without account, email capture, optional signup',
-    status: 'backlog',
-    agent: 'Frontend-B',
+    status: 'in-progress',  // 🚀 Assigned to Frontend-A 2025-12-26
+    agent: 'Frontend-A',  // 🔄 CTO Reassigned 2025-12-26 (Auth domain)
     points: 2,
     component: 'Auth',
   },

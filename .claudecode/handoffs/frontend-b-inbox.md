@@ -55,7 +55,90 @@ Assign work related to:
 
 ## Pending Messages
 
-## 2025-12-25 - PM: UI-04 Assignment - Checkout Page UI
+## 2025-12-26 - PM: GF-04 Assignment - Gift Wrapping Option
+
+**Story**: GF-04
+**Priority**: P1
+**Type**: Parallel Assignment (4 agents)
+**Sprint**: 6
+**Points**: 2
+
+### Context
+
+Gift experience is a key differentiator for Footprint. GF-01 (gift toggle), GF-02 (message), GF-03 (recipient shipping) are done. Now add premium gift wrapping option.
+
+### Assignment
+
+Implement gift wrapping selection in the checkout flow with visual preview.
+
+### Requirements
+
+1. **Gift Wrap Options**
+   ```typescript
+   interface GiftWrapOption {
+     id: 'none' | 'standard' | 'premium';
+     nameHe: string;
+     nameEn: string;
+     description: string;
+     price: number;  // ILS
+     image: string;  // Preview image path
+   }
+
+   const giftWrapOptions: GiftWrapOption[] = [
+     { id: 'none', nameHe: 'ללא אריזה', nameEn: 'No wrapping', description: '', price: 0, image: '' },
+     { id: 'standard', nameHe: 'אריזת מתנה', nameEn: 'Gift wrap', description: 'נייר עטיפה יפהפה עם סרט', price: 15, image: '/images/gift-wrap-standard.jpg' },
+     { id: 'premium', nameHe: 'קופסת מתנה', nameEn: 'Gift box', description: 'קופסה מעוצבת עם סרט סאטן', price: 35, image: '/images/gift-box-premium.jpg' },
+   ];
+   ```
+
+2. **UI Components**
+   - GiftWrapSelector component (radio cards with images)
+   - Price shown on each option (+₪15, +₪35)
+   - Visual preview of selected wrap style
+   - Only shown when gift toggle is ON
+
+3. **Integration**
+   - Updates orderStore with giftWrapOption
+   - Price flows to total calculation
+   - Hebrew labels with RTL support
+
+### Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `components/checkout/GiftWrapSelector.tsx` | Create |
+| `components/checkout/GiftWrapSelector.test.tsx` | Create |
+| `stores/orderStore.ts` | Modify (add giftWrapOption) |
+| `app/(app)/create/checkout/page.tsx` | Modify (integrate) |
+
+### Acceptance Criteria
+
+- [ ] Gift wrap options display correctly
+- [ ] Visual preview for each option
+- [ ] Price addon shown (+₪15, +₪35)
+- [ ] Only visible when isGift=true
+- [ ] Selection updates orderStore
+- [ ] Total price includes gift wrap
+- [ ] RTL Hebrew layout works
+- [ ] Tests written (TDD)
+- [ ] Coverage: 80%+ minimum
+- [ ] TypeScript clean
+- [ ] ESLint clean
+
+### Gate 1 Checklist (MANDATORY)
+
+- [ ] Create branch: `git checkout -b feature/GF-04-gift-wrapping`
+- [ ] Create START.md: `.claudecode/milestones/sprint-6/GF-04/START.md`
+- [ ] Create ROLLBACK-PLAN.md
+- [ ] Create tag: `git tag GF-04-start`
+
+### On Completion
+
+Write handoff to: `.claudecode/handoffs/qa-inbox.md`
+
+---
+
+## 2025-12-25 - PM: UI-04 Assignment - Checkout Page UI [COMPLETED]
 
 **Story**: UI-04
 **Priority**: P0
