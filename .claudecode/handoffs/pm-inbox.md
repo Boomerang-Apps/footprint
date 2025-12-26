@@ -35,6 +35,54 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
+## 2025-12-26 - Backend-2: OM-02 Ready for QA
+
+**Story**: OM-02 - Update Order Status
+**Priority**: P1
+**Type**: Gate 2 Complete - Ready for QA
+
+### Summary
+Implemented admin order status update functionality using TDD:
+- Status validation library with transition rules enforcement
+- Admin API endpoint (PATCH /api/admin/orders/[id]/status)
+- Customer notification email with Hebrew RTL support
+- Status history tracking with timestamps
+
+### Key Decisions
+- Terminal states (delivered, cancelled) allow no further transitions
+- Cancellation only allowed before printing starts
+- Email continues to send even if update partially fails (graceful degradation)
+
+### Order Status Flow
+```
+pending -> paid -> processing -> printing -> shipped -> delivered
+                                    |
+                                    v
+                               cancelled
+```
+
+### Test Results
+- **Tests**: 50 passing (34 lib + 16 API)
+- **Coverage**: 100% for lib/orders/status.ts
+- **TypeScript**: 0 errors in OM-02 files
+- **Lint**: Clean
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/lib/orders/status.ts | Created |
+| footprint/lib/orders/status.test.ts | Created |
+| footprint/app/api/admin/orders/[id]/status/route.ts | Created |
+| footprint/app/api/admin/orders/[id]/status/route.test.ts | Created |
+| footprint/lib/email/resend.ts | Modified (added status update email) |
+
+### Branch
+`feature/OM-02-order-status-update` (commit `908368b7`)
+
+**Ready for Gate 3 QA validation.**
+
+---
+
 ## 2025-12-25 - Backend-2: CO-03 Ready for QA
 
 **Story**: CO-03 - Apple Pay / Google Pay

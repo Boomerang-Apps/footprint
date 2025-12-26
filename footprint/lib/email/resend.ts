@@ -38,6 +38,14 @@ export interface OrderConfirmationParams {
   shippingAddress: ShippingAddress;
 }
 
+export interface StatusUpdateParams {
+  to: string;
+  customerName: string;
+  orderId: string;
+  newStatus: string;
+  note?: string;
+}
+
 export interface EmailResult {
   success: boolean;
   emailId?: string;
@@ -266,4 +274,156 @@ export function generateWhatsAppShareUrl(
   }
 
   return `https://wa.me/?text=${text}`;
+}
+
+// ============================================================================
+// Status Update Email
+// ============================================================================
+
+/**
+ * Status labels in Hebrew for customer notifications
+ */
+const STATUS_LABELS_HE: Record<string, string> = {
+  pending: 'ממתין לתשלום',
+  paid: 'שולם',
+  processing: 'בטיפול',
+  printing: 'בהדפסה',
+  shipped: 'נשלח',
+  delivered: 'נמסר',
+  cancelled: 'בוטל',
+};
+
+/**
+ * Generates HTML email template for status update.
+ */
+function generateStatusUpdateHtml(params: StatusUpdateParams): string {
+  const { customerName, orderId, newStatus } = params;
+  const statusLabel = STATUS_LABELS_HE[newStatus] || newStatus;
+
+  // Status-specific messaging
+  let statusMessage = '';
+  let nextSteps = '';
+
+  switch (newStatus) {
+    case 'processing':
+      statusMessage = 'ההזמנה שלך נמצאת כעת בטיפול!';
+      nextSteps = 'אנחנו מכינים את העבודה שלך להדפסה. נעדכן אותך כשנתחיל בהדפסה.';
+      break;
+    case 'printing':
+      statusMessage = 'ההזמנה שלך בהדפסה! 🖨️';
+      nextSteps = 'היצירה שלך מודפסת כרגע על ידי הצוות המקצועי שלנו.';
+      break;
+    case 'shipped':
+      statusMessage = 'ההזמנה שלך נשלחה! 📦';
+      nextSteps = 'החבילה בדרך אליך! צפי להגעה: 5-7 ימי עסקים.';
+      break;
+    case 'delivered':
+      statusMessage = 'ההזמנה שלך נמסרה! 🎉';
+      nextSteps = 'תודה שבחרת ב-Footprint! נשמח לראות את היצירה תלויה אצלך.';
+      break;
+    case 'cancelled':
+      statusMessage = 'ההזמנה שלך בוטלה';
+      nextSteps = 'אם יש לך שאלות, אנא צור איתנו קשר.';
+      break;
+    default:
+      statusMessage = `הסטטוס עודכן ל: ${statusLabel}`;
+      nextSteps = '';
+  }
+
+  return `
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>עדכון סטטוס הזמנה - ${orderId}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; direction: rtl;">
+
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #2563eb; margin: 0;">Footprint</h1>
+    <p style="color: #666; margin: 5px 0;">סטודיו להדפסת תמונות AI</p>
+  </div>
+
+  <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+    <h2 style="margin: 0 0 16px 0; color: #1e293b;">${statusMessage}</h2>
+    <p style="margin: 0;">שלום ${customerName},</p>
+    <p>רצינו לעדכן אותך שסטטוס ההזמנה שלך השתנה.</p>
+    <p style="font-size: 18px; font-weight: bold;">
+      הזמנה: <span style="color: #2563eb;">${orderId}</span>
+    </p>
+    <p style="font-size: 18px;">
+      סטטוס חדש: <span style="background: #dbeafe; padding: 4px 12px; border-radius: 16px; color: #1d4ed8;">${statusLabel}</span>
+    </p>
+  </div>
+
+  ${nextSteps ? `
+  <div style="margin-bottom: 24px;">
+    <h3 style="margin: 0 0 16px 0; color: #1e293b;">מה הלאה?</h3>
+    <p style="margin: 0;">${nextSteps}</p>
+  </div>
+  ` : ''}
+
+  <div style="text-align: center; padding: 24px; border-top: 1px solid #eee; color: #666; font-size: 14px;">
+    <p>שאלות? השב למייל זה או צור קשר ב-support@footprint.co.il</p>
+    <p style="margin: 0;">© ${new Date().getFullYear()} Footprint. כל הזכויות שמורות.</p>
+  </div>
+
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Sends a status update email via Resend.
+ *
+ * @param params - Status update parameters
+ * @returns Email result with success status and email ID
+ */
+export async function sendStatusUpdateEmail(
+  params: StatusUpdateParams
+): Promise<EmailResult> {
+  try {
+    const config = getResendConfig();
+
+    const statusLabel = STATUS_LABELS_HE[params.newStatus] || params.newStatus;
+    const subject = `עדכון הזמנה ${params.orderId}: ${statusLabel}`;
+
+    const emailBody = {
+      from: config.fromEmail,
+      to: params.to,
+      subject,
+      html: generateStatusUpdateHtml(params),
+    };
+
+    const response = await fetch(RESEND_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify(emailBody),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = (errorData as { message?: string }).message || `HTTP ${response.status}`;
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      emailId: (data as { id: string }).id,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      error: message,
+    };
+  }
 }
