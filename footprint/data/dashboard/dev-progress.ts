@@ -556,10 +556,10 @@ export const stories: Record<string, Story> = {
     id: 'UI-04',
     title: 'Checkout Page UI (04-checkout.html)',
     description: 'Implement checkout: gift toggle, address form, payment section, price breakdown',
-    status: 'in-progress',  // ✅ Assigned to Frontend-B 2025-12-25
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (57 tests)
     agent: 'Frontend-B',
     points: 5,
-    blockedBy: ['UI-06'],  // Can start in parallel after demo data
+    blockedBy: ['UI-06'],
     component: 'UI',
   },
   'UI-05': {
@@ -776,7 +776,7 @@ export const sprints: Sprint[] = [
     id: 4,
     name: 'Sprint 4',
     focus: 'Admin, Payment & UI Polish',
-    status: 'active',  // 🚀 ACTIVE - 10/19 SP complete (52%)
+    status: 'active',  // 🚀 ACTIVE - 15/24 SP complete (62.5%) - UI-04 merged!
     features: ['F5b', 'F6', 'F9', 'F10'],  // Combined: Admin + Payment + UI Implementation
   },
   {
