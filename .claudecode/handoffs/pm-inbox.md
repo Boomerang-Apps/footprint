@@ -35,6 +35,79 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
+## 2025-12-26 - Frontend-B: INT-05 Ready for QA
+
+**Story**: INT-05 - Connect Confirmation to Order API
+**Branch**: feature/int-05-confirmation-order-api
+**Sprint**: 5
+**Priority**: P1
+
+### Summary
+Connected the confirmation page to the order confirmation API:
+- Reads orderId from URL search params (`?orderId=xxx`)
+- Fetches order data from `/api/orders/[orderId]/confirm`
+- Displays real order number from API response
+- Uses WhatsApp URL from API for share functionality
+- Shows loading state with spinner while fetching
+- Shows error state with home button if API fails
+- Falls back to store data when no orderId provided
+
+### Key Deliverables
+- `app/(app)/create/complete/page.tsx` - Modified with API integration
+- `app/(app)/create/complete/page.test.tsx` - Added 9 integration tests (54 total)
+- `.claudecode/milestones/sprint-5/INT-05/*` - Planning docs
+
+### Test Results
+- **Tests**: 54 passing (45 UI + 9 integration)
+- **Total**: 1236 tests passing (all project tests)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+Note: Pre-existing TypeScript errors in `src/app/cockpit/page.tsx` (not my changes)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/app/(app)/create/complete/page.tsx` | Modified - API integration |
+| `footprint/app/(app)/create/complete/page.test.tsx` | Modified - added 9 integration tests |
+| `.claudecode/milestones/sprint-5/INT-05/START.md` | Created |
+| `.claudecode/milestones/sprint-5/INT-05/ROLLBACK-PLAN.md` | Created |
+
+### API Integration
+```typescript
+// URL param handling
+const searchParams = useSearchParams();
+const orderId = searchParams.get('orderId');
+
+// On mount, if orderId present:
+GET /api/orders/{orderId}/confirm
+
+// Response used for:
+- orderNumber (displayed instead of random)
+- total (for price display)
+- whatsappUrl (for share button)
+```
+
+### UI States
+1. **Loading**: Spinner with "טוען פרטי הזמנה..." text
+2. **Error**: Error icon, message, and home button
+3. **Success**: Full confirmation page with API data
+4. **Fallback**: No orderId → uses store data + generated order number
+
+### Gate Status
+- [x] Gate 0: Research (N/A - uses existing API)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tag INT-05-start)
+- [x] Gate 2: Implementation (TDD - 54 tests)
+- [x] Gate 3: Code Quality (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `0f9d9a56`
+
+**Ready for Gate 4 PM/QA validation.**
+
+---
+
 ## 2025-12-26 - Backend-2: OM-03 Ready for QA
 
 **Story**: OM-03 - Download Print-Ready Files
