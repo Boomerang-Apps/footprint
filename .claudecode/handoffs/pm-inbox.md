@@ -35,6 +35,50 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
+## 2025-12-26 - CTO: PayPlus Gate 0 APPROVED (CO-02)
+
+**Story**: CO-02 - Pay with Credit Card (PayPlus)
+**Priority**: P0 - CRITICAL PATH
+**Type**: Gate 0 Approval
+
+### Decision: APPROVED ✅
+
+PayPlus approved as **PRIMARY** payment processor for Footprint (Israeli market focus).
+
+### CTO Decisions on Questions:
+
+| Question | Decision | Rationale |
+|----------|----------|-----------|
+| **PayPlus as PRIMARY?** | ✅ YES | Israeli market focus, native ILS, local compliance |
+| **Paddle for international?** | ⏳ DEFER to Sprint 6 | Focus on Israeli launch first |
+| **Installments (תשלומים)?** | ✅ YES - Enable v1 | Critical for Israeli e-commerce |
+| **Bit integration?** | ✅ YES - Enable v1 | 6M+ users, major payment method |
+
+### Approval Conditions:
+
+1. **Webhook Security** - MUST implement:
+   - HMAC-SHA256 validation
+   - User-agent check (`PayPlus`)
+   - Idempotency handling
+
+2. **Error Handling** - Handle gracefully:
+   - Network failures → Retry with backoff
+   - Payment failures → Clear user message
+
+3. **Logging** - Required for payment debugging
+
+### Research Document
+`.claudecode/research/GATE0-payplus-payments.md`
+
+### Action Required
+1. Update CO-02 story status to "Gate 1 - Planning"
+2. Assign Backend-2 to create `START.md` and `ROLLBACK-PLAN.md`
+3. Coordinate with Frontend-B for checkout UI integration
+
+**Signed**: CTO Agent - 2025-12-26
+
+---
+
 ## 2025-12-26 - Backend-2: OM-03 Ready for QA
 
 **Story**: OM-03 - Download Print-Ready Files
