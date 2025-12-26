@@ -267,7 +267,7 @@ export const stories: Record<string, Story> = {
     id: 'PC-05',
     title: 'Realistic Mockup Preview',
     description: 'Room environment preview, wall visualization, size context',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (26 tests)
     agent: 'Frontend-B',
     points: 2,
     component: 'ProductConfig',
@@ -621,7 +621,7 @@ export const stories: Record<string, Story> = {
     id: 'INT-05',
     title: 'Connect Confirmation to Order API',
     description: 'Fetch real order data from API, display order number, tracking info, WhatsApp share with real data',
-    status: 'in-progress',  // 🚀 Assigned to Frontend-B 2025-12-26 (completes integration sprint)
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (54 tests, 94.04% coverage) - SPRINT 5 COMPLETE!
     agent: 'Frontend-B',
     points: 2,
     blockedBy: ['UI-05', 'INT-04'],
