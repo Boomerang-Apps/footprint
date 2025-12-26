@@ -46,6 +46,15 @@ export interface StatusUpdateParams {
   note?: string;
 }
 
+export interface TrackingNotificationParams {
+  to: string;
+  customerName: string;
+  orderId: string;
+  trackingNumber: string;
+  carrier: string;
+  trackingUrl: string | null;
+}
+
 export interface EmailResult {
   success: boolean;
   emailId?: string;
@@ -394,6 +403,145 @@ export async function sendStatusUpdateEmail(
       to: params.to,
       subject,
       html: generateStatusUpdateHtml(params),
+    };
+
+    const response = await fetch(RESEND_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify(emailBody),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = (errorData as { message?: string }).message || `HTTP ${response.status}`;
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      emailId: (data as { id: string }).id,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      error: message,
+    };
+  }
+}
+
+// ============================================================================
+// Tracking Notification Email
+// ============================================================================
+
+/**
+ * Carrier names in Hebrew
+ */
+const CARRIER_NAMES_HE: Record<string, string> = {
+  israel_post: 'דואר ישראל',
+  dhl: 'DHL',
+  fedex: 'FedEx',
+  ups: 'UPS',
+  other: 'שליח',
+};
+
+/**
+ * Generates HTML email template for tracking notification.
+ */
+function generateTrackingNotificationHtml(params: TrackingNotificationParams): string {
+  const { customerName, orderId, trackingNumber, carrier, trackingUrl } = params;
+  const carrierName = CARRIER_NAMES_HE[carrier] || carrier;
+
+  const trackingButtonHtml = trackingUrl
+    ? `
+    <div style="text-align: center; margin: 24px 0;">
+      <a href="${trackingUrl}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+        עקוב אחר המשלוח
+      </a>
+    </div>
+    `
+    : '';
+
+  return `
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ההזמנה שלך נשלחה - ${orderId}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; direction: rtl;">
+
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #2563eb; margin: 0;">Footprint</h1>
+    <p style="color: #666; margin: 5px 0;">סטודיו להדפסת תמונות AI</p>
+  </div>
+
+  <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+    <h2 style="margin: 0 0 16px 0; color: #1e293b;">ההזמנה שלך בדרך! 📦</h2>
+    <p style="margin: 0;">שלום ${customerName},</p>
+    <p>חדשות מצוינות! ההזמנה שלך נשלחה והיא בדרך אליך.</p>
+    <p style="font-size: 18px; font-weight: bold;">
+      הזמנה: <span style="color: #2563eb;">${orderId}</span>
+    </p>
+  </div>
+
+  <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+    <h3 style="margin: 0 0 16px 0; color: #1e293b;">פרטי משלוח</h3>
+    <table style="width: 100%;">
+      <tr>
+        <td style="padding: 8px 0; color: #666;">חברת משלוח:</td>
+        <td style="padding: 8px 0; font-weight: bold;">${carrierName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #666;">מספר מעקב:</td>
+        <td style="padding: 8px 0; font-weight: bold; font-family: monospace;">${trackingNumber}</td>
+      </tr>
+    </table>
+    ${trackingButtonHtml}
+  </div>
+
+  <div style="margin-bottom: 24px;">
+    <h3 style="margin: 0 0 16px 0; color: #1e293b;">מה הלאה?</h3>
+    <p style="margin: 0;">צפי להגעה: 5-7 ימי עסקים. תוכל לעקוב אחר המשלוח בקישור למעלה.</p>
+  </div>
+
+  <div style="text-align: center; padding: 24px; border-top: 1px solid #eee; color: #666; font-size: 14px;">
+    <p>שאלות? השב למייל זה או צור קשר ב-support@footprint.co.il</p>
+    <p style="margin: 0;">© ${new Date().getFullYear()} Footprint. כל הזכויות שמורות.</p>
+  </div>
+
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Sends a tracking notification email via Resend.
+ *
+ * @param params - Tracking notification parameters
+ * @returns Email result with success status and email ID
+ */
+export async function sendTrackingNotificationEmail(
+  params: TrackingNotificationParams
+): Promise<EmailResult> {
+  try {
+    const config = getResendConfig();
+
+    const subject = `ההזמנה שלך נשלחה! מספר מעקב: ${params.trackingNumber}`;
+
+    const emailBody = {
+      from: config.fromEmail,
+      to: params.to,
+      subject,
+      html: generateTrackingNotificationHtml(params),
     };
 
     const response = await fetch(RESEND_API_URL, {
