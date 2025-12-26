@@ -35,51 +35,43 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
-## 2025-12-26 - Backend-1: GF-05 Ready for QA
+## 2025-12-26 - Backend-2: UP-05 Ready for QA
 
-**Story**: GF-05 - Scheduled Delivery Date
+**Story**: UP-05 - Face Detection Cropping
 **Priority**: P1
 **Type**: Gate 2 Complete - Ready for QA
 
 ### Summary
-Implemented scheduled delivery date functionality for gift orders:
-- Delivery date utilities (lib/delivery/dates.ts)
-  - Business day calculations (skip weekends)
-  - Min delivery: 3 business days from order
-  - Max delivery: 30 days from order
-  - Date validation, formatting, parsing
-- orderStore integration
-  - scheduledDeliveryDate state
-  - Setter, clear, and validation actions
-  - Persisted to localStorage
-- Updated Order types and demo data
+Implemented intelligent face detection and smart cropping functionality using TDD:
+- Content-aware cropping using smartcrop-sharp library
+- Aspect ratio parsing and validation (1:1, 4:5, 3:4, 16:9, A-series)
+- Smart crop region calculation with confidence scores
+- POST /api/detect-crop API endpoint
+- R2 image fetching helpers (getImageFromR2, isR2Url)
 
 ### Key Decisions
-- Minimum 3 business days required for processing
-- Maximum 30 days out to limit scheduling complexity
-- Weekends not counted as business days
-- Delivery can occur on weekends (just processing is M-F)
-- Date stored as ISO string (YYYY-MM-DD) for simplicity
+- Used smartcrop-sharp for content-aware cropping (no external API calls)
+- Scores normalized to 0-1 range using sigmoid function
+- Fallback to centered crop if smartcrop fails
+- Only accepts R2 URLs for security (no external image fetching)
 
 ### Test Results
-- **Tests**: 75 passing (37 delivery + 38 orderStore)
-- **Coverage**: lib/delivery/dates.ts at 100%
-- **TypeScript**: 0 errors in GF-05 files
+- **Tests**: 51 passing (35 lib/image/faceDetection + 16 API)
+- **Coverage**: 87.27% statements for faceDetection.ts
+- **TypeScript**: 0 errors in UP-05 files
 - **Lint**: Clean
 
 ### Files Changed
 | File | Status |
 |------|--------|
-| footprint/lib/delivery/dates.ts | Created |
-| footprint/lib/delivery/dates.test.ts | Created |
-| footprint/stores/orderStore.ts | Modified |
-| footprint/stores/orderStore.test.ts | Modified |
-| footprint/types/order.ts | Modified |
-| footprint/data/demo/orders.ts | Modified |
-| footprint/lib/api/mock.ts | Modified |
+| footprint/lib/image/faceDetection.ts | Created |
+| footprint/lib/image/faceDetection.test.ts | Created |
+| footprint/app/api/detect-crop/route.ts | Created |
+| footprint/app/api/detect-crop/route.test.ts | Created |
+| footprint/lib/storage/r2.ts | Modified (added helpers) |
 
 ### Branch
-`feature/gf-05-scheduled-delivery` (commit `d314711e`)
+`feature/UP-05-face-detection-cropping` (commit `5e632321`)
 
 **Ready for Gate 3 QA validation.**
 

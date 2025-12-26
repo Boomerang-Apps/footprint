@@ -420,3 +420,99 @@ Please route to QA Agent for:
 ---
 
 **Backend-2 Agent**
+
+---
+
+## 2025-12-26 - Backend-2: INT-04 Ready for QA
+
+**From**: Backend-2 Agent
+**Date**: 2025-12-26
+**Status**: Gate 2 Complete - Ready for QA
+
+---
+
+### Summary
+
+Implemented order creation from successful payment webhooks with TDD:
+
+| Component | Tests | Coverage |
+|-----------|-------|----------|
+| **lib/orders/create.ts** | 19 | 97.43% |
+| **app/api/webhooks/stripe/route.ts** | - | Extended |
+| **app/api/webhooks/payplus/route.ts** | - | Extended |
+
+---
+
+### Features Implemented
+
+1. **Order Number Generation**
+   - Format: FP-YYYYMMDD-XXXX (e.g., FP-20251226-0001)
+   - Sequential numbering per day
+   - Zero-padded to 4 digits
+
+2. **Order Creation Service**
+   - Full validation (name, email, items, total, transactionId)
+   - Idempotency: returns existing order if duplicate transactionId
+   - Stores all order data in Supabase
+
+3. **Stripe Webhook Integration**
+   - Parses order metadata from PaymentIntent
+   - Creates order on payment_intent.succeeded
+   - Returns 200 even if order creation fails (safety)
+
+4. **PayPlus Webhook Integration**
+   - Parses order data from more_info JSON field
+   - Creates order on status_code "000"
+   - Returns 200 even if order creation fails (safety)
+
+5. **Confirmation Email Trigger**
+   - Fire-and-forget pattern
+   - Logs errors but doesn't block order creation
+
+---
+
+### Test Results
+
+```
+Order Creation Service: 19 tests passed
+Coverage: 97.43% (lib/orders/create.ts)
+TypeScript: Clean (INT-04 files)
+```
+
+---
+
+### Files Created/Modified
+
+```
+lib/orders/
+├── create.ts           # Order creation service (NEW)
+└── create.test.ts      # 19 unit tests (NEW)
+
+app/api/webhooks/
+├── stripe/route.ts     # Added createOrder integration
+└── payplus/route.ts    # Added createOrder integration
+```
+
+---
+
+### Branch Info
+
+- **Branch**: `feature/INT-04-order-on-payment`
+- **Commit**: `f135ea96`
+- **Gate Files**: `.claudecode/milestones/sprint-5/INT-04/`
+
+---
+
+### Ready for Gate 3 QA Validation
+
+Please route to QA Agent for:
+- [ ] Order number generation (format, sequence)
+- [ ] Order creation validation (required fields)
+- [ ] Idempotency testing (duplicate transactions)
+- [ ] Stripe webhook order creation
+- [ ] PayPlus webhook order creation
+- [ ] Safety: webhooks return 200 even on errors
+
+---
+
+**Backend-2 Agent**
