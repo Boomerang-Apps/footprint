@@ -95,7 +95,7 @@
 
 | ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
 |----|-------|--------------------|----|----------|-------|--------|
-| OM-01 | Admin order dashboard | Order list, filter by status, search by # | 3 | Must | Frontend-B | 🔄 In Progress |
+| OM-01 | Admin order dashboard | Order list, filter by status, search by # | 3 | Must | Frontend-B | 🔍 In Review |
 | OM-02 | Update order status | Status dropdown, timestamp logged, customer notified | 2 | Must | Backend-2 | 🔄 In Progress |
 | OM-03 | Download print-ready files | High-res download, correct dimensions, color profile | 2 | Must | Backend-2 | ⬜ Backlog |
 | OM-04 | Add tracking numbers | Tracking input, carrier selection, auto-notify | 2 | Must | Backend-2 | ⬜ Backlog |

@@ -392,7 +392,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1845',
     title: 'Admin Order Dashboard',
     description: 'Order list, filter by status, search by order number',
-    status: 'in-progress',  // 🚀 Sprint 4 Start - Assigned to Frontend-B
+    status: 'in-review',  // 🔍 Gate 2 complete, awaiting QA validation
     agent: 'Frontend-B',
     points: 3,
     component: 'Admin',
