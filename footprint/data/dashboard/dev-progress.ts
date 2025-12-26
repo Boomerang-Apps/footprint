@@ -392,7 +392,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1845',
     title: 'Admin Order Dashboard',
     description: 'Order list, filter by status, search by order number',
-    status: 'backlog',
+    status: 'done',  // ✅ Merged 2025-12-26
     agent: 'Frontend-B',
     points: 3,
     component: 'Admin',
@@ -402,7 +402,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1846',
     title: 'Update Order Status',
     description: 'Status dropdown, timestamp logged, customer notified',
-    status: 'backlog',
+    status: 'done',  // ✅ Merged 2025-12-26 (TDD)
     agent: 'Backend-2',
     points: 2,
     component: 'Admin',
@@ -412,7 +412,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1847',
     title: 'Download Print-Ready Files',
     description: 'High-res download, correct dimensions, color profile',
-    status: 'backlog',
+    status: 'done',  // ✅ Merged 2025-12-26 (28 tests, 93.75% coverage)
     agent: 'Backend-2',
     points: 2,
     component: 'Admin',
@@ -495,7 +495,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-08',
     title: 'Step Progress Indicator',
     description: 'Create reusable 5-step progress indicator for order flow. Shows current step, completed steps, Hebrew labels.',
-    status: 'in-progress',  // ✅ Assigned to Frontend-A 2025-12-25
+    status: 'done',  // ✅ Merged 2025-12-26 (29 tests, 100% coverage)
     agent: 'Frontend-A',
     points: 2,
     blockedBy: ['UI-07'],
@@ -505,7 +505,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-09',
     title: 'Price Display & Timeline Components',
     description: 'PriceDisplay (ILS formatting with ₪), OrderTimeline (4-step order status tracker). Shared by multiple pages.',
-    status: 'backlog',
+    status: 'done',  // ✅ Merged 2025-12-26 (62 tests, 100% coverage)
     agent: 'Frontend-A',
     points: 2,
     blockedBy: ['UI-07'],
@@ -556,20 +556,20 @@ export const stories: Record<string, Story> = {
     id: 'UI-04',
     title: 'Checkout Page UI (04-checkout.html)',
     description: 'Implement checkout: gift toggle, address form, payment section, price breakdown',
-    status: 'in-progress',  // ✅ Assigned to Frontend-B 2025-12-25
+    status: 'done',  // ✅ Merged 2025-12-26
     agent: 'Frontend-B',
     points: 5,
-    blockedBy: ['UI-06'],  // Can start in parallel after demo data
+    blockedBy: ['UI-06'],
     component: 'UI',
   },
   'UI-05': {
     id: 'UI-05',
     title: 'Confirmation Page UI (05-confirmation.html)',
     description: 'Implement confirmation: order summary, timeline tracker, WhatsApp share',
-    status: 'backlog',
+    status: 'done',  // ✅ Merged 2025-12-26
     agent: 'Frontend-B',
     points: 2,
-    blockedBy: ['UI-06', 'UI-09'],  // Needs Timeline component from Frontend-A
+    blockedBy: ['UI-06', 'UI-09'],
     component: 'UI',
   },
 };
@@ -776,14 +776,14 @@ export const sprints: Sprint[] = [
     id: 4,
     name: 'Sprint 4',
     focus: 'UI Implementation & Demo',
-    status: 'active',
+    status: 'completed',  // ✅ COMPLETED 2025-12-26 - All 9 stories merged
     features: ['F9', 'F10'],  // Parallel tracks: F9 (Frontend-B pages) + F10 (Frontend-A primitives)
   },
   {
     id: 5,
     name: 'Sprint 5',
     focus: 'Admin & Polish',
-    status: 'planned',
+    status: 'active',  // Started early - OM-01, OM-02, OM-03 complete
     features: ['F5b', 'F6'],
   },
   {

@@ -35,51 +35,48 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
-## 2025-12-26 - CTO: PayPlus Gate 0 APPROVED (CO-02)
+## 2025-12-26 - CTO: Sprint 4 COMPLETE! 🎉
 
-**Story**: CO-02 - Pay with Credit Card (PayPlus)
-**Priority**: P0 - CRITICAL PATH
-**Type**: Gate 0 Approval
+**Type**: Sprint Milestone
+**Priority**: P0
 
-### Decision: APPROVED ✅
+### Sprint 4 Status: COMPLETED ✅
 
-PayPlus approved as **PRIMARY** payment processor for Footprint (Israeli market focus).
+All 9 UI stories merged to main:
 
-### CTO Decisions on Questions:
+| Feature | Stories | Status |
+|---------|---------|--------|
+| F9 (Pages) | UI-01 to UI-06 | ✅ DONE |
+| F10 (Primitives) | UI-07 to UI-09 | ✅ DONE |
 
-| Question | Decision | Rationale |
-|----------|----------|-----------|
-| **PayPlus as PRIMARY?** | ✅ YES | Israeli market focus, native ILS, local compliance |
-| **Paddle for international?** | ⏳ DEFER to Sprint 6 | Focus on Israeli launch first |
-| **Installments (תשלומים)?** | ✅ YES - Enable v1 | Critical for Israeli e-commerce |
-| **Bit integration?** | ✅ YES - Enable v1 | 6M+ users, major payment method |
+### Sprint 5 Now Active
+Early work already merged:
+- OM-01: Admin Order Dashboard ✅
+- OM-02: Update Order Status ✅
+- OM-03: Print-Ready Files ✅
 
-### Approval Conditions:
-
-1. **Webhook Security** - MUST implement:
-   - HMAC-SHA256 validation
-   - User-agent check (`PayPlus`)
-   - Idempotency handling
-
-2. **Error Handling** - Handle gracefully:
-   - Network failures → Retry with backoff
-   - Payment failures → Clear user message
-
-3. **Logging** - Required for payment debugging
-
-### Research Document
-`.claudecode/research/GATE0-payplus-payments.md`
-
-### Action Required
-1. Update CO-02 story status to "Gate 1 - Planning"
-2. Assign Backend-2 to create `START.md` and `ROLLBACK-PLAN.md`
-3. Coordinate with Frontend-B for checkout UI integration
+### Next Priorities (Sprint 5):
+1. OM-04: Add Tracking Numbers
+2. AI-05: Fast AI Transformation
+3. CO-03: Apple Pay / Google Pay
+4. CO-05: Discount Codes
 
 **Signed**: CTO Agent - 2025-12-26
 
 ---
 
-## 2025-12-26 - Backend-2: OM-03 Ready for QA
+## Archived Messages
+
+### 2025-12-26 - CTO: PayPlus Gate 0 APPROVED (CO-02) ✅ ACTIONED
+
+**Status**: Actioned - CO-02 merged to main
+
+PayPlus approved as **PRIMARY** payment processor for Footprint.
+Research: `.claudecode/research/GATE0-payplus-payments.md`
+
+---
+
+### 2025-12-26 - Backend-2: OM-03 Ready for QA ✅ MERGED
 
 **Story**: OM-03 - Download Print-Ready Files
 **Priority**: P1
