@@ -3,26 +3,39 @@
  *
  * Handles PayPlus webhook callbacks for payment processing.
  * Verifies webhook signature (HMAC-SHA256) and user-agent header.
+ * Creates orders in the database on successful payments.
  *
  * Headers required:
  * - hash: HMAC-SHA256 signature (base64)
  * - user-agent: Must be "PayPlus"
  *
  * Events handled:
- * - status_code "000": Payment successful, update order status
+ * - status_code "000": Payment successful, create order
  * - Other status codes: Payment failed, log error
  */
 
 import { NextResponse } from 'next/server';
 import { validateWebhook } from '@/lib/payments/payplus';
+import {
+  createOrder,
+  triggerConfirmationEmail,
+  type CreateOrderParams,
+} from '@/lib/orders/create';
 
+/**
+ * PayPlus webhook payload structure
+ *
+ * Order data is stored in more_info fields:
+ * - more_info: JSON stringified { userId, items, subtotal, shipping, total, shippingAddress, isGift, giftMessage }
+ * - more_info_1-5: Reserved for additional data
+ */
 interface WebhookPayload {
   transaction_uid: string;
   page_request_uid?: string;
   status_code: string;
   amount?: number;
   currency?: string;
-  more_info?: string; // orderId
+  more_info?: string; // JSON stringified order data
   more_info_1?: string;
   more_info_2?: string;
   more_info_3?: string;
@@ -40,6 +53,10 @@ interface WebhookPayload {
 
 interface WebhookResponse {
   received: boolean;
+  orderCreated?: boolean;
+  orderId?: string;
+  orderNumber?: string;
+  reason?: string;
 }
 
 interface ErrorResponse {
@@ -47,23 +64,54 @@ interface ErrorResponse {
 }
 
 /**
- * Updates order status in the database
- * TODO: Implement with actual Supabase client
+ * Parses order data from PayPlus webhook payload
  */
-async function updateOrderStatus(
-  orderId: string,
-  status: 'paid' | 'failed',
-  paymentDetails: {
-    transactionUid: string;
-    pageRequestUid?: string;
-    amount?: number;
-    paidAt?: Date;
-    failureReason?: string;
+function parseOrderData(
+  payload: WebhookPayload
+): CreateOrderParams | null {
+  // Customer info comes from PayPlus directly
+  const customerName = payload.customer_name;
+  const customerEmail = payload.customer_email;
+
+  if (!customerName || !customerEmail) {
+    return null;
   }
-): Promise<void> {
-  // TODO: Update order in Supabase
-  // This will be implemented when integrating with the orders table
-  console.log(`Updating order ${orderId} to status: ${status}`, paymentDetails);
+
+  // Order data is stored in more_info as JSON
+  if (!payload.more_info) {
+    return null;
+  }
+
+  try {
+    const orderData = JSON.parse(payload.more_info);
+
+    if (!orderData.items || !orderData.total) {
+      return null;
+    }
+
+    return {
+      userId: orderData.userId,
+      customerName,
+      customerEmail,
+      items: orderData.items,
+      subtotal: orderData.subtotal || 0,
+      shipping: orderData.shipping || 0,
+      total: orderData.total,
+      shippingAddress: orderData.shippingAddress || {
+        street: '',
+        city: '',
+        postalCode: '',
+        country: 'Israel',
+      },
+      paymentProvider: 'payplus' as const,
+      paymentTransactionId: payload.transaction_uid,
+      isGift: orderData.isGift || false,
+      giftMessage: orderData.giftMessage,
+    };
+  } catch (error) {
+    console.error('Failed to parse PayPlus order data:', error);
+    return null;
+  }
 }
 
 export async function POST(
@@ -115,31 +163,63 @@ export async function POST(
     const payload: WebhookPayload = JSON.parse(body);
 
     // 7. Handle transaction result
-    const orderId = payload.more_info;
     const isSuccess = payload.status_code === '000';
 
-    if (orderId) {
-      if (isSuccess) {
-        await updateOrderStatus(orderId, 'paid', {
-          transactionUid: payload.transaction_uid,
-          pageRequestUid: payload.page_request_uid,
-          amount: payload.amount,
-          paidAt: new Date(),
+    if (isSuccess) {
+      // Payment successful - create order
+      console.log(`Payment succeeded: ${payload.transaction_uid}`);
+
+      const orderParams = parseOrderData(payload);
+
+      if (!orderParams) {
+        console.warn(
+          'Payment succeeded but missing order data:',
+          payload.transaction_uid
+        );
+        return NextResponse.json({
+          received: true,
+          orderCreated: false,
+          reason: 'Missing order data in payload',
         });
-        console.log(`Order ${orderId} marked as paid`);
-      } else {
-        await updateOrderStatus(orderId, 'failed', {
-          transactionUid: payload.transaction_uid,
-          pageRequestUid: payload.page_request_uid,
-          failureReason: `Payment failed with status code: ${payload.status_code}`,
+      }
+
+      try {
+        // Create order in database
+        const orderResult = await createOrder(orderParams);
+
+        console.log(
+          `Order created: ${orderResult.orderNumber} (${orderResult.orderId})`
+        );
+
+        // Trigger confirmation email (fire and forget)
+        triggerConfirmationEmail(orderResult.orderId);
+
+        return NextResponse.json({
+          received: true,
+          orderCreated: true,
+          orderId: orderResult.orderId,
+          orderNumber: orderResult.orderNumber,
         });
-        console.log(`Order ${orderId} marked as failed: ${payload.status_code}`);
+      } catch (error) {
+        // Log error but still return 200 to acknowledge webhook
+        console.error('Failed to create order:', error);
+        return NextResponse.json({
+          received: true,
+          orderCreated: false,
+          reason: error instanceof Error ? error.message : 'Unknown error',
+        });
       }
     } else {
-      console.warn('Webhook received but no orderId in more_info');
+      // Payment failed - log for debugging
+      console.log(
+        `Payment failed: ${payload.transaction_uid} (status: ${payload.status_code})`
+      );
+      return NextResponse.json({
+        received: true,
+        orderCreated: false,
+        reason: `Payment failed with status code: ${payload.status_code}`,
+      });
     }
-
-    return NextResponse.json({ received: true });
   } catch (error) {
     console.error('Webhook handler error:', error);
     return NextResponse.json(

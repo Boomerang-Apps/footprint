@@ -5,21 +5,74 @@
  *
  * Handles Stripe webhook events for wallet payments.
  * Verifies webhook signatures and processes payment events.
+ * Creates orders in the database on successful payments.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateStripeWebhook } from '@/lib/payments/stripe';
+import {
+  createOrder,
+  triggerConfirmationEmail,
+  type CreateOrderParams,
+} from '@/lib/orders/create';
 import type Stripe from 'stripe';
 
-// Define the structure of a PaymentIntent with metadata
+// Define the structure of a PaymentIntent with order metadata
 interface PaymentIntentWithMetadata {
   id: string;
+  receipt_email?: string;
   metadata: {
-    orderId?: string;
+    // Order creation metadata
+    userId?: string;
+    customerName?: string;
+    customerEmail?: string;
+    items?: string; // JSON stringified OrderItem[]
+    subtotal?: string;
+    shipping?: string;
+    total?: string;
+    shippingAddress?: string; // JSON stringified ShippingAddress
+    isGift?: string;
+    giftMessage?: string;
   };
   last_payment_error?: {
     message?: string;
   };
+}
+
+/**
+ * Parses order metadata from PaymentIntent
+ */
+function parseOrderMetadata(
+  paymentIntent: PaymentIntentWithMetadata
+): CreateOrderParams | null {
+  const { metadata, receipt_email } = paymentIntent;
+
+  // Validate required fields
+  if (!metadata.customerName || !metadata.items || !metadata.total) {
+    return null;
+  }
+
+  try {
+    return {
+      userId: metadata.userId,
+      customerName: metadata.customerName,
+      customerEmail: metadata.customerEmail || receipt_email || '',
+      items: JSON.parse(metadata.items),
+      subtotal: parseFloat(metadata.subtotal || '0'),
+      shipping: parseFloat(metadata.shipping || '0'),
+      total: parseFloat(metadata.total),
+      shippingAddress: metadata.shippingAddress
+        ? JSON.parse(metadata.shippingAddress)
+        : { street: '', city: '', postalCode: '', country: '' },
+      paymentProvider: 'stripe' as const,
+      paymentTransactionId: paymentIntent.id,
+      isGift: metadata.isGift === 'true',
+      giftMessage: metadata.giftMessage,
+    };
+  } catch (error) {
+    console.error('Failed to parse order metadata:', error);
+    return null;
+  }
 }
 
 /**
@@ -66,46 +119,82 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // Handle specific event types
   const paymentIntent = event.data.object as PaymentIntentWithMetadata;
-  const orderId = paymentIntent.metadata?.orderId;
 
   switch (event.type) {
-    case 'payment_intent.succeeded':
-      // Payment successful - update order status
-      console.log(`Payment succeeded for order ${orderId}`);
-      // TODO: Update order status in database
-      // TODO: Send confirmation email
-      return NextResponse.json({
-        received: true,
-        orderId,
-        status: 'succeeded',
-        paymentIntentId: paymentIntent.id,
-      });
+    case 'payment_intent.succeeded': {
+      // Payment successful - create order in database
+      console.log(`Payment succeeded: ${paymentIntent.id}`);
 
-    case 'payment_intent.payment_failed':
-      // Payment failed - handle failure
+      const orderParams = parseOrderMetadata(paymentIntent);
+
+      if (!orderParams) {
+        console.warn(
+          'Payment succeeded but missing order metadata:',
+          paymentIntent.id
+        );
+        return NextResponse.json({
+          received: true,
+          status: 'succeeded',
+          orderCreated: false,
+          reason: 'Missing order metadata',
+          paymentIntentId: paymentIntent.id,
+        });
+      }
+
+      try {
+        // Create order in database
+        const orderResult = await createOrder(orderParams);
+
+        console.log(
+          `Order created: ${orderResult.orderNumber} (${orderResult.orderId})`
+        );
+
+        // Trigger confirmation email (fire and forget)
+        triggerConfirmationEmail(orderResult.orderId);
+
+        return NextResponse.json({
+          received: true,
+          status: 'succeeded',
+          orderCreated: true,
+          orderId: orderResult.orderId,
+          orderNumber: orderResult.orderNumber,
+          paymentIntentId: paymentIntent.id,
+        });
+      } catch (error) {
+        // Log error but still return 200 to acknowledge webhook
+        console.error('Failed to create order:', error);
+        return NextResponse.json({
+          received: true,
+          status: 'succeeded',
+          orderCreated: false,
+          reason: error instanceof Error ? error.message : 'Unknown error',
+          paymentIntentId: paymentIntent.id,
+        });
+      }
+    }
+
+    case 'payment_intent.payment_failed': {
+      // Payment failed - log for debugging
       console.log(
-        `Payment failed for order ${orderId}:`,
+        `Payment failed: ${paymentIntent.id}`,
         paymentIntent.last_payment_error?.message
       );
-      // TODO: Update order status in database
-      // TODO: Optionally notify customer
       return NextResponse.json({
         received: true,
-        orderId,
         status: 'failed',
         paymentIntentId: paymentIntent.id,
       });
+    }
 
-    case 'payment_intent.canceled':
-      // Payment canceled
-      console.log(`Payment canceled for order ${orderId}`);
-      // TODO: Update order status in database
+    case 'payment_intent.canceled': {
+      // Payment canceled - log for debugging
+      console.log(`Payment canceled: ${paymentIntent.id}`);
       return NextResponse.json({
         received: true,
-        orderId,
         status: 'canceled',
         paymentIntentId: paymentIntent.id,
       });
+    }
 
     default:
       // Acknowledge unhandled event types
