@@ -1,14 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { ArrowLeft, Check, Sparkles, CreditCard, MapPin, User, Phone, Mail, Building, Loader2 } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import toast from 'react-hot-toast';
 
+// Generate a unique order ID
+function generateOrderId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  return `FP-${timestamp}-${random}`.toUpperCase();
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     originalImage,
     selectedStyle,
@@ -39,9 +47,33 @@ export default function CheckoutPage() {
     }
   }, [originalImage, router]);
 
+  // Check for payment error on return from PayPlus
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'payment_failed') {
+      toast.error('התשלום נכשל. אנא נסו שוב.');
+    }
+  }, [searchParams]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  // Calculate total amount in agorot (ILS cents)
+  const calculateTotalInAgorot = useCallback(() => {
+    const sizes: Record<string, number> = { A5: 89, A4: 129, A3: 179, A2: 249 };
+    const paperMods: Record<string, number> = { matte: 0, glossy: 20, canvas: 50 };
+    const framePrices: Record<string, number> = { none: 0, black: 79, white: 79, oak: 99 };
+
+    const basePrice = sizes[size] || 129;
+    const paperMod = paperMods[paperType] || 0;
+    const framePrice = framePrices[frameType] || 0;
+    const subtotal = basePrice + paperMod + framePrice;
+    const shipping = subtotal >= 299 ? 0 : 29;
+    const total = subtotal + shipping;
+
+    return total * 100; // Convert to agorot
+  }, [size, paperType, frameType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,10 +86,7 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
 
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Save address to store
+    // Save address to store before payment
     setShippingAddress({
       name: formData.fullName,
       phone: formData.phone,
@@ -67,9 +96,33 @@ export default function CheckoutPage() {
       country: 'ישראל',
     });
 
-    toast.success('ההזמנה התקבלה בהצלחה!');
-    setStep('complete');
-    router.push('/create/complete');
+    try {
+      // Call PayPlus API to create payment link
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: generateOrderId(),
+          amount: calculateTotalInAgorot(),
+          customerName: formData.fullName,
+          customerEmail: formData.email,
+          customerPhone: formData.phone,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'שגיאה ביצירת התשלום');
+      }
+
+      // Redirect to PayPlus payment page
+      window.location.href = data.paymentUrl;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'שגיאה ביצירת התשלום';
+      toast.error(message);
+      setIsProcessing(false);
+    }
   };
 
   const handleBack = () => {
