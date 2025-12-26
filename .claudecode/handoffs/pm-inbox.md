@@ -35,6 +35,46 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
+## 2025-12-26 - Backend-2: OM-03 Ready for QA
+
+**Story**: OM-03 - Download Print-Ready Files
+**Priority**: P1
+**Type**: Gate 2 Complete - Ready for QA
+
+### Summary
+Implemented admin print-ready file download functionality using TDD:
+- Print file generation library with 300 DPI optimization
+- Admin API endpoint (GET /api/admin/orders/[id]/download)
+- Support for all print sizes: A5, A4, A3, A2
+- Presigned download URLs (1 hour expiry)
+
+### Key Decisions
+- Uses existing lib/image/optimize.ts for print processing
+- Uses existing lib/storage/r2.ts for storage operations
+- Files generated on-demand from transformed images
+- sRGB color profile preserved (CMYK handled by print shop)
+
+### Test Results
+- **Tests**: 28 passing (14 lib + 14 API)
+- **Coverage**: 93.75% for lib/orders/printFile.ts
+- **TypeScript**: 0 errors in OM-03 files
+- **Lint**: Clean
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/lib/orders/printFile.ts | Created |
+| footprint/lib/orders/printFile.test.ts | Created |
+| footprint/app/api/admin/orders/[id]/download/route.ts | Created |
+| footprint/app/api/admin/orders/[id]/download/route.test.ts | Created |
+
+### Branch
+`feature/OM-03-print-ready-download` (commit `fa9148f4`)
+
+**Ready for Gate 3 QA validation.**
+
+---
+
 ## 2025-12-21 - CTO: PayPlus Gate 0 APPROVED
 
 **Story**: CO-06 (UZF-1853)
