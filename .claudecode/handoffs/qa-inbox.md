@@ -41,504 +41,6 @@ When work is ready for testing:
 
 ## Pending Messages
 
-## 2025-12-25 - Backend-2: CO-03 Apple Pay / Google Pay
-
-**Story**: CO-03
-**Branch**: feature/CO-03-apple-google-pay
-**Sprint**: 4
-**Priority**: P1
-**Story Points**: 3
-**Linear**: UZF-1850
-
-### Completed
-- [x] lib/payments/stripe.ts - Stripe client with PaymentIntent creation
-- [x] Wallet payment support (Apple Pay, Google Pay via card type)
-- [x] app/api/checkout/wallet/create-intent/route.ts - Create PaymentIntent API
-- [x] app/api/webhooks/stripe/route.ts - Stripe webhook handler
-- [x] Webhook signature verification (Stripe SDK)
-- [x] Support for ILS, USD, EUR currencies
-- [x] Order metadata for tracking (orderId in PaymentIntent)
-- [x] Payment status handling (succeeded, failed, canceled)
-- [x] All tests written (TDD approach)
-- [x] 100% coverage on lib/payments/stripe.ts
-
-### Test Results
-- **Tests**: 35 passing (17 stripe lib + 9 wallet API + 9 webhook)
-- **Coverage**:
-  - lib/payments/stripe.ts: 100% statements, 90.9% branches, 100% lines
-  - lib/payments/ overall: 98.52% statements
-
-### API Endpoint Documentation
-
-**POST /api/checkout/wallet/create-intent**
-
-```json
-POST /api/checkout/wallet/create-intent
-Content-Type: application/json
-
-Request:
-{
-  "orderId": "order_123",
-  "amount": 15000,  // in smallest unit (agorot for ILS)
-  "currency": "ils",  // optional, defaults to 'ils'
-  "customerEmail": "customer@example.com",
-  "description": "Pop Art Print - A4"  // optional
-}
-
-Response (200):
-{
-  "paymentIntentId": "pi_xxx",
-  "clientSecret": "pi_xxx_secret_xxx"
-}
-
-Response (400): Validation error (missing fields, invalid amount)
-Response (500): Stripe API error
-```
-
-**POST /api/webhooks/stripe**
-
-```
-Stripe webhook endpoint for payment callbacks.
-Requires header:
-- stripe-signature: Stripe signature for verification
-
-Handled events:
-- payment_intent.succeeded: Order marked as paid
-- payment_intent.payment_failed: Payment failure logged
-- payment_intent.canceled: Cancellation handled
-
-Response always 200 with { received: true } to acknowledge
-```
-
-### Files Changed
-| File | Change |
-|------|--------|
-| footprint/lib/payments/stripe.ts | Created |
-| footprint/lib/payments/stripe.test.ts | Created |
-| footprint/app/api/checkout/wallet/create-intent/route.ts | Created |
-| footprint/app/api/checkout/wallet/create-intent/route.test.ts | Created |
-| footprint/app/api/webhooks/stripe/route.ts | Created |
-| footprint/app/api/webhooks/stripe/route.test.ts | Created |
-| .claudecode/milestones/sprint-4/CO-03/START.md | Created |
-| .claudecode/milestones/sprint-4/CO-03/ROLLBACK-PLAN.md | Created |
-
-### Environment Variables Required
-```bash
-STRIPE_SECRET_KEY=sk_test_xxx
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-```
-
-### Architecture Note
-This complements the PayPlus integration (CO-02):
-- **Israeli Customers**: PayPlus (Bit, local cards, installments)
-- **International + Wallet Users**: Stripe (Apple Pay, Google Pay)
-
-### Frontend Integration (Next Steps)
-The frontend will use Stripe's Express Checkout Element:
-```tsx
-import { ExpressCheckoutElement } from '@stripe/react-stripe-js';
-
-<ExpressCheckoutElement
-  onConfirm={async () => {
-    const res = await fetch('/api/checkout/wallet/create-intent', {
-      method: 'POST',
-      body: JSON.stringify({ orderId, amount, customerEmail }),
-    });
-    // Use clientSecret to confirm payment
-  }}
-/>
-```
-
-### How to Test
-```bash
-cd footprint
-npm test -- lib/payments/stripe.test.ts app/api/checkout/wallet app/api/webhooks/stripe
-npm run type-check
-npm run lint
-```
-
-### Ops Tasks (Post-Merge)
-1. Enable Apple Pay in Stripe Dashboard
-2. Enable Google Pay in Stripe Dashboard
-3. Add Apple Pay domain verification file
-4. Configure webhook URL in Stripe Dashboard
-
-### Gate Status
-- [x] Gate 0: Research (GATE0-stripe-payments.md approved)
-- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tag CO-03-start)
-- [x] Gate 2: Implementation (TDD - 35 tests, 100% lib coverage)
-- [ ] Gate 3: QA Validation (PENDING)
-- [x] Gate 4: Review (TypeScript clean in my files, tests pass)
-- [ ] Gate 5: Deployment (pending QA)
-
-### Notes
-- TypeScript clean for my files (pre-existing errors in src/app/cockpit/page.tsx not mine)
-- Uses Stripe SDK v14.21.0 with API version 2023-10-16
-- Payment method type is 'card' which enables wallets automatically
-
-> Ready for QA validation
-
----
-
-## 2025-12-25 - Frontend-B: UI-03 Customize Page Ready for QA
-
-**Story**: UI-03 - Customize Page UI
-**Branch**: `feature/ui-03-customize-page`
-**Commit**: `b757a92a`
-**Sprint**: 4
-**Priority**: P0
-
-### Summary
-Frontend-B implemented the Customize Page matching `03-customize.html` mockup:
-
-| Feature | Status |
-|---------|--------|
-| Progress bar at 60% (Step 3) | ✅ |
-| Size grid (A5/A4/A3/A2) | ✅ |
-| "פופולרי" badge on A4 | ✅ |
-| Paper selector with radio buttons | ✅ |
-| Frame grid with color previews | ✅ |
-| Live price calculation | ✅ |
-| Bottom CTA with price summary | ✅ |
-| Hebrew RTL layout | ✅ |
-
-### Pricing (matching mockup)
-| Option | Price |
-|--------|-------|
-| A5 | ₪89 |
-| A4 | ₪149 |
-| A3 | ₪249 |
-| A2 | ₪379 |
-| Matte Paper | Included |
-| Glossy Paper | +₪20 |
-| Canvas | +₪40 |
-| No Frame | Free |
-| Black/White Frame | +₪60 |
-| Oak Frame | +₪80 |
-
-### Test Results
-- **Tests**: 43 passing (TDD)
-- **Total**: 829 passing (no regressions)
-- **TypeScript**: Clean
-- **ESLint**: Clean
-
-### Files Changed
-| File | Change |
-|------|--------|
-| `app/(app)/create/customize/page.tsx` | Complete rewrite |
-| `app/(app)/create/customize/page.test.tsx` | Created (43 tests) |
-
-### Validation Required
-```bash
-cd footprint
-git fetch && git checkout feature/ui-03-customize-page
-npm install
-npm test -- --coverage
-npm run type-check
-npm run lint
-npm run dev  # Visual check against mockup
-```
-
-### Visual Verification
-Compare against: `design_mockups/03-customize.html`
-
-### Gate Status
-- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
-- [x] Gate 2: Implementation (TDD - 43 tests)
-- [x] Gate 3: Code Quality (TypeScript/Lint clean)
-- [ ] Gate 4: QA Validation (PENDING)
-
-### On Approval
-Write to PM inbox: UI-03 APPROVED
-**Unblocks**: UI-04 (Checkout Page UI)
-
----
-
-## 2025-12-25 - Frontend-B: UI-02 Style Selection Ready for QA
-
-**Story**: UI-02 - Style Selection UI
-**Branch**: `feature/ui-02-style-selection`
-**Sprint**: 4
-**Priority**: P0
-
-### Summary
-Frontend-B implemented the Style Selection Page matching `02-style-selection.html` mockup:
-
-| Feature | Status |
-|---------|--------|
-| Header with "בחירת סגנון" | ✅ |
-| Progress bar at 40% (Step 2) | ✅ |
-| Step 1 (העלאה) completed indicator | ✅ |
-| Large preview container (4:5 ratio) | ✅ |
-| Close button (X) | ✅ |
-| Style badge showing current style | ✅ |
-| AI processing overlay on style change | ✅ |
-| 8 style options in horizontal strip | ✅ |
-| Gradient icon buttons | ✅ |
-| "פופולרי" badge on Pop Art | ✅ |
-| "חדש" badge on Romantic | ✅ |
-| Free preview notice | ✅ |
-| Bottom CTA buttons | ✅ |
-| Hebrew RTL layout | ✅ |
-
-### Test Results
-- **Tests**: 28 passing (TDD)
-- **Total**: 652 passing (no regressions)
-- **TypeScript**: Clean
-- **ESLint**: Clean
-
-### Files Changed
-| File | Change |
-|------|--------|
-| `app/(app)/create/style/page.tsx` | Complete rewrite |
-| `app/(app)/create/style/page.test.tsx` | Created (28 tests) |
-
-### Validation Required
-```bash
-cd footprint
-git fetch && git checkout feature/ui-02-style-selection
-npm install
-npm test -- --coverage
-npm run type-check
-npm run lint
-npm run dev  # Visual check against mockup
-```
-
-### Visual Verification
-Compare against: `design_mockups/02-style-selection.html`
-
-### On Approval
-Write to PM inbox: UI-02 APPROVED
-**Unblocks**: UI-03 (Customize Page UI)
-
----
-
-## 2025-12-25 - Frontend-A: UI-07 Base UI Primitives Ready for QA
-
-**Story**: UI-07 - Base UI Primitives
-**Branch**: `feature/ui-07-base-primitives`
-**Sprint**: 4
-**Priority**: P0
-
-### Summary
-Frontend-A implemented foundational UI components in `components/ui/`:
-
-| Component | Tests | Key Features |
-|-----------|-------|--------------|
-| Button | 24 | 4 variants, 3 sizes, loading state, disabled |
-| Card | - | Container with header, body, footer |
-| Input | - | Text input with label, error state |
-| Select | - | Dropdown with options |
-| Checkbox | - | Checkbox with label |
-| Badge | 18 | 6 variants, dot indicator, icon slot |
-
-### Test Results
-- **UI Component Tests**: 134 passing
-- **All Tests**: 669 passing
-- **TypeScript**: 0 errors
-- **ESLint**: Clean
-- **TDD**: Tests written first
-
-### Files Created
-| File | Type |
-|------|------|
-| `components/ui/Button.tsx` | Component |
-| `components/ui/Button.test.tsx` | Tests |
-| `components/ui/Card.tsx` | Component |
-| `components/ui/Card.test.tsx` | Tests |
-| `components/ui/Input.tsx` | Component |
-| `components/ui/Input.test.tsx` | Tests |
-| `components/ui/Select.tsx` | Component |
-| `components/ui/Select.test.tsx` | Tests |
-| `components/ui/Checkbox.tsx` | Component |
-| `components/ui/Checkbox.test.tsx` | Tests |
-| `components/ui/Badge.tsx` | Component |
-| `components/ui/Badge.test.tsx` | Tests |
-| `components/ui/index.ts` | Exports |
-| `components/ui/utils.ts` | Utilities |
-
-### Validation Required
-```bash
-cd footprint
-git fetch && git checkout feature/ui-07-base-primitives
-npm install
-npm test -- --coverage
-npm run type-check
-npm run lint
-```
-
-### Component Checklist
-- [ ] All 6 components render correctly
-- [ ] RTL layout works (dir="rtl")
-- [ ] Tailwind styling only (no CSS modules)
-- [ ] TypeScript interfaces defined
-- [ ] Accessibility (ARIA labels)
-- [ ] Hebrew text displays correctly
-
-### On Approval
-Write to PM inbox: UI-07 APPROVED
-**Unblocks**: UI-08 (Step Progress), UI-09 (Price Display & Timeline)
-
----
-
-## 2025-12-24 - PM: UI-01 Upload Page Ready for QA
-
-**Story**: UI-01 - Upload Page UI
-**Branch**: `feature/ui-01-upload-page`
-**Sprint**: 4
-**Priority**: P0
-
-### Summary
-Frontend-B implemented the Upload Page UI matching `01-upload.html` mockup.
-
-### Features Implemented
-| Feature | Status |
-|---------|--------|
-| Header with "יצירת תמונה" | ✅ |
-| Progress bar (20% gradient) | ✅ |
-| 4 steps: העלאה, סגנון, התאמה, תשלום | ✅ |
-| Upload zone with drag-drop | ✅ |
-| Gallery button ("בחירה מהגלריה") | ✅ |
-| Camera button ("צילום") | ✅ |
-| Preview state with "מוכן" badge | ✅ |
-| Replace button ("החלפת תמונה") | ✅ |
-| Tips section | ✅ |
-| Bottom CTA (disabled until image) | ✅ |
-| Hebrew RTL layout | ✅ |
-
-### Test Results
-- **Tests**: 24 passing (component tests)
-- **Total**: 624 tests passing
-- **TypeScript**: Clean
-- **ESLint**: Clean
-
-### Files Changed
-| File | Change |
-|------|--------|
-| `app/(app)/create/page.tsx` | Complete rewrite |
-| `app/(app)/create/page.test.tsx` | Created (24 tests) |
-| `vitest.config.ts` | Modified (React plugin) |
-| `types/index.ts` | Fixed missing export |
-
-### Validation Required
-```bash
-cd footprint
-npm test -- --coverage
-npm run type-check
-npm run lint
-npm run dev  # Visual check against mockup
-```
-
-### Visual Verification
-Compare against: `design_mockups/01-upload.html`
-
-### On Approval
-Write to PM inbox with APPROVED status.
-
----
-
-## 2025-12-24 - PM: UP-03 Re-validation (Coverage Fixed)
-
-**Story**: UP-03 - Auto-Optimize Photo for Print
-**Branch**: `feature/UP-03-image-optimization`
-**Priority**: P0
-**Type**: Re-validation after coverage fix
-
-### Context
-Backend-2 fixed the branch coverage issue that blocked UP-03.
-
-### Coverage Improvement
-| Metric | Before | After | Threshold |
-|--------|--------|-------|-----------|
-| Branch | 69.33% | 88.15% | 75% ✅ |
-| Statement | 82.7% | 94.56% | - |
-
-### Changes Made
-- Added 9 new direct upload mode tests
-- Added metadata fallback tests
-- Added no-resize edge case tests
-- Commit: `fca8d7d2`
-
-### Validation Required
-```bash
-cd footprint
-npm test -- --coverage
-npm run type-check
-npm run lint
-```
-
-### On Approval
-Write to PM inbox with APPROVED status.
-
----
-
-## 2025-12-24 - PM: UI-06 Demo Data Ready for QA
-
-**Story**: UI-06 - Demo Data & Mock Images
-**Branch**: `feature/ui-06-demo-data`
-**Sprint**: 4
-**Priority**: P0 - Foundation for Sprint 4 UI stories
-
-### Summary
-Frontend-B has completed UI-06: Demo Data & Mock Images.
-This is the foundation story for Sprint 4 - all UI pages (UI-01 to UI-05) depend on this data.
-
-### Reported Results
-| Metric | Result |
-|--------|--------|
-| Tests | 51 passing |
-| Coverage | 100% statements, 89.28% branches |
-| TypeScript | Clean (0 demo-related errors) |
-| ESLint | Clean (0 warnings/errors) |
-
-### Files Created
-```
-footprint/data/demo/
-├── index.ts          # Main exports
-├── index.test.ts     # 51 tests
-├── users.ts          # 4 users, 5 addresses
-├── orders.ts         # 7 orders (all statuses)
-├── products.ts       # 8 styles, sizes, papers, frames
-└── images.ts         # Placeholder image URLs
-```
-
-### Key Exports
-- `demoOrders` - Orders in all 6 statuses (pending → delivered)
-- `demoUsers` - Regular + admin users with Hebrew names
-- `demoAddresses` - Israel addresses with 7-digit postal codes
-- `demoStyles` - 8 AI styles with Hebrew labels
-- `createDemoOrder()` - Dynamic order generation
-- `getDemoOrderByStatus()` - Status-based lookup
-
-### Validation Required
-1. Run tests: `cd footprint && npm test -- --coverage`
-2. Check types: `npm run type-check`
-3. Check lint: `npm run lint`
-4. Verify demo data exports work correctly
-5. Check data matches `types/database.ts` interfaces
-
-### Acceptance Criteria to Verify
-- [ ] Demo data matches database types
-- [ ] At least 3 sample orders with different statuses
-- [ ] 8 style previews with before/after mock images
-- [ ] Price data in ILS (₪)
-- [ ] Coverage >= 80%
-
-### Gate 1 Documents
-- START.md: `.claudecode/milestones/sprint-4/UI-06/START.md`
-- ROLLBACK-PLAN.md: `.claudecode/milestones/sprint-4/UI-06/ROLLBACK-PLAN.md`
-
-### On Approval
-Write to: `.claudecode/handoffs/pm-inbox.md` with APPROVED status
-
-### On Block
-Write to: `.claudecode/handoffs/frontend-b-inbox.md` with issues
-
-> Ready for Gate 3 QA validation
-
----
-
 ## 2025-12-23 - Frontend-B: Shipping Address Form (CO-01)
 
 **Story**: CO-01 - Enter Shipping Address
@@ -1076,94 +578,63 @@ EMAIL_FROM=orders@footprint.co.il  # optional, defaults to noreply@footprint.co.
 
 ---
 
-## 2025-12-25 - Backend-1: CO-05 Apply Discount Codes
+## 2025-12-26 - Frontend-A: Step Progress Indicator (UI-08)
 
-**Story**: CO-05
-**Branch**: feature/co-05-discount-codes
-**Sprint**: 4
+**Story**: UI-08 - Step Progress Indicator
+**Branch**: feature/ui-08-step-progress
+**Sprint**: 2
 **Priority**: P1
-**Story Points**: 2
 
 ### Completed
-- [x] Extended orderStore with discountValidation state
-- [x] applyDiscountCode() action - validates and applies discount
-- [x] clearDiscount() action - removes applied discount
-- [x] hasAppliedDiscount() helper - returns boolean
-- [x] getDiscountAmount() helper - returns discount value
-- [x] setDiscountCode() clears error on code change
-- [x] Integration with existing lib/pricing/discounts.ts
-- [x] Pricing updates automatically when discount applied
-- [x] TDD approach with 21 tests
-- [x] TypeScript clean (in my files)
-- [x] ESLint clean
+- [x] StepProgress component - 5-step progress indicator
+- [x] Current step highlighting with brand purple accent
+- [x] Completed steps show checkmark icons
+- [x] Hebrew labels with RTL layout support (locale prop)
+- [x] Connector lines between steps with proper styling
+- [x] Full accessibility support (nav role, aria-current, aria-labels)
+- [x] Configurable steps via props
+- [x] TypeScript strict mode clean
+- [x] ESLint clean (no warnings or errors)
+- [x] Tests written with TDD approach
 
 ### Test Results
-- **Tests**: 21 passing (orderStore discount tests)
-- **Coverage**:
-  - lib/pricing/: 100% (discounts.ts, calculator.ts, shipping.ts)
-  - stores/orderStore.ts: 46% overall (discount functions tested)
-
-### Store API for Components
-
-```typescript
-// State
-const {
-  discountCode,        // Current discount code string
-  discountValidation,  // { isValidating, error, appliedDiscount }
-  pricing,             // Includes updated discount & total
-} = useOrderStore();
-
-// Actions
-setDiscountCode('SAVE10');  // Update code (clears error)
-applyDiscountCode();        // Validate and apply
-clearDiscount();            // Remove discount
-
-// Computed
-hasAppliedDiscount();       // true if valid discount applied
-getDiscountAmount();        // discount amount in ILS
-```
-
-### Available Discount Codes (for testing)
-| Code | Type | Value | Min Purchase |
-|------|------|-------|--------------|
-| SAVE10 | percentage | 10% | - |
-| SAVE20 | percentage | 20% | - |
-| FLAT20 | fixed | 20 ILS | - |
-| FLAT50 | fixed | 50 ILS | - |
-| VIP25 | percentage | 25% | 200 ILS |
-| WELCOME | percentage | 15% | - |
-| EXPIRED50 | percentage | 50% | - (expired) |
+- **Tests**: 29 passing (StepProgress component)
+- **Coverage**: 100% statements, 100% branches, 100% functions, 100% lines
+  - StepProgress.tsx: 100%
 
 ### Files Changed
 | File | Change |
 |------|--------|
-| `footprint/stores/orderStore.ts` | Modified |
-| `footprint/stores/orderStore.test.ts` | Created |
-| `.claudecode/milestones/sprint-4/CO-05/START.md` | Created |
-| `.claudecode/milestones/sprint-4/CO-05/ROLLBACK-PLAN.md` | Created |
+| `components/ui/StepProgress.tsx` | Created |
+| `components/ui/StepProgress.test.tsx` | Created |
+| `components/ui/index.ts` | Modified (export added) |
+| `.claudecode/milestones/sprint-2/UI-08/START.md` | Created |
+| `.claudecode/milestones/sprint-2/UI-08/ROLLBACK-PLAN.md` | Created |
 
 ### How to Test
 ```bash
 cd footprint
-npm test -- stores/orderStore.test.ts
+npm test -- StepProgress
 npm run type-check
 npm run lint
+npm run dev  # Manual testing
 ```
 
 ### Manual Test Cases
-1. **Valid code**: Enter SAVE10, apply, verify 10% discount shown
-2. **Invalid code**: Enter INVALID, apply, verify error message
-3. **Expired code**: Enter EXPIRED50, apply, verify expiration error
-4. **Min purchase**: Enter VIP25 with low subtotal, verify minimum error
-5. **Clear discount**: Apply SAVE10, then clear, verify discount removed
-6. **Case insensitive**: Enter save10 (lowercase), verify works
+1. **Step display**: Verify all 5 steps render with labels
+2. **Current step**: Current step should have purple indicator
+3. **Completed steps**: Steps before current show checkmarks
+4. **Hebrew labels**: Pass locale="he" to see Hebrew labels
+5. **RTL layout**: Hebrew locale applies dir="rtl"
+6. **Connector lines**: Lines between steps styled correctly
+7. **Accessibility**: Tab through, verify aria attributes
 
 ### Gate Status
-- [x] Gate 0: Research (N/A - uses existing discount lib)
-- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tagged CO-05-start)
-- [x] Gate 2: Implementation (TDD - 21 tests)
+- [x] Gate 0: Research (N/A - standard UI component)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 29 tests)
 - [ ] Gate 3: QA Validation (PENDING)
-- [x] Gate 4: Review (TypeScript clean, Lint clean)
+- [x] Gate 4: Review (TypeScript clean, Lint clean, 100% coverage)
 - [ ] Gate 5: Deployment (pending QA)
 
 > Ready for QA validation

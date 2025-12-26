@@ -14,4 +14,5 @@ export { Input, type InputProps } from './Input';
 export { Select, type SelectProps, type SelectOption } from './Select';
 export { Checkbox, type CheckboxProps } from './Checkbox';
 export { Badge, type BadgeProps } from './Badge';
+export { StepProgress, type StepProgressProps, type StepConfig } from './StepProgress';
 export { cn } from './utils';
