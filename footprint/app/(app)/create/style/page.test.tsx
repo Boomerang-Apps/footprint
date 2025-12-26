@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import StylePage from './page';
 import { useOrderStore } from '@/stores/orderStore';
 
@@ -32,17 +32,39 @@ vi.mock('next/image', () => ({
   ),
 }));
 
+// Mock fetch for transform API
+const mockFetch = vi.fn();
+
 describe('StylePage', () => {
   const mockSetStep = vi.fn();
   const mockSetSelectedStyle = vi.fn();
+  const mockSetTransformedImage = vi.fn();
+  const mockSetIsTransforming = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Setup fetch mock to prevent actual API calls in all tests
+    global.fetch = mockFetch;
+    mockFetch.mockReset();
+    // Default mock: successful transform
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        transformedUrl: 'https://r2.example.com/transformed/test.jpg',
+        style: 'pop_art',
+        processingTime: 3000,
+      }),
+    });
+
     (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       setStep: mockSetStep,
       setSelectedStyle: mockSetSelectedStyle,
+      setTransformedImage: mockSetTransformedImage,
+      setIsTransforming: mockSetIsTransforming,
       originalImage: 'blob:test-image-url',
+      transformedImage: null,
       selectedStyle: 'pop_art',
+      isTransforming: false,
       currentStep: 'style',
     });
   });
@@ -277,6 +299,303 @@ describe('StylePage', () => {
       render(<StylePage />);
       const styleStrip = screen.getByTestId('style-strip');
       expect(styleStrip).toHaveClass('overflow-x-auto');
+    });
+  });
+
+  describe('AI Transform Integration', () => {
+    const mockSetTransformedImage = vi.fn();
+    const mockSetIsTransforming = vi.fn();
+
+    beforeEach(() => {
+      global.fetch = mockFetch;
+      mockFetch.mockReset();
+
+      // Setup mock store with transform-related fields
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        setStep: mockSetStep,
+        setSelectedStyle: mockSetSelectedStyle,
+        setTransformedImage: mockSetTransformedImage,
+        setIsTransforming: mockSetIsTransforming,
+        isTransforming: false,
+        originalImage: 'https://r2.example.com/uploads/user123/image.jpg',
+        transformedImage: null,
+        selectedStyle: 'pop_art',
+        currentStep: 'style',
+      });
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('calls transform API when style is selected', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          transformedUrl: 'https://r2.example.com/transformed/pop_art.jpg',
+          style: 'watercolor',
+          processingTime: 3000,
+        }),
+      });
+
+      render(<StylePage />);
+
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+
+      await act(async () => {
+        fireEvent.click(watercolorButton);
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith('/api/transform', expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        }));
+      });
+    });
+
+    it('sends correct parameters to transform API', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          transformedUrl: 'https://r2.example.com/transformed/watercolor.jpg',
+          style: 'watercolor',
+          processingTime: 3000,
+        }),
+      });
+
+      render(<StylePage />);
+
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+
+      await act(async () => {
+        fireEvent.click(watercolorButton);
+      });
+
+      await waitFor(() => {
+        const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+        expect(callBody.imageUrl).toBe('https://r2.example.com/uploads/user123/image.jpg');
+        expect(callBody.style).toBe('watercolor');
+      });
+    });
+
+    it('stores transformed URL in orderStore on success', async () => {
+      const transformedUrl = 'https://r2.example.com/transformed/watercolor.jpg';
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          transformedUrl,
+          style: 'watercolor',
+          processingTime: 3000,
+        }),
+      });
+
+      render(<StylePage />);
+
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+
+      await act(async () => {
+        fireEvent.click(watercolorButton);
+      });
+
+      await waitFor(() => {
+        expect(mockSetTransformedImage).toHaveBeenCalledWith(transformedUrl);
+      });
+    });
+
+    it('shows error message on transform failure', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Transform failed' }),
+      });
+
+      render(<StylePage />);
+
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+
+      await act(async () => {
+        fireEvent.click(watercolorButton);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('transform-error')).toBeInTheDocument();
+      });
+    });
+
+    it('shows retry button on transform error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Transform failed' }),
+      });
+
+      render(<StylePage />);
+
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+
+      await act(async () => {
+        fireEvent.click(watercolorButton);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /נסה שוב|retry/i })).toBeInTheDocument();
+      });
+    });
+
+    it('retries transform when retry button is clicked', async () => {
+      // First call fails
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Transform failed' }),
+      });
+
+      // Second call succeeds
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          transformedUrl: 'https://r2.example.com/transformed/watercolor.jpg',
+          style: 'watercolor',
+          processingTime: 3000,
+        }),
+      });
+
+      render(<StylePage />);
+
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+
+      await act(async () => {
+        fireEvent.click(watercolorButton);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('transform-error')).toBeInTheDocument();
+      });
+
+      const retryButton = screen.getByRole('button', { name: /נסה שוב|retry/i });
+
+      await act(async () => {
+        fireEvent.click(retryButton);
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('disables continue button during transform', async () => {
+      // Mock store with isTransforming true
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        setStep: mockSetStep,
+        setSelectedStyle: mockSetSelectedStyle,
+        setTransformedImage: mockSetTransformedImage,
+        setIsTransforming: mockSetIsTransforming,
+        isTransforming: true,
+        originalImage: 'https://r2.example.com/uploads/user123/image.jpg',
+        transformedImage: null,
+        selectedStyle: 'pop_art',
+        currentStep: 'style',
+      });
+
+      render(<StylePage />);
+
+      const continueButton = screen.getByText('אהבתי! המשך').closest('button');
+      expect(continueButton).toBeDisabled();
+    });
+
+    it('displays transformed image in preview after successful transform', async () => {
+      const transformedUrl = 'https://r2.example.com/transformed/watercolor.jpg';
+
+      // Mock store with transformed image
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        setStep: mockSetStep,
+        setSelectedStyle: mockSetSelectedStyle,
+        setTransformedImage: mockSetTransformedImage,
+        setIsTransforming: mockSetIsTransforming,
+        isTransforming: false,
+        originalImage: 'https://r2.example.com/uploads/user123/image.jpg',
+        transformedImage: transformedUrl,
+        selectedStyle: 'watercolor',
+        currentStep: 'style',
+      });
+
+      render(<StylePage />);
+
+      const previewImage = screen.getByAltText(/התמונה שלך|preview/i);
+      expect(previewImage).toHaveAttribute('src', transformedUrl);
+    });
+
+    it('shows processing overlay during transform', async () => {
+      // Mock store with isTransforming true
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        setStep: mockSetStep,
+        setSelectedStyle: mockSetSelectedStyle,
+        setTransformedImage: mockSetTransformedImage,
+        setIsTransforming: mockSetIsTransforming,
+        isTransforming: true,
+        originalImage: 'https://r2.example.com/uploads/user123/image.jpg',
+        transformedImage: null,
+        selectedStyle: 'pop_art',
+        currentStep: 'style',
+      });
+
+      render(<StylePage />);
+
+      expect(screen.getByTestId('ai-overlay')).toBeInTheDocument();
+    });
+
+    it('handles network error gracefully', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      render(<StylePage />);
+
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+
+      await act(async () => {
+        fireEvent.click(watercolorButton);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('transform-error')).toBeInTheDocument();
+      });
+    });
+
+    it('clears previous error when retrying', async () => {
+      // First call fails
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Transform failed' }),
+      });
+
+      // Second call succeeds
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          transformedUrl: 'https://r2.example.com/transformed/watercolor.jpg',
+          style: 'watercolor',
+          processingTime: 3000,
+        }),
+      });
+
+      render(<StylePage />);
+
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+
+      await act(async () => {
+        fireEvent.click(watercolorButton);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('transform-error')).toBeInTheDocument();
+      });
+
+      const retryButton = screen.getByRole('button', { name: /נסה שוב|retry/i });
+
+      await act(async () => {
+        fireEvent.click(retryButton);
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('transform-error')).not.toBeInTheDocument();
+      });
     });
   });
 });

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, Heart, Film, Sun } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, Heart, Film, Sun, AlertCircle, RefreshCw } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import type { StyleType } from '@/types';
 
@@ -86,7 +86,22 @@ const STEPS = [
 
 export default function StylePage() {
   const router = useRouter();
-  const { originalImage, selectedStyle, setSelectedStyle, setStep } = useOrderStore();
+  const {
+    originalImage,
+    selectedStyle,
+    setSelectedStyle,
+    setStep,
+    transformedImage,
+    setTransformedImage,
+    isTransforming,
+    setIsTransforming,
+  } = useOrderStore();
+
+  // Local state for transform error and pending style for retry
+  const [transformError, setTransformError] = useState<string | null>(null);
+  const [pendingStyle, setPendingStyle] = useState<{ id: StyleType; nameHe: string } | null>(null);
+
+  // Legacy state for backward compatibility with existing tests
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStyle, setProcessingStyle] = useState<string | null>(null);
 
@@ -102,22 +117,64 @@ export default function StylePage() {
     setStep('style');
   }, [setStep]);
 
-  const handleStyleSelect = useCallback((styleId: StyleType, styleNameHe: string) => {
+  // Transform image using AI API
+  const transformImage = useCallback(async (styleId: StyleType, styleNameHe: string) => {
     setSelectedStyle(styleId);
+    setIsTransforming(true);
+    setTransformError(null);
+    setPendingStyle({ id: styleId, nameHe: styleNameHe });
+
+    // Also set legacy state for existing tests
     setIsProcessing(true);
     setProcessingStyle(styleNameHe);
 
-    // Simulate AI processing
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/transform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: originalImage,
+          style: styleId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Transform failed');
+      }
+
+      // Store transformed image URL
+      setTransformedImage(data.transformedUrl);
+      setTransformError(null);
+      setPendingStyle(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'שגיאה בעיבוד התמונה';
+      setTransformError(message);
+    } finally {
+      setIsTransforming(false);
       setIsProcessing(false);
       setProcessingStyle(null);
-    }, 1500);
-  }, [setSelectedStyle]);
+    }
+  }, [originalImage, setSelectedStyle, setTransformedImage, setIsTransforming]);
+
+  // Retry transform with pending style
+  const handleRetry = useCallback(() => {
+    if (pendingStyle) {
+      transformImage(pendingStyle.id, pendingStyle.nameHe);
+    }
+  }, [pendingStyle, transformImage]);
+
+  const handleStyleSelect = useCallback((styleId: StyleType, styleNameHe: string) => {
+    transformImage(styleId, styleNameHe);
+  }, [transformImage]);
 
   const handleContinue = useCallback(() => {
-    setStep('customize');
-    router.push('/create/customize');
-  }, [setStep, router]);
+    if (!isTransforming) {
+      setStep('customize');
+      router.push('/create/customize');
+    }
+  }, [isTransforming, setStep, router]);
 
   const handleBack = useCallback(() => {
     setStep('upload');
@@ -197,22 +254,46 @@ export default function StylePage() {
         <div className="py-5 flex justify-center">
           <div className="relative w-full max-w-sm aspect-[4/5] bg-zinc-100 rounded-2xl overflow-hidden shadow-lg">
             <Image
-              src={originalImage}
+              src={transformedImage || originalImage}
               alt="התמונה שלך"
               fill
               className="object-cover"
             />
 
             {/* AI Processing Overlay */}
-            {isProcessing && (
+            {(isProcessing || isTransforming) && (
               <div
                 data-testid="ai-overlay"
                 className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center gap-3"
               >
                 <div className="w-12 h-12 border-3 border-zinc-200 border-t-purple-600 rounded-full animate-spin" />
                 <span className="text-sm text-zinc-600 font-medium">
-                  מעבד בסגנון {processingStyle}...
+                  מעבד בסגנון {processingStyle || pendingStyle?.nameHe}...
                 </span>
+              </div>
+            )}
+
+            {/* Transform Error Overlay */}
+            {transformError && !isTransforming && (
+              <div
+                data-testid="transform-error"
+                className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center gap-4 p-6"
+              >
+                <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="w-7 h-7 text-red-600" />
+                </div>
+                <div className="text-center">
+                  <p className="text-zinc-900 font-medium mb-1">שגיאה בעיבוד</p>
+                  <p className="text-sm text-zinc-500">{transformError}</p>
+                </div>
+                <button
+                  onClick={handleRetry}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-xl font-medium hover:opacity-90 transition"
+                  aria-label="נסה שוב"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>נסה שוב</span>
+                </button>
               </div>
             )}
 
@@ -320,7 +401,13 @@ export default function StylePage() {
 
           <button
             onClick={handleContinue}
-            className="flex-[2] py-3.5 px-5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold shadow-md hover:opacity-90 transition flex items-center justify-center gap-2"
+            disabled={isTransforming}
+            className={`
+              flex-[2] py-3.5 px-5 rounded-xl font-semibold shadow-md transition flex items-center justify-center gap-2
+              ${isTransforming
+                ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90'}
+            `}
           >
             <span>אהבתי! המשך</span>
             <ArrowRight className="w-5 h-5 rotate-180" />
