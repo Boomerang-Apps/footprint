@@ -317,7 +317,7 @@ export const stories: Record<string, Story> = {
     id: 'GF-05',
     title: 'Scheduled Delivery Date',
     description: 'Date picker for delivery, arrive by date, calendar integration',
-    status: 'in-progress',  // 🚀 Assigned to Backend-1 2025-12-26 (parallel assignment)
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (75 tests, 100% coverage)
     agent: 'Backend-1',
     points: 3,
     component: 'Gift',
