@@ -35,6 +35,56 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
+## 2025-12-26 - Backend-1: GF-05 Ready for QA
+
+**Story**: GF-05 - Scheduled Delivery Date
+**Priority**: P1
+**Type**: Gate 2 Complete - Ready for QA
+
+### Summary
+Implemented scheduled delivery date functionality for gift orders:
+- Delivery date utilities (lib/delivery/dates.ts)
+  - Business day calculations (skip weekends)
+  - Min delivery: 3 business days from order
+  - Max delivery: 30 days from order
+  - Date validation, formatting, parsing
+- orderStore integration
+  - scheduledDeliveryDate state
+  - Setter, clear, and validation actions
+  - Persisted to localStorage
+- Updated Order types and demo data
+
+### Key Decisions
+- Minimum 3 business days required for processing
+- Maximum 30 days out to limit scheduling complexity
+- Weekends not counted as business days
+- Delivery can occur on weekends (just processing is M-F)
+- Date stored as ISO string (YYYY-MM-DD) for simplicity
+
+### Test Results
+- **Tests**: 75 passing (37 delivery + 38 orderStore)
+- **Coverage**: lib/delivery/dates.ts at 100%
+- **TypeScript**: 0 errors in GF-05 files
+- **Lint**: Clean
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/lib/delivery/dates.ts | Created |
+| footprint/lib/delivery/dates.test.ts | Created |
+| footprint/stores/orderStore.ts | Modified |
+| footprint/stores/orderStore.test.ts | Modified |
+| footprint/types/order.ts | Modified |
+| footprint/data/demo/orders.ts | Modified |
+| footprint/lib/api/mock.ts | Modified |
+
+### Branch
+`feature/gf-05-scheduled-delivery` (commit `d314711e`)
+
+**Ready for Gate 3 QA validation.**
+
+---
+
 ## 2025-12-26 - Backend-2: OM-03 Ready for QA
 
 **Story**: OM-03 - Download Print-Ready Files
