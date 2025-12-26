@@ -114,4 +114,47 @@ QA handoff written to: `.claudecode/handoffs/qa-inbox.md`
 
 ---
 
+## 2025-12-26 - Frontend-A: UI-08 Ready for QA
+
+**Story**: UI-08
+**Priority**: P1
+**Type**: Gate 2 Complete
+
+### Summary
+Implemented StepProgress component for 5-step order flow indicator:
+- Displays all 5 steps with labels (Upload, Style, Customize, Checkout, Complete)
+- Current step highlighting with brand purple accent
+- Completed steps show checkmark icons
+- Hebrew labels with RTL layout support
+- Connector lines between steps with proper styling
+- Full accessibility support (nav role, aria-current, aria-labels)
+
+### Key Decisions
+- Used `locale` prop for language switching ('en' | 'he')
+- RTL direction auto-applied when locale is Hebrew
+- Follows existing UI primitive patterns (forwardRef, cn utility)
+- Designed as reusable component with configurable steps
+
+### Test Results
+- **Tests**: 29 passing
+- **Coverage**: 100% (statements, branches, functions, lines)
+- **TypeScript**: 0 errors
+- **Lint**: Clean
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/components/ui/StepProgress.tsx | Created |
+| footprint/components/ui/StepProgress.test.tsx | Created |
+| footprint/components/ui/index.ts | Modified (export added) |
+| .claudecode/milestones/sprint-2/UI-08/START.md | Created |
+| .claudecode/milestones/sprint-2/UI-08/ROLLBACK-PLAN.md | Created |
+
+### Branch
+`feature/ui-08-step-progress` (commit `5c859e6a`)
+
+**Ready for Gate 3 QA validation.**
+
+---
+
 ---

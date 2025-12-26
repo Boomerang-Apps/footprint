@@ -577,3 +577,66 @@ EMAIL_FROM=orders@footprint.co.il  # optional, defaults to noreply@footprint.co.
 > Ready for QA validation
 
 ---
+
+## 2025-12-26 - Frontend-A: Step Progress Indicator (UI-08)
+
+**Story**: UI-08 - Step Progress Indicator
+**Branch**: feature/ui-08-step-progress
+**Sprint**: 2
+**Priority**: P1
+
+### Completed
+- [x] StepProgress component - 5-step progress indicator
+- [x] Current step highlighting with brand purple accent
+- [x] Completed steps show checkmark icons
+- [x] Hebrew labels with RTL layout support (locale prop)
+- [x] Connector lines between steps with proper styling
+- [x] Full accessibility support (nav role, aria-current, aria-labels)
+- [x] Configurable steps via props
+- [x] TypeScript strict mode clean
+- [x] ESLint clean (no warnings or errors)
+- [x] Tests written with TDD approach
+
+### Test Results
+- **Tests**: 29 passing (StepProgress component)
+- **Coverage**: 100% statements, 100% branches, 100% functions, 100% lines
+  - StepProgress.tsx: 100%
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `components/ui/StepProgress.tsx` | Created |
+| `components/ui/StepProgress.test.tsx` | Created |
+| `components/ui/index.ts` | Modified (export added) |
+| `.claudecode/milestones/sprint-2/UI-08/START.md` | Created |
+| `.claudecode/milestones/sprint-2/UI-08/ROLLBACK-PLAN.md` | Created |
+
+### How to Test
+```bash
+cd footprint
+npm test -- StepProgress
+npm run type-check
+npm run lint
+npm run dev  # Manual testing
+```
+
+### Manual Test Cases
+1. **Step display**: Verify all 5 steps render with labels
+2. **Current step**: Current step should have purple indicator
+3. **Completed steps**: Steps before current show checkmarks
+4. **Hebrew labels**: Pass locale="he" to see Hebrew labels
+5. **RTL layout**: Hebrew locale applies dir="rtl"
+6. **Connector lines**: Lines between steps styled correctly
+7. **Accessibility**: Tab through, verify aria attributes
+
+### Gate Status
+- [x] Gate 0: Research (N/A - standard UI component)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 29 tests)
+- [ ] Gate 3: QA Validation (PENDING)
+- [x] Gate 4: Review (TypeScript clean, Lint clean, 100% coverage)
+- [ ] Gate 5: Deployment (pending QA)
+
+> Ready for QA validation
+
+---
