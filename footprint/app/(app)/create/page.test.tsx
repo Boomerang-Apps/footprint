@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import CreatePage from './page';
 import { useOrderStore } from '@/stores/orderStore';
 
@@ -31,6 +31,9 @@ vi.mock('react-hot-toast', () => ({
     error: vi.fn(),
   },
 }));
+
+// Mock fetch for upload API
+const mockFetch = vi.fn();
 
 describe('CreatePage (Upload)', () => {
   const mockSetStep = vi.fn();
@@ -234,6 +237,291 @@ describe('CreatePage (Upload)', () => {
       render(<CreatePage />);
       const main = screen.getByRole('main');
       expect(main).toBeInTheDocument();
+    });
+  });
+
+  describe('R2 Upload Integration', () => {
+    beforeEach(() => {
+      // Setup fetch mock
+      global.fetch = mockFetch;
+      mockFetch.mockReset();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('shows upload progress indicator during upload', async () => {
+      // Mock a slow upload response
+      mockFetch.mockImplementation(() =>
+        new Promise(resolve =>
+          setTimeout(() => resolve({
+            ok: true,
+            json: () => Promise.resolve({ publicUrl: 'https://r2.example.com/image.jpg' })
+          }), 100)
+        )
+      );
+
+      render(<CreatePage />);
+
+      // Trigger file upload
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      // Should show uploading indicator
+      expect(screen.getByTestId('upload-progress')).toBeInTheDocument();
+    });
+
+    it('shows error message on upload failure', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Upload failed' })
+      });
+
+      render(<CreatePage />);
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('upload-error')).toBeInTheDocument();
+      });
+    });
+
+    it('disables next button during upload', async () => {
+      mockFetch.mockImplementation(() =>
+        new Promise(resolve =>
+          setTimeout(() => resolve({
+            ok: true,
+            json: () => Promise.resolve({ publicUrl: 'https://r2.example.com/image.jpg' })
+          }), 500)
+        )
+      );
+
+      render(<CreatePage />);
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      const nextButton = screen.getByRole('button', { name: /המשך לבחירת סגנון/i });
+      expect(nextButton).toBeDisabled();
+    });
+
+    it('calls upload API with direct mode when file is selected', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          publicUrl: 'https://r2.example.com/image.jpg',
+          key: 'uploads/user123/image.jpg',
+          size: 12345
+        })
+      });
+
+      render(<CreatePage />);
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith('/api/upload', expect.objectContaining({
+          method: 'POST',
+        }));
+      });
+
+      // Verify FormData was sent
+      const callArgs = mockFetch.mock.calls[0];
+      expect(callArgs[1].body).toBeInstanceOf(FormData);
+    });
+
+    it('stores R2 URL in orderStore on successful upload', async () => {
+      const r2Url = 'https://r2.example.com/uploads/user123/image.jpg';
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          publicUrl: r2Url,
+          key: 'uploads/user123/image.jpg',
+          size: 12345
+        })
+      });
+
+      render(<CreatePage />);
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      await waitFor(() => {
+        expect(mockSetOriginalImage).toHaveBeenCalledWith(r2Url, file);
+      });
+    });
+
+    it('shows retry button on upload error', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Network error' })
+      });
+
+      render(<CreatePage />);
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /נסה שוב|retry/i })).toBeInTheDocument();
+      });
+    });
+
+    it('clears error and retries upload when retry button clicked', async () => {
+      // First call fails
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Network error' })
+      });
+
+      // Second call succeeds
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          publicUrl: 'https://r2.example.com/image.jpg',
+          key: 'uploads/user123/image.jpg',
+          size: 12345
+        })
+      });
+
+      render(<CreatePage />);
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('upload-error')).toBeInTheDocument();
+      });
+
+      // Click retry
+      const retryButton = screen.getByRole('button', { name: /נסה שוב|retry/i });
+      await act(async () => {
+        fireEvent.click(retryButton);
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('shows upload percentage during progress', async () => {
+      // We'll need XMLHttpRequest for progress events
+      // For now, test that progress indicator exists
+      mockFetch.mockImplementation(() =>
+        new Promise(resolve =>
+          setTimeout(() => resolve({
+            ok: true,
+            json: () => Promise.resolve({ publicUrl: 'https://r2.example.com/image.jpg' })
+          }), 100)
+        )
+      );
+
+      render(<CreatePage />);
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      // Progress indicator should be visible
+      expect(screen.getByTestId('upload-progress')).toBeInTheDocument();
+    });
+
+    it('hides upload progress after successful upload', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          publicUrl: 'https://r2.example.com/image.jpg',
+          key: 'uploads/user123/image.jpg',
+          size: 12345
+        })
+      });
+
+      // Mock store to return the uploaded image
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        setStep: mockSetStep,
+        setOriginalImage: mockSetOriginalImage,
+        originalImage: 'https://r2.example.com/image.jpg',
+        currentStep: 'upload',
+      });
+
+      render(<CreatePage />);
+
+      const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('upload-progress')).not.toBeInTheDocument();
+      });
+    });
+
+    it('validates file type before uploading', async () => {
+      render(<CreatePage />);
+
+      // Try to upload a PDF (invalid)
+      const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+
+      // Should not call API for invalid file type
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('validates file size before uploading', async () => {
+      render(<CreatePage />);
+
+      // Create a mock file > 20MB - use small content but mock the size property
+      const largeFile = new File(['test'], 'large.jpg', { type: 'image/jpeg' });
+      Object.defineProperty(largeFile, 'size', { value: 21 * 1024 * 1024, writable: false });
+
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [largeFile] } });
+      });
+
+      // Should not call API for oversized file
+      expect(mockFetch).not.toHaveBeenCalled();
     });
   });
 });
