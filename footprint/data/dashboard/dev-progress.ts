@@ -495,7 +495,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-08',
     title: 'Step Progress Indicator',
     description: 'Create reusable 5-step progress indicator for order flow. Shows current step, completed steps, Hebrew labels.',
-    status: 'in-progress',  // ✅ Assigned to Frontend-A 2025-12-25
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (29 tests, 100% coverage)
     agent: 'Frontend-A',
     points: 2,
     blockedBy: ['UI-07'],
@@ -776,7 +776,7 @@ export const sprints: Sprint[] = [
     id: 4,
     name: 'Sprint 4',
     focus: 'Admin, Payment & UI Polish',
-    status: 'active',  // 🚀 ACTIVE - 15/24 SP complete (62.5%) - UI-04 merged!
+    status: 'active',  // 🚀 ACTIVE - 17/24 SP complete (70.8%) - UI-08 merged!
     features: ['F5b', 'F6', 'F9', 'F10'],  // Combined: Admin + Payment + UI Implementation
   },
   {
