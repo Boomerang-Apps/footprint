@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import {
   Sparkles,
@@ -12,10 +12,36 @@ import {
   Home,
   Plus,
   Copy,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import confetti from 'canvas-confetti';
 import toast from 'react-hot-toast';
+
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface ShippingAddress {
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
+interface OrderConfirmation {
+  orderNumber: string;
+  status: string;
+  items: OrderItem[];
+  subtotal: number;
+  shipping: number;
+  total: number;
+  shippingAddress: ShippingAddress;
+  whatsappUrl: string;
+}
 
 const STYLE_NAMES: Record<string, string> = {
   pop_art: 'פופ ארט',
@@ -77,6 +103,9 @@ function getHebrewMonth(month: number): string {
 
 export default function CompletePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId');
+
   const {
     originalImage,
     transformedImage,
@@ -89,7 +118,46 @@ export default function CompletePage() {
     reset,
   } = useOrderStore();
 
-  const orderNumber = formatOrderId();
+  // API state
+  const [orderData, setOrderData] = useState<OrderConfirmation | null>(null);
+  const [isLoading, setIsLoading] = useState(!!orderId);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch order from API if orderId provided
+  useEffect(() => {
+    if (!orderId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchOrder = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/orders/${orderId}/confirm`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch order');
+        }
+
+        setOrderData(data);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to fetch order';
+        setError(message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [orderId]);
+
+  // Use API data or fallback to generated/store data
+  const orderNumber = orderData?.orderNumber || formatOrderId();
+  const orderTotal = orderData?.total || pricing?.total || 209;
+  const whatsappUrlFromApi = orderData?.whatsappUrl;
   const estimatedDelivery = getEstimatedDelivery();
 
   // Trigger confetti on mount
@@ -147,8 +215,12 @@ export default function CompletePage() {
   };
 
   const handleWhatsAppShare = () => {
-    const text = `הזמנתי יצירה מדהימה מ-Footprint! 🎨 מספר הזמנה: ${orderNumber}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    if (whatsappUrlFromApi) {
+      window.open(whatsappUrlFromApi, '_blank');
+    } else {
+      const text = `הזמנתי יצירה מדהימה מ-Footprint! 🎨 מספר הזמנה: ${orderNumber}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
   };
 
   const handleFacebookShare = () => {
@@ -161,7 +233,43 @@ export default function CompletePage() {
   const frameName = FRAME_NAMES[frameType || 'none'] || 'ללא מסגרת';
   const displayImage = transformedImage || originalImage || '';
   const customerEmail = 'shelly@example.com'; // Email from user session, placeholder for now
-  const orderTotal = pricing?.total || 209;
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+        <div data-testid="loading-skeleton" className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-violet-600 animate-spin" />
+          <p className="text-zinc-500">טוען פרטי הזמנה...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
+        <div className="bg-white border border-zinc-200 rounded-2xl p-8 max-w-md text-center">
+          <div
+            data-testid="error-message"
+            className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h1 className="text-xl font-bold text-zinc-900 mb-2">לא ניתן לטעון את ההזמנה</h1>
+          <p className="text-zinc-500 mb-6">{error}</p>
+          <button
+            onClick={handleHome}
+            className="flex items-center justify-center gap-2 bg-zinc-100 text-zinc-700 py-3 px-6 rounded-xl font-semibold mx-auto"
+          >
+            <Home className="w-5 h-5" />
+            לדף הבית
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50">
