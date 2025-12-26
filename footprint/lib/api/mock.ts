@@ -133,6 +133,7 @@ export const mockClient: ApiClient = {
         isGift: input.isGift,
         giftMessage: input.giftMessage || null,
         giftWrap: input.giftWrap || false,
+        scheduledDeliveryDate: input.scheduledDeliveryDate || null,
         shippingAddress: input.shippingAddress,
         billingAddress: input.billingAddress || input.shippingAddress,
         stripePaymentIntentId: null,

@@ -9,6 +9,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { StyleType, SizeType, PaperType, FrameType, Address, PriceBreakdown } from '@/types';
 import { applyDiscount, type ApplyDiscountResult } from '@/lib/pricing/discounts';
+import {
+  getMinDeliveryDate as getMinDate,
+  getMaxDeliveryDate as getMaxDate,
+  isValidDeliveryDate as isValidDate,
+  formatDeliveryDate,
+  parseDeliveryDate,
+} from '@/lib/delivery/dates';
 
 /**
  * Discount validation state
@@ -51,11 +58,14 @@ interface OrderState {
   recipientAddress: Address | null;
   recipientName: string;
   useRecipientAddress: boolean;
-  
+
   // Pricing
   pricing: PriceBreakdown | null;
   discountCode: string;
   discountValidation: DiscountValidation;
+
+  // Scheduled Delivery (GF-05)
+  scheduledDeliveryDate: string | null;
 
   // Order result
   orderId: string | null;
@@ -105,6 +115,13 @@ interface OrderActions {
   hasAppliedDiscount: () => boolean;
   getDiscountAmount: () => number;
 
+  // Scheduled Delivery (GF-05)
+  setScheduledDeliveryDate: (date: string | null) => void;
+  clearScheduledDeliveryDate: () => void;
+  getMinDeliveryDate: () => string;
+  getMaxDeliveryDate: () => string;
+  isValidDeliveryDate: (date: string) => boolean;
+
   // Order
   setOrderId: (id: string) => void;
 
@@ -138,6 +155,7 @@ const initialState: OrderState = {
     error: null,
     appliedDiscount: null,
   },
+  scheduledDeliveryDate: null,
   orderId: null,
 };
 
@@ -290,6 +308,27 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         return 0;
       },
 
+      // Scheduled Delivery (GF-05)
+      setScheduledDeliveryDate: (date) => set({ scheduledDeliveryDate: date }),
+
+      clearScheduledDeliveryDate: () => set({ scheduledDeliveryDate: null }),
+
+      getMinDeliveryDate: () => {
+        return formatDeliveryDate(getMinDate());
+      },
+
+      getMaxDeliveryDate: () => {
+        return formatDeliveryDate(getMaxDate());
+      },
+
+      isValidDeliveryDate: (dateString) => {
+        const date = parseDeliveryDate(dateString);
+        if (!date) {
+          return false;
+        }
+        return isValidDate(date);
+      },
+
       // Order
       setOrderId: (id) => set({ orderId: id }),
 
@@ -313,6 +352,8 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         recipientAddress: state.recipientAddress,
         recipientName: state.recipientName,
         useRecipientAddress: state.useRecipientAddress,
+        // Scheduled Delivery (GF-05)
+        scheduledDeliveryDate: state.scheduledDeliveryDate,
       }),
     }
   )

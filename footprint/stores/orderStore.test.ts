@@ -491,4 +491,175 @@ describe('Order Store', () => {
       });
     });
   });
+
+  // =========================================================================
+  // GF-05: Scheduled Delivery Date Tests
+  // =========================================================================
+
+  describe('Scheduled Delivery Date (GF-05)', () => {
+    describe('Initial State', () => {
+      it('should have null scheduledDeliveryDate by default', () => {
+        const state = useOrderStore.getState();
+        expect(state.scheduledDeliveryDate).toBeNull();
+      });
+    });
+
+    describe('setScheduledDeliveryDate', () => {
+      it('should set scheduled delivery date', () => {
+        const { setScheduledDeliveryDate } = useOrderStore.getState();
+
+        act(() => {
+          setScheduledDeliveryDate('2025-06-25');
+        });
+
+        expect(useOrderStore.getState().scheduledDeliveryDate).toBe('2025-06-25');
+      });
+
+      it('should allow updating the date', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.setScheduledDeliveryDate('2025-06-25');
+        });
+
+        act(() => {
+          store.setScheduledDeliveryDate('2025-06-30');
+        });
+
+        expect(useOrderStore.getState().scheduledDeliveryDate).toBe('2025-06-30');
+      });
+
+      it('should allow setting date to null', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.setScheduledDeliveryDate('2025-06-25');
+        });
+
+        act(() => {
+          store.setScheduledDeliveryDate(null);
+        });
+
+        expect(useOrderStore.getState().scheduledDeliveryDate).toBeNull();
+      });
+    });
+
+    describe('clearScheduledDeliveryDate', () => {
+      it('should clear the scheduled delivery date', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.setScheduledDeliveryDate('2025-06-25');
+        });
+
+        act(() => {
+          store.clearScheduledDeliveryDate();
+        });
+
+        expect(useOrderStore.getState().scheduledDeliveryDate).toBeNull();
+      });
+
+      it('should work when date is already null', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.clearScheduledDeliveryDate();
+        });
+
+        expect(useOrderStore.getState().scheduledDeliveryDate).toBeNull();
+      });
+    });
+
+    describe('getMinDeliveryDate', () => {
+      it('should return date 3 business days from now', () => {
+        // Current mocked date: 2025-06-15 (Sunday)
+        // 3 business days from Sunday = Wednesday June 18
+        // (Mon=1, Tue=2, Wed=3)
+        const store = useOrderStore.getState();
+        const minDate = store.getMinDeliveryDate();
+
+        expect(minDate).toBe('2025-06-18');
+      });
+    });
+
+    describe('getMaxDeliveryDate', () => {
+      it('should return date 30 days from now', () => {
+        // Current mocked date: 2025-06-15
+        // +30 days = 2025-07-15
+        const store = useOrderStore.getState();
+        const maxDate = store.getMaxDeliveryDate();
+
+        expect(maxDate).toBe('2025-07-15');
+      });
+    });
+
+    describe('isValidDeliveryDate', () => {
+      it('should return true for date within valid range', () => {
+        const store = useOrderStore.getState();
+
+        // June 25 is within June 18 (min) and July 15 (max)
+        expect(store.isValidDeliveryDate('2025-06-25')).toBe(true);
+      });
+
+      it('should return true for date on min boundary', () => {
+        const store = useOrderStore.getState();
+        expect(store.isValidDeliveryDate('2025-06-18')).toBe(true);
+      });
+
+      it('should return true for date on max boundary', () => {
+        const store = useOrderStore.getState();
+        expect(store.isValidDeliveryDate('2025-07-15')).toBe(true);
+      });
+
+      it('should return false for date before min', () => {
+        const store = useOrderStore.getState();
+        expect(store.isValidDeliveryDate('2025-06-16')).toBe(false);
+      });
+
+      it('should return false for date after max', () => {
+        const store = useOrderStore.getState();
+        expect(store.isValidDeliveryDate('2025-07-20')).toBe(false);
+      });
+
+      it('should return false for invalid date string', () => {
+        const store = useOrderStore.getState();
+        expect(store.isValidDeliveryDate('not-a-date')).toBe(false);
+      });
+
+      it('should return false for empty string', () => {
+        const store = useOrderStore.getState();
+        expect(store.isValidDeliveryDate('')).toBe(false);
+      });
+    });
+
+    describe('reset', () => {
+      it('should clear scheduled delivery date on reset', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.setScheduledDeliveryDate('2025-06-25');
+        });
+
+        act(() => {
+          store.reset();
+        });
+
+        expect(useOrderStore.getState().scheduledDeliveryDate).toBeNull();
+      });
+    });
+
+    describe('persistence', () => {
+      it('should persist scheduledDeliveryDate to localStorage', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.setScheduledDeliveryDate('2025-06-25');
+        });
+
+        // Check the persisted state includes scheduledDeliveryDate
+        const state = useOrderStore.getState();
+        expect(state.scheduledDeliveryDate).toBe('2025-06-25');
+      });
+    });
+  });
 });

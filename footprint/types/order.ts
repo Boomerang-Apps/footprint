@@ -44,7 +44,10 @@ export interface Order {
   isGift: boolean;
   giftMessage: string | null;
   giftWrap: boolean;
-  
+
+  // Scheduled Delivery (GF-05)
+  scheduledDeliveryDate: string | null;
+
   // Addresses
   shippingAddress: Address;
   billingAddress: Address;
@@ -69,6 +72,7 @@ export interface CreateOrderInput {
   isGift: boolean;
   giftMessage?: string;
   giftWrap?: boolean;
+  scheduledDeliveryDate?: string;
   shippingAddress: Address;
   billingAddress?: Address;
   discountCode?: string;
