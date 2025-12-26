@@ -2,233 +2,135 @@
 
 ---
 
-## 📬 INT-03: Connect Checkout to Payment APIs
+## 📬 INT-05: Connect Confirmation Page to API
 
 **From**: PM Agent
 **Date**: 2025-12-26
 **Priority**: High
-**Story Points**: 5
-**Dependencies**: UI-04 ✅, CO-02 ✅, CO-03 ✅, INT-02 ✅ (all complete)
+**Story Points**: 2
+**Sprint**: 5 (Integration - Final Story!)
+**Dependencies**: INT-04 (in progress by Backend-2)
 
 ### Story Description
 
-Replace simulated payment processing with real API calls. Credit card payments go to PayPlus (Israeli gateway), wallet payments (Apple Pay, Google Pay) go to Stripe.
+Replace hardcoded/simulated data in the confirmation page with real API calls. Fetch actual order details after payment success.
 
 ### Current Implementation (to replace)
 
-File: `app/(app)/create/checkout/page.tsx` lines 112-139
+File: `app/(app)/create/complete/page.tsx`
 
-```typescript
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  // ... validation ...
-  setIsProcessing(true);
+**Problems to fix:**
+1. `formatOrderId()` generates fake order number (line 50-54)
+2. `customerEmail` is hardcoded placeholder (line 163)
+3. `getEstimatedDelivery()` calculates locally instead of from order (line 56-68)
+4. No API call to fetch real order data
 
-  // ⚠️ SIMULATED - Replace with real payment flow
-  await new Promise(resolve => setTimeout(resolve, 2000));
+### API Specification
 
-  // ... save address ...
-  toast.success('ההזמנה התקבלה בהצלחה!');
-  setStep('complete');
-  router.push('/create/complete');
-};
-```
+**Endpoint**: `GET /api/orders/[id]/confirm`
 
----
+**How to get order ID:**
+- PayPlus redirects to: `/create/complete?page_request_uid={uid}`
+- Use `page_request_uid` to look up the order
 
-### Payment Flow Overview
-
-```
-┌─────────────────┐     ┌─────────────────┐
-│  Credit Card    │────▶│  /api/checkout  │────▶ PayPlus Hosted Page
-│  (PayPlus)      │     │  (returns URL)  │
-└─────────────────┘     └─────────────────┘
-
-┌─────────────────┐     ┌─────────────────────────────────┐
-│  Apple/Google   │────▶│  /api/checkout/wallet/create-   │────▶ Stripe Elements
-│  Pay (Stripe)   │     │  intent (returns clientSecret)  │
-└─────────────────┘     └─────────────────────────────────┘
-```
-
----
-
-### API 1: PayPlus (Credit Card)
-
-**Endpoint**: `POST /api/checkout`
-
-**Request**:
+**Response**:
 ```typescript
 {
-  orderId: string;        // Generate UUID before call
-  amount: number;         // In agorot (e.g., 15800 = ₪158)
-  customerName: string;   // From form
-  customerEmail?: string; // Optional, uses auth user if not provided
-  customerPhone?: string; // Optional
+  orderNumber: string;      // "FP-20251226-A7K9"
+  status: string;           // "confirmed"
+  items: [{
+    name: string;
+    quantity: number;
+    price: number;
+  }];
+  subtotal: number;
+  shipping: number;
+  total: number;
+  shippingAddress: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
+  whatsappUrl: string;      // Pre-generated share URL
 }
 ```
-
-**Success Response** (200):
-```typescript
-{
-  pageRequestUid: string;  // PayPlus transaction ID
-  paymentUrl: string;      // Redirect user here
-}
-```
-
-**Error Responses**:
-- 400: Missing required fields
-- 401: Unauthorized
-- 500: Failed to create payment link
-
-**Integration**:
-```typescript
-// Credit card flow
-const response = await fetch('/api/checkout', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    orderId: crypto.randomUUID(),
-    amount: total * 100,  // Convert to agorot
-    customerName: formData.fullName,
-    customerPhone: formData.phone,
-  }),
-});
-
-const { paymentUrl } = await response.json();
-window.location.href = paymentUrl;  // Redirect to PayPlus
-```
-
----
-
-### API 2: Stripe (Wallet Payments)
-
-**Endpoint**: `POST /api/checkout/wallet/create-intent`
-
-**Request**:
-```typescript
-{
-  orderId: string;        // Generate UUID
-  amount: number;         // In agorot/cents
-  currency?: string;      // Default: 'ils'
-  customerEmail: string;  // Required
-  description?: string;   // Optional
-}
-```
-
-**Success Response** (200):
-```typescript
-{
-  paymentIntentId: string;
-  clientSecret: string;    // Use with Stripe Elements
-}
-```
-
-**Integration**:
-```typescript
-// Wallet flow (Apple Pay / Google Pay)
-import { loadStripe } from '@stripe/stripe-js';
-
-const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-
-const response = await fetch('/api/checkout/wallet/create-intent', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    orderId: crypto.randomUUID(),
-    amount: total * 100,
-    customerEmail: user.email,
-  }),
-});
-
-const { clientSecret } = await response.json();
-
-// Use Stripe Express Checkout Element
-// See: https://stripe.com/docs/payments/accept-a-payment?platform=web&ui=elements
-```
-
----
 
 ### Implementation Requirements
 
-1. **Generate Order ID**
-   - Use `crypto.randomUUID()` before making API call
-   - Store in orderStore for confirmation page
+1. **Get order ID from URL params**
+   ```typescript
+   import { useSearchParams } from 'next/navigation';
 
-2. **Credit Card Flow**
-   - Call `/api/checkout` → Get `paymentUrl`
-   - Redirect user to PayPlus hosted page
-   - PayPlus redirects back to `/create/complete?page_request_uid=xxx`
+   const searchParams = useSearchParams();
+   const pageRequestUid = searchParams.get('page_request_uid');
+   ```
 
-3. **Wallet Payment Flow**
-   - Install: `npm install @stripe/stripe-js @stripe/react-stripe-js`
-   - Create payment intent → Get `clientSecret`
-   - Show Stripe Express Checkout Element
-   - Handle success/failure in component
+2. **Fetch order details**
+   ```typescript
+   // Need to first get orderId from page_request_uid
+   // This might require a lookup endpoint or storing orderId in session
 
-4. **Success Flow**
-   - PayPlus: User returns to `/create/complete?page_request_uid={uid}`
-   - Stripe: `confirmPayment()` resolves → Navigate to `/create/complete`
+   const response = await fetch(`/api/orders/${orderId}/confirm`);
+   const orderData = await response.json();
+   ```
 
-5. **Error Handling**
-   - Show toast on API errors
-   - Handle payment cancellation (PayPlus redirects to checkout with `?error=payment_failed`)
-   - Retry button for failed payments
+3. **Handle loading state**
+   - Show skeleton/spinner while fetching
+   - Handle case where order not found
 
----
+4. **Update displayed data**
+   - `orderNumber` → from API response
+   - `customerEmail` → from user session or API
+   - `estimatedDelivery` → calculate from order created_at
+   - `total` → from API response
+
+5. **WhatsApp share**
+   - Use `whatsappUrl` from API instead of generating locally
 
 ### Files to Modify
 
-1. **`app/(app)/create/checkout/page.tsx`**
-   - Replace `handleSubmit` with real payment logic
-   - Add payment method routing (credit card vs wallet)
-   - Handle URL params for PayPlus callback
-
-2. **New: `components/checkout/StripeWalletButton.tsx`** (optional)
-   - Wrap Stripe Express Checkout Element
-   - Handle wallet payment confirmation
-
----
+1. **`app/(app)/create/complete/page.tsx`**
+   - Add useSearchParams to get page_request_uid
+   - Add useEffect to fetch order data
+   - Replace hardcoded values with API data
+   - Add loading/error states
 
 ### Acceptance Criteria
 
-- [ ] Credit card → calls `/api/checkout` → redirects to PayPlus
-- [ ] Apple/Google Pay → calls wallet API → shows Stripe Element
-- [ ] Order ID generated and stored before payment
-- [ ] Payment errors show user-friendly messages
-- [ ] Handles PayPlus redirect callback (`?error=payment_failed`)
-- [ ] Tests cover all payment paths
+- [ ] Gets page_request_uid from URL params
+- [ ] Fetches real order data from API
+- [ ] Displays actual order number from database
+- [ ] Shows loading state while fetching
+- [ ] Handles order not found gracefully
+- [ ] WhatsApp share uses API-provided URL
+- [ ] Tests cover API integration
 - [ ] 80%+ test coverage maintained
-
----
 
 ### Test Scenarios
 
-1. **Credit Card Happy Path**: Fill form → Select credit card → Submit → Redirect to PayPlus
-2. **Wallet Payment Happy Path**: Select Apple Pay → Call API → Confirm with Stripe
-3. **PayPlus Error**: Return with `?error=payment_failed` → Show error toast
-4. **API Error**: `/api/checkout` returns 500 → Show error → Allow retry
-5. **Validation Error**: Missing fields → Show validation messages
-
----
+1. Happy path: page_request_uid in URL → Fetch order → Display data
+2. Missing param: No page_request_uid → Show error/redirect
+3. Order not found: API returns 404 → Show error message
+4. Loading state: API pending → Show skeleton
 
 ### Notes
 
-- PayPlus is redirect-based (user leaves our site temporarily)
-- Stripe wallet is in-page (Express Checkout Element)
-- Amount must be in smallest unit (agorot/cents), not shekel
-- INT-04 will handle order creation after payment success
+- INT-04 (Backend-2) is implementing the order creation - coordinate if needed
+- The order lookup by page_request_uid may need Backend-2 to add an endpoint
+- Confetti animation should still trigger on mount
 
 ### Reference Files
 
-- PayPlus API: `app/api/checkout/route.ts`
-- Stripe API: `app/api/checkout/wallet/create-intent/route.ts`
-- Checkout Page: `app/(app)/create/checkout/page.tsx`
-- PayPlus lib: `lib/payments/payplus.ts`
-- Stripe lib: `lib/payments/stripe.ts`
+- Current page: `app/(app)/create/complete/page.tsx`
+- Confirm API: `app/api/orders/[id]/confirm/route.ts`
+- Order store: `stores/orderStore.ts`
 
 ---
 
-**Ready for implementation!** Ping PM when complete for QA handoff.
+**Ready for implementation!** This completes Sprint 5 Integration.
+
+Ping PM when complete for QA handoff.
 
 ---
 

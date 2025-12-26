@@ -317,7 +317,7 @@ export const stories: Record<string, Story> = {
     id: 'GF-05',
     title: 'Scheduled Delivery Date',
     description: 'Date picker for delivery, arrive by date, calendar integration',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Assigned to Backend-1 2025-12-26 (parallel assignment)
     agent: 'Backend-1',
     points: 3,
     component: 'Gift',
@@ -463,7 +463,7 @@ export const stories: Record<string, Story> = {
     id: 'AUTH-01',
     title: 'User Login Page',
     description: 'Email/password login, social login options, Hebrew RTL',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Assigned to Frontend-A 2025-12-26 (parallel assignment)
     agent: 'Frontend-A',
     points: 3,
     component: 'Auth',
@@ -621,7 +621,7 @@ export const stories: Record<string, Story> = {
     id: 'INT-05',
     title: 'Connect Confirmation to Order API',
     description: 'Fetch real order data from API, display order number, tracking info, WhatsApp share with real data',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Assigned to Frontend-B 2025-12-26 (completes integration sprint)
     agent: 'Frontend-B',
     points: 2,
     blockedBy: ['UI-05', 'INT-04'],
