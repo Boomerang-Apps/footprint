@@ -210,4 +210,72 @@ Implemented two shared UI components:
 
 ---
 
+## 2025-12-26 - Frontend-A: AUTH-01 Ready for QA
+
+**Story**: AUTH-01
+**Priority**: P1
+**Type**: Gate 2 Complete
+
+### Summary
+Implemented user login page with TDD:
+
+**LoginForm:**
+- Email input with validation (required, email format)
+- Password input with show/hide visibility toggle
+- Form validation with inline error messages
+- Loading and disabled states
+- RTL/Hebrew layout support via dir prop
+- Server error display
+- Links to forgot password and registration
+
+**SocialLoginButtons:**
+- Google OAuth button with icon
+- Apple OAuth button with icon
+- Loading states for each provider
+- Disabled state when any login is in progress
+- RTL support for Hebrew labels
+- "or" divider between social and form login
+
+**Login Page:**
+- Full page layout with Card component
+- Integrated LoginForm and SocialLoginButtons
+- State management for loading and errors
+- Ready for Backend-1 auth integration
+
+### Key Decisions
+- Used placeholder text selectors in tests for specificity (avoids conflicts with aria-labels)
+- Kept auth API calls as TODOs - Backend-1 owns auth integration
+- Password visibility toggle uses accessible aria-labels
+- Email validation uses standard regex pattern
+
+### Test Results
+- **Tests**: 39 passing (21 LoginForm + 18 SocialLoginButtons)
+- **Coverage**: Full statement/branch coverage for auth components
+- **TypeScript**: 0 errors
+- **Lint**: Clean
+- **All Project Tests**: 799 passing
+
+### Files Changed
+| File | Status |
+|------|--------|
+| footprint/components/auth/LoginForm.tsx | Created |
+| footprint/components/auth/LoginForm.test.tsx | Created |
+| footprint/components/auth/SocialLoginButtons.tsx | Created |
+| footprint/components/auth/SocialLoginButtons.test.tsx | Created |
+| footprint/components/auth/index.ts | Created |
+| footprint/app/(auth)/login/page.tsx | Created |
+| footprint/app/(auth)/layout.tsx | Created |
+| .claudecode/milestones/sprint-4/AUTH-01/START.md | Created |
+| .claudecode/milestones/sprint-4/AUTH-01/ROLLBACK-PLAN.md | Created |
+
+### Branch
+`feature/auth-01-login-page` (commits `d16421fa`, `d2239650`)
+
+### Blockers
+None - auth API integration is Backend-1's domain
+
+**Ready for Gate 3 QA validation.**
+
+---
+
 ---
