@@ -90,13 +90,13 @@
 ## Sprint 4: Admin & Polish (Weeks 7-8) 🟡 ACTIVE
 
 **Focus**: Admin dashboard, additional features, launch prep
-**Story Points**: 8/19 (In Progress)
+**Story Points**: 10/19 (In Progress)
 **Started**: 2025-12-25
 
 | ID | Story | Acceptance Criteria | SP | Priority | Agent | Status |
 |----|-------|--------------------|----|----------|-------|--------|
 | OM-01 | Admin order dashboard | Order list, filter by status, search by # | 3 | Must | Frontend-B | ✅ Done |
-| OM-02 | Update order status | Status dropdown, timestamp logged, customer notified | 2 | Must | Backend-2 | 🔄 In Progress |
+| OM-02 | Update order status | Status dropdown, timestamp logged, customer notified | 2 | Must | Backend-2 | ✅ Done |
 | OM-03 | Download print-ready files | High-res download, correct dimensions, color profile | 2 | Must | Backend-2 | ⬜ Backlog |
 | OM-04 | Add tracking numbers | Tracking input, carrier selection, auto-notify | 2 | Must | Backend-2 | ⬜ Backlog |
 | AI-05 | Fast AI transformation | Target < 10 seconds, progress shown, retry on failure | 5 | Should | Backend-2 | ⬜ Backlog |

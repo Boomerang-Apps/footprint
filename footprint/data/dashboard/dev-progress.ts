@@ -402,7 +402,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1846',
     title: 'Update Order Status',
     description: 'Status dropdown, timestamp logged, customer notified',
-    status: 'in-progress',  // 🚀 Sprint 4 Start - Assigned to Backend-2
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (50 tests, 100% coverage)
     agent: 'Backend-2',
     points: 2,
     component: 'Admin',
