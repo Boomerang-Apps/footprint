@@ -611,7 +611,7 @@ export const stories: Record<string, Story> = {
     id: 'INT-04',
     title: 'Create Order on Payment Success',
     description: 'Create order record in database on successful payment, trigger confirmation email via /api/orders/[id]/confirm',
-    status: 'in-progress',  // 🚀 Assigned to Backend-2 2025-12-26
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (19 tests, 97.43% coverage)
     agent: 'Backend-2',
     points: 3,
     blockedBy: ['INT-03', 'CO-04'],
