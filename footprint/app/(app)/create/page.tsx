@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Camera, ImageIcon, Upload, Check, Lightbulb } from 'lucide-react';
+import { ArrowRight, Camera, ImageIcon, Upload, Check, Lightbulb, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import Image from 'next/image';
 
@@ -19,6 +19,10 @@ const TIPS = [
   { text: 'תאורה טבעית', icon: Check },
 ];
 
+// Constants for file validation
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif'];
+
 export default function CreatePage() {
   const router = useRouter();
   const { setStep, setOriginalImage, originalImage, currentStep } = useOrderStore();
@@ -26,21 +30,73 @@ export default function CreatePage() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Upload state (local to component, not in store per domain rules)
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+
   // Set current step on mount
   useEffect(() => {
     setStep('upload');
   }, [setStep]);
 
-  const handleFileSelect = useCallback((file: File) => {
-    if (!file.type.match(/^image\/(jpeg|png|heic|heif)$/i)) {
-      return;
+  // Upload file to R2 via API
+  const uploadToR2 = useCallback(async (file: File) => {
+    setIsUploading(true);
+    setUploadProgress(0);
+    setUploadError(null);
+    setPendingFile(file);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('mode', 'direct');
+      formData.append('optimize', 'true');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      // Store R2 URL in orderStore
+      setOriginalImage(data.publicUrl, file);
+      setUploadError(null);
+      setPendingFile(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'שגיאה בהעלאת הקובץ';
+      setUploadError(message);
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(100);
     }
-    if (file.size > 20 * 1024 * 1024) {
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setOriginalImage(url);
   }, [setOriginalImage]);
+
+  // Retry upload with pending file
+  const handleRetry = useCallback(() => {
+    if (pendingFile) {
+      uploadToR2(pendingFile);
+    }
+  }, [pendingFile, uploadToR2]);
+
+  const handleFileSelect = useCallback((file: File) => {
+    // Validate file type
+    if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
+      return;
+    }
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      return;
+    }
+    // Upload to R2
+    uploadToR2(file);
+  }, [uploadToR2]);
 
   const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,11 +133,11 @@ export default function CreatePage() {
   }, []);
 
   const handleNext = useCallback(() => {
-    if (originalImage) {
+    if (originalImage && !isUploading) {
       setStep('style');
       router.push('/create/style');
     }
-  }, [originalImage, setStep, router]);
+  }, [originalImage, isUploading, setStep, router]);
 
   const handleBack = useCallback(() => {
     router.push('/');
@@ -163,7 +219,56 @@ export default function CreatePage() {
         </div>
 
         {/* Upload Zone */}
-        {!originalImage ? (
+        {isUploading ? (
+          /* Upload Progress State */
+          <div
+            data-testid="upload-progress"
+            className="border-2 border-purple-300 rounded-2xl p-8 text-center bg-purple-50"
+          >
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 flex items-center justify-center mb-4">
+                <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+              </div>
+
+              <p className="text-zinc-900 font-medium mb-2">מעלה את התמונה...</p>
+              <p className="text-zinc-500 text-sm mb-4">אנא המתינו</p>
+
+              {/* Progress Bar */}
+              <div className="w-full max-w-xs h-2 bg-zinc-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-zinc-400 mt-2">{uploadProgress}%</p>
+            </div>
+          </div>
+        ) : uploadError ? (
+          /* Upload Error State */
+          <div
+            data-testid="upload-error"
+            className="border-2 border-red-300 rounded-2xl p-8 text-center bg-red-50"
+          >
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                <AlertCircle className="w-8 h-8 text-red-600" />
+              </div>
+
+              <p className="text-zinc-900 font-medium mb-2">שגיאה בהעלאה</p>
+              <p className="text-zinc-500 text-sm mb-4">{uploadError}</p>
+
+              <button
+                onClick={handleRetry}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-xl font-medium hover:opacity-90 transition"
+                aria-label="נסה שוב"
+              >
+                <RefreshCw className="w-5 h-5" />
+                <span>נסה שוב</span>
+              </button>
+            </div>
+          </div>
+        ) : !originalImage ? (
+          /* Default Upload Zone */
           <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -276,10 +381,10 @@ export default function CreatePage() {
         <div className="max-w-2xl mx-auto">
           <button
             onClick={handleNext}
-            disabled={!originalImage}
+            disabled={!originalImage || isUploading}
             className={`
               w-full py-4 rounded-xl font-medium text-lg transition
-              ${originalImage
+              ${originalImage && !isUploading
                 ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90'
                 : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'}
             `}
