@@ -601,7 +601,7 @@ export const stories: Record<string, Story> = {
     id: 'INT-03',
     title: 'Connect Checkout to Payment APIs',
     description: 'Integrate PayPlus (Israeli) and Stripe (wallet) payment flows, handle success/failure callbacks',
-    status: 'in-progress',  // 🚀 Assigned to Frontend-B 2025-12-26
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (20 tests, 95.52% coverage)
     agent: 'Frontend-B',
     points: 5,
     blockedBy: ['UI-04', 'CO-02', 'CO-03'],
@@ -611,7 +611,7 @@ export const stories: Record<string, Story> = {
     id: 'INT-04',
     title: 'Create Order on Payment Success',
     description: 'Create order record in database on successful payment, trigger confirmation email via /api/orders/[id]/confirm',
-    status: 'backlog',
+    status: 'in-progress',  // 🚀 Assigned to Backend-2 2025-12-26
     agent: 'Backend-2',
     points: 3,
     blockedBy: ['INT-03', 'CO-04'],
