@@ -463,7 +463,7 @@ export const stories: Record<string, Story> = {
     id: 'AUTH-01',
     title: 'User Login Page',
     description: 'Email/password login, social login options, Hebrew RTL',
-    status: 'in-progress',  // 🚀 Assigned to Frontend-A 2025-12-26 (parallel assignment)
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (39 tests, 100% coverage)
     agent: 'Frontend-A',
     points: 3,
     component: 'Auth',
