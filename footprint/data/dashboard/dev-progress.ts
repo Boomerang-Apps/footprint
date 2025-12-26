@@ -349,7 +349,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1850',
     title: 'Apple Pay / Google Pay',
     description: 'Wallet detection, one-tap payment, same confirmation',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (35 tests, 100% stmt, 90.9% branch)
     agent: 'Backend-2',
     points: 3,
     component: 'Payment',
@@ -369,7 +369,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1851',
     title: 'Apply Discount Codes',
     description: 'Code input, validation feedback, discount shown',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (148 tests, 100% coverage on discounts.ts)
     agent: 'Backend-1',
     points: 2,
     component: 'Checkout',
@@ -386,13 +386,13 @@ export const stories: Record<string, Story> = {
     component: 'Payment',
   },
 
-  // Sprint 4 - Admin
+  // Sprint 4 - Admin (ACTIVE)
   'OM-01': {
     id: 'OM-01',
     linearId: 'UZF-1845',
     title: 'Admin Order Dashboard',
     description: 'Order list, filter by status, search by order number',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (38 tests)
     agent: 'Frontend-B',
     points: 3,
     component: 'Admin',
@@ -402,7 +402,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1846',
     title: 'Update Order Status',
     description: 'Status dropdown, timestamp logged, customer notified',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (50 tests, 100% coverage)
     agent: 'Backend-2',
     points: 2,
     component: 'Admin',
@@ -412,7 +412,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1847',
     title: 'Download Print-Ready Files',
     description: 'High-res download, correct dimensions, color profile',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (28 tests, 93.75% coverage)
     agent: 'Backend-2',
     points: 2,
     component: 'Admin',
@@ -422,7 +422,7 @@ export const stories: Record<string, Story> = {
     linearId: 'UZF-1848',
     title: 'Add Tracking Numbers',
     description: 'Tracking input, carrier selection, auto-notify',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (48 tests, 96.66% coverage)
     agent: 'Backend-2',
     points: 2,
     component: 'Admin',
@@ -495,7 +495,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-08',
     title: 'Step Progress Indicator',
     description: 'Create reusable 5-step progress indicator for order flow. Shows current step, completed steps, Hebrew labels.',
-    status: 'in-progress',  // ✅ Assigned to Frontend-A 2025-12-25
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (29 tests, 100% coverage)
     agent: 'Frontend-A',
     points: 2,
     blockedBy: ['UI-07'],
@@ -505,7 +505,7 @@ export const stories: Record<string, Story> = {
     id: 'UI-09',
     title: 'Price Display & Timeline Components',
     description: 'PriceDisplay (ILS formatting with ₪), OrderTimeline (4-step order status tracker). Shared by multiple pages.',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (62 tests, 100% coverage)
     agent: 'Frontend-A',
     points: 2,
     blockedBy: ['UI-07'],
@@ -556,21 +556,76 @@ export const stories: Record<string, Story> = {
     id: 'UI-04',
     title: 'Checkout Page UI (04-checkout.html)',
     description: 'Implement checkout: gift toggle, address form, payment section, price breakdown',
-    status: 'in-progress',  // ✅ Assigned to Frontend-B 2025-12-25
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-25 (57 tests)
     agent: 'Frontend-B',
     points: 5,
-    blockedBy: ['UI-06'],  // Can start in parallel after demo data
+    blockedBy: ['UI-06'],
     component: 'UI',
   },
   'UI-05': {
     id: 'UI-05',
     title: 'Confirmation Page UI (05-confirmation.html)',
     description: 'Implement confirmation: order summary, timeline tracker, WhatsApp share',
-    status: 'backlog',
+    status: 'done',  // ✅ QA Approved & Merged 2025-12-26 (45 tests)
     agent: 'Frontend-B',
     points: 2,
     blockedBy: ['UI-06', 'UI-09'],  // Needs Timeline component from Frontend-A
     component: 'UI',
+  },
+
+  // =============================================================================
+  // INTEGRATION - Connect UI to Backend APIs (Sprint 5)
+  // =============================================================================
+
+  'INT-01': {
+    id: 'INT-01',
+    title: 'Connect Upload to R2 Storage',
+    description: 'Call /api/upload on image select, store R2 URL in orderStore, show upload progress',
+    status: 'in-progress',  // 🚀 Assigned to Frontend-B 2025-12-26
+    agent: 'Frontend-B',
+    points: 3,
+    blockedBy: ['UI-01', 'UP-03'],
+    component: 'Integration',
+  },
+  'INT-02': {
+    id: 'INT-02',
+    title: 'Connect Style Selection to AI Transform',
+    description: 'Call /api/transform when style selected, show real AI preview instead of simulated, handle errors',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 5,
+    blockedBy: ['UI-02', 'AI-02', 'INT-01'],
+    component: 'Integration',
+  },
+  'INT-03': {
+    id: 'INT-03',
+    title: 'Connect Checkout to Payment APIs',
+    description: 'Integrate PayPlus (Israeli) and Stripe (wallet) payment flows, handle success/failure callbacks',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 5,
+    blockedBy: ['UI-04', 'CO-02', 'CO-03'],
+    component: 'Integration',
+  },
+  'INT-04': {
+    id: 'INT-04',
+    title: 'Create Order on Payment Success',
+    description: 'Create order record in database on successful payment, trigger confirmation email via /api/orders/[id]/confirm',
+    status: 'backlog',
+    agent: 'Backend-2',
+    points: 3,
+    blockedBy: ['INT-03', 'CO-04'],
+    component: 'Integration',
+  },
+  'INT-05': {
+    id: 'INT-05',
+    title: 'Connect Confirmation to Order API',
+    description: 'Fetch real order data from API, display order number, tracking info, WhatsApp share with real data',
+    status: 'backlog',
+    agent: 'Frontend-B',
+    points: 2,
+    blockedBy: ['UI-05', 'INT-04'],
+    component: 'Integration',
   },
 };
 
@@ -737,6 +792,20 @@ export const features: Record<string, Feature> = {
       stories['UI-09'],  // Price display & timeline
     ],
   },
+  'F11': {
+    id: 'F11',
+    name: 'End-to-End Integration',
+    description: 'Connect UI screens to backend APIs for full order flow. Upload→R2, Style→AI, Checkout→Payment, Confirm→Order.',
+    prdRef: 'Sprint 5 Integration',
+    priority: 'P0',
+    stories: [
+      stories['INT-01'],  // Upload → R2
+      stories['INT-02'],  // Style → AI Transform
+      stories['INT-03'],  // Checkout → Payment
+      stories['INT-04'],  // Payment → Order Creation
+      stories['INT-05'],  // Confirm → Order API
+    ],
+  },
 };
 
 // =============================================================================
@@ -775,23 +844,23 @@ export const sprints: Sprint[] = [
   {
     id: 4,
     name: 'Sprint 4',
-    focus: 'UI Implementation & Demo',
-    status: 'active',
-    features: ['F9', 'F10'],  // Parallel tracks: F9 (Frontend-B pages) + F10 (Frontend-A primitives)
+    focus: 'Admin, Payment & UI Polish',
+    status: 'completed',  // ✅ COMPLETED 2025-12-26 - OM-04 merged! 100% (34/34 SP)
+    features: ['F5b', 'F6', 'F9', 'F10'],  // Combined: Admin + Payment + UI Implementation
   },
   {
     id: 5,
     name: 'Sprint 5',
-    focus: 'Admin & Polish',
-    status: 'planned',
-    features: ['F5b', 'F6'],
+    focus: 'End-to-End Integration',
+    status: 'active',  // 🚀 STARTED 2025-12-26 - Connect UI to Backend APIs
+    features: ['F11'],  // Priority: Full order flow integration (18 SP)
   },
   {
     id: 6,
     name: 'Sprint 6',
-    focus: 'User Accounts & Post-MVP',
+    focus: 'User Accounts & Auth',
     status: 'planned',
-    features: ['F7', 'F8'],
+    features: ['F7', 'F8'],  // User account features, login (11 SP)
   },
 ];
 
@@ -819,6 +888,7 @@ export const components = [
   'UserAccount',
   'Auth',
   'UI',
+  'Integration',
 ] as const;
 
 export type ComponentType = typeof components[number];
@@ -1040,3 +1110,152 @@ export const agentConfig: Record<string, { label: string; color: string }> = {
   'Backend-1': { label: 'Backend-1', color: 'text-orange-600' },
   'Backend-2': { label: 'Backend-2', color: 'text-pink-600' },
 };
+
+// =============================================================================
+// UI PAGES (for Pages tab)
+// =============================================================================
+
+export interface UIPage {
+  name: string;
+  route: string;
+  status: 'done' | 'planned';
+  description?: string;
+}
+
+export interface UIPageCategory {
+  category: string;
+  icon: string;
+  pages: UIPage[];
+}
+
+export const uiPages: UIPageCategory[] = [
+  {
+    category: 'Public',
+    icon: '🌐',
+    pages: [
+      { name: 'Landing Page', route: '/', status: 'done', description: 'Hero, products, testimonials' },
+    ],
+  },
+  {
+    category: 'Order Flow',
+    icon: '🛒',
+    pages: [
+      { name: 'Step 1 - Upload', route: '/create', status: 'done', description: 'Photo upload from camera roll or drag-drop' },
+      { name: 'Step 2 - Style', route: '/create/style', status: 'done', description: 'AI style selection gallery' },
+      { name: 'Step 3 - Customize', route: '/create/customize', status: 'done', description: 'Size, paper, frame selection' },
+      { name: 'Step 4 - Checkout', route: '/create/checkout', status: 'done', description: 'Address and payment' },
+      { name: 'Step 5 - Complete', route: '/create/complete', status: 'done', description: 'Order confirmation' },
+    ],
+  },
+  {
+    category: 'Admin',
+    icon: '⚙️',
+    pages: [
+      { name: 'Order Dashboard', route: '/admin', status: 'done', description: 'Order list with filters (OM-01)' },
+      { name: 'Order Status API', route: '/api/admin/orders/[id]/status', status: 'done', description: 'Status update endpoint (OM-02)' },
+    ],
+  },
+  {
+    category: 'Dev Tools',
+    icon: '🔧',
+    pages: [
+      { name: 'Cockpit', route: '/cockpit', status: 'done', description: 'PM dashboard' },
+    ],
+  },
+];
+
+// =============================================================================
+// AGENTS (for Agents tab)
+// =============================================================================
+
+export interface Agent {
+  id: string;
+  name: string;
+  model: string;
+  role: string;
+  worktree: string;
+  branch: string;
+  status: 'active' | 'offline' | 'standby';
+  stories: string[];
+  color: string;
+}
+
+export const agents: Agent[] = [
+  {
+    id: 'pm',
+    name: 'PM Agent',
+    model: 'Opus 4.5',
+    role: 'Orchestration',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/agent-pm',
+    branch: 'agent/agent-pm',
+    status: 'active',
+    stories: [],
+    color: 'bg-purple-100 text-purple-800',
+  },
+  {
+    id: 'cto',
+    name: 'CTO Agent',
+    model: 'Opus 4.5',
+    role: 'Architecture, Security',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/agent-cto',
+    branch: 'cto-workspace',
+    status: 'offline',
+    stories: [],
+    color: 'bg-red-100 text-red-800',
+  },
+  {
+    id: 'frontend-a',
+    name: 'Frontend-A',
+    model: 'Sonnet 4',
+    role: 'Layout, Design System',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/frontend-a',
+    branch: 'develop',
+    status: 'offline',
+    stories: [],
+    color: 'bg-blue-100 text-blue-800',
+  },
+  {
+    id: 'frontend-b',
+    name: 'Frontend-B',
+    model: 'Sonnet 4',
+    role: 'Features, Components',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/frontend-b',
+    branch: 'develop',
+    status: 'offline',
+    stories: [],
+    color: 'bg-indigo-100 text-indigo-800',
+  },
+  {
+    id: 'backend-1',
+    name: 'Backend-1',
+    model: 'Sonnet 4',
+    role: 'Database, Auth, State',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/backend-1',
+    branch: 'develop',
+    status: 'offline',
+    stories: [],
+    color: 'bg-orange-100 text-orange-800',
+  },
+  {
+    id: 'backend-2',
+    name: 'Backend-2',
+    model: 'Sonnet 4',
+    role: 'API, AI, Storage, Payment',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/backend-2',
+    branch: 'develop',
+    status: 'offline',
+    stories: [],
+    color: 'bg-pink-100 text-pink-800',
+  },
+  {
+    id: 'qa',
+    name: 'QA Agent',
+    model: 'Sonnet 4',
+    role: 'Testing, Quality',
+    worktree: '/Users/mymac/Desktop/footprint-worktrees/qa',
+    branch: 'qa-validation',
+    status: 'standby',
+    stories: [],
+    color: 'bg-teal-100 text-teal-800',
+  },
+];
