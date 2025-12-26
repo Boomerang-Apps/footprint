@@ -3,21 +3,27 @@
  *
  * TDD Test Suite for UI-05: Confirmation Page UI
  * Tests the confirmation page matching 05-confirmation.html mockup
+ * INT-05: Added API integration tests
  */
 
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import CompletePage from './page';
 import { useOrderStore } from '@/stores/orderStore';
 
 // Mock next/navigation
 const mockPush = vi.fn();
+const mockSearchParams = new URLSearchParams();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
+  useSearchParams: () => mockSearchParams,
 }));
+
+// Mock fetch for API calls
+const mockFetch = vi.fn();
 
 // Mock zustand store
 vi.mock('@/stores/orderStore');
@@ -64,7 +70,14 @@ const mockOrderData = {
 describe('CompletePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    global.fetch = mockFetch;
+    mockFetch.mockReset();
+    mockSearchParams.delete('orderId');
     (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockOrderData);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('Header', () => {
@@ -346,6 +359,172 @@ describe('CompletePage', () => {
       render(<CompletePage />);
       const specs = screen.getByTestId('order-specs');
       expect(specs.textContent).toMatch(/מסגרת שחורה|שחורה/);
+    });
+  });
+
+  describe('Order API Integration', () => {
+    const mockApiResponse = {
+      orderNumber: 'FP-2025-1234',
+      status: 'pending',
+      items: [{ name: 'Pop Art Print', quantity: 1, price: 209 }],
+      subtotal: 209,
+      shipping: 29,
+      total: 238,
+      shippingAddress: {
+        street: 'רחוב הרצל 123',
+        city: 'תל אביב',
+        postalCode: '6120101',
+        country: 'ישראל',
+      },
+      whatsappUrl: 'https://wa.me/?text=Order%20FP-2025-1234',
+    };
+
+    it('fetches order data when orderId is in URL', async () => {
+      mockSearchParams.set('orderId', 'test-order-123');
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockApiResponse),
+      });
+
+      await act(async () => {
+        render(<CompletePage />);
+      });
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith('/api/orders/test-order-123/confirm');
+      });
+    });
+
+    it('displays order number from API response', async () => {
+      mockSearchParams.set('orderId', 'test-order-123');
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockApiResponse),
+      });
+
+      await act(async () => {
+        render(<CompletePage />);
+      });
+
+      await waitFor(() => {
+        const orderNumber = screen.getByTestId('order-number');
+        expect(orderNumber.textContent).toContain('FP-2025-1234');
+      });
+    });
+
+    it('displays total from API response', async () => {
+      mockSearchParams.set('orderId', 'test-order-123');
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockApiResponse),
+      });
+
+      await act(async () => {
+        render(<CompletePage />);
+      });
+
+      await waitFor(() => {
+        const price = screen.getByTestId('order-price');
+        expect(price.textContent).toContain('238');
+      });
+    });
+
+    it('shows loading state while fetching order', async () => {
+      mockSearchParams.set('orderId', 'test-order-123');
+      mockFetch.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({
+          ok: true,
+          json: () => Promise.resolve(mockApiResponse),
+        }), 100))
+      );
+
+      await act(async () => {
+        render(<CompletePage />);
+      });
+
+      expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
+    });
+
+    it('shows error message when API fails', async () => {
+      mockSearchParams.set('orderId', 'invalid-order');
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Order not found' }),
+      });
+
+      await act(async () => {
+        render(<CompletePage />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('error-message')).toBeInTheDocument();
+      });
+    });
+
+    it('shows home button in error state', async () => {
+      mockSearchParams.set('orderId', 'invalid-order');
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Order not found' }),
+      });
+
+      await act(async () => {
+        render(<CompletePage />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /לדף הבית/i })).toBeInTheDocument();
+      });
+    });
+
+    it('falls back to store data when no orderId', async () => {
+      // No orderId set in search params
+      render(<CompletePage />);
+
+      // Should not call API
+      expect(mockFetch).not.toHaveBeenCalled();
+
+      // Should use store data
+      const orderNumber = screen.getByTestId('order-number');
+      expect(orderNumber.textContent).toMatch(/FP-\d{4}-\d+/);
+    });
+
+    it('uses WhatsApp URL from API response', async () => {
+      mockSearchParams.set('orderId', 'test-order-123');
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockApiResponse),
+      });
+
+      // Mock window.open
+      const mockOpen = vi.fn();
+      window.open = mockOpen;
+
+      await act(async () => {
+        render(<CompletePage />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('order-number')).toHaveTextContent('FP-2025-1234');
+      });
+
+      const whatsappBtn = screen.getByTestId('share-whatsapp');
+      fireEvent.click(whatsappBtn);
+
+      expect(mockOpen).toHaveBeenCalledWith(mockApiResponse.whatsappUrl, '_blank');
+    });
+
+    it('handles network error gracefully', async () => {
+      mockSearchParams.set('orderId', 'test-order-123');
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      await act(async () => {
+        render(<CompletePage />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('error-message')).toBeInTheDocument();
+      });
     });
   });
 });
