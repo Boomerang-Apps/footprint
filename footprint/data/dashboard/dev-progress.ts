@@ -775,20 +775,13 @@ export const sprints: Sprint[] = [
   {
     id: 4,
     name: 'Sprint 4',
-    focus: 'UI Implementation & Demo',
-    status: 'active',
-    features: ['F9', 'F10'],  // Parallel tracks: F9 (Frontend-B pages) + F10 (Frontend-A primitives)
+    focus: 'Admin, Payment & UI Polish',
+    status: 'active',  // 🚀 ACTIVE - 10/19 SP complete (52%)
+    features: ['F5b', 'F6', 'F9', 'F10'],  // Combined: Admin + Payment + UI Implementation
   },
   {
     id: 5,
     name: 'Sprint 5',
-    focus: 'Admin & Polish',
-    status: 'active',  // 🚀 STARTED 2025-12-25
-    features: ['F5b', 'F6'],
-  },
-  {
-    id: 6,
-    name: 'Sprint 6',
     focus: 'User Accounts & Post-MVP',
     status: 'planned',
     features: ['F7', 'F8'],
@@ -1081,8 +1074,8 @@ export const uiPages: UIPageCategory[] = [
     category: 'Admin',
     icon: '⚙️',
     pages: [
-      { name: 'Order Dashboard', route: '/admin', status: 'planned', description: 'Order list with filters' },
-      { name: 'Order Details', route: '/admin/orders/[id]', status: 'planned', description: 'Single order management' },
+      { name: 'Order Dashboard', route: '/admin', status: 'done', description: 'Order list with filters (OM-01)' },
+      { name: 'Order Status API', route: '/api/admin/orders/[id]/status', status: 'done', description: 'Status update endpoint (OM-02)' },
     ],
   },
   {
