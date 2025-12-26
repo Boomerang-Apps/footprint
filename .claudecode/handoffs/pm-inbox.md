@@ -35,7 +35,379 @@ All messages for PM orchestration appear here. PM reviews completed work, routes
 
 ## Pending Messages
 
+<<<<<<< HEAD
 ## 2025-12-26 - Frontend-B: INT-05 Ready for QA
+=======
+## 2025-12-26 - Frontend-B: PC-05 Ready for QA
+
+**Story**: PC-05 - Realistic Mockup Preview
+**Branch**: feature/pc-05-realistic-mockup-preview
+**Sprint**: 5
+**Priority**: P1
+
+### Summary
+Implemented realistic room environment mockup preview for the customize page:
+- Room preview showing art on a wall with furniture context
+- Size-based scaling (A5 smallest → A2 largest)
+- Frame styling support (black, white, oak, none)
+- Toggle between room view and simple view
+- Furniture elements: sofa with pillows, side table with lamp, plant
+- Responsive design with consistent aspect ratio
+
+### Key Deliverables
+- `components/mockup/RoomPreview.tsx` - New component
+- `components/mockup/RoomPreview.test.tsx` - 26 TDD tests
+- `app/(app)/create/customize/page.tsx` - Integrated RoomPreview
+
+### Test Results
+- **Tests**: 26 new tests passing (RoomPreview component)
+- **Total**: 1036 tests passing (all project tests)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+Note: Pre-existing TypeScript errors in `src/app/cockpit/page.tsx` (not my changes)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/components/mockup/RoomPreview.tsx` | Created - room preview component |
+| `footprint/components/mockup/RoomPreview.test.tsx` | Created - 26 TDD tests |
+| `footprint/app/(app)/create/customize/page.tsx` | Modified - integrated RoomPreview |
+| `.claudecode/milestones/sprint-5/PC-05/START.md` | Created |
+| `.claudecode/milestones/sprint-5/PC-05/ROLLBACK-PLAN.md` | Created |
+
+### Component API
+```typescript
+interface RoomPreviewProps {
+  imageUrl: string;      // Art image URL
+  size: SizeType;        // A5 | A4 | A3 | A2
+  frameType: FrameType;  // none | black | white | oak
+}
+```
+
+### Features
+1. **Room View**: Wall background with sofa, side table, lamp, and plant
+2. **Simple View**: Clean background, art centered
+3. **Size Scaling**: Art scales proportionally based on print size
+4. **Frame Display**: Frame color/style applied around art
+5. **Toggle Button**: Switch between room and simple views
+
+### Gate Status
+- [x] Gate 0: Research (N/A - UI implementation)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tag PC-05-start)
+- [x] Gate 2: Implementation (TDD - 26 tests)
+- [x] Gate 3: Code Quality (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `908e16ff`
+
+**Ready for Gate 4 PM/QA validation.**
+
+---
+
+## 2025-12-26 - Frontend-B: INT-03 Ready for QA
+
+**Story**: INT-03 - Connect Checkout to Payment APIs
+**Branch**: feature/int-03-checkout-payment-integration
+**Sprint**: 5
+**Priority**: P1
+
+### Summary
+Integrated the checkout page with PayPlus payment API:
+- Calls `/api/checkout` to create PayPlus payment link
+- Redirects user to PayPlus hosted payment page
+- Handles payment failure return (`?error=payment_failed`)
+- Saves shipping address to orderStore before payment
+- Calculates total amount in agorot (ILS cents)
+- Shows loading state during payment processing
+- Disables submit button while processing
+
+### Key Deliverables
+- `app/(app)/create/checkout/page.tsx` - Modified to call PayPlus API
+- `app/(app)/create/checkout/page.test.tsx` - Created with 20 TDD tests
+- `.claudecode/milestones/sprint-5/INT-03/*` - Planning docs
+
+### Test Results
+- **Tests**: 20 passing (new test file)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+Note: Pre-existing TypeScript errors in `src/app/cockpit/page.tsx` (not my changes)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/app/(app)/create/checkout/page.tsx` | Modified - PayPlus integration |
+| `footprint/app/(app)/create/checkout/page.test.tsx` | Created - 20 TDD tests |
+| `.claudecode/milestones/sprint-5/INT-03/START.md` | Created |
+| `.claudecode/milestones/sprint-5/INT-03/ROLLBACK-PLAN.md` | Created |
+
+### Payment Flow
+```
+User fills form → Click "לתשלום"
+→ POST /api/checkout (orderId, amount, customer info)
+→ Receives paymentUrl
+→ Redirect to PayPlus
+→ Success: Returns to /create/complete?page_request_uid={uid}
+→ Failure: Returns to /create/checkout?error=payment_failed
+```
+
+### Notes
+- Stripe wallet integration API exists (`/api/checkout/wallet/create-intent`) for future enhancement
+- Currently implements PayPlus for Israeli credit cards
+- Wallet payments (Apple Pay/Google Pay) can be added as follow-up
+
+### Gate Status
+- [x] Gate 0: Research (N/A - uses existing APIs)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tag INT-03-start)
+- [x] Gate 2: Implementation (TDD - 20 tests)
+- [x] Gate 3: Code Quality (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `5a951614`
+
+**Ready for Gate 4 PM/QA validation.**
+
+---
+
+## 2025-12-26 - Frontend-B: INT-02 Ready for QA
+
+**Story**: INT-02 - Connect Style Selection to AI Transform
+**Branch**: feature/int-02-style-transform-integration
+**Sprint**: 5
+**Priority**: P1
+
+### Summary
+Integrated the style selection page with the AI transform API:
+- Calls `/api/transform` when a style is selected
+- Stores transformed image URL in orderStore.transformedImage
+- Displays transformed image in preview (instead of original)
+- Error overlay with retry button on transform failure
+- Disables "Continue" button during transform
+- Handles network errors gracefully
+
+### Key Deliverables
+- `app/(app)/create/style/page.tsx` - Modified to call transform API
+- `app/(app)/create/style/page.test.tsx` - Added 11 new integration tests (39 total)
+- `.claudecode/milestones/sprint-5/INT-02/*` - Planning docs
+
+### Test Results
+- **Tests**: 39 passing (28 UI + 11 integration)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+Note: Pre-existing TypeScript errors in `src/app/cockpit/page.tsx` (not my changes)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/app/(app)/create/style/page.tsx` | Modified - AI transform integration |
+| `footprint/app/(app)/create/style/page.test.tsx` | Modified - added 11 integration tests |
+| `.claudecode/milestones/sprint-5/INT-02/START.md` | Created |
+| `.claudecode/milestones/sprint-5/INT-02/ROLLBACK-PLAN.md` | Created |
+
+### API Integration
+```typescript
+// On style select, calls:
+POST /api/transform
+Content-Type: application/json
+Body: { imageUrl: originalImage, style: selectedStyleId }
+
+// On success, stores:
+orderStore.setTransformedImage(response.transformedUrl)
+```
+
+### UI States
+1. **Default**: Style grid with preview showing original/transformed image
+2. **Processing**: AI overlay with spinner while transform runs
+3. **Error**: Error overlay with retry button
+4. **Success**: Preview updates to show transformed image
+
+### Gate Status
+- [x] Gate 0: Research (N/A - uses existing API)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tag INT-02-start)
+- [x] Gate 2: Implementation (TDD - 39 tests)
+- [x] Gate 3: Code Quality (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `04e6e3ed`
+
+**Ready for Gate 4 PM/QA validation.**
+
+---
+
+## 2025-12-26 - Frontend-B: INT-01 Ready for QA
+
+**Story**: INT-01 - Connect Upload to R2 Storage
+**Branch**: feature/int-01-upload-r2-integration
+**Sprint**: 5
+**Priority**: P1
+
+### Summary
+Integrated the upload page with the R2 storage API:
+- Upload progress indicator during file upload (spinner + percentage)
+- Error state with retry button on upload failure
+- Calls `/api/upload` with direct mode when file is selected
+- Stores R2 public URL in orderStore on successful upload
+- Disables "Continue" button during upload
+- Client-side file validation (type: JPEG/PNG/HEIC, size: max 20MB)
+
+### Key Deliverables
+- `app/(app)/create/page.tsx` - Modified to call upload API
+- `app/(app)/create/page.test.tsx` - Added 11 new integration tests (35 total)
+- `.claudecode/milestones/sprint-5/INT-01/*` - Planning docs
+
+### Test Results
+- **Tests**: 35 passing (24 UI + 11 integration)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+Note: Pre-existing TypeScript errors in `src/app/cockpit/page.tsx` (not my changes)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/app/(app)/create/page.tsx` | Modified - R2 upload integration |
+| `footprint/app/(app)/create/page.test.tsx` | Modified - added 11 integration tests |
+| `.claudecode/milestones/sprint-5/INT-01/START.md` | Created |
+| `.claudecode/milestones/sprint-5/INT-01/ROLLBACK-PLAN.md` | Created |
+
+### API Integration
+```typescript
+// On file select, calls:
+POST /api/upload
+Content-Type: multipart/form-data
+Body: { file: File, mode: 'direct', optimize: 'true' }
+
+// On success, stores:
+orderStore.setOriginalImage(response.publicUrl, file)
+```
+
+### UI States
+1. **Default**: Upload zone with gallery/camera buttons
+2. **Uploading**: Progress indicator with spinner and percentage
+3. **Error**: Error message with retry button
+4. **Success**: Image preview with "מוכן" badge
+
+### Gate Status
+- [x] Gate 0: Research (N/A - uses existing API)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md, tag INT-01-start)
+- [x] Gate 2: Implementation (TDD - 35 tests)
+- [x] Gate 3: Code Quality (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `f17e96f2`
+
+**Ready for Gate 4 PM/QA validation.**
+
+---
+
+## 2025-12-26 - Frontend-B: UI-05 Ready for QA
+
+**Story**: UI-05 - Confirmation Page UI
+**Branch**: feature/ui-05-confirmation-page
+**Sprint**: 4
+**Priority**: P1
+
+### Summary
+Implemented Confirmation Page UI matching 05-confirmation.html mockup:
+- Success hero with animated checkmark and celebratory confetti
+- Order number in FP-YYYY-XXXX format
+- Order summary card with thumbnail, style name, specs, price
+- Delivery info with estimated arrival date
+- 4-step timeline tracker (completed, active, pending visual states)
+- Share card with WhatsApp, Facebook, Copy link buttons
+- Bottom CTA with "לדף הבית" and "הזמנה נוספת" buttons
+- RTL layout throughout
+
+### Key Deliverables
+- `app/(app)/create/complete/page.tsx` - Complete page rewrite matching mockup
+- `app/(app)/create/complete/page.test.tsx` - 45 TDD tests
+
+### Test Results
+- **Tests**: 45 passing (page-specific)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/app/(app)/create/complete/page.tsx` | Modified - complete rewrite |
+| `footprint/app/(app)/create/complete/page.test.tsx` | Created - 45 TDD tests |
+| `.claudecode/milestones/sprint-4/UI-05/*` | Created - planning docs |
+
+### Gate Status
+- [x] Gate 0: Research (N/A - UI implementation)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 45 tests)
+- [x] Gate 3: QA Validation (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `6cc85ab7`
+
+**Ready for Gate 4 PM/QA validation.**
+
+**Completes UI Flow**: UI-01 → UI-02 → UI-03 → UI-04 → **UI-05** (order creation flow complete)
+
+---
+
+## 2025-12-26 - Frontend-B: OM-01 Ready for QA
+
+**Story**: OM-01 - Admin Order Dashboard
+**Branch**: feature/om-01-admin-dashboard
+**Sprint**: 4
+**Priority**: P1
+**Linear**: UZF-1845
+
+### Summary
+Implemented Admin Order Dashboard matching 09-admin-orders.html mockup:
+- Stats grid with 4 cards (today orders, pending, shipped, revenue)
+- Search bar for filtering by order ID, customer name, or phone
+- Status filter tabs (all, pending, processing, shipped, delivered)
+- Orders list with thumbnails, FP-YYYY-XXXX IDs, status badges, and prices
+- Time ago formatting (Hebrew: "לפני X דק׳", "לפני X שעות", etc.)
+- RTL layout throughout
+- Uses demo data from `data/demo/orders.ts`
+
+### Key Deliverables
+- `app/admin/page.tsx` - Complete admin dashboard
+- `app/admin/page.test.tsx` - 38 TDD tests
+
+### Test Results
+- **Tests**: 38 passing (page-specific)
+- **TypeScript**: Clean (my files)
+- **Lint**: Clean (my files)
+
+Note: Pre-existing TypeScript/lint errors exist in `src/app/cockpit/page.tsx` (not my changes)
+
+### Files Changed
+| File | Action |
+|------|--------|
+| `footprint/app/admin/page.tsx` | Created - full admin dashboard |
+| `footprint/app/admin/page.test.tsx` | Created - 38 TDD tests |
+| `.claudecode/milestones/sprint-4/OM-01/*` | Created - planning docs |
+
+### Gate Status
+- [x] Gate 0: Research (N/A - UI implementation)
+- [x] Gate 1: Planning (START.md, ROLLBACK-PLAN.md)
+- [x] Gate 2: Implementation (TDD - 38 tests)
+- [x] Gate 3: QA Validation (TypeScript clean, Lint clean)
+- [ ] Gate 4: Review (PM/QA validation)
+- [ ] Gate 5: Deployment
+
+**Commit**: `a7fff31e`
+
+**Ready for Gate 4 PM/QA validation.**
+
+---
+
+## 2025-12-25 - Backend-2: CO-03 Ready for QA
+>>>>>>> feature/pc-05-realistic-mockup-preview
 
 **Story**: INT-05 - Connect Confirmation to Order API
 **Branch**: feature/int-05-confirmation-order-api

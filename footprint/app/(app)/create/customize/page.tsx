@@ -2,9 +2,9 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
+import RoomPreview from '@/components/mockup/RoomPreview';
 import type { SizeType, PaperType, FrameType } from '@/types';
 
 // Prices matching mockup 03-customize.html
@@ -154,27 +154,12 @@ export default function CustomizePage() {
       <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-[400px_1fr]">
         {/* Preview Section */}
         <div className="bg-white border-b lg:border-b-0 lg:border-l border-zinc-200 p-5 lg:sticky lg:top-[70px] lg:h-fit">
-          <div
-            data-testid="mockup-container"
-            className="flex items-center justify-center p-6 bg-gradient-to-br from-zinc-100 to-zinc-50 rounded-2xl min-h-[200px]"
-          >
-            <div
-              className={`relative transition-all shadow-lg ${
-                frameType !== 'none' ? 'p-1.5' : ''
-              }`}
-              style={{
-                backgroundColor: currentFrame?.color || 'transparent',
-                boxShadow: frameType === 'white' ? '0 10px 15px rgba(0,0,0,0.1), inset 0 0 0 1px #e4e4e7' : undefined,
-              }}
-            >
-              <Image
-                src={originalImage}
-                alt="תצוגה מקדימה"
-                width={140}
-                height={140}
-                className="object-cover rounded-sm"
-              />
-            </div>
+          <div data-testid="mockup-container">
+            <RoomPreview
+              imageUrl={originalImage}
+              size={size}
+              frameType={frameType}
+            />
           </div>
           <div data-testid="size-label" className="text-center mt-3 text-sm text-zinc-500">
             {currentSize?.name} • {currentSize?.dimensions}
