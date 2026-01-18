@@ -14,9 +14,14 @@ import { StyleType, STYLE_PROMPTS, isValidStyle } from './replicate';
 
 /**
  * Nano Banana model configuration
- * Uses environment variable or defaults to gemini-2.0-flash-exp
+ *
+ * Uses gemini-2.5-flash-image as default (stable, works globally)
+ * Note: gemini-2.0-flash-preview-image-generation does NOT work in Middle East/Europe/Africa
+ *
+ * @see https://ai.google.dev/gemini-api/docs/models
+ * @see https://ai.google.dev/gemini-api/docs/image-generation
  */
-const NANO_BANANA_MODEL = process.env.NANO_BANANA_MODEL || 'gemini-2.0-flash-exp';
+const NANO_BANANA_MODEL = process.env.NANO_BANANA_MODEL || 'gemini-2.5-flash-image';
 const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 
 /**
@@ -127,9 +132,10 @@ export async function transformWithNanoBanana(
       },
     ],
     generationConfig: {
-      responseModalities: ['Text', 'Image'],
-      temperature: 0.8,
-      maxOutputTokens: 8192,
+      responseModalities: ['TEXT', 'IMAGE'],
+      imageConfig: {
+        aspectRatio: '1:1',
+      },
     },
     safetySettings: [
       {
@@ -151,13 +157,14 @@ export async function transformWithNanoBanana(
     ],
   };
 
-  const url = `${API_BASE_URL}/models/${NANO_BANANA_MODEL}:generateContent?key=${apiKey}`;
+  const url = `${API_BASE_URL}/models/${NANO_BANANA_MODEL}:generateContent`;
   console.log(`Nano Banana: Calling model ${NANO_BANANA_MODEL}`);
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
     },
     body: JSON.stringify(requestBody),
   });
