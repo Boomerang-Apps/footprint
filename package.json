@@ -1,0 +1,17 @@
+{
+  "name": "footprint-root",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix footprint",
+    "build": "npm run build --prefix footprint",
+    "start": "npm run start --prefix footprint",
+    "lint": "npm run lint --prefix footprint",
+    "type-check": "npm run type-check --prefix footprint",
+    "test": "npm run test --prefix footprint",
+    "postinstall": "cd footprint && npm install"
+  },
+  "dependencies": {
+    "next": "14.2.0"
+  }
+}
