@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getUploadUrl, uploadToR2 } from '@/lib/storage/r2';
+import { getUploadUrl, uploadToSupabase } from '@/lib/storage/supabase-storage';
 import {
   validateImage,
   optimizeForPrint,
@@ -219,7 +219,7 @@ async function handleDirectMode(
         ? fileName.replace(/\.heic$/i, '.jpg')
         : fileName;
 
-    const result = await uploadToR2(
+    const result = await uploadToSupabase(
       buffer,
       userId,
       finalFileName,
