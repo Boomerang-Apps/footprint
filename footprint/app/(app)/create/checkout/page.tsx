@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { ArrowLeft, Check, Sparkles, CreditCard, MapPin, User, Phone, Mail, Building, Loader2 } from 'lucide-react';
@@ -14,7 +14,7 @@ function generateOrderId(): string {
   return `FP-${timestamp}-${random}`.toUpperCase();
 }
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const {
@@ -400,5 +400,24 @@ export default function CheckoutPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function CheckoutPageFallback() {
+  return (
+    <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-12 h-12 text-violet-600 animate-spin" />
+        <p className="text-zinc-500">טוען...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutPageFallback />}>
+      <CheckoutPageContent />
+    </Suspense>
   );
 }
