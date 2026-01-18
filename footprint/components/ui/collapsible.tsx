@@ -35,13 +35,27 @@ function Collapsible({ open = false, onOpenChange, children, className = '' }: C
   );
 }
 
-function CollapsibleTrigger({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+interface CollapsibleTriggerProps {
+  children: React.ReactNode;
+  className?: string;
+  asChild?: boolean;
+}
+
+function CollapsibleTrigger({ children, className = '', asChild = false }: CollapsibleTriggerProps) {
   const context = React.useContext(CollapsibleContext);
   if (!context) throw new Error('CollapsibleTrigger must be used within Collapsible');
 
+  const handleClick = () => context.onOpenChange(!context.open);
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, {
+      onClick: handleClick,
+    });
+  }
+
   return (
     <button
-      onClick={() => context.onOpenChange(!context.open)}
+      onClick={handleClick}
       className={className}
     >
       {children}
