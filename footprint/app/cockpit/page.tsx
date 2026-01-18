@@ -62,7 +62,7 @@ import {
   type Screen,
 } from '@/data/dashboard/dev-progress';
 
-type ViewMode = 'sprints' | 'features' | 'components' | 'epics' | 'sitemap' | 'pages' | 'agents';
+type ViewMode = 'sprints' | 'features' | 'components' | 'epics' | 'sitemap' | 'pages' | 'agents' | 'command';
 
 // Agent data for multi-agent framework
 const agents = [
@@ -1720,7 +1720,7 @@ export default function DevDashboard() {
                         <div className="text-right">
                           <div className="text-2xl font-bold text-purple-600">{percentage}%</div>
                           <div className="text-xs text-gray-500">{done}/{total} stories</div>
-                          <div className="text-xs text-gray-400 mt-1">{epic.totalPoints} pts</div>
+                          <div className="text-xs text-gray-400 mt-1">{epic.totalPoints || 0} pts</div>
                         </div>
                       </div>
                       <div className="mt-4 w-full h-2 bg-white rounded-full overflow-hidden">
@@ -1903,7 +1903,7 @@ export default function DevDashboard() {
                                   'bg-gray-300'
                                 }`} />
                                 <span className="font-medium text-gray-900">{screen.name}</span>
-                                <code className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{screen.route}</code>
+                                <code className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{screen.path}</code>
                                 {screen.mockup && (
                                   <a
                                     href={`/design_mockups/${screen.mockup}`}
@@ -1916,7 +1916,7 @@ export default function DevDashboard() {
                                 )}
                               </div>
                               <p className="text-sm text-gray-500 mt-1">{screen.description}</p>
-                              {screen.stories.length > 0 && (
+                              {screen.stories && screen.stories.length > 0 && (
                                 <div className="mt-2 flex flex-wrap gap-1">
                                   {screen.stories.map(storyId => (
                                     <span

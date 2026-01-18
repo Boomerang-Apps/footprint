@@ -24,7 +24,8 @@ import {
 } from './replicate';
 
 // Re-export common types and utilities
-export { StyleType, ALLOWED_STYLES, STYLE_PROMPTS, isValidStyle };
+export type { StyleType };
+export { ALLOWED_STYLES, STYLE_PROMPTS, isValidStyle };
 
 /**
  * AI provider options

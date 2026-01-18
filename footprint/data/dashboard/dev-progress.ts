@@ -1270,6 +1270,7 @@ export interface Epic {
   description: string;
   features: string[];
   status: 'done' | 'in-progress' | 'planned';
+  totalPoints?: number;
 }
 
 export const epics: Epic[] = [
@@ -1332,8 +1333,12 @@ export interface Screen {
   id: string;
   name: string;
   path: string;
+  route?: string;
   status: 'done' | 'in-progress' | 'planned';
   category: string;
+  mockup?: string;
+  description?: string;
+  stories?: string[];
 }
 
 export const screens: Screen[] = [
@@ -1347,9 +1352,9 @@ export const screens: Screen[] = [
   { id: 'cockpit', name: 'Dev Cockpit', path: '/cockpit', status: 'done', category: 'dev' },
 ];
 
-export const screenCategories = [
-  { id: 'marketing', name: 'Marketing', screens: screens.filter(s => s.category === 'marketing') },
-  { id: 'order-flow', name: 'Order Flow', screens: screens.filter(s => s.category === 'order-flow') },
-  { id: 'admin', name: 'Admin', screens: screens.filter(s => s.category === 'admin') },
-  { id: 'dev', name: 'Development', screens: screens.filter(s => s.category === 'dev') },
-];
+export const screenCategories: Record<string, { bgColor: string; color: string; label: string }> = {
+  'marketing': { bgColor: 'bg-emerald-50', color: 'text-emerald-700', label: 'Marketing' },
+  'order-flow': { bgColor: 'bg-blue-50', color: 'text-blue-700', label: 'Order Flow' },
+  'admin': { bgColor: 'bg-amber-50', color: 'text-amber-700', label: 'Admin' },
+  'dev': { bgColor: 'bg-purple-50', color: 'text-purple-700', label: 'Development' },
+};

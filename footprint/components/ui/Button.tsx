@@ -5,13 +5,15 @@ import { cn } from './utils';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Visual style variant */
-  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'outline';
   /** Size of the button */
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   /** Show loading spinner */
   loading?: boolean;
   /** Stretch to full width of container */
   fullWidth?: boolean;
+  /** Render as child element (for link buttons) */
+  asChild?: boolean;
 }
 
 /**
@@ -52,6 +54,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             'bg-light-muted text-text-primary hover:bg-light-border': variant === 'secondary',
             'bg-transparent text-text-primary hover:bg-light-muted': variant === 'ghost',
             'bg-red-500 text-white hover:bg-red-600': variant === 'destructive',
+            'border border-zinc-200 bg-transparent text-zinc-700 hover:bg-zinc-100': variant === 'outline',
           },
 
           // Size styles
@@ -59,6 +62,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             'h-8 px-3 text-sm': size === 'sm',
             'h-10 px-4 text-base': size === 'md',
             'h-12 px-6 text-lg': size === 'lg',
+            'h-8 w-8 p-0': size === 'icon',
           },
 
           // State styles

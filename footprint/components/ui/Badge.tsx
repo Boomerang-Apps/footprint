@@ -3,7 +3,7 @@ import { cn } from './utils';
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   /** Visual style variant */
-  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'brand';
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'brand' | 'secondary' | 'destructive' | 'outline';
   /** Size of the badge */
   size?: 'sm' | 'md';
   /** Icon to display before text */
@@ -45,6 +45,9 @@ export function Badge({
           'bg-red-100 text-red-800': variant === 'error',
           'bg-blue-100 text-blue-800': variant === 'info',
           'bg-brand-purple text-white': variant === 'brand',
+          'bg-zinc-100 text-zinc-700': variant === 'secondary',
+          'bg-red-500 text-white': variant === 'destructive',
+          'border border-zinc-200 bg-transparent text-zinc-700': variant === 'outline',
         },
 
         className
