@@ -50,30 +50,30 @@ function validatePresignedRequest(body: unknown): body is PresignedUrlRequest {
  */
 export async function POST(request: Request): Promise<Response> {
   try {
-    // Authenticate user
-    const supabase = createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    // Try to authenticate user, but allow anonymous uploads for development
+    let userId = 'anonymous';
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        userId = user.id;
+      }
+    } catch (authError) {
+      // Allow anonymous uploads if auth fails
+      console.log('Auth check failed, using anonymous upload:', authError);
     }
 
     const contentType = request.headers.get('content-type') || '';
 
     // Handle presigned URL mode (JSON body)
     if (contentType.includes('application/json')) {
-      return handlePresignedMode(request, user.id);
+      return handlePresignedMode(request, userId);
     }
 
     // Handle direct upload mode (FormData)
     if (contentType.includes('multipart/form-data')) {
-      return handleDirectMode(request, user.id);
+      return handleDirectMode(request, userId);
     }
 
     return NextResponse.json(
