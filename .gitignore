@@ -1,2 +1,29 @@
-.vercel
+# Dependencies
+node_modules/
+
+# Next.js build
+.next/
+out/
+
+# Environment files
 .env*.local
+.env
+
+# Vercel
+.vercel
+
+# OS files
+.DS_Store
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+
+# Temporary files
+*.log
+*.tmp
