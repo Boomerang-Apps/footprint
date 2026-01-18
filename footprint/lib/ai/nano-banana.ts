@@ -14,8 +14,9 @@ import { StyleType, STYLE_PROMPTS, isValidStyle } from './replicate';
 
 /**
  * Nano Banana model configuration
+ * Uses environment variable or defaults to gemini-2.0-flash-exp
  */
-const NANO_BANANA_MODEL = 'gemini-2.5-flash-preview-image-generation';
+const NANO_BANANA_MODEL = process.env.NANO_BANANA_MODEL || 'gemini-2.0-flash-exp';
 const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 
 /**
@@ -126,7 +127,7 @@ export async function transformWithNanoBanana(
       },
     ],
     generationConfig: {
-      responseModalities: ['TEXT', 'IMAGE'],
+      responseModalities: ['Text', 'Image'],
       temperature: 0.8,
       maxOutputTokens: 8192,
     },
@@ -150,21 +151,29 @@ export async function transformWithNanoBanana(
     ],
   };
 
-  const response = await fetch(
-    `${API_BASE_URL}/models/${NANO_BANANA_MODEL}:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    }
-  );
+  const url = `${API_BASE_URL}/models/${NANO_BANANA_MODEL}:generateContent?key=${apiKey}`;
+  console.log(`Nano Banana: Calling model ${NANO_BANANA_MODEL}`);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const errorMessage =
-      (errorData as GeminiResponse).error?.message || `HTTP ${response.status}`;
+    const errorText = await response.text().catch(() => '');
+    console.error(`Nano Banana API error: HTTP ${response.status}`, errorText);
+
+    let errorMessage = `HTTP ${response.status}`;
+    try {
+      const errorData = JSON.parse(errorText);
+      errorMessage = errorData.error?.message || errorMessage;
+    } catch {
+      // Use raw text if not JSON
+      if (errorText) errorMessage = errorText.substring(0, 200);
+    }
     throw new Error(`Nano Banana API error: ${errorMessage}`);
   }
 
