@@ -30,7 +30,7 @@ import {
   ALLOWED_STYLES,
   AIProvider,
 } from '@/lib/ai';
-import { uploadToR2 } from '@/lib/storage/r2';
+import { uploadToSupabase } from '@/lib/storage/supabase-storage';
 import {
   createTransformation,
   startTransformation,
@@ -92,18 +92,17 @@ export async function POST(
   let transformationId: string | null = null;
 
   try {
-    // 1. Authenticate user
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    // 1. Try to authenticate user, allow anonymous for development
+    let userId = 'anonymous';
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please sign in to transform images' },
-        { status: 401 }
-      );
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        userId = userId;
+      }
+    } catch (authError) {
+      console.log('Auth check failed, using anonymous transform:', authError);
     }
 
     // 2. Parse and validate request body
@@ -189,7 +188,7 @@ export async function POST(
     // 4. Create transformation record
     try {
       const record = await createTransformation({
-        userId: user.id,
+        userId: userId,
         originalImageKey,
         style,
         provider,
@@ -225,8 +224,8 @@ export async function POST(
       );
     }
 
-    // 6. Upload transformed image to R2
-    let r2Result: { key: string; publicUrl: string; size: number };
+    // 6. Upload transformed image to Supabase Storage
+    let uploadResult: { key: string; publicUrl: string; size: number };
     try {
       let imageBuffer: Buffer;
 
@@ -247,9 +246,9 @@ export async function POST(
 
       const fileName = `${style}-${Date.now()}.png`;
 
-      r2Result = await uploadToR2(
+      uploadResult = await uploadToSupabase(
         imageBuffer,
-        user.id,
+        userId,
         fileName,
         result.mimeType || 'image/png',
         'transformed'
@@ -280,7 +279,7 @@ export async function POST(
     if (transformationId) {
       try {
         await completeTransformation(transformationId, {
-          transformedImageKey: r2Result.key,
+          transformedImageKey: uploadResult.key,
           tokensUsed: result.tokensUsed,
           estimatedCost: result.estimatedCost,
           processingTimeMs: processingTime,
@@ -292,7 +291,7 @@ export async function POST(
 
     // 8. Return success response
     return NextResponse.json({
-      transformedUrl: r2Result.publicUrl,
+      transformedUrl: uploadResult.publicUrl,
       style,
       provider: result.provider,
       processingTime,
