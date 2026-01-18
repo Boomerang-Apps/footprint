@@ -1444,7 +1444,7 @@ export default function DevDashboard() {
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-center py-4">
-                    No stories found matching "{searchQuery}"
+                    No stories found matching &quot;{searchQuery}&quot;
                   </p>
                 )}
               </CardContent>
@@ -1640,7 +1640,7 @@ export default function DevDashboard() {
 
               {/* Helper text */}
               <p className="text-center text-sm text-gray-400">
-                Click sync icon on any story or use "Sync All" to fetch latest from Linear
+                Click sync icon on any story or use &quot;Sync All&quot; to fetch latest from Linear
               </p>
             </div>
           )}
