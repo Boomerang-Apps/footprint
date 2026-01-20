@@ -236,9 +236,9 @@ export default function StylePage() {
   const currentStyle = STYLES.find(s => s.id === selectedStyle) || STYLES[0];
 
   return (
-    <main className="min-h-screen bg-zinc-50" dir="rtl">
+    <main className="h-screen flex flex-col bg-zinc-50 overflow-hidden" dir="rtl">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
+      <header className="flex-shrink-0 z-50 bg-white border-b border-zinc-200">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={handleBack}
@@ -255,7 +255,7 @@ export default function StylePage() {
       </header>
 
       {/* Progress Steps */}
-      <div className="bg-white border-b border-zinc-200 px-4 py-4">
+      <div className="flex-shrink-0 bg-white border-b border-zinc-200 px-4 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-1">
             {STEPS.map((step, i) => {
@@ -282,11 +282,11 @@ export default function StylePage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 pb-28">
-        {/* Preview Section */}
-        <div className="py-5 flex justify-center">
-          <div className="relative w-full max-w-sm aspect-[4/5] bg-zinc-100 rounded-2xl overflow-hidden shadow-lg group">
+      {/* Main Content - Fill available height between header and bottom panel */}
+      <div className="flex-1 flex flex-col min-h-0 px-4 pb-[220px]">
+        {/* Preview Section - Responsive to viewport */}
+        <div className="flex-1 flex items-center justify-center py-3 min-h-0">
+          <div className="relative h-full w-auto aspect-[4/5] max-w-full bg-zinc-100 rounded-2xl overflow-hidden shadow-lg group">
             <Image
               src={transformedImage || originalImage}
               alt="התמונה שלך"
@@ -415,8 +415,6 @@ export default function StylePage() {
           </div>
         </div>
 
-        {/* Spacer for fixed bottom panel */}
-        <div className="h-[220px]" />
       </div>
 
       {/* Sticky Bottom Panel - Style Selection + CTA */}
