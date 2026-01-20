@@ -284,9 +284,9 @@ export default function StylePage() {
 
       {/* Main Content - Fill available height between header and bottom panel */}
       <div className="flex-1 flex flex-col min-h-0 px-4 pb-[220px]">
-        {/* Preview Section - Responsive to viewport */}
+        {/* Preview Section - Fills available space */}
         <div className="flex-1 flex items-center justify-center py-3 min-h-0">
-          <div className="relative h-full w-auto aspect-[4/5] max-w-full bg-zinc-100 rounded-2xl overflow-hidden shadow-lg group">
+          <div className="relative w-full h-full bg-zinc-100 rounded-2xl overflow-hidden shadow-lg group">
             <Image
               src={transformedImage || originalImage}
               alt="התמונה שלך"
