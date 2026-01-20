@@ -42,7 +42,7 @@ const STYLES: StyleOption[] = [
   {
     id: 'line_art_watercolor',
     name: 'Line + Watercolor',
-    nameHe: 'קווי + צבעי מים',
+    nameHe: 'קו+מים',
     icon: Layers,
     gradient: 'from-purple-500 to-blue-400',
   },
