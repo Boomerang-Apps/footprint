@@ -21,10 +21,12 @@ export default function HomePage() {
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-zinc-200">
         <div className="max-w-7xl mx-auto px-5 h-16 lg:h-[72px] flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 bg-gradient-to-br from-brand-purple to-brand-pink rounded-xl flex items-center justify-center text-white">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <span className="text-xl font-bold text-zinc-900">פוטפרינט</span>
+            <img
+              src="/footprint-logo-black-v2.svg"
+              alt="פוטפרינט"
+              className="h-[52px] w-auto"
+            />
+            <span className="text-[26px] font-bold text-zinc-900">פוטפרינט</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-9">
@@ -403,17 +405,28 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10 text-center lg:text-right">
             {/* Brand */}
             <div className="flex flex-col items-center lg:items-start">
-              <div className="w-14 h-14 bg-gradient-to-br from-brand-purple to-brand-pink rounded-xl flex items-center justify-center text-white mb-4">
-                <Sparkles className="w-7 h-7" />
-              </div>
-              <div className="text-[22px] font-bold text-zinc-900 mb-3">פוטפרינט</div>
-              <p className="text-sm text-zinc-500 mb-5 leading-relaxed max-w-[280px]">מתנות אמנותיות מהתמונות שלכם</p>
+              <img
+                src="/footprint-logo-black-v2.svg"
+                alt="פוטפרינט"
+                className="h-[73px] w-auto mb-4"
+              />
+              <div className="text-[29px] font-bold text-zinc-900 mb-3">פוטפרינט</div>
+              <p className="text-sm text-zinc-500 mb-5 leading-relaxed max-w-[280px]">מסגרו את הסיפורים שלכם</p>
               <div className="flex gap-2.5">
-                {[Instagram, Facebook, MessageCircle].map((Icon, i) => (
-                  <a key={i} href="#" className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-500 hover:border-brand-purple hover:text-brand-purple transition">
-                    <Icon className="w-5 h-5" />
-                  </a>
-                ))}
+                <a href="#" className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-500 hover:border-brand-purple hover:text-brand-purple transition">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-500 hover:border-brand-purple hover:text-brand-purple transition">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-500 hover:border-brand-purple hover:text-brand-purple transition">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                  </svg>
+                </a>
+                <a href="#" className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-500 hover:border-brand-purple hover:text-brand-purple transition">
+                  <MessageCircle className="w-5 h-5" />
+                </a>
               </div>
             </div>
 

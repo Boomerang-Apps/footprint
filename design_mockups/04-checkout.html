@@ -272,12 +272,13 @@
       transform: translateX(20px);
     }
     
-    /* Gift Message */
-    .gift-message {
+    /* Gift Options (Message + Recipient) */
+    .gift-options {
       display: none;
-      margin-top: 12px;
+      margin-top: 16px;
     }
-    .gift-message.show { display: block; }
+    .gift-options.show { display: block; }
+
     .gift-message textarea {
       width: 100%;
       height: 80px;
@@ -296,6 +297,66 @@
       font-size: 11px;
       color: var(--gray-400);
       margin-top: 4px;
+    }
+
+    /* Recipient Address Section */
+    .recipient-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--gray-200);
+    }
+    .recipient-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .recipient-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+    .recipient-title .icon {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+    }
+    .copy-address-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--gray-100);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-600);
+      transition: all 0.2s;
+    }
+    .copy-address-btn:hover {
+      background: var(--gray-200);
+    }
+    .copy-address-btn .icon {
+      width: 14px;
+      height: 14px;
+    }
+    .delivery-estimate {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(16, 185, 129, 0.08);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--success);
+    }
+    .delivery-estimate .icon {
+      width: 16px;
+      height: 16px;
     }
     
     /* Form */
@@ -532,6 +593,9 @@
       <symbol id="i-credit-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></symbol>
       <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
       <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+      <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></symbol>
     </defs>
   </svg>
 
@@ -591,44 +655,112 @@
             <svg class="icon"><use href="#i-gift"/></svg>
           </div>
           <div>
-            <div class="gift-toggle-text">זו מתנה?</div>
-            <div class="gift-toggle-desc">נוסיף אריזת מתנה והודעה אישית</div>
+            <div class="gift-toggle-text">זוהי מתנה?</div>
+            <div class="gift-toggle-desc">נשלח ישירות לנמען עם הודעה אישית</div>
           </div>
         </div>
         <div class="toggle-switch" id="giftToggle"></div>
       </div>
-      <div class="gift-message" id="giftMessage">
-        <textarea placeholder="כתבו הודעה אישית למקבל המתנה..." maxlength="150" oninput="updateCharCount(this)"></textarea>
-        <div class="gift-char-count"><span id="charCount">0</span>/150</div>
+
+      <!-- Gift Options (shown when toggle is on) -->
+      <div class="gift-options" id="giftOptions">
+        <!-- Gift Message -->
+        <div class="gift-message">
+          <label class="form-label">הודעה אישית</label>
+          <textarea placeholder="כתבו הודעה אישית למקבל המתנה..." maxlength="150" oninput="updateCharCount(this)"></textarea>
+          <div class="gift-char-count"><span id="charCount">0</span>/150</div>
+        </div>
+
+        <!-- Recipient Address -->
+        <div class="recipient-section">
+          <div class="recipient-header">
+            <div class="recipient-title">
+              <svg class="icon"><use href="#i-map-pin"/></svg>
+              כתובת הנמען
+            </div>
+            <button class="copy-address-btn" onclick="copyBuyerAddress(event)">
+              <svg class="icon"><use href="#i-copy"/></svg>
+              העתק מכתובת המשלוח
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">שם הנמען *</label>
+            <input type="text" class="form-input" id="recipientName" placeholder="שם מלא של מקבל המתנה">
+          </div>
+          <div class="form-group">
+            <label class="form-label">טלפון הנמען *</label>
+            <input type="tel" class="form-input" id="recipientPhone" placeholder="050-0000000" dir="ltr">
+          </div>
+          <div class="form-group">
+            <label class="form-label">רחוב *</label>
+            <input type="text" class="form-input" id="recipientStreet" placeholder="שם הרחוב">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">מספר בית *</label>
+              <input type="text" class="form-input" id="recipientHouseNum" placeholder="מס׳">
+            </div>
+            <div class="form-group">
+              <label class="form-label">דירה</label>
+              <input type="text" class="form-input" id="recipientApartment" placeholder="דירה">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">עיר *</label>
+              <input type="text" class="form-input" id="recipientCity" placeholder="עיר">
+            </div>
+            <div class="form-group">
+              <label class="form-label">מיקוד</label>
+              <input type="text" class="form-input" id="recipientPostal" placeholder="0000000" dir="ltr">
+            </div>
+          </div>
+
+          <div class="delivery-estimate">
+            <svg class="icon"><use href="#i-calendar"/></svg>
+            הגעה משוערת לנמען: 25-27 בינואר
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Shipping -->
-    <div class="section">
+    <!-- Shipping (Buyer's Address) -->
+    <div class="section" id="shippingSection">
       <h3 class="section-title">
         <svg class="icon"><use href="#i-truck"/></svg>
-        פרטי משלוח
+        <span id="shippingTitle">פרטי משלוח</span>
       </h3>
       <div class="form-group">
-        <label class="form-label">שם מלא</label>
-        <input type="text" class="form-input" placeholder="ישראל ישראלי">
+        <label class="form-label">שם מלא *</label>
+        <input type="text" class="form-input" id="buyerName" placeholder="ישראל ישראלי">
       </div>
       <div class="form-group">
-        <label class="form-label">טלפון</label>
-        <input type="tel" class="form-input" placeholder="050-0000000" dir="ltr">
+        <label class="form-label">טלפון *</label>
+        <input type="tel" class="form-input" id="buyerPhone" placeholder="050-0000000" dir="ltr">
       </div>
       <div class="form-group">
-        <label class="form-label">כתובת</label>
-        <input type="text" class="form-input" placeholder="רחוב, מספר בית, דירה">
+        <label class="form-label">רחוב *</label>
+        <input type="text" class="form-input" id="buyerStreet" placeholder="שם הרחוב">
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">עיר</label>
-          <input type="text" class="form-input" placeholder="תל אביב">
+          <label class="form-label">מספר בית *</label>
+          <input type="text" class="form-input" id="buyerHouseNum" placeholder="מס׳">
+        </div>
+        <div class="form-group">
+          <label class="form-label">דירה</label>
+          <input type="text" class="form-input" id="buyerApartment" placeholder="דירה">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">עיר *</label>
+          <input type="text" class="form-input" id="buyerCity" placeholder="תל אביב">
         </div>
         <div class="form-group">
           <label class="form-label">מיקוד</label>
-          <input type="text" class="form-input" placeholder="0000000" dir="ltr">
+          <input type="text" class="form-input" id="buyerPostal" placeholder="0000000" dir="ltr">
         </div>
       </div>
     </div>
@@ -708,7 +840,15 @@
     function toggleGift() {
       isGift = !isGift;
       document.getElementById('giftToggle').classList.toggle('active', isGift);
-      document.getElementById('giftMessage').classList.toggle('show', isGift);
+      document.getElementById('giftOptions').classList.toggle('show', isGift);
+
+      // Update shipping section title based on gift status
+      const shippingTitle = document.getElementById('shippingTitle');
+      if (isGift) {
+        shippingTitle.textContent = 'פרטי המזמין (לצורך חשבונית)';
+      } else {
+        shippingTitle.textContent = 'פרטי משלוח';
+      }
     }
 
     function updateCharCount(textarea) {
@@ -718,6 +858,32 @@
     function selectPayment(el) {
       document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
       el.classList.add('selected');
+    }
+
+    function copyBuyerAddress(event) {
+      event.stopPropagation();
+
+      // Copy buyer address to recipient fields
+      document.getElementById('recipientName').value = document.getElementById('buyerName').value;
+      document.getElementById('recipientPhone').value = document.getElementById('buyerPhone').value;
+      document.getElementById('recipientStreet').value = document.getElementById('buyerStreet').value;
+      document.getElementById('recipientHouseNum').value = document.getElementById('buyerHouseNum').value;
+      document.getElementById('recipientApartment').value = document.getElementById('buyerApartment').value;
+      document.getElementById('recipientCity').value = document.getElementById('buyerCity').value;
+      document.getElementById('recipientPostal').value = document.getElementById('buyerPostal').value;
+
+      // Visual feedback
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<svg class="icon" style="width:14px;height:14px"><use href="#i-check"/></svg> הועתק!';
+      btn.style.background = 'rgba(16, 185, 129, 0.15)';
+      btn.style.color = 'var(--success)';
+
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.background = '';
+        btn.style.color = '';
+      }, 2000);
     }
   </script>
 </body>
