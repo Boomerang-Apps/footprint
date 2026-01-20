@@ -38,6 +38,11 @@ import {
   failTransformation,
   findExistingTransformation,
 } from '@/lib/db/transformations';
+import {
+  getStyleReferences,
+  hasStyleReferences,
+} from '@/lib/ai/style-references';
+import { loadReferenceImages, type ReferenceImage } from '@/lib/ai/nano-banana';
 
 interface TransformRequest {
   imageUrl: string;
@@ -200,10 +205,24 @@ export async function POST(
       // Continue without tracking if DB fails
     }
 
-    // 5. Transform image using AI
+    // 5. Load style references if available
+    let referenceImages: ReferenceImage[] = [];
+    if (hasStyleReferences(style)) {
+      try {
+        const refPaths = getStyleReferences(style);
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        referenceImages = await loadReferenceImages(refPaths, baseUrl);
+        console.log(`Loaded ${referenceImages.length} reference images for style: ${style}`);
+      } catch (refError) {
+        console.warn('Failed to load reference images:', refError);
+        // Continue without references
+      }
+    }
+
+    // 6. Transform image using AI
     let result;
     try {
-      result = await transformImage(imageUrl, style, { provider });
+      result = await transformImage(imageUrl, style, { provider, referenceImages });
     } catch (error) {
       console.error('AI transformation error:', error);
 

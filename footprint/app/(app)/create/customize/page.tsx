@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import RoomPreview from '@/components/mockup/RoomPreview';
 import type { SizeType, PaperType, FrameType } from '@/types';
@@ -49,6 +49,7 @@ export default function CustomizePage() {
     setPaperType,
     setFrameType,
     setStep,
+    _hasHydrated,
   } = useOrderStore();
 
   // Use transformed image if available and style is not 'original', otherwise use original
@@ -56,12 +57,12 @@ export default function CustomizePage() {
     ? transformedImage
     : originalImage;
 
-  // Redirect if no image
+  // Redirect if no image (only after hydration)
   useEffect(() => {
-    if (!originalImage) {
+    if (_hasHydrated && !originalImage) {
       router.push('/create');
     }
-  }, [originalImage, router]);
+  }, [_hasHydrated, originalImage, router]);
 
   const handleContinue = () => {
     setStep('checkout');
@@ -73,8 +74,16 @@ export default function CustomizePage() {
     router.push('/create/tweak');
   };
 
-  if (!originalImage) {
-    return null;
+  // Show loading state while hydrating or if no image
+  if (!_hasHydrated || !originalImage) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-zinc-50" dir="rtl">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-purple-600" />
+          <p className="text-sm text-zinc-500">טוען...</p>
+        </div>
+      </main>
+    );
   }
 
   // Calculate price

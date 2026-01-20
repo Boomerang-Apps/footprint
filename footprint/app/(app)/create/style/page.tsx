@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, CircleOff, Layers, AlertCircle, RefreshCw, RotateCcw, Maximize2, Heart, Grid3X3, Trash2 } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
+import { StyleLoader } from '@/components/ui/StyleLoader';
 import type { StyleType } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -85,6 +86,7 @@ export default function StylePage() {
     addSavedVersion,
     removeSavedVersion,
     selectSavedVersion,
+    _hasHydrated,
   } = useOrderStore();
 
   // Local state for transform error and pending style for retry
@@ -104,12 +106,12 @@ export default function StylePage() {
   // Max saved versions
   const MAX_VERSIONS = 10;
 
-  // Redirect to upload if no image
+  // Redirect to upload if no image (only after hydration)
   useEffect(() => {
-    if (!originalImage) {
+    if (_hasHydrated && !originalImage) {
       router.push('/create');
     }
-  }, [originalImage, router]);
+  }, [_hasHydrated, originalImage, router]);
 
   // Set current step on mount
   useEffect(() => {
@@ -229,8 +231,16 @@ export default function StylePage() {
     return STYLES.find(s => s.id === styleId)?.nameHe || styleId;
   }, []);
 
-  if (!originalImage) {
-    return null;
+  // Show loading state while hydrating or if no image
+  if (!_hasHydrated || !originalImage) {
+    return (
+      <main className="h-screen flex items-center justify-center bg-zinc-50" dir="rtl">
+        <div className="text-center">
+          <div className="w-8 h-8 border-3 border-zinc-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-sm text-zinc-500">טוען...</p>
+        </div>
+      </main>
+    );
   }
 
   const currentStyle = STYLES.find(s => s.id === selectedStyle) || STYLES[0];
@@ -296,15 +306,10 @@ export default function StylePage() {
 
             {/* AI Processing Overlay */}
             {(isProcessing || isTransforming) && (
-              <div
+              <StyleLoader
+                styleName={processingStyle || pendingStyle?.nameHe || 'סגנון'}
                 data-testid="ai-overlay"
-                className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center gap-3"
-              >
-                <div className="w-12 h-12 border-3 border-zinc-200 border-t-purple-600 rounded-full animate-spin" />
-                <span className="text-sm text-zinc-600 font-medium">
-                  מעבד בסגנון {processingStyle || pendingStyle?.nameHe}...
-                </span>
-              </div>
+              />
             )}
 
             {/* Transform Error Overlay */}

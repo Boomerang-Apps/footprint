@@ -89,7 +89,7 @@ function getApiKey(): string {
 
 /**
  * Builds the style transfer prompt for Nano Banana
- * If reference images are provided, includes instructions to match them
+ * If reference images are provided, uses them as style inspiration (not exact copies)
  */
 function buildPrompt(
   style: StyleType,
@@ -100,27 +100,31 @@ function buildPrompt(
   const instructions = customInstructions || '';
   const referencePrompt = hasReferences ? getStyleReferencePrompt(style) : '';
 
-  // If we have reference images, structure the prompt differently
+  // If we have reference images, use them for style inspiration
   if (hasReferences && referencePrompt) {
-    return `You are given reference images showing the exact artistic style to apply, followed by a source photograph to transform.
+    return `Transform the source photograph into an artistic image using the style concepts, colors, and techniques shown in the reference images.
 
-REFERENCE IMAGES: The first image(s) show the target artistic style. Study these carefully.
+STYLE REFERENCE IMAGES: The first images demonstrate the artistic style to apply. Use these as INSPIRATION for:
+- Color palette and tones
+- Brush stroke or line technique
+- Overall artistic mood and texture
+- Visual style and rendering approach
 
 ${referencePrompt}
 
-SOURCE IMAGE: The last image is the photograph to transform.
+SOURCE PHOTOGRAPH: The last image is the photograph to transform. Keep all content, subjects, and composition from this image.
 
-STYLE REQUIREMENTS:
+STYLE DESCRIPTION:
 ${basePrompt}
 
 ${instructions}
 
-CRITICAL INSTRUCTIONS:
-- Match the EXACT style shown in the reference images
-- Maintain the subject's likeness and key features from the source photo
-- Apply the style consistently across the entire image
-- Ensure high quality output suitable for professional printing
-- Output only the transformed image`;
+IMPORTANT:
+- Use the references for STYLE INSPIRATION only - do NOT copy their content
+- PRESERVE the exact subjects, people, and composition from the source photograph
+- Apply the artistic style while maintaining the subject's likeness and features
+- Render the source image content with the artistic techniques from the references
+- Ensure high quality output suitable for professional printing`;
   }
 
   // Standard prompt without reference images

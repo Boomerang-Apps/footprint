@@ -5,15 +5,12 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   ArrowRight,
-  X,
   RefreshCw,
   Palette,
-  Scissors,
-  Eraser,
+  Wand2,
   Sun,
   Contrast,
   Droplets,
-  RotateCw,
   Check,
   Loader2,
   AlertCircle,
@@ -28,7 +25,7 @@ const STEPS = [
   { id: 'payment', label: 'תשלום' },
 ];
 
-type ToolTab = 'color' | 'crop' | 'background';
+type ToolTab = 'color' | 'ai';
 
 interface ColorFilter {
   id: TweakSettings['colorFilter'];
@@ -45,6 +42,19 @@ const COLOR_FILTERS: ColorFilter[] = [
   { id: 'bw', name: 'B&W', nameHe: 'שחור-לבן', style: 'grayscale(1)' },
 ];
 
+// Fun facts and tips to show during loading
+const LOADING_MESSAGES = [
+  { text: 'הבינה המלאכותית מנתחת את התמונה שלך...', icon: '🔍' },
+  { text: 'יוצרים קסם אמנותי...', icon: '✨' },
+  { text: 'ידעת? הדפסה על קנבס שומרת על צבעים עד 100 שנה', icon: '🎨' },
+  { text: 'טיפ: תאורה טבעית נותנת את התוצאות הטובות ביותר', icon: '💡' },
+  { text: 'עובדים על הפרטים הקטנים...', icon: '🖌️' },
+  { text: 'ידעת? צבעי מים הומצאו בסין לפני 2000 שנה', icon: '🎭' },
+  { text: 'מוסיפים את הנגיעות האחרונות...', icon: '🖼️' },
+  { text: 'טיפ: מסגרת לבנה מתאימה לכל סגנון עיצוב', icon: '🏠' },
+  { text: 'האמנות שלך כמעט מוכנה...', icon: '🎉' },
+];
+
 export default function TweakPage() {
   const router = useRouter();
   const {
@@ -58,24 +68,57 @@ export default function TweakPage() {
     setTweakSettings,
     resetTweakSettings,
     setStep,
+    _hasHydrated,
   } = useOrderStore();
 
   const [activeTab, setActiveTab] = useState<ToolTab>('color');
-  const [isRemovingBg, setIsRemovingBg] = useState(false);
-  const [bgError, setBgError] = useState<string | null>(null);
+  const [isApplyingPrompt, setIsApplyingPrompt] = useState(false);
+  const [promptError, setPromptError] = useState<string | null>(null);
+  const [customPrompt, setCustomPrompt] = useState('');
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
-  // Redirect to upload if no image
+  // Redirect to upload if no image (only after hydration)
   useEffect(() => {
-    if (!originalImage) {
+    if (_hasHydrated && !originalImage) {
       router.push('/create');
     }
-  }, [originalImage, router]);
+  }, [_hasHydrated, originalImage, router]);
 
   // Set current step on mount
   useEffect(() => {
     setStep('tweak');
   }, [setStep]);
+
+  // Rotate loading messages and update progress during processing
+  const isLoading = isTransforming || isApplyingPrompt || isRegenerating;
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingProgress(0);
+      setLoadingMessageIndex(0);
+      return;
+    }
+
+    // Rotate messages every 3 seconds
+    const messageInterval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, 3000);
+
+    // Simulate progress (reaches ~90% over 15 seconds, then slows)
+    const progressInterval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev < 90) return prev + 6;
+        if (prev < 95) return prev + 1;
+        return prev;
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(messageInterval);
+      clearInterval(progressInterval);
+    };
+  }, [isLoading]);
 
   // Calculate CSS filter string from tweak settings
   const getFilterStyle = useCallback(() => {
@@ -139,43 +182,38 @@ export default function TweakPage() {
     }
   }, [originalImage, selectedStyle, isRegenerating, setTransformedImage, setIsTransforming, resetTweakSettings]);
 
-  // Remove background
-  const handleRemoveBackground = useCallback(async () => {
-    if (!transformedImage || isRemovingBg) return;
+  // Apply custom prompt via nano-banana
+  const handleApplyPrompt = useCallback(async () => {
+    if (!transformedImage || isApplyingPrompt || !customPrompt.trim()) return;
 
-    setIsRemovingBg(true);
-    setBgError(null);
+    setIsApplyingPrompt(true);
+    setPromptError(null);
 
     try {
-      const response = await fetch('/api/remove-bg', {
+      const response = await fetch('/api/tweak', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: transformedImage,
+          prompt: customPrompt.trim(),
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Background removal failed');
+        throw new Error(data.error || 'Failed to apply prompt');
       }
 
       setTransformedImage(data.imageUrl);
-      setTweakSettings({ backgroundRemoved: true });
+      setCustomPrompt(''); // Clear prompt after success
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'שגיאה בהסרת הרקע';
-      setBgError(message);
+      const message = error instanceof Error ? error.message : 'שגיאה בעריכת התמונה';
+      setPromptError(message);
     } finally {
-      setIsRemovingBg(false);
+      setIsApplyingPrompt(false);
     }
-  }, [transformedImage, isRemovingBg, setTransformedImage, setTweakSettings]);
-
-  // Rotate image
-  const handleRotate = useCallback(() => {
-    const newRotation = ((tweakSettings.rotation + 90) % 360) as 0 | 90 | 180 | 270;
-    setTweakSettings({ rotation: newRotation });
-  }, [tweakSettings.rotation, setTweakSettings]);
+  }, [transformedImage, isApplyingPrompt, customPrompt, setTransformedImage]);
 
   // Reset all tweaks
   const handleReset = useCallback(() => {
@@ -183,28 +221,41 @@ export default function TweakPage() {
   }, [resetTweakSettings]);
 
   const handleContinue = useCallback(() => {
-    if (!isTransforming && !isRemovingBg) {
+    if (!isTransforming && !isApplyingPrompt) {
       setStep('customize');
       router.push('/create/customize');
     }
-  }, [isTransforming, isRemovingBg, setStep, router]);
+  }, [isTransforming, isApplyingPrompt, setStep, router]);
 
   const handleBack = useCallback(() => {
     setStep('style');
     router.push('/create/style');
   }, [setStep, router]);
 
+  // Show loading state while hydrating
+  if (!_hasHydrated) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-zinc-50" dir="rtl">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-purple-600" />
+          <p className="text-sm text-zinc-500">טוען...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // After hydration, if no image, the useEffect will redirect
   if (!originalImage) {
     return null;
   }
 
   const displayImage = transformedImage || originalImage;
-  const isProcessing = isTransforming || isRemovingBg || isRegenerating;
+  const isProcessing = isTransforming || isApplyingPrompt || isRegenerating;
 
   return (
-    <main className="min-h-screen bg-zinc-50" dir="rtl">
+    <main className="h-screen flex flex-col bg-zinc-50 overflow-hidden" dir="rtl">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
+      <header className="flex-none bg-white border-b border-zinc-200">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={handleBack}
@@ -227,7 +278,7 @@ export default function TweakPage() {
       </header>
 
       {/* Progress Steps */}
-      <div className="bg-white border-b border-zinc-200 px-4 py-4">
+      <div className="flex-none bg-white border-b border-zinc-200 px-4 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-1">
             {STEPS.map((step, i) => {
@@ -254,11 +305,10 @@ export default function TweakPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 pb-32">
-        {/* Preview Section */}
-        <div className="py-5 flex justify-center">
-          <div className="relative w-full max-w-sm aspect-[4/5] bg-zinc-100 rounded-2xl overflow-hidden shadow-lg">
+      {/* Main Content - Image Preview (fills 90% of available height) */}
+      <div className="flex-1 flex items-center justify-center p-4 overflow-hidden min-h-0">
+        <div className="relative h-[90%] aspect-[4/5] max-w-full bg-zinc-100 rounded-2xl overflow-hidden shadow-lg">
+          {displayImage ? (
             <div
               className="w-full h-full"
               style={{
@@ -273,145 +323,165 @@ export default function TweakPage() {
                 className="object-cover"
               />
             </div>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-zinc-100">
+              <div className="text-center text-zinc-400">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                <p className="text-sm">טוען תמונה...</p>
+              </div>
+            </div>
+          )}
 
-            {/* Processing Overlay */}
-            {isProcessing && (
-              <div
-                data-testid="processing-overlay"
-                className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center gap-3"
+          {/* Processing Overlay - Enhanced */}
+          {isProcessing && (
+            <div
+              data-testid="processing-overlay"
+              className="absolute inset-0 bg-gradient-to-b from-white/95 to-purple-50/95 backdrop-blur-sm flex flex-col items-center justify-center p-6"
+            >
+              {/* Animated spinner with glow */}
+              <div className="relative mb-6">
+                <div className="absolute inset-0 bg-purple-400 rounded-full blur-xl opacity-30 animate-pulse" />
+                <Loader2 className="w-16 h-16 text-purple-600 animate-spin relative z-10" />
+              </div>
+
+              {/* Rotating message with icon */}
+              <div className="text-center mb-6 min-h-[60px] flex flex-col items-center justify-center">
+                <span className="text-3xl mb-2">{LOADING_MESSAGES[loadingMessageIndex].icon}</span>
+                <p className="text-base text-zinc-700 font-medium px-4 leading-relaxed">
+                  {LOADING_MESSAGES[loadingMessageIndex].text}
+                </p>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full max-w-xs">
+                <div className="h-2 bg-zinc-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                    style={{ width: `${loadingProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-zinc-500 text-center mt-2">
+                  {loadingProgress < 30 && 'מנתחים את התמונה...'}
+                  {loadingProgress >= 30 && loadingProgress < 60 && 'יוצרים את האמנות...'}
+                  {loadingProgress >= 60 && loadingProgress < 90 && 'מוסיפים פרטים...'}
+                  {loadingProgress >= 90 && 'כמעט שם...'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Prompt Error */}
+          {promptError && !isApplyingPrompt && (
+            <div className="absolute bottom-3 left-3 right-3 bg-red-100 text-red-700 text-sm p-2 rounded-lg flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{promptError}</span>
+            </div>
+          )}
+
+          {/* Regenerate Button */}
+          <button
+            onClick={handleRegenerate}
+            disabled={isProcessing}
+            className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-2 bg-white rounded-full shadow-md text-zinc-700 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            aria-label="יצירה מחדש"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+            <span>יצירה מחדש</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom Section - Tools + CTA */}
+      <div className="flex-none bg-white border-t border-zinc-200">
+        {/* Tool Tabs */}
+        <div className="px-4 pt-3 pb-2">
+          <div className="max-w-md mx-auto flex gap-2">
+            {[
+              { id: 'color' as ToolTab, icon: Palette, label: 'צבע' },
+              { id: 'ai' as ToolTab, icon: Wand2, label: 'AI' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-sm font-medium transition
+                  ${activeTab === tab.id
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}
+                `}
               >
-                <Loader2 className="w-10 h-10 text-purple-600 animate-spin" />
-                <span className="text-sm text-zinc-600 font-medium">
-                  {isRegenerating ? 'יוצר מחדש...' : isRemovingBg ? 'מסיר רקע...' : 'מעבד...'}
-                </span>
-              </div>
-            )}
-
-            {/* Background Error */}
-            {bgError && !isRemovingBg && (
-              <div className="absolute bottom-3 left-3 right-3 bg-red-100 text-red-700 text-sm p-2 rounded-lg flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" />
-                <span>{bgError}</span>
-              </div>
-            )}
-
-            {/* Regenerate Button */}
-            <button
-              onClick={handleRegenerate}
-              disabled={isProcessing}
-              className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-2 bg-white rounded-full shadow-md text-zinc-700 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              aria-label="יצירה מחדש"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
-              <span>יצירה מחדש</span>
-            </button>
-
-            {/* Close Button */}
-            <button
-              onClick={handleBack}
-              className="absolute top-3 left-3 w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600"
-              aria-label="סגירה"
-            >
-              <X className="w-5 h-5" />
-            </button>
+                <tab.icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Tool Tabs */}
-        <div className="flex gap-2 mb-4">
-          {[
-            { id: 'color' as ToolTab, icon: Palette, label: 'צבע' },
-            { id: 'crop' as ToolTab, icon: Scissors, label: 'חיתוך' },
-            { id: 'background' as ToolTab, icon: Eraser, label: 'רקע' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`
-                flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium transition
-                ${activeTab === tab.id
-                  ? 'bg-purple-100 text-purple-700'
-                  : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50'}
-              `}
-            >
-              <tab.icon className="w-5 h-5" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        {/* Tool Panels - Compact */}
+        <div className="px-4 pb-2">
+          <div className="max-w-md mx-auto">
+            {/* Color Panel */}
+            {activeTab === 'color' && (
+              <div className="space-y-3">
+                {/* Sliders Row */}
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Brightness */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <Sun className="w-3.5 h-3.5 text-zinc-500" />
+                      <span className="text-xs text-zinc-500">{tweakSettings.brightness}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-100"
+                      max="100"
+                      value={tweakSettings.brightness}
+                      onChange={(e) => setTweakSettings({ brightness: parseInt(e.target.value) })}
+                      className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    />
+                  </div>
 
-        {/* Tool Panels */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-5">
-          {/* Color Panel */}
-          {activeTab === 'color' && (
-            <div className="space-y-6">
-              {/* Brightness Slider */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-zinc-700">
-                    <Sun className="w-4 h-4" />
-                    בהירות
-                  </label>
-                  <span className="text-sm text-zinc-500">{tweakSettings.brightness}</span>
+                  {/* Contrast */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <Contrast className="w-3.5 h-3.5 text-zinc-500" />
+                      <span className="text-xs text-zinc-500">{tweakSettings.contrast}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-100"
+                      max="100"
+                      value={tweakSettings.contrast}
+                      onChange={(e) => setTweakSettings({ contrast: parseInt(e.target.value) })}
+                      className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    />
+                  </div>
+
+                  {/* Saturation */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <Droplets className="w-3.5 h-3.5 text-zinc-500" />
+                      <span className="text-xs text-zinc-500">{tweakSettings.saturation}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-100"
+                      max="100"
+                      value={tweakSettings.saturation}
+                      onChange={(e) => setTweakSettings({ saturation: parseInt(e.target.value) })}
+                      className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  value={tweakSettings.brightness}
-                  onChange={(e) => setTweakSettings({ brightness: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                />
-              </div>
 
-              {/* Contrast Slider */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-zinc-700">
-                    <Contrast className="w-4 h-4" />
-                    ניגודיות
-                  </label>
-                  <span className="text-sm text-zinc-500">{tweakSettings.contrast}</span>
-                </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  value={tweakSettings.contrast}
-                  onChange={(e) => setTweakSettings({ contrast: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                />
-              </div>
-
-              {/* Saturation Slider */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-zinc-700">
-                    <Droplets className="w-4 h-4" />
-                    רוויה
-                  </label>
-                  <span className="text-sm text-zinc-500">{tweakSettings.saturation}</span>
-                </div>
-                <input
-                  type="range"
-                  min="-100"
-                  max="100"
-                  value={tweakSettings.saturation}
-                  onChange={(e) => setTweakSettings({ saturation: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                />
-              </div>
-
-              {/* Color Filter Presets */}
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-3">פילטרים</label>
-                <div className="flex gap-2 flex-wrap">
+                {/* Color Filter Presets - Full Width */}
+                <div className="grid grid-cols-5 gap-2">
                   {COLOR_FILTERS.map((filter) => (
                     <button
                       key={filter.id}
                       onClick={() => setTweakSettings({ colorFilter: filter.id })}
                       className={`
-                        px-4 py-2 rounded-xl text-sm font-medium transition
+                        py-2 rounded-lg text-xs font-medium transition
                         ${tweakSettings.colorFilter === filter.id
                           ? 'bg-purple-600 text-white'
                           : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'}
@@ -422,99 +492,66 @@ export default function TweakPage() {
                   ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Crop Panel */}
-          {activeTab === 'crop' && (
-            <div className="space-y-6">
-              {/* Rotate Button */}
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-3">סיבוב</label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleRotate}
-                    className="flex items-center gap-2 px-5 py-3 bg-zinc-100 rounded-xl text-zinc-700 font-medium hover:bg-zinc-200 transition"
-                  >
-                    <RotateCw className="w-5 h-5" />
-                    <span>סובב 90°</span>
-                  </button>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-xl text-purple-700">
-                    <span className="text-sm font-medium">{tweakSettings.rotation}°</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Crop Info */}
-              <div className="p-4 bg-amber-50 rounded-xl border border-amber-100">
-                <p className="text-sm text-amber-700">
-                  חיתוך מתקדם יהיה זמין בקרוב. כרגע ניתן לסובב את התמונה.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Background Panel */}
-          {activeTab === 'background' && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-3">הסרת רקע</label>
+            {/* AI Edit Panel */}
+            {activeTab === 'ai' && (
+              <div className="py-2 space-y-3">
+                <textarea
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  placeholder="תארו את השינוי הרצוי... לדוגמה: הסר את הרקע, שנה את הרקע לשקיעה, הוסף אפקט עשן"
+                  className="w-full h-20 px-3 py-2 text-sm border border-zinc-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  dir="rtl"
+                />
                 <button
-                  onClick={handleRemoveBackground}
-                  disabled={isRemovingBg || tweakSettings.backgroundRemoved}
+                  onClick={handleApplyPrompt}
+                  disabled={isApplyingPrompt || !customPrompt.trim()}
                   className={`
-                    w-full flex items-center justify-center gap-2 py-4 rounded-xl font-medium transition
-                    ${tweakSettings.backgroundRemoved
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : isRemovingBg
+                    w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition
+                    ${isApplyingPrompt
+                      ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                      : !customPrompt.trim()
                         ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90'}
                   `}
                 >
-                  {tweakSettings.backgroundRemoved ? (
+                  {isApplyingPrompt ? (
                     <>
-                      <Check className="w-5 h-5" />
-                      <span>הרקע הוסר בהצלחה</span>
-                    </>
-                  ) : isRemovingBg ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>מסיר רקע...</span>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>מעבד...</span>
                     </>
                   ) : (
                     <>
-                      <Eraser className="w-5 h-5" />
-                      <span>הסר רקע</span>
+                      <RefreshCw className="w-4 h-4" />
+                      <span>החל שינוי</span>
                     </>
                   )}
                 </button>
+                {promptError && (
+                  <p className="text-xs text-red-500 text-center">{promptError}</p>
+                )}
               </div>
-
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <p className="text-sm text-blue-700">
-                  הסרת הרקע תיצור תמונה עם רקע שקוף, מושלם להדפסה על קנבס או נייר צבעוני.
-                </p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 p-4 pb-safe">
-        <div className="max-w-md mx-auto">
-          <button
-            onClick={handleContinue}
-            disabled={isProcessing}
-            className={`
-              w-full py-3.5 rounded-xl font-semibold shadow-lg transition flex items-center justify-center gap-2
-              ${isProcessing
-                ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:shadow-xl hover:shadow-violet-500/25 active:scale-[0.98]'}
-            `}
-          >
-            <span>המשך להתאמה</span>
-          </button>
+        {/* CTA Button */}
+        <div className="px-4 pb-4 pt-2">
+          <div className="max-w-md mx-auto">
+            <button
+              onClick={handleContinue}
+              disabled={isProcessing}
+              className={`
+                w-full py-3.5 rounded-xl font-semibold shadow-lg transition flex items-center justify-center gap-2
+                ${isProcessing
+                  ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:shadow-xl hover:shadow-violet-500/25 active:scale-[0.98]'}
+              `}
+            >
+              <span>המשך להתאמה</span>
+            </button>
+          </div>
         </div>
       </div>
     </main>

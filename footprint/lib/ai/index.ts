@@ -14,6 +14,7 @@ import {
   NanoBananaResult,
   dataUriToBase64,
   base64ToDataUri,
+  type ReferenceImage,
 } from './nano-banana';
 import {
   transformWithRetry as transformWithReplicateRetry,
@@ -51,6 +52,7 @@ export interface TransformResult {
 export interface TransformOptions {
   provider?: AIProvider;
   maxRetries?: number;
+  referenceImages?: ReferenceImage[];
 }
 
 /**
@@ -105,7 +107,7 @@ export async function transformImage(
   // Try preferred provider first
   if (preferredProvider === 'nano-banana' && isNanoBananaConfigured()) {
     try {
-      return await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries);
+      return await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries, options.referenceImages);
     } catch (error) {
       console.error('Nano Banana failed:', error);
 
@@ -128,7 +130,7 @@ export async function transformImage(
       // Fall back to Nano Banana if configured
       if (isNanoBananaConfigured()) {
         console.log('Falling back to Nano Banana...');
-        return await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries);
+        return await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries, options.referenceImages);
       }
       throw error;
     }
@@ -144,7 +146,8 @@ async function transformWithNanoBananaProvider(
   input: string,
   style: StyleType,
   startTime: number,
-  maxRetries?: number
+  maxRetries?: number,
+  referenceImages?: ReferenceImage[]
 ): Promise<TransformResult> {
   // Convert input to base64 if needed
   const { base64, mimeType } = input.startsWith('data:')
@@ -157,7 +160,8 @@ async function transformWithNanoBananaProvider(
     base64,
     style,
     mimeType,
-    maxRetries
+    maxRetries,
+    referenceImages || []
   );
 
   return {

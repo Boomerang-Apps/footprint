@@ -48,6 +48,7 @@ function CheckoutPageContent() {
     shippingAddress,
     setShippingAddress,
     setStep,
+    _hasHydrated,
   } = useOrderStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -60,12 +61,12 @@ function CheckoutPageContent() {
     zipCode: '',
   });
 
-  // Redirect if no image
+  // Redirect if no image (only after hydration)
   useEffect(() => {
-    if (!originalImage) {
+    if (_hasHydrated && !originalImage) {
       router.push('/create');
     }
-  }, [originalImage, router]);
+  }, [_hasHydrated, originalImage, router]);
 
   // Check for payment error on return from PayPlus
   useEffect(() => {
@@ -160,8 +161,16 @@ function CheckoutPageContent() {
     router.push('/create/customize');
   };
 
-  if (!originalImage) {
-    return null;
+  // Show loading state while hydrating or if no image
+  if (!_hasHydrated || !originalImage) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-white" dir="rtl">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-purple-600" />
+          <p className="text-sm text-zinc-500">טוען...</p>
+        </div>
+      </main>
+    );
   }
 
   // Calculate price (simplified)

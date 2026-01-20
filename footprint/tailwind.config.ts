@@ -49,6 +49,16 @@ const config: Config = {
         'xl': '16px',
         '2xl': '24px',
       },
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
+        'bounce-gentle': 'bounce-gentle 2s ease-in-out infinite',
+      },
+      keyframes: {
+        'bounce-gentle': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.05)' },
+        },
+      },
     },
   },
   plugins: [],

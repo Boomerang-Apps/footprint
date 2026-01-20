@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Camera, ImageIcon, Upload, Check, Lightbulb, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowRight, Camera, ImageIcon, Upload, Check, Lightbulb, Loader2, AlertCircle, RefreshCw, X } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import Image from 'next/image';
 
@@ -148,11 +148,17 @@ export default function CreatePage() {
     fileInputRef.current?.click();
   }, []);
 
+  const handleRemoveImage = useCallback(() => {
+    setOriginalImage('', undefined);
+    setUploadError(null);
+    setPendingFile(null);
+  }, [setOriginalImage]);
+
   return (
     <main className="min-h-screen bg-white" dir="rtl">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-zinc-200">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition"
@@ -170,7 +176,7 @@ export default function CreatePage() {
 
       {/* Progress Steps */}
       <div className="border-b border-zinc-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-center gap-1">
             {STEPS.map((step, i) => {
               const isCompleted = false; // Step 1 is active, none completed
@@ -197,11 +203,11 @@ export default function CreatePage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 py-4">
         {/* Page Title */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2 text-zinc-900">בחרו תמונה</h2>
-          <p className="text-zinc-500">העלו תמונה מהגלריה או צלמו תמונה חדשה</p>
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-bold mb-1 text-zinc-900">בחרו תמונה</h2>
+          <p className="text-zinc-500 text-sm">העלו תמונה מהגלריה או צלמו תמונה חדשה</p>
         </div>
 
         {/* Upload Zone */}
@@ -309,8 +315,17 @@ export default function CreatePage() {
               className="w-full h-auto object-cover"
             />
 
+            {/* Remove Button (X) */}
+            <button
+              onClick={handleRemoveImage}
+              className="absolute top-3 left-3 w-9 h-9 flex items-center justify-center bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white rounded-full transition"
+              aria-label="הסר תמונה"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
             {/* Ready Badge */}
-            <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded-full text-sm font-medium">
+            <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded-full text-sm font-medium">
               <Check className="w-4 h-4" />
               <span>מוכן</span>
             </div>
@@ -318,10 +333,10 @@ export default function CreatePage() {
             {/* Replace Button */}
             <button
               onClick={handleReplaceImage}
-              className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm text-zinc-700 rounded-lg text-sm font-medium hover:bg-white transition"
+              className="absolute bottom-3 left-3 flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur-sm text-zinc-700 rounded-lg text-sm font-medium hover:bg-white transition"
             >
               <ImageIcon className="w-4 h-4" />
-              <span>החלפת תמונה</span>
+              <span>החלפה</span>
             </button>
           </div>
         )}
@@ -344,17 +359,15 @@ export default function CreatePage() {
         />
 
         {/* Tips Section */}
-        <div className="mt-8 p-6 bg-amber-50 rounded-xl border border-amber-100">
-          <div className="flex items-center gap-2 mb-4">
-            <Lightbulb className="w-5 h-5 text-amber-600" />
-            <h3 className="font-semibold text-zinc-900">טיפים לתוצאה מושלמת</h3>
+        <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+          <div className="flex items-center gap-2 mb-2">
+            <Lightbulb className="w-4 h-4 text-amber-600" />
+            <h3 className="font-semibold text-zinc-900 text-sm">טיפים לתוצאה מושלמת</h3>
           </div>
-          <ul className="space-y-3">
+          <ul className="flex flex-wrap gap-x-4 gap-y-1">
             {TIPS.map((tip, i) => (
-              <li key={i} className="flex items-center gap-3 text-sm text-zinc-700">
-                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <Check className="w-3 h-3 text-green-600" />
-                </div>
+              <li key={i} className="flex items-center gap-2 text-xs text-zinc-700">
+                <Check className="w-3 h-3 text-green-600" />
                 <span>{tip.text}</span>
               </li>
             ))}

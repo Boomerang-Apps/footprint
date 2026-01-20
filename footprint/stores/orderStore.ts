@@ -118,6 +118,10 @@ interface OrderState {
 }
 
 interface OrderActions {
+  // Hydration
+  _hasHydrated: boolean;
+  setHasHydrated: (value: boolean) => void;
+
   // Navigation
   setStep: (step: OrderState['currentStep']) => void;
   nextStep: () => void;
@@ -245,6 +249,10 @@ export const useOrderStore = create<OrderState & OrderActions>()(
   persist(
     (set, get) => ({
       ...initialState,
+
+      // Hydration
+      _hasHydrated: false,
+      setHasHydrated: (value) => set({ _hasHydrated: value }),
 
       // Navigation
       setStep: (step) => set({ currentStep: step }),
@@ -469,6 +477,9 @@ export const useOrderStore = create<OrderState & OrderActions>()(
     }),
     {
       name: 'footprint-order',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       partialize: (state) => ({
         // Only persist certain fields
         originalImage: state.originalImage,
