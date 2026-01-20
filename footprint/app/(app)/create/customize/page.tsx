@@ -31,6 +31,7 @@ const frames: { id: FrameType; name: string; color: string; extraPrice: number }
 const progressSteps = [
   { key: 'upload', label: 'העלאה' },
   { key: 'style', label: 'סגנון' },
+  { key: 'tweak', label: 'עריכה' },
   { key: 'customize', label: 'התאמה' },
   { key: 'checkout', label: 'תשלום' },
 ];
@@ -61,8 +62,8 @@ export default function CustomizePage() {
   };
 
   const handleBack = () => {
-    setStep('style');
-    router.push('/create/style');
+    setStep('tweak');
+    router.push('/create/tweak');
   };
 
   if (!originalImage) {
@@ -105,15 +106,15 @@ export default function CustomizePage() {
             <div
               data-testid="progress-fill"
               className="h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full"
-              style={{ width: '60%' }}
+              style={{ width: '80%' }}
             />
           </div>
 
           {/* Step labels */}
           <div className="flex justify-between">
             {progressSteps.map((step, i) => {
-              const isCompleted = i < 2; // Steps 0 and 1 are completed
-              const isActive = i === 2; // Step 2 (customize) is active
+              const isCompleted = i < 3; // Steps 0, 1, 2 are completed (upload, style, tweak)
+              const isActive = i === 3; // Step 3 (customize) is active
 
               return (
                 <div

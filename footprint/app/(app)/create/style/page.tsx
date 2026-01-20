@@ -80,6 +80,7 @@ const STYLES: StyleOption[] = [
 const STEPS = [
   { id: 'upload', label: 'העלאה' },
   { id: 'style', label: 'סגנון' },
+  { id: 'tweak', label: 'עריכה' },
   { id: 'customize', label: 'התאמה' },
   { id: 'payment', label: 'תשלום' },
 ];
@@ -171,8 +172,8 @@ export default function StylePage() {
 
   const handleContinue = useCallback(() => {
     if (!isTransforming) {
-      setStep('customize');
-      router.push('/create/customize');
+      setStep('tweak');
+      router.push('/create/tweak');
     }
   }, [isTransforming, setStep, router]);
 
@@ -221,8 +222,8 @@ export default function StylePage() {
           {/* Steps */}
           <div className="flex justify-between">
             {STEPS.map((step, i) => {
-              const isCompleted = i < 1;
-              const isActive = i === 1;
+              const isCompleted = i < 1; // Only upload is completed
+              const isActive = i === 1; // Style is active
               return (
                 <div
                   key={step.id}

@@ -9,6 +9,7 @@ import Image from 'next/image';
 const STEPS = [
   { id: 'upload', label: 'העלאה' },
   { id: 'style', label: 'סגנון' },
+  { id: 'tweak', label: 'עריכה' },
   { id: 'customize', label: 'התאמה' },
   { id: 'payment', label: 'תשלום' },
 ];
