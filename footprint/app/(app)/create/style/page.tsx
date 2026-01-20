@@ -466,7 +466,10 @@ export default function StylePage() {
         >
           {/* Close Button */}
           <button
-            onClick={handleToggleFullscreen}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsFullscreen(false);
+            }}
             className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-white/10 rounded-full text-white hover:bg-white/20 transition z-10"
             aria-label="סגירה"
           >
