@@ -9,6 +9,7 @@ import Image from 'next/image';
 const STEPS = [
   { id: 'upload', label: 'העלאה' },
   { id: 'style', label: 'סגנון' },
+  { id: 'tweak', label: 'עריכה' },
   { id: 'customize', label: 'התאמה' },
   { id: 'payment', label: 'תשלום' },
 ];
@@ -167,45 +168,30 @@ export default function CreatePage() {
         </div>
       </header>
 
-      {/* Progress Bar */}
+      {/* Progress Steps */}
       <div className="border-b border-zinc-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="relative">
-            {/* Progress Track */}
-            <div className="absolute top-4 right-0 left-0 h-1 bg-zinc-200 rounded-full">
-              <div
-                data-testid="progress-fill"
-                className="h-full bg-gradient-to-l from-purple-600 to-pink-500 rounded-full transition-all"
-                style={{ width: '20%' }}
-              />
-            </div>
-
-            {/* Steps */}
-            <div className="relative flex items-center justify-between">
-              {STEPS.map((step, i) => {
-                const isActive = i === 0;
-                return (
-                  <div
-                    key={step.id}
-                    data-step={step.id}
-                    data-active={isActive ? 'true' : 'false'}
-                    className="flex flex-col items-center"
-                  >
-                    <div className={`
-                      w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium z-10
-                      ${isActive
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white'
-                        : 'bg-zinc-100 text-zinc-500'}
-                    `}>
-                      {i + 1}
-                    </div>
-                    <span className={`text-xs mt-2 ${isActive ? 'text-zinc-900 font-medium' : 'text-zinc-500'}`}>
-                      {step.label}
-                    </span>
+          <div className="flex items-center justify-center gap-1">
+            {STEPS.map((step, i) => {
+              const isCompleted = false; // Step 1 is active, none completed
+              const isActive = i === 0;
+              return (
+                <div key={step.id} className="flex items-center gap-1" data-step={step.id} data-active={isActive ? 'true' : undefined}>
+                  <div className={`
+                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                    ${isCompleted ? 'bg-violet-600 text-white' : isActive ? 'bg-violet-600 text-white' : 'bg-zinc-100 text-zinc-500'}
+                  `}>
+                    {isCompleted ? <Check className="w-4 h-4" /> : i + 1}
                   </div>
-                );
-              })}
-            </div>
+                  <span className={`text-sm hidden sm:inline ${isCompleted || isActive ? 'text-zinc-900' : 'text-zinc-500'}`}>
+                    {step.label}
+                  </span>
+                  {i < STEPS.length - 1 && (
+                    <div className={`w-6 h-px mx-1 ${isCompleted ? 'bg-violet-600' : 'bg-zinc-300'}`} />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -24,27 +24,21 @@ export const originalImages: string[] = [
 // Style preview images (shown in style selector)
 export const stylePreviewImages: Record<StyleType, string> = {
   original: '/demo/styles/original.jpg',
-  pop_art: '/demo/styles/pop-art.jpg',
   watercolor: '/demo/styles/watercolor.jpg',
   line_art: '/demo/styles/line-art.jpg',
+  line_art_watercolor: '/demo/styles/line-watercolor.jpg',
   oil_painting: '/demo/styles/oil-painting.jpg',
-  romantic: '/demo/styles/romantic.jpg',
-  comic_book: '/demo/styles/comic-book.jpg',
-  vintage: '/demo/styles/vintage.jpg',
-  minimalist: '/demo/styles/minimalist.jpg',
+  avatar_cartoon: '/demo/styles/avatar-cartoon.jpg',
 };
 
 // Transformed image examples (same image in different styles)
 export const transformedExamples: Record<StyleType, string> = {
   original: 'https://picsum.photos/seed/orig_enhanced/800/600',
-  pop_art: 'https://picsum.photos/seed/pop_art_demo/800/600',
   watercolor: 'https://picsum.photos/seed/watercolor_demo/800/600',
   line_art: 'https://picsum.photos/seed/line_art_demo/800/600',
+  line_art_watercolor: 'https://picsum.photos/seed/line_watercolor_demo/800/600',
   oil_painting: 'https://picsum.photos/seed/oil_demo/800/600',
-  romantic: 'https://picsum.photos/seed/romantic_demo/800/600',
-  comic_book: 'https://picsum.photos/seed/comic_demo/800/600',
-  vintage: 'https://picsum.photos/seed/vintage_demo/800/600',
-  minimalist: 'https://picsum.photos/seed/minimal_demo/800/600',
+  avatar_cartoon: 'https://picsum.photos/seed/avatar_cartoon_demo/800/600',
 };
 
 // Aggregated demo images export

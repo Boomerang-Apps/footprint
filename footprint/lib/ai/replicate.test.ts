@@ -34,12 +34,12 @@ describe('lib/ai/replicate', () => {
   });
 
   describe('STYLE_PROMPTS', () => {
-    it('should have prompts for all 8 styles', () => {
-      expect(Object.keys(STYLE_PROMPTS)).toHaveLength(8);
+    it('should have prompts for all 6 styles', () => {
+      expect(Object.keys(STYLE_PROMPTS)).toHaveLength(6);
     });
 
-    it('should include pop_art style', () => {
-      expect(STYLE_PROMPTS.pop_art).toContain('pop art');
+    it('should include original style', () => {
+      expect(STYLE_PROMPTS.original).toContain('original');
     });
 
     it('should include watercolor style', () => {
@@ -50,51 +50,40 @@ describe('lib/ai/replicate', () => {
       expect(STYLE_PROMPTS.line_art).toContain('line art');
     });
 
+    it('should include line_art_watercolor style', () => {
+      expect(STYLE_PROMPTS.line_art_watercolor).toContain('line art');
+      expect(STYLE_PROMPTS.line_art_watercolor).toContain('watercolor');
+    });
+
     it('should include oil_painting style', () => {
       expect(STYLE_PROMPTS.oil_painting).toContain('oil painting');
     });
 
-    it('should include romantic style', () => {
-      expect(STYLE_PROMPTS.romantic).toContain('romantic');
-    });
-
-    it('should include comic_book style', () => {
-      expect(STYLE_PROMPTS.comic_book).toContain('comic book');
-    });
-
-    it('should include vintage style', () => {
-      expect(STYLE_PROMPTS.vintage).toContain('vintage');
-    });
-
-    it('should include original_enhanced style', () => {
-      expect(STYLE_PROMPTS.original_enhanced).toContain('Enhance');
+    it('should include avatar_cartoon style', () => {
+      expect(STYLE_PROMPTS.avatar_cartoon).toContain('cartoon');
     });
   });
 
   describe('ALLOWED_STYLES', () => {
-    it('should contain all 8 style types', () => {
-      expect(ALLOWED_STYLES).toHaveLength(8);
-      expect(ALLOWED_STYLES).toContain('pop_art');
+    it('should contain all 6 style types', () => {
+      expect(ALLOWED_STYLES).toHaveLength(6);
+      expect(ALLOWED_STYLES).toContain('original');
       expect(ALLOWED_STYLES).toContain('watercolor');
       expect(ALLOWED_STYLES).toContain('line_art');
+      expect(ALLOWED_STYLES).toContain('line_art_watercolor');
       expect(ALLOWED_STYLES).toContain('oil_painting');
-      expect(ALLOWED_STYLES).toContain('romantic');
-      expect(ALLOWED_STYLES).toContain('comic_book');
-      expect(ALLOWED_STYLES).toContain('vintage');
-      expect(ALLOWED_STYLES).toContain('original_enhanced');
+      expect(ALLOWED_STYLES).toContain('avatar_cartoon');
     });
   });
 
   describe('isValidStyle', () => {
     it('should return true for valid styles', () => {
-      expect(isValidStyle('pop_art')).toBe(true);
+      expect(isValidStyle('original')).toBe(true);
       expect(isValidStyle('watercolor')).toBe(true);
       expect(isValidStyle('line_art')).toBe(true);
+      expect(isValidStyle('line_art_watercolor')).toBe(true);
       expect(isValidStyle('oil_painting')).toBe(true);
-      expect(isValidStyle('romantic')).toBe(true);
-      expect(isValidStyle('comic_book')).toBe(true);
-      expect(isValidStyle('vintage')).toBe(true);
-      expect(isValidStyle('original_enhanced')).toBe(true);
+      expect(isValidStyle('avatar_cartoon')).toBe(true);
     });
 
     it('should return false for invalid styles', () => {
@@ -104,26 +93,30 @@ describe('lib/ai/replicate', () => {
       expect(isValidStyle(null as unknown as string)).toBe(false);
       expect(isValidStyle(undefined as unknown as string)).toBe(false);
     });
+
+    it('should return false for removed styles', () => {
+      expect(isValidStyle('romantic')).toBe(false);
+      expect(isValidStyle('comic_book')).toBe(false);
+      expect(isValidStyle('vintage')).toBe(false);
+    });
   });
 
   describe('getStylePrompt', () => {
     it('should return correct prompt for each style', () => {
       const styles: StyleType[] = [
-        'pop_art',
+        'original',
         'watercolor',
         'line_art',
+        'line_art_watercolor',
         'oil_painting',
-        'romantic',
-        'comic_book',
-        'vintage',
-        'original_enhanced',
+        'avatar_cartoon',
       ];
 
       styles.forEach((style) => {
         const prompt = getStylePrompt(style);
         expect(prompt).toBe(STYLE_PROMPTS[style]);
         expect(typeof prompt).toBe('string');
-        expect(prompt.length).toBeGreaterThan(20);
+        expect(prompt.length).toBeGreaterThan(10);
       });
     });
 
@@ -139,14 +132,14 @@ describe('lib/ai/replicate', () => {
     it('should call Replicate API with correct parameters', async () => {
       mockRun.mockResolvedValue(mockOutputUrl);
 
-      await transformImage(testImageUrl, 'pop_art');
+      await transformImage(testImageUrl, 'avatar_cartoon');
 
       expect(mockRun).toHaveBeenCalledWith(
         'black-forest-labs/flux-kontext-pro',
         expect.objectContaining({
           input: expect.objectContaining({
             image: testImageUrl,
-            prompt: expect.stringContaining('pop art'),
+            prompt: expect.stringContaining('Pollock'),
           }),
         })
       );
@@ -182,7 +175,7 @@ describe('lib/ai/replicate', () => {
     it('should include required input parameters', async () => {
       mockRun.mockResolvedValue(mockOutputUrl);
 
-      await transformImage(testImageUrl, 'romantic');
+      await transformImage(testImageUrl, 'line_art_watercolor');
 
       expect(mockRun).toHaveBeenCalledWith(
         expect.any(String),
@@ -202,13 +195,13 @@ describe('lib/ai/replicate', () => {
     it('should throw error when API fails', async () => {
       mockRun.mockRejectedValue(new Error('API Error'));
 
-      await expect(transformImage(testImageUrl, 'comic_book')).rejects.toThrow('API Error');
+      await expect(transformImage(testImageUrl, 'avatar_cartoon')).rejects.toThrow('API Error');
     });
 
     it('should throw error when API returns null', async () => {
       mockRun.mockResolvedValue(null);
 
-      await expect(transformImage(testImageUrl, 'vintage')).rejects.toThrow(
+      await expect(transformImage(testImageUrl, 'watercolor')).rejects.toThrow(
         'No output returned from Replicate'
       );
     });
@@ -216,7 +209,7 @@ describe('lib/ai/replicate', () => {
     it('should throw error when API returns empty array', async () => {
       mockRun.mockResolvedValue([]);
 
-      await expect(transformImage(testImageUrl, 'original_enhanced')).rejects.toThrow(
+      await expect(transformImage(testImageUrl, 'original')).rejects.toThrow(
         'No output returned from Replicate'
       );
     });
@@ -224,7 +217,7 @@ describe('lib/ai/replicate', () => {
     it('should throw error for missing API token', async () => {
       vi.stubEnv('REPLICATE_API_TOKEN', '');
 
-      await expect(transformImage(testImageUrl, 'pop_art')).rejects.toThrow(
+      await expect(transformImage(testImageUrl, 'avatar_cartoon')).rejects.toThrow(
         'REPLICATE_API_TOKEN is not configured'
       );
     });
@@ -237,7 +230,7 @@ describe('lib/ai/replicate', () => {
     it('should return result on first successful attempt', async () => {
       mockRun.mockResolvedValue(mockOutputUrl);
 
-      const result = await transformWithRetry(testImageUrl, 'pop_art', 1);
+      const result = await transformWithRetry(testImageUrl, 'avatar_cartoon', 1);
 
       expect(result).toBe(mockOutputUrl);
       expect(mockRun).toHaveBeenCalledTimes(1);
@@ -249,7 +242,6 @@ describe('lib/ai/replicate', () => {
         .mockResolvedValue(mockOutputUrl);
 
       // Use a patched delay for fast testing
-      const originalDelay = 1000;
       vi.spyOn(global, 'setTimeout').mockImplementation((fn) => {
         (fn as () => void)();
         return 0 as unknown as NodeJS.Timeout;
@@ -313,7 +305,7 @@ describe('lib/ai/replicate', () => {
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValue(mockOutputUrl);
 
-      await transformWithRetry(testImageUrl, 'romantic');
+      await transformWithRetry(testImageUrl, 'line_art_watercolor');
 
       // Should have delays of 1000ms, 2000ms (exponential backoff)
       expect(delays[0]).toBe(1000);
@@ -334,7 +326,7 @@ describe('lib/ai/replicate', () => {
         return 0 as unknown as NodeJS.Timeout;
       });
 
-      await expect(transformWithRetry(testImageUrl, 'comic_book')).rejects.toThrow(
+      await expect(transformWithRetry(testImageUrl, 'avatar_cartoon')).rejects.toThrow(
         'Final error'
       );
 
@@ -346,17 +338,15 @@ describe('lib/ai/replicate', () => {
     it('should have StyleType as a union of all style strings', () => {
       // TypeScript compile-time check - if this compiles, the types are correct
       const styles: StyleType[] = [
-        'pop_art',
+        'original',
         'watercolor',
         'line_art',
+        'line_art_watercolor',
         'oil_painting',
-        'romantic',
-        'comic_book',
-        'vintage',
-        'original_enhanced',
+        'avatar_cartoon',
       ];
 
-      expect(styles).toHaveLength(8);
+      expect(styles).toHaveLength(6);
     });
   });
 });

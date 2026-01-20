@@ -23,14 +23,12 @@ const mockOrders: Order[] = [];
 // ============================================
 
 const mockStyles: Style[] = [
-  { id: 'original', name: 'Original', nameHe: 'מקורי', description: 'Keep your photo as-is with enhancement', descriptionHe: 'שמור על התמונה המקורית עם שיפורים', thumbnailUrl: '/styles/original.jpg', processingTime: 2 },
-  { id: 'pop_art', name: 'Pop Art', nameHe: 'פופ ארט', description: 'Bold colors, Warhol-inspired', descriptionHe: 'צבעים נועזים, בהשראת וורהול', thumbnailUrl: '/styles/pop-art.jpg', processingTime: 8, popular: true },
+  { id: 'original', name: 'No Filter', nameHe: 'ללא פילטר', description: 'Keep your photo as-is', descriptionHe: 'שמור על התמונה המקורית', thumbnailUrl: '/styles/original.jpg', processingTime: 0 },
   { id: 'watercolor', name: 'Watercolor', nameHe: 'צבעי מים', description: 'Soft, flowing artistic style', descriptionHe: 'סגנון אמנותי רך וזורם', thumbnailUrl: '/styles/watercolor.jpg', processingTime: 10 },
-  { id: 'line_art', name: 'Line Art', nameHe: 'קווי מתאר', description: 'Clean minimalist lines', descriptionHe: 'קווים נקיים ומינימליסטיים', thumbnailUrl: '/styles/line-art.jpg', processingTime: 6 },
-  { id: 'oil_painting', name: 'Oil Painting', nameHe: 'ציור שמן', description: 'Classic painted look', descriptionHe: 'מראה ציור קלאסי', thumbnailUrl: '/styles/oil-painting.jpg', processingTime: 12 },
-  { id: 'romantic', name: 'Romantic', nameHe: 'רומנטי', description: 'Soft focus, warm tones', descriptionHe: 'מיקוד רך, גוונים חמים', thumbnailUrl: '/styles/romantic.jpg', processingTime: 8 },
-  { id: 'comic_book', name: 'Comic Book', nameHe: 'קומיקס', description: 'Bold outlines, action style', descriptionHe: 'קווי מתאר נועזים, סגנון אקשן', thumbnailUrl: '/styles/comic.jpg', processingTime: 8 },
-  { id: 'vintage', name: 'Vintage', nameHe: 'וינטג׳', description: 'Retro film look', descriptionHe: 'מראה פילם רטרו', thumbnailUrl: '/styles/vintage.jpg', processingTime: 6 },
+  { id: 'line_art', name: 'Line Art', nameHe: 'ציור קווי', description: 'Clean minimalist lines', descriptionHe: 'קווים נקיים ומינימליסטיים', thumbnailUrl: '/styles/line-art.jpg', processingTime: 6 },
+  { id: 'line_art_watercolor', name: 'Line + Watercolor', nameHe: 'קווי + צבעי מים', description: 'Lines with watercolor fills', descriptionHe: 'קווים עם מילוי צבעי מים', thumbnailUrl: '/styles/line-watercolor.jpg', processingTime: 12 },
+  { id: 'oil_painting', name: 'Oil', nameHe: 'ציור שמן', description: 'Classic painted look', descriptionHe: 'מראה ציור קלאסי', thumbnailUrl: '/styles/oil-painting.jpg', processingTime: 12 },
+  { id: 'avatar_cartoon', name: 'Avatar Cartoon', nameHe: 'אווטאר קרטון', description: '3D cartoon avatar style', descriptionHe: 'סגנון אווטאר קרטון תלת מימדי', thumbnailUrl: '/styles/avatar-cartoon.jpg', processingTime: 10 },
 ];
 
 const mockSizes: Size[] = [

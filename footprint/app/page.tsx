@@ -1,7 +1,12 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, Star, Zap, Truck, Shield, Award, ArrowLeft, Play, Upload, Palette, Package, Heart, Users, Brush, Camera, Pen, Gift, Menu, Search, ShoppingCart, Phone, Mail, Instagram, Facebook, MessageCircle } from 'lucide-react';
+import { Sparkles, Star, Zap, Truck, Shield, Award, ArrowLeft, Play, Upload, Palette, Package, Heart, Users, Brush, Camera, Pen, Gift, Menu, X, Search, ShoppingCart, Phone, Mail, Instagram, Facebook, MessageCircle, LogIn, UserPlus } from 'lucide-react';
 
 export default function HomePage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-white">
       {/* Announcement Bar */}
@@ -37,25 +42,131 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="w-11 h-11 rounded-xl flex items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition">
+            {/* Desktop: Search */}
+            <button className="hidden lg:flex w-11 h-11 rounded-xl items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition">
               <Search className="w-5 h-5" />
             </button>
+
+            {/* Cart - always visible */}
             <button className="w-11 h-11 rounded-xl flex items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition relative">
               <ShoppingCart className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-[18px] h-[18px] bg-brand-purple rounded-full text-[10px] font-semibold text-white flex items-center justify-center">0</span>
             </button>
+
+            {/* Desktop: Login */}
+            <Link
+              href="/login"
+              className="hidden lg:flex text-[15px] font-medium text-zinc-600 hover:text-zinc-900 transition px-3"
+            >
+              התחברות
+            </Link>
+
+            {/* Desktop only: CTA - hidden on mobile */}
             <Link
               href="/create"
-              className="hidden lg:flex btn btn-primary"
+              className="!hidden lg:!inline-flex btn btn-primary"
             >
               התחילו
             </Link>
-            <button className="lg:hidden w-11 h-11 rounded-xl flex items-center justify-center text-zinc-900">
+
+            {/* Mobile: Hamburger menu */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden w-11 h-11 rounded-xl flex items-center justify-center text-zinc-900"
+            >
               <Menu className="w-5 h-5" />
             </button>
           </div>
         </div>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Menu Panel */}
+          <div className="absolute top-0 left-0 w-[280px] h-full bg-white shadow-xl">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-zinc-200">
+              <span className="text-lg font-bold text-zinc-900">תפריט</span>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-500 hover:bg-zinc-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Menu Links */}
+            <div className="p-4 space-y-1">
+              <Link
+                href="/create"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-900 hover:bg-zinc-100 transition"
+              >
+                <Sparkles className="w-5 h-5 text-brand-purple" />
+                התחילו ליצור
+              </Link>
+              <Link
+                href="#products"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
+              >
+                מוצרים
+              </Link>
+              <Link
+                href="#gallery"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
+              >
+                גלריה
+              </Link>
+              <Link
+                href="#how"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
+              >
+                איך זה עובד
+              </Link>
+              <Link
+                href="#contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
+              >
+                צור קשר
+              </Link>
+            </div>
+
+            {/* Divider */}
+            <div className="mx-4 border-t border-zinc-200" />
+
+            {/* Auth Links */}
+            <div className="p-4 space-y-1">
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
+              >
+                <LogIn className="w-5 h-5" />
+                התחברות
+              </Link>
+              <Link
+                href="/signup"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
+              >
+                <UserPlus className="w-5 h-5" />
+                הרשמה
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="py-16 lg:py-24 px-5">

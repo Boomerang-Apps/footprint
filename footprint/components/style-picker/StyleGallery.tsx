@@ -24,22 +24,12 @@ export interface StyleGalleryProps {
 const STYLES: Style[] = [
   {
     id: 'original',
-    name: 'Original',
-    nameHe: 'מקורי',
-    description: 'Your photo with enhanced colors and clarity',
-    descriptionHe: 'התמונה שלכם עם צבעים ובהירות משופרים',
+    name: 'No Filter',
+    nameHe: 'ללא פילטר',
+    description: 'Your original photo without any transformation',
+    descriptionHe: 'התמונה המקורית שלכם ללא שינוי',
     thumbnailUrl: '/styles/original.jpg',
-    processingTime: 2,
-  },
-  {
-    id: 'pop_art',
-    name: 'Pop Art',
-    nameHe: 'פופ ארט',
-    description: 'Bold colors and halftone patterns inspired by Warhol',
-    descriptionHe: 'צבעים נועזים ודפוסי הלפטון בהשראת וורהול',
-    thumbnailUrl: '/styles/pop-art.jpg',
-    processingTime: 8,
-    popular: true,
+    processingTime: 0,
   },
   {
     id: 'watercolor',
@@ -53,57 +43,38 @@ const STYLES: Style[] = [
   {
     id: 'line_art',
     name: 'Line Art',
-    nameHe: 'קווים',
+    nameHe: 'ציור קווי',
     description: 'Clean lines and minimalist style',
     descriptionHe: 'קווים נקיים וסגנון מינימליסטי',
     thumbnailUrl: '/styles/line-art.jpg',
     processingTime: 6,
   },
   {
+    id: 'line_art_watercolor',
+    name: 'Line + Watercolor',
+    nameHe: 'קווי + צבעי מים',
+    description: 'Combination of clean lines with watercolor fills',
+    descriptionHe: 'שילוב של קווים נקיים עם מילוי צבעי מים',
+    thumbnailUrl: '/styles/line-watercolor.jpg',
+    processingTime: 12,
+  },
+  {
     id: 'oil_painting',
-    name: 'Oil Painting',
+    name: 'Oil',
     nameHe: 'ציור שמן',
     description: 'Thick brushstrokes and classic art style',
     descriptionHe: 'משיכות מכחול עבות וסגנון אמנות קלאסי',
     thumbnailUrl: '/styles/oil-painting.jpg',
     processingTime: 12,
-    popular: true,
   },
   {
-    id: 'romantic',
-    name: 'Romantic',
-    nameHe: 'רומנטי',
-    description: 'Soft focus and warm dreamy tones',
-    descriptionHe: 'פוקוס רך וגוונים חמים וחלומיים',
-    thumbnailUrl: '/styles/romantic.jpg',
-    processingTime: 8,
-  },
-  {
-    id: 'comic_book',
-    name: 'Comic Book',
-    nameHe: 'קומיקס',
-    description: 'Bold outlines and bright comic style',
-    descriptionHe: 'קווי מתאר נועזים וסגנון קומיקס בהיר',
-    thumbnailUrl: '/styles/comic-book.jpg',
-    processingTime: 7,
-  },
-  {
-    id: 'vintage',
-    name: 'Vintage',
-    nameHe: 'וינטג׳',
-    description: 'Sepia tones and nostalgic film grain',
-    descriptionHe: 'גוונים חומים ורגש נוסטלגי של פילם',
-    thumbnailUrl: '/styles/vintage.jpg',
-    processingTime: 5,
-  },
-  {
-    id: 'minimalist',
-    name: 'Minimalist',
-    nameHe: 'מינימליסטי',
-    description: 'Simple shapes and reduced color palette',
-    descriptionHe: 'צורות פשוטות ופלטת צבעים מצומצמת',
-    thumbnailUrl: '/styles/minimalist.jpg',
-    processingTime: 6,
+    id: 'avatar_cartoon',
+    name: 'Avatar Cartoon',
+    nameHe: 'אווטאר קרטון',
+    description: '3D cartoon avatar style like Pixar characters',
+    descriptionHe: 'סגנון אווטאר קרטון תלת מימדי כמו דמויות פיקסאר',
+    thumbnailUrl: '/styles/avatar-cartoon.jpg',
+    processingTime: 10,
   },
 ];
 
@@ -162,14 +133,11 @@ export default function StyleGallery({
               className={`
                 absolute inset-0 flex items-center justify-center
                 ${style.id === 'original' ? 'bg-gradient-to-br from-zinc-100 to-zinc-200' : ''}
-                ${style.id === 'pop_art' ? 'bg-gradient-to-br from-pink-400 to-yellow-400' : ''}
                 ${style.id === 'watercolor' ? 'bg-gradient-to-br from-blue-200 to-purple-200' : ''}
                 ${style.id === 'line_art' ? 'bg-gradient-to-br from-zinc-50 to-zinc-300' : ''}
+                ${style.id === 'line_art_watercolor' ? 'bg-gradient-to-br from-purple-300 to-blue-300' : ''}
                 ${style.id === 'oil_painting' ? 'bg-gradient-to-br from-amber-300 to-orange-400' : ''}
-                ${style.id === 'romantic' ? 'bg-gradient-to-br from-pink-200 to-rose-300' : ''}
-                ${style.id === 'comic_book' ? 'bg-gradient-to-br from-red-400 to-blue-500' : ''}
-                ${style.id === 'vintage' ? 'bg-gradient-to-br from-amber-200 to-yellow-100' : ''}
-                ${style.id === 'minimalist' ? 'bg-gradient-to-br from-zinc-100 to-zinc-50' : ''}
+                ${style.id === 'avatar_cartoon' ? 'bg-gradient-to-br from-violet-400 to-pink-400' : ''}
               `}
             >
               <Sparkles className="w-8 h-8 text-white/80" />

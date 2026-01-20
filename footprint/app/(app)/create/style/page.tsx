@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, Heart, Film, Sun, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, CircleOff, Layers, AlertCircle, RefreshCw, RotateCcw, Maximize2, Heart, Grid3X3, Trash2 } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import type { StyleType } from '@/types';
+import toast from 'react-hot-toast';
 
 interface StyleOption {
   id: StyleType;
@@ -18,12 +19,11 @@ interface StyleOption {
 
 const STYLES: StyleOption[] = [
   {
-    id: 'pop_art',
-    name: 'Pop Art',
-    nameHe: 'פופ ארט',
-    icon: Zap,
-    gradient: 'from-violet-500 to-pink-500',
-    badge: 'popular',
+    id: 'original',
+    name: 'No Filter',
+    nameHe: 'ללא פילטר',
+    icon: CircleOff,
+    gradient: 'from-zinc-500 to-zinc-400',
   },
   {
     id: 'watercolor',
@@ -40,46 +40,32 @@ const STYLES: StyleOption[] = [
     gradient: 'from-gray-500 to-gray-400',
   },
   {
+    id: 'line_art_watercolor',
+    name: 'Line + Watercolor',
+    nameHe: 'קווי + צבעי מים',
+    icon: Layers,
+    gradient: 'from-purple-500 to-blue-400',
+  },
+  {
     id: 'oil_painting',
-    name: 'Oil Painting',
+    name: 'Oil',
     nameHe: 'ציור שמן',
     icon: Brush,
     gradient: 'from-amber-500 to-amber-600',
   },
   {
-    id: 'romantic',
-    name: 'Romantic',
-    nameHe: 'רומנטי',
-    icon: Heart,
-    gradient: 'from-pink-500 to-pink-400',
-    badge: 'new',
-  },
-  {
-    id: 'comic_book',
-    name: 'Comic Book',
-    nameHe: 'קומיקס',
+    id: 'avatar_cartoon',
+    name: 'Avatar Cartoon',
+    nameHe: 'אווטאר קרטון',
     icon: Zap,
-    gradient: 'from-orange-500 to-red-500',
-  },
-  {
-    id: 'vintage',
-    name: 'Vintage',
-    nameHe: 'וינטג׳',
-    icon: Film,
-    gradient: 'from-amber-800 to-amber-700',
-  },
-  {
-    id: 'original',
-    name: 'Original Enhanced',
-    nameHe: 'מקורי משופר',
-    icon: Sun,
-    gradient: 'from-emerald-500 to-emerald-400',
+    gradient: 'from-violet-500 to-pink-500',
   },
 ];
 
 const STEPS = [
   { id: 'upload', label: 'העלאה' },
   { id: 'style', label: 'סגנון' },
+  { id: 'tweak', label: 'עריכה' },
   { id: 'customize', label: 'התאמה' },
   { id: 'payment', label: 'תשלום' },
 ];
@@ -95,6 +81,10 @@ export default function StylePage() {
     setTransformedImage,
     isTransforming,
     setIsTransforming,
+    savedVersions,
+    addSavedVersion,
+    removeSavedVersion,
+    selectSavedVersion,
   } = useOrderStore();
 
   // Local state for transform error and pending style for retry
@@ -104,6 +94,15 @@ export default function StylePage() {
   // Legacy state for backward compatibility with existing tests
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStyle, setProcessingStyle] = useState<string | null>(null);
+
+  // Fullscreen modal state
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Grid modal state for viewing saved versions
+  const [showGridModal, setShowGridModal] = useState(false);
+
+  // Max saved versions
+  const MAX_VERSIONS = 10;
 
   // Redirect to upload if no image
   useEffect(() => {
@@ -171,8 +170,8 @@ export default function StylePage() {
 
   const handleContinue = useCallback(() => {
     if (!isTransforming) {
-      setStep('customize');
-      router.push('/create/customize');
+      setStep('tweak');
+      router.push('/create/tweak');
     }
   }, [isTransforming, setStep, router]);
 
@@ -180,6 +179,55 @@ export default function StylePage() {
     setStep('upload');
     router.push('/create');
   }, [setStep, router]);
+
+  // Reset to original image (clear transformation)
+  const handleResetToOriginal = useCallback(() => {
+    setTransformedImage(null);
+    setSelectedStyle('original');
+    setTransformError(null);
+  }, [setTransformedImage, setSelectedStyle]);
+
+  // Toggle fullscreen modal
+  const handleToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => !prev);
+  }, []);
+
+  // Save current version to collection
+  const handleSaveVersion = useCallback(() => {
+    if (!transformedImage) {
+      toast.error('אין תמונה לשמירה');
+      return;
+    }
+
+    if (savedVersions.length >= MAX_VERSIONS) {
+      toast.error(`הגעת למקסימום ${MAX_VERSIONS} גרסאות`);
+      return;
+    }
+
+    const success = addSavedVersion();
+    if (success) {
+      toast.success(`נשמר! (${savedVersions.length + 1}/${MAX_VERSIONS})`);
+    }
+  }, [transformedImage, savedVersions.length, addSavedVersion]);
+
+  // Select a version from grid and continue
+  const handleSelectVersion = useCallback((id: string) => {
+    selectSavedVersion(id);
+    setShowGridModal(false);
+    toast.success('נבחרה הגרסה');
+  }, [selectSavedVersion]);
+
+  // Delete a saved version
+  const handleDeleteVersion = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    removeSavedVersion(id);
+    toast.success('הגרסה נמחקה');
+  }, [removeSavedVersion]);
+
+  // Get style name for a saved version
+  const getStyleName = useCallback((styleId: StyleType) => {
+    return STYLES.find(s => s.id === styleId)?.nameHe || styleId;
+  }, []);
 
   if (!originalImage) {
     return null;
@@ -206,41 +254,27 @@ export default function StylePage() {
         </div>
       </header>
 
-      {/* Progress Bar */}
+      {/* Progress Steps */}
       <div className="bg-white border-b border-zinc-200 px-4 py-4">
         <div className="max-w-4xl mx-auto">
-          {/* Progress Track */}
-          <div className="h-1 bg-zinc-200 rounded-full mb-3">
-            <div
-              data-testid="progress-fill"
-              className="h-full bg-gradient-to-l from-purple-600 to-pink-500 rounded-full transition-all"
-              style={{ width: '40%' }}
-            />
-          </div>
-
-          {/* Steps */}
-          <div className="flex justify-between">
+          <div className="flex items-center justify-center gap-1">
             {STEPS.map((step, i) => {
-              const isCompleted = i < 1;
-              const isActive = i === 1;
+              const isCompleted = i < 1; // Only upload is completed
+              const isActive = i === 1; // Style is active
               return (
-                <div
-                  key={step.id}
-                  data-step={step.id}
-                  data-completed={isCompleted ? 'true' : 'false'}
-                  data-active={isActive ? 'true' : 'false'}
-                  className="flex items-center gap-1.5"
-                >
+                <div key={step.id} className="flex items-center gap-1" data-step={step.id} data-completed={isCompleted ? 'true' : undefined} data-active={isActive ? 'true' : undefined}>
                   <div className={`
-                    w-2 h-2 rounded-full
-                    ${isCompleted ? 'bg-emerald-500' : isActive ? 'bg-purple-600' : 'bg-zinc-300'}
-                  `} />
-                  <span className={`
-                    text-xs font-medium
-                    ${isCompleted ? 'text-emerald-600' : isActive ? 'text-purple-600' : 'text-zinc-400'}
+                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                    ${isCompleted ? 'bg-violet-600 text-white' : isActive ? 'bg-violet-600 text-white' : 'bg-zinc-100 text-zinc-500'}
                   `}>
+                    {isCompleted ? <Check className="w-4 h-4" /> : i + 1}
+                  </div>
+                  <span className={`text-sm hidden sm:inline ${isCompleted || isActive ? 'text-zinc-900' : 'text-zinc-500'}`}>
                     {step.label}
                   </span>
+                  {i < STEPS.length - 1 && (
+                    <div className={`w-6 h-px mx-1 ${isCompleted ? 'bg-violet-600' : 'bg-zinc-300'}`} />
+                  )}
                 </div>
               );
             })}
@@ -252,7 +286,7 @@ export default function StylePage() {
       <div className="max-w-4xl mx-auto px-4 pb-28">
         {/* Preview Section */}
         <div className="py-5 flex justify-center">
-          <div className="relative w-full max-w-sm aspect-[4/5] bg-zinc-100 rounded-2xl overflow-hidden shadow-lg">
+          <div className="relative w-full max-w-sm aspect-[4/5] bg-zinc-100 rounded-2xl overflow-hidden shadow-lg group">
             <Image
               src={transformedImage || originalImage}
               alt="התמונה שלך"
@@ -297,38 +331,107 @@ export default function StylePage() {
               </div>
             )}
 
-            {/* Close Button */}
-            <button
-              onClick={handleBack}
-              className="absolute top-3 left-3 w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600"
-              aria-label="סגירה"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Style Badge */}
-            <div
-              data-testid="style-badge"
-              className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3.5 py-2 bg-white rounded-full shadow-md"
-            >
-              <Sparkles className="w-4 h-4 text-purple-600" />
-              <span className="text-sm font-semibold text-zinc-900">{currentStyle.nameHe}</span>
+            {/* Top Left Buttons */}
+            <div className="absolute top-3 left-3 flex gap-2">
+              {/* Close Button */}
+              <button
+                onClick={handleBack}
+                className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600 hover:bg-zinc-50 transition"
+                aria-label="סגירה"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
+
+            {/* Top Right Buttons */}
+            <div className="absolute top-3 right-3 flex gap-2">
+              {/* Reset to Original Button */}
+              {transformedImage && (
+                <button
+                  onClick={handleResetToOriginal}
+                  className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600 hover:bg-zinc-50 transition"
+                  aria-label="חזרה למקור"
+                  title="חזרה לתמונה המקורית"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+              )}
+              {/* Save Version Button */}
+              {transformedImage && selectedStyle !== 'original' && (() => {
+                const isAlreadySaved = savedVersions.some(v => v.imageUrl === transformedImage);
+                return (
+                  <button
+                    onClick={handleSaveVersion}
+                    disabled={savedVersions.length >= MAX_VERSIONS || isAlreadySaved}
+                    className={`w-9 h-9 flex items-center justify-center rounded-full shadow-md transition ${
+                      isAlreadySaved
+                        ? 'bg-pink-100 text-pink-500 cursor-default'
+                        : savedVersions.length >= MAX_VERSIONS
+                        ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
+                        : 'bg-white text-pink-500 hover:bg-pink-50'
+                    }`}
+                    aria-label={isAlreadySaved ? 'כבר נשמר' : 'שמור גרסה'}
+                    title={isAlreadySaved ? 'גרסה זו כבר נשמרה' : `שמור לאוסף (${savedVersions.length}/${MAX_VERSIONS})`}
+                  >
+                    <Heart className="w-5 h-5" fill={isAlreadySaved ? 'currentColor' : 'none'} />
+                  </button>
+                );
+              })()}
+              {/* Fullscreen Button */}
+              <button
+                onClick={handleToggleFullscreen}
+                className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600 hover:bg-zinc-50 transition"
+                aria-label="מסך מלא"
+                title="תצוגת מסך מלא"
+              >
+                <Maximize2 className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Saved Count Badge */}
+            {savedVersions.length > 0 && (
+              <button
+                onClick={() => setShowGridModal(true)}
+                className="absolute bottom-3 left-3 flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-violet-600 to-pink-500 rounded-full shadow-md text-white hover:shadow-lg transition"
+                aria-label="צפה באוסף"
+              >
+                <Grid3X3 className="w-4 h-4" />
+                <span className="text-sm font-semibold">{savedVersions.length}</span>
+              </button>
+            )}
+
+            {/* Style Badge with Regenerate - Bottom Right */}
+            {transformedImage && selectedStyle !== 'original' && !isTransforming && !transformError && (
+              <button
+                onClick={() => transformImage(selectedStyle, currentStyle.nameHe)}
+                data-testid="style-badge"
+                className="absolute bottom-3 right-3 flex items-center gap-2 px-4 py-2.5 bg-white/95 backdrop-blur-sm rounded-full shadow-lg text-zinc-700 hover:bg-white hover:scale-105 active:scale-95 transition"
+                aria-label={`נסה שוב ${currentStyle.nameHe}`}
+              >
+                <RefreshCw className="w-4 h-4 text-purple-600" />
+                <span className="text-sm font-semibold">{currentStyle.nameHe}</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Styles Section */}
-        <div className="py-5">
-          <div className="text-center mb-4">
-            <h2 className="text-lg font-bold text-zinc-900 mb-1">בחרו סגנון אמנות</h2>
-            <p className="text-sm text-zinc-500">הקישו על סגנון לתצוגה מקדימה בזמן אמת</p>
-          </div>
+        {/* Spacer for fixed bottom panel */}
+        <div className="h-[220px]" />
+      </div>
 
-          {/* Horizontal Style Strip */}
+      {/* Sticky Bottom Panel - Style Selection + CTA */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-white/95 backdrop-blur-xl border-t border-zinc-200 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
+        {/* Style Section Header */}
+        <div className="text-center pt-4 pb-2">
+          <h2 className="text-base font-bold text-zinc-900">בחרו סגנון אמנות</h2>
+          <p className="text-xs text-zinc-500">הקישו על סגנון לתצוגה מקדימה</p>
+        </div>
+
+        {/* Horizontal Style Strip */}
+        <div className="px-4 pb-3">
           <div
             data-testid="style-strip"
-            className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide"
-            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
+            className="flex gap-2 overflow-x-auto scrollbar-hide justify-start sm:justify-center pb-2"
           >
             {STYLES.map((style) => {
               const isSelected = selectedStyle === style.id;
@@ -340,39 +443,28 @@ export default function StylePage() {
                   onClick={() => handleStyleSelect(style.id, style.nameHe)}
                   data-selected={isSelected ? 'true' : 'false'}
                   aria-label={style.nameHe}
-                  className="flex-shrink-0 flex flex-col items-center gap-2"
+                  className="flex-shrink-0 flex flex-col items-center gap-1.5"
                 >
                   <div className={`
-                    relative w-16 h-16 rounded-2xl flex items-center justify-center
-                    bg-gradient-to-br ${style.gradient}
-                    ${isSelected ? 'ring-2 ring-purple-600 ring-offset-2' : ''}
-                    transition-all active:scale-95
+                    relative w-14 h-14 rounded-xl flex items-center justify-center
+                    ${isSelected
+                      ? 'bg-gradient-to-br from-violet-600 to-pink-500 shadow-lg shadow-violet-500/30'
+                      : 'bg-zinc-800 hover:bg-zinc-700'}
+                    transition-all duration-200 active:scale-95
                   `}>
-                    <Icon className="w-7 h-7 text-white" />
-
-                    {/* Badge */}
-                    {style.badge === 'popular' && (
-                      <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-pink-500 text-white text-[8px] font-bold rounded whitespace-nowrap">
-                        פופולרי
-                      </span>
-                    )}
-                    {style.badge === 'new' && (
-                      <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-pink-500 text-white text-[8px] font-bold rounded whitespace-nowrap">
-                        חדש
-                      </span>
-                    )}
+                    <Icon className="w-6 h-6 text-white" />
 
                     {/* Selection Check */}
                     {isSelected && (
-                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center border-2 border-white">
-                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                        <Check className="w-3 h-3 text-violet-600" strokeWidth={3} />
                       </div>
                     )}
                   </div>
 
                   <span className={`
-                    text-xs font-medium text-center max-w-[65px]
-                    ${isSelected ? 'text-purple-600' : 'text-zinc-600'}
+                    text-[10px] font-medium text-center max-w-[60px] leading-tight
+                    ${isSelected ? 'text-violet-600' : 'text-zinc-500'}
                   `}>
                     {style.nameHe}
                   </span>
@@ -380,40 +472,173 @@ export default function StylePage() {
               );
             })}
           </div>
+        </div>
 
-          {/* Free Preview Notice */}
-          <div className="mt-4 p-3 bg-purple-50 rounded-xl text-center flex items-center justify-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-600" />
-            <span className="text-sm text-purple-700 font-medium">תצוגה מקדימה חינם ללא הגבלה</span>
+        {/* CTA Button */}
+        <div className="px-4 pb-4 pb-safe">
+          <div className="max-w-md mx-auto">
+            <button
+              onClick={handleContinue}
+              disabled={isTransforming}
+              className={`
+                w-full py-3.5 rounded-xl font-semibold shadow-lg transition flex items-center justify-center gap-2
+                ${isTransforming
+                  ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:shadow-xl hover:shadow-violet-500/25 active:scale-[0.98]'}
+              `}
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>אהבתי! המשך</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 p-3 pb-safe">
-        <div className="max-w-4xl mx-auto flex gap-3">
+      {/* Fullscreen Modal with Watermark */}
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          onClick={handleToggleFullscreen}
+        >
+          {/* Close Button */}
           <button
-            onClick={handleBack}
-            className="flex-1 py-3.5 px-5 rounded-xl border-2 border-zinc-200 font-semibold text-zinc-700 hover:bg-zinc-50 transition"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsFullscreen(false);
+            }}
+            className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-white/10 rounded-full text-white hover:bg-white/20 transition z-10"
+            aria-label="סגירה"
           >
-            חזרה
+            <X className="w-6 h-6" />
           </button>
 
-          <button
-            onClick={handleContinue}
-            disabled={isTransforming}
-            className={`
-              flex-[2] py-3.5 px-5 rounded-xl font-semibold shadow-md transition flex items-center justify-center gap-2
-              ${isTransforming
-                ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90'}
-            `}
-          >
-            <span>אהבתי! המשך</span>
-            <ArrowRight className="w-5 h-5 rotate-180" />
-          </button>
+          {/* Image Container */}
+          <div className="relative w-full h-full max-w-4xl max-h-[90vh] m-4">
+            <Image
+              src={transformedImage || originalImage}
+              alt="התמונה שלך"
+              fill
+              className="object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Watermark Overlay */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="absolute inset-0 flex flex-wrap items-center justify-center gap-20 opacity-20 rotate-[-25deg] scale-150">
+                {[...Array(20)].map((_, i) => (
+                  <span
+                    key={i}
+                    className="text-white text-2xl font-bold whitespace-nowrap select-none"
+                  >
+                    פוטפרינט
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Style Badge in Fullscreen */}
+            <div className="absolute bottom-4 right-4 flex items-center gap-1.5 px-4 py-2.5 bg-white/90 rounded-full shadow-lg">
+              <Sparkles className="w-5 h-5 text-purple-600" />
+              <span className="text-base font-semibold text-zinc-900">{currentStyle.nameHe}</span>
+            </div>
+
+            {/* Preview Notice */}
+            <div className="absolute bottom-4 left-4 px-4 py-2.5 bg-amber-500/90 rounded-full text-white text-sm font-medium">
+              תצוגה מקדימה בלבד
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Grid Modal - Saved Versions */}
+      {showGridModal && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setShowGridModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-zinc-200">
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900">האוסף שלך</h2>
+                <p className="text-sm text-zinc-500">{savedVersions.length}/{MAX_VERSIONS} גרסאות שמורות</p>
+              </div>
+              <button
+                onClick={() => setShowGridModal(false)}
+                className="w-10 h-10 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 rounded-xl transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Grid */}
+            <div className="p-4 overflow-y-auto max-h-[calc(85vh-140px)]">
+              {savedVersions.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Heart className="w-8 h-8 text-zinc-400" />
+                  </div>
+                  <p className="text-zinc-500">עדיין לא שמרת גרסאות</p>
+                  <p className="text-sm text-zinc-400 mt-1">לחצו על ❤️ כדי לשמור גרסה</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {savedVersions.map((version) => (
+                    <div
+                      key={version.id}
+                      onClick={() => handleSelectVersion(version.id)}
+                      className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group border-2 border-transparent hover:border-violet-500 transition"
+                    >
+                      <Image
+                        src={version.imageUrl}
+                        alt={`גרסה ${getStyleName(version.style)}`}
+                        fill
+                        className="object-cover"
+                      />
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-zinc-900">
+                          בחר גרסה
+                        </span>
+                      </div>
+
+                      {/* Style badge */}
+                      <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 rounded-full text-xs text-white font-medium">
+                        {getStyleName(version.style)}
+                      </div>
+
+                      {/* Delete button */}
+                      <button
+                        onClick={(e) => handleDeleteVersion(version.id, e)}
+                        className="absolute top-2 left-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+                        aria-label="מחק גרסה"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            {savedVersions.length > 0 && (
+              <div className="p-4 border-t border-zinc-200">
+                <button
+                  onClick={() => setShowGridModal(false)}
+                  className="w-full py-3 rounded-xl font-semibold bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition"
+                >
+                  המשך לנסות סגנונות
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
