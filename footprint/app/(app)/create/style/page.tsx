@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, Heart, Film, Sun, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, Heart, Film, Sun, AlertCircle, RefreshCw, RotateCcw, Maximize2 } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import type { StyleType } from '@/types';
 
@@ -106,6 +106,9 @@ export default function StylePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStyle, setProcessingStyle] = useState<string | null>(null);
 
+  // Fullscreen modal state
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   // Redirect to upload if no image
   useEffect(() => {
     if (!originalImage) {
@@ -181,6 +184,18 @@ export default function StylePage() {
     setStep('upload');
     router.push('/create');
   }, [setStep, router]);
+
+  // Reset to original image (clear transformation)
+  const handleResetToOriginal = useCallback(() => {
+    setTransformedImage(null);
+    setSelectedStyle('original');
+    setTransformError(null);
+  }, [setTransformedImage, setSelectedStyle]);
+
+  // Toggle fullscreen modal
+  const handleToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => !prev);
+  }, []);
 
   if (!originalImage) {
     return null;
@@ -298,14 +313,41 @@ export default function StylePage() {
               </div>
             )}
 
-            {/* Close Button */}
-            <button
-              onClick={handleBack}
-              className="absolute top-3 left-3 w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600"
-              aria-label="סגירה"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {/* Top Left Buttons */}
+            <div className="absolute top-3 left-3 flex gap-2">
+              {/* Close Button */}
+              <button
+                onClick={handleBack}
+                className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600 hover:bg-zinc-50 transition"
+                aria-label="סגירה"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Top Right Buttons */}
+            <div className="absolute top-3 right-3 flex gap-2">
+              {/* Reset to Original Button */}
+              {transformedImage && (
+                <button
+                  onClick={handleResetToOriginal}
+                  className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600 hover:bg-zinc-50 transition"
+                  aria-label="חזרה למקור"
+                  title="חזרה לתמונה המקורית"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+              )}
+              {/* Fullscreen Button */}
+              <button
+                onClick={handleToggleFullscreen}
+                className="w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-md text-zinc-600 hover:bg-zinc-50 transition"
+                aria-label="מסך מלא"
+                title="תצוגת מסך מלא"
+              >
+                <Maximize2 className="w-5 h-5" />
+              </button>
+            </div>
 
             {/* Style Badge */}
             <div
@@ -415,6 +457,59 @@ export default function StylePage() {
           </button>
         </div>
       </div>
+
+      {/* Fullscreen Modal with Watermark */}
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          onClick={handleToggleFullscreen}
+        >
+          {/* Close Button */}
+          <button
+            onClick={handleToggleFullscreen}
+            className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-white/10 rounded-full text-white hover:bg-white/20 transition z-10"
+            aria-label="סגירה"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Image Container */}
+          <div className="relative w-full h-full max-w-4xl max-h-[90vh] m-4">
+            <Image
+              src={transformedImage || originalImage}
+              alt="התמונה שלך"
+              fill
+              className="object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Watermark Overlay */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="absolute inset-0 flex flex-wrap items-center justify-center gap-20 opacity-20 rotate-[-25deg] scale-150">
+                {[...Array(20)].map((_, i) => (
+                  <span
+                    key={i}
+                    className="text-white text-2xl font-bold whitespace-nowrap select-none"
+                  >
+                    פוטפרינט
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Style Badge in Fullscreen */}
+            <div className="absolute bottom-4 right-4 flex items-center gap-1.5 px-4 py-2.5 bg-white/90 rounded-full shadow-lg">
+              <Sparkles className="w-5 h-5 text-purple-600" />
+              <span className="text-base font-semibold text-zinc-900">{currentStyle.nameHe}</span>
+            </div>
+
+            {/* Preview Notice */}
+            <div className="absolute bottom-4 left-4 px-4 py-2.5 bg-amber-500/90 rounded-full text-white text-sm font-medium">
+              תצוגה מקדימה בלבד
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
