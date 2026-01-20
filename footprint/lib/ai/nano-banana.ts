@@ -115,6 +115,9 @@ export async function transformWithNanoBanana(
   const apiKey = getApiKey();
   const prompt = buildPrompt(style);
 
+  // Check if the model supports aspectRatio (only gemini-2.5-flash-image does)
+  const supportsAspectRatio = NANO_BANANA_MODEL.includes('2.5-flash-image');
+
   const requestBody = {
     contents: [
       {
@@ -133,9 +136,11 @@ export async function transformWithNanoBanana(
     ],
     generationConfig: {
       responseModalities: ['TEXT', 'IMAGE'],
-      imageConfig: {
-        aspectRatio: '1:1',
-      },
+      ...(supportsAspectRatio && {
+        imageConfig: {
+          aspectRatio: '1:1',
+        },
+      }),
     },
     safetySettings: [
       {
