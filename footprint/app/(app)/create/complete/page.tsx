@@ -105,6 +105,8 @@ function CompletePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
+  const isSandbox = searchParams.get('sandbox') === 'true';
+  const emailFromParams = searchParams.get('email');
 
   const {
     originalImage,
@@ -114,18 +116,19 @@ function CompletePageContent() {
     paperType,
     frameType,
     shippingAddress,
+    isGift,
     pricing,
     reset,
   } = useOrderStore();
 
   // API state
   const [orderData, setOrderData] = useState<OrderConfirmation | null>(null);
-  const [isLoading, setIsLoading] = useState(!!orderId);
+  const [isLoading, setIsLoading] = useState(!!orderId && !isSandbox);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch order from API if orderId provided
+  // Fetch order from API if orderId provided (skip in sandbox mode)
   useEffect(() => {
-    if (!orderId) {
+    if (!orderId || isSandbox) {
       setIsLoading(false);
       return;
     }
@@ -152,7 +155,7 @@ function CompletePageContent() {
     };
 
     fetchOrder();
-  }, [orderId]);
+  }, [orderId, isSandbox]);
 
   // Use API data or fallback to generated/store data
   const orderNumber = orderData?.orderNumber || formatOrderId();
@@ -232,7 +235,7 @@ function CompletePageContent() {
   const paperName = PAPER_NAMES[paperType || 'matte'] || 'Fine Art Matte';
   const frameName = FRAME_NAMES[frameType || 'none'] || 'ללא מסגרת';
   const displayImage = transformedImage || originalImage || '';
-  const customerEmail = 'shelly@example.com'; // Email from user session, placeholder for now
+  const customerEmail = emailFromParams || 'your@email.com';
 
   // Loading state
   if (isLoading) {
@@ -276,15 +279,13 @@ function CompletePageContent() {
       {/* Header */}
       <header role="banner" className="bg-white border-b border-zinc-200 py-3.5 px-4">
         <div className="max-w-[600px] mx-auto flex items-center justify-center">
-          <div className="flex items-center gap-2">
-            <div
-              data-testid="logo-icon"
-              className="w-8 h-8 bg-gradient-to-br from-violet-600 to-pink-500 rounded-lg flex items-center justify-center"
-            >
-              <Sparkles className="w-[18px] h-[18px] text-white" />
-            </div>
-            <span className="text-lg font-bold text-zinc-900">Footprint</span>
-          </div>
+          <Image
+            src="/footprint-logo-black-v2.svg"
+            alt="Footprint"
+            width={140}
+            height={32}
+            priority
+          />
         </div>
       </header>
 
@@ -292,6 +293,14 @@ function CompletePageContent() {
       <main role="main" dir="rtl" className="max-w-[550px] mx-auto px-4 py-6 pb-32">
         {/* Success Hero */}
         <div className="bg-white border border-zinc-200 rounded-[20px] p-8 text-center mb-4">
+          {/* Sandbox Badge */}
+          {isSandbox && (
+            <div className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-semibold mb-4">
+              <span>🧪</span>
+              <span>מצב סנדבוקס - לא בוצע חיוב</span>
+            </div>
+          )}
+
           <div
             data-testid="success-icon"
             className="w-[72px] h-[72px] bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-[scaleIn_0.5s_ease]"
@@ -301,9 +310,17 @@ function CompletePageContent() {
           <h1 className="text-[22px] font-bold text-zinc-900 mb-1.5">
             ההזמנה בוצעה בהצלחה! 🎉
           </h1>
-          <p className="text-sm text-zinc-500 mb-4">
+          <p className="text-sm text-zinc-500 mb-2">
             אישור נשלח למייל {customerEmail}
           </p>
+
+          {/* Gift notification */}
+          {isGift && (
+            <p className="text-sm text-violet-600 mb-4">
+              🎁 נעדכן אותך כשהמתנה תישלח!
+            </p>
+          )}
+
           <div
             data-testid="order-number"
             className="inline-flex items-center gap-1.5 bg-zinc-50 px-[18px] py-2.5 rounded-full text-sm text-zinc-600"

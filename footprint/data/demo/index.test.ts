@@ -160,13 +160,11 @@ describe('Demo Data Module', () => {
     it('should have preview image for each style', () => {
       const styles: StyleType[] = [
         'original',
-        'pop_art',
         'watercolor',
         'line_art',
+        'line_art_watercolor',
         'oil_painting',
-        'romantic',
-        'comic_book',
-        'vintage',
+        'avatar_cartoon',
       ];
 
       styles.forEach((style) => {
@@ -189,7 +187,7 @@ describe('Demo Data Module', () => {
   describe('demoStyles', () => {
     it('should export an array of styles', () => {
       expect(Array.isArray(demoStyles)).toBe(true);
-      expect(demoStyles.length).toBe(8);
+      expect(demoStyles.length).toBe(6);
     });
 
     it('should have styles with all required fields', () => {
@@ -304,7 +302,7 @@ describe('Demo Data Module', () => {
 
   describe('getStylePreviewImage', () => {
     it('should return preview image for pop_art style', () => {
-      const url = getStylePreviewImage('pop_art');
+      const url = getStylePreviewImage('avatar_cartoon');
       expect(url).toBeDefined();
       expect(typeof url).toBe('string');
     });
@@ -312,24 +310,17 @@ describe('Demo Data Module', () => {
     it('should return preview image for all styles', () => {
       const styles: StyleType[] = [
         'original',
-        'pop_art',
         'watercolor',
         'line_art',
+        'line_art_watercolor',
         'oil_painting',
-        'romantic',
-        'comic_book',
-        'vintage',
+        'avatar_cartoon',
       ];
 
       styles.forEach((style) => {
         const url = getStylePreviewImage(style);
         expect(url).toBeDefined();
       });
-    });
-
-    it('should return fallback for minimalist style', () => {
-      const url = getStylePreviewImage('minimalist');
-      expect(url).toBeDefined();
     });
   });
 
@@ -349,9 +340,9 @@ describe('Demo Data Module', () => {
 
   describe('getStyleById', () => {
     it('should return style for valid id', () => {
-      const style = getStyleById('pop_art');
+      const style = getStyleById('avatar_cartoon');
       expect(style).toBeDefined();
-      expect(style?.id).toBe('pop_art');
+      expect(style?.id).toBe('avatar_cartoon');
       expect(style?.name).toBe('Pop Art');
     });
 
@@ -384,7 +375,7 @@ describe('Demo Data Module', () => {
     it('should include pop_art and watercolor', () => {
       const popular = getPopularStyles();
       const ids = popular.map((s) => s.id);
-      expect(ids).toContain('pop_art');
+      expect(ids).toContain('avatar_cartoon');
       expect(ids).toContain('watercolor');
     });
   });

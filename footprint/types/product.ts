@@ -1,16 +1,13 @@
 // Product Types for Footprint
 
 // AI Style Types
-export type StyleType = 
+export type StyleType =
   | 'original'
-  | 'pop_art'
   | 'watercolor'
   | 'line_art'
+  | 'line_art_watercolor'
   | 'oil_painting'
-  | 'romantic'
-  | 'comic_book'
-  | 'vintage'
-  | 'minimalist';
+  | 'avatar_cartoon';
 
 export interface Style {
   id: StyleType;

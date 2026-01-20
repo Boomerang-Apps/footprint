@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, Check, Sparkles, CreditCard, MapPin, User, Phone, Mail, Building, Loader2 } from 'lucide-react';
+import { ArrowRight, Check, Sparkles, CreditCard, MapPin, User, Phone, Mail, Building, Loader2, Gift, Heart, Cake, Baby, GraduationCap, Home, PartyPopper, HandHeart, Sparkle } from 'lucide-react';
+import type { GiftOccasion } from '@/stores/orderStore';
 import { useOrderStore } from '@/stores/orderStore';
 import toast from 'react-hot-toast';
 
@@ -13,6 +14,19 @@ function generateOrderId(): string {
   const random = Math.random().toString(36).substring(2, 8);
   return `FP-${timestamp}-${random}`.toUpperCase();
 }
+
+// Gift occasion options
+const GIFT_OCCASIONS: { id: GiftOccasion; label: string; icon: React.ElementType }[] = [
+  { id: 'birthday', label: 'יום הולדת', icon: Cake },
+  { id: 'love', label: 'אהבה', icon: Heart },
+  { id: 'wedding', label: 'חתונה', icon: PartyPopper },
+  { id: 'newBaby', label: 'תינוק חדש', icon: Baby },
+  { id: 'barMitzvah', label: 'בר/בת מצווה', icon: Sparkle },
+  { id: 'housewarming', label: 'חנוכת בית', icon: Home },
+  { id: 'graduation', label: 'סיום לימודים', icon: GraduationCap },
+  { id: 'thankYou', label: 'תודה', icon: HandHeart },
+  { id: 'justBecause', label: 'סתם ככה', icon: Gift },
+];
 
 function CheckoutPageContent() {
   const router = useRouter();
@@ -24,7 +38,13 @@ function CheckoutPageContent() {
     paperType,
     frameType,
     isGift,
+    setIsGift,
+    giftOccasion,
+    setGiftOccasion,
     giftMessage,
+    setGiftMessage,
+    hideGiftPrice,
+    setHideGiftPrice,
     shippingAddress,
     setShippingAddress,
     setStep,
@@ -96,6 +116,16 @@ function CheckoutPageContent() {
       country: 'ישראל',
     });
 
+    // Sandbox mode - skip payment and go directly to success
+    const isSandbox = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
+    if (isSandbox) {
+      // Simulate a short delay for UX
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const orderId = generateOrderId();
+      router.push(`/create/complete?orderId=${orderId}&sandbox=true&email=${encodeURIComponent(formData.email)}`);
+      return;
+    }
+
     try {
       // Call PayPlus API to create payment link
       const response = await fetch('/api/checkout', {
@@ -147,45 +177,54 @@ function CheckoutPageContent() {
   const total = subtotal + shipping;
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white pb-40">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-zinc-200">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition"
+            className="w-10 h-10 flex items-center justify-center text-zinc-600 rounded-xl"
+            aria-label="חזרה"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>חזרה</span>
+            <ArrowRight className="w-6 h-6" />
           </button>
 
-          <div className="flex items-center gap-2 text-zinc-900">
-            <CreditCard className="w-5 h-5 text-brand-purple" />
-            <span className="font-semibold">תשלום</span>
-          </div>
+          <h1 className="text-[17px] font-semibold text-zinc-900">תשלום</h1>
 
-          <div className="w-20" />
+          <div className="w-10" />
         </div>
       </header>
 
       {/* Progress Steps */}
       <div className="border-b border-zinc-200">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-2">
-            {['העלאה', 'סגנון', 'התאמה', 'תשלום'].map((step, i) => (
-              <div key={step} className="flex items-center gap-2">
-                <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                  ${i <= 3 ? 'bg-brand-purple text-white' : 'bg-zinc-100 text-zinc-500'}
-                `}>
-                  {i < 3 ? <Check className="w-4 h-4" /> : i + 1}
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-center gap-1">
+            {[
+              { key: 'upload', label: 'העלאה' },
+              { key: 'style', label: 'סגנון' },
+              { key: 'tweak', label: 'עריכה' },
+              { key: 'customize', label: 'התאמה' },
+              { key: 'payment', label: 'תשלום' },
+            ].map((step, i) => {
+              const isCompleted = i < 4; // Steps 0-3 are completed
+              const isActive = i === 4; // Step 4 (payment) is active
+              return (
+                <div key={step.key} className="flex items-center gap-1" data-step={step.key} data-completed={isCompleted ? 'true' : undefined} data-active={isActive ? 'true' : undefined}>
+                  <div className={`
+                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                    ${isCompleted ? 'bg-violet-600 text-white' : isActive ? 'bg-violet-600 text-white' : 'bg-zinc-100 text-zinc-500'}
+                  `}>
+                    {isCompleted ? <Check className="w-4 h-4" /> : i + 1}
+                  </div>
+                  <span className={`text-sm hidden sm:inline ${isCompleted || isActive ? 'text-zinc-900' : 'text-zinc-500'}`}>
+                    {step.label}
+                  </span>
+                  {i < 4 && (
+                    <div className={`w-6 h-px mx-1 ${isCompleted ? 'bg-violet-600' : 'bg-zinc-300'}`} />
+                  )}
                 </div>
-                <span className={`text-sm ${i <= 3 ? 'text-zinc-900' : 'text-zinc-500'}`}>
-                  {step}
-                </span>
-                {i < 3 && <div className="w-8 h-px bg-brand-purple" />}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -269,7 +308,7 @@ function CheckoutPageContent() {
 
           {/* Checkout Form */}
           <div className="order-1 lg:order-2">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form id="checkout-form" onSubmit={handleSubmit} className="space-y-6">
               {/* Contact Info */}
               <section>
                 <h2 className="text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
@@ -359,6 +398,92 @@ function CheckoutPageContent() {
                 </div>
               </section>
 
+              {/* Gift Options */}
+              <section className="border border-zinc-200 rounded-xl overflow-hidden">
+                {/* Gift Toggle Header */}
+                <button
+                  type="button"
+                  onClick={() => setIsGift(!isGift)}
+                  className={`w-full p-4 flex items-center justify-between transition-colors ${
+                    isGift ? 'bg-pink-50' : 'bg-white hover:bg-zinc-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      isGift ? 'bg-pink-100' : 'bg-zinc-100'
+                    }`}>
+                      <Gift className={`w-5 h-5 ${isGift ? 'text-pink-600' : 'text-zinc-500'}`} />
+                    </div>
+                    <div className="text-right">
+                      <h2 className="font-semibold text-zinc-900">זוהי מתנה?</h2>
+                      <p className="text-sm text-zinc-500">הוסף הודעה אישית ובחר סוג אירוע</p>
+                    </div>
+                  </div>
+                  <div className={`w-12 h-7 rounded-full transition-colors relative ${
+                    isGift ? 'bg-pink-500' : 'bg-zinc-300'
+                  }`}>
+                    <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                      isGift ? 'right-1' : 'left-1'
+                    }`} />
+                  </div>
+                </button>
+
+                {/* Gift Options Panel */}
+                {isGift && (
+                  <div className="p-4 border-t border-zinc-200 bg-white space-y-4">
+                    {/* Occasion Selector */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-2">סוג האירוע</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {GIFT_OCCASIONS.map((occasion) => {
+                          const Icon = occasion.icon;
+                          const isSelected = giftOccasion === occasion.id;
+                          return (
+                            <button
+                              key={occasion.id}
+                              type="button"
+                              onClick={() => setGiftOccasion(isSelected ? null : occasion.id)}
+                              className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                                isSelected
+                                  ? 'border-pink-500 bg-pink-50 text-pink-700'
+                                  : 'border-zinc-200 hover:border-zinc-300 text-zinc-600'
+                              }`}
+                            >
+                              <Icon className={`w-5 h-5 ${isSelected ? 'text-pink-600' : 'text-zinc-500'}`} />
+                              <span className="text-xs font-medium">{occasion.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Personal Message */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-1">הודעה אישית</label>
+                      <textarea
+                        value={giftMessage}
+                        onChange={(e) => setGiftMessage(e.target.value.slice(0, 150))}
+                        placeholder="כתבו הודעה אישית למקבל המתנה..."
+                        className="input min-h-[80px] resize-none"
+                        maxLength={150}
+                      />
+                      <div className="text-xs text-zinc-400 text-left mt-1">{giftMessage.length}/150</div>
+                    </div>
+
+                    {/* Hide Price Checkbox */}
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={hideGiftPrice}
+                        onChange={(e) => setHideGiftPrice(e.target.checked)}
+                        className="w-5 h-5 rounded border-zinc-300 text-pink-600 focus:ring-pink-500"
+                      />
+                      <span className="text-sm text-zinc-700">הסתר מחיר מהנמען</span>
+                    </label>
+                  </div>
+                )}
+              </section>
+
               {/* Payment Note */}
               <section className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
                 <div className="flex items-start gap-3">
@@ -373,30 +498,42 @@ function CheckoutPageContent() {
                 </div>
               </section>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isProcessing}
-                className="btn btn-primary w-full py-4 text-base disabled:opacity-70"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>מעבד תשלום...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>לתשלום ₪{total}</span>
-                    <CreditCard className="w-5 h-5" />
-                  </>
-                )}
-              </button>
-
               <p className="text-xs text-zinc-500 text-center">
                 בלחיצה על כפתור התשלום אתם מאשרים את <a href="#" className="underline">התקנון</a> ו<a href="#" className="underline">מדיניות הפרטיות</a>
               </p>
             </form>
           </div>
+        </div>
+      </div>
+
+      {/* Bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 p-4 pb-[max(16px,env(safe-area-inset-bottom))]">
+        <div className="max-w-md mx-auto">
+          {/* Price summary */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-zinc-600">סה״כ</span>
+            <span className="text-2xl font-bold text-zinc-900">
+              ₪{total} {shipping > 0 && <span className="text-sm font-normal text-zinc-500">+ ₪{shipping} משלוח</span>}
+              {shipping === 0 && <span className="text-sm font-normal text-green-600">משלוח חינם!</span>}
+            </span>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            form="checkout-form"
+            disabled={isProcessing}
+            className="w-full py-3.5 rounded-xl font-semibold shadow-lg transition flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:shadow-xl hover:shadow-violet-500/25 active:scale-[0.98] disabled:opacity-70"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>מעבד תשלום...</span>
+              </>
+            ) : (
+              <span>לתשלום ₪{total}</span>
+            )}
+          </button>
         </div>
       </div>
     </main>

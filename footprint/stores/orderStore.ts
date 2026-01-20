@@ -27,6 +27,31 @@ export interface DiscountValidation {
 }
 
 /**
+ * Saved version for comparing multiple transformations
+ */
+export interface SavedVersion {
+  id: string;
+  imageUrl: string;
+  style: StyleType;
+  timestamp: number;
+}
+
+/**
+ * Gift occasion types
+ */
+export type GiftOccasion =
+  | 'birthday'
+  | 'love'
+  | 'wedding'
+  | 'newBaby'
+  | 'barMitzvah'
+  | 'housewarming'
+  | 'graduation'
+  | 'thankYou'
+  | 'justBecause'
+  | null;
+
+/**
  * Tweak settings for image adjustments
  */
 export interface TweakSettings {
@@ -52,6 +77,9 @@ interface OrderState {
   // Style selection
   selectedStyle: StyleType;
 
+  // Saved versions for comparison (max 10)
+  savedVersions: SavedVersion[];
+
   // Tweak settings
   tweakSettings: TweakSettings;
   
@@ -62,8 +90,10 @@ interface OrderState {
   
   // Gift options
   isGift: boolean;
+  giftOccasion: GiftOccasion;
   giftMessage: string;
   giftWrap: boolean;
+  hideGiftPrice: boolean;
 
   // Addresses
   shippingAddress: Address | null;
@@ -101,6 +131,12 @@ interface OrderActions {
   // Style
   setSelectedStyle: (style: StyleType) => void;
 
+  // Saved versions
+  addSavedVersion: () => boolean; // Returns false if max reached
+  removeSavedVersion: (id: string) => void;
+  clearSavedVersions: () => void;
+  selectSavedVersion: (id: string) => void;
+
   // Tweak
   setTweakSettings: (settings: Partial<TweakSettings>) => void;
   resetTweakSettings: () => void;
@@ -112,8 +148,10 @@ interface OrderActions {
   
   // Gift
   setIsGift: (value: boolean) => void;
+  setGiftOccasion: (occasion: GiftOccasion) => void;
   setGiftMessage: (message: string) => void;
   setGiftWrap: (value: boolean) => void;
+  setHideGiftPrice: (value: boolean) => void;
   
   // Addresses
   setShippingAddress: (address: Address) => void;
@@ -156,6 +194,7 @@ const initialState: OrderState = {
   transformedImage: null,
   isTransforming: false,
   selectedStyle: 'original',
+  savedVersions: [],
   tweakSettings: {
     brightness: 0,
     contrast: 0,
@@ -169,8 +208,10 @@ const initialState: OrderState = {
   paperType: 'matte',
   frameType: 'none',
   isGift: false,
+  giftOccasion: null,
   giftMessage: '',
   giftWrap: false,
+  hideGiftPrice: true,
   shippingAddress: null,
   billingAddress: null,
   useSameAddress: true,
@@ -238,6 +279,50 @@ export const useOrderStore = create<OrderState & OrderActions>()(
       // Style
       setSelectedStyle: (style) => set({ selectedStyle: style }),
 
+      // Saved versions
+      addSavedVersion: () => {
+        const state = get();
+        const MAX_VERSIONS = 10;
+
+        // Check if max reached
+        if (state.savedVersions.length >= MAX_VERSIONS) {
+          return false;
+        }
+
+        // Check if we have a transformed image to save
+        if (!state.transformedImage) {
+          return false;
+        }
+
+        const newVersion: SavedVersion = {
+          id: `v-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          imageUrl: state.transformedImage,
+          style: state.selectedStyle,
+          timestamp: Date.now(),
+        };
+
+        set({ savedVersions: [...state.savedVersions, newVersion] });
+        return true;
+      },
+
+      removeSavedVersion: (id) => {
+        const state = get();
+        set({ savedVersions: state.savedVersions.filter(v => v.id !== id) });
+      },
+
+      clearSavedVersions: () => set({ savedVersions: [] }),
+
+      selectSavedVersion: (id) => {
+        const state = get();
+        const version = state.savedVersions.find(v => v.id === id);
+        if (version) {
+          set({
+            transformedImage: version.imageUrl,
+            selectedStyle: version.style,
+          });
+        }
+      },
+
       // Tweak
       setTweakSettings: (settings) => set((state) => ({
         tweakSettings: { ...state.tweakSettings, ...settings },
@@ -251,8 +336,10 @@ export const useOrderStore = create<OrderState & OrderActions>()(
 
       // Gift
       setIsGift: (value) => set({ isGift: value }),
+      setGiftOccasion: (occasion) => set({ giftOccasion: occasion }),
       setGiftMessage: (message) => set({ giftMessage: message }),
       setGiftWrap: (value) => set({ giftWrap: value }),
+      setHideGiftPrice: (value) => set({ hideGiftPrice: value }),
 
       // Addresses
       setShippingAddress: (address) => set({ shippingAddress: address }),
@@ -387,12 +474,16 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         originalImage: state.originalImage,
         transformedImage: state.transformedImage,
         selectedStyle: state.selectedStyle,
+        savedVersions: state.savedVersions,
         tweakSettings: state.tweakSettings,
         size: state.size,
         paperType: state.paperType,
         frameType: state.frameType,
         isGift: state.isGift,
+        giftOccasion: state.giftOccasion,
         giftMessage: state.giftMessage,
+        giftWrap: state.giftWrap,
+        hideGiftPrice: state.hideGiftPrice,
         currentStep: state.currentStep,
         // Recipient (for gift orders)
         recipientAddress: state.recipientAddress,

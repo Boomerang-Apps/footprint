@@ -11,6 +11,11 @@
  */
 
 import { StyleType, STYLE_PROMPTS, isValidStyle } from './replicate';
+import {
+  getStyleReferences,
+  getStyleReferencePrompt,
+  hasStyleReferences,
+} from './style-references';
 
 /**
  * Nano Banana model configuration
@@ -63,6 +68,14 @@ export interface NanoBananaResult {
 }
 
 /**
+ * Reference image data for style consistency
+ */
+export interface ReferenceImage {
+  base64: string;
+  mimeType: string;
+}
+
+/**
  * Gets the Google AI API key from environment
  * @throws Error if GOOGLE_AI_API_KEY is not set
  */
@@ -76,11 +89,41 @@ function getApiKey(): string {
 
 /**
  * Builds the style transfer prompt for Nano Banana
+ * If reference images are provided, includes instructions to match them
  */
-function buildPrompt(style: StyleType, customInstructions?: string): string {
+function buildPrompt(
+  style: StyleType,
+  customInstructions?: string,
+  hasReferences: boolean = false
+): string {
   const basePrompt = STYLE_PROMPTS[style];
   const instructions = customInstructions || '';
+  const referencePrompt = hasReferences ? getStyleReferencePrompt(style) : '';
 
+  // If we have reference images, structure the prompt differently
+  if (hasReferences && referencePrompt) {
+    return `You are given reference images showing the exact artistic style to apply, followed by a source photograph to transform.
+
+REFERENCE IMAGES: The first image(s) show the target artistic style. Study these carefully.
+
+${referencePrompt}
+
+SOURCE IMAGE: The last image is the photograph to transform.
+
+STYLE REQUIREMENTS:
+${basePrompt}
+
+${instructions}
+
+CRITICAL INSTRUCTIONS:
+- Match the EXACT style shown in the reference images
+- Maintain the subject's likeness and key features from the source photo
+- Apply the style consistently across the entire image
+- Ensure high quality output suitable for professional printing
+- Output only the transformed image`;
+  }
+
+  // Standard prompt without reference images
   return `Transform this photograph using the following artistic style:
 
 ${basePrompt}
@@ -100,38 +143,61 @@ Important instructions:
  * @param imageBase64 - Base64 encoded image data (without data URI prefix)
  * @param style - The artistic style to apply
  * @param mimeType - MIME type of the input image (default: image/jpeg)
+ * @param referenceImages - Optional array of reference images for style consistency
  * @returns Transformation result with base64 image and metadata
  * @throws Error if transformation fails
  */
 export async function transformWithNanoBanana(
   imageBase64: string,
   style: StyleType,
-  mimeType: string = 'image/jpeg'
+  mimeType: string = 'image/jpeg',
+  referenceImages: ReferenceImage[] = []
 ): Promise<NanoBananaResult> {
   if (!isValidStyle(style)) {
     throw new Error(`Invalid style: ${style}`);
   }
 
   const apiKey = getApiKey();
-  const prompt = buildPrompt(style);
+  const hasRefs = referenceImages.length > 0;
+  const prompt = buildPrompt(style, undefined, hasRefs);
 
   // Check if the model supports aspectRatio (only gemini-2.5-flash-image does)
   const supportsAspectRatio = NANO_BANANA_MODEL.includes('2.5-flash-image');
 
+  // Build parts array: reference images first, then source image, then prompt
+  const parts: Array<{ inlineData?: { mimeType: string; data: string }; text?: string }> = [];
+
+  // Add reference images first (if any)
+  for (const ref of referenceImages) {
+    parts.push({
+      inlineData: {
+        mimeType: ref.mimeType,
+        data: ref.base64,
+      },
+    });
+  }
+
+  // Add the source image
+  parts.push({
+    inlineData: {
+      mimeType,
+      data: imageBase64,
+    },
+  });
+
+  // Add the prompt
+  parts.push({
+    text: prompt,
+  });
+
+  if (hasRefs) {
+    console.log(`Nano Banana: Using ${referenceImages.length} reference images for style: ${style}`);
+  }
+
   const requestBody = {
     contents: [
       {
-        parts: [
-          {
-            inlineData: {
-              mimeType,
-              data: imageBase64,
-            },
-          },
-          {
-            text: prompt,
-          },
-        ],
+        parts,
       },
     ],
     generationConfig: {
@@ -197,13 +263,13 @@ export async function transformWithNanoBanana(
   }
 
   // Extract the generated image from response
-  const parts = data.candidates?.[0]?.content?.parts;
-  if (!parts || parts.length === 0) {
+  const responseParts = data.candidates?.[0]?.content?.parts;
+  if (!responseParts || responseParts.length === 0) {
     throw new Error('No output returned from Nano Banana');
   }
 
   // Find the image part in the response
-  const imagePart = parts.find((part) => part.inlineData?.data);
+  const imagePart = responseParts.find((part) => part.inlineData?.data);
   if (!imagePart || !imagePart.inlineData) {
     throw new Error('No image in Nano Banana response');
   }
@@ -236,6 +302,7 @@ function delay(ms: number): Promise<void> {
  * @param style - The artistic style to apply
  * @param mimeType - MIME type of the input image
  * @param maxRetries - Maximum number of attempts (default: 3)
+ * @param referenceImages - Optional array of reference images for style consistency
  * @returns Transformation result
  * @throws Last error encountered after all retries fail
  */
@@ -243,13 +310,14 @@ export async function transformWithNanoBananaRetry(
   imageBase64: string,
   style: StyleType,
   mimeType: string = 'image/jpeg',
-  maxRetries: number = 3
+  maxRetries: number = 3,
+  referenceImages: ReferenceImage[] = []
 ): Promise<NanoBananaResult> {
   let lastError: Error = new Error('Unknown error');
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await transformWithNanoBanana(imageBase64, style, mimeType);
+      return await transformWithNanoBanana(imageBase64, style, mimeType, referenceImages);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
@@ -301,3 +369,49 @@ export function dataUriToBase64(dataUri: string): {
 export function base64ToDataUri(base64: string, mimeType: string): string {
   return `data:${mimeType};base64,${base64}`;
 }
+
+/**
+ * Loads reference images from URLs and converts to base64
+ * Use this to load reference images from /public/style-references/
+ *
+ * @param urls - Array of image URLs (can be relative paths like /style-references/watercolor/ref1.jpg)
+ * @param baseUrl - Base URL for relative paths (e.g., process.env.NEXT_PUBLIC_APP_URL)
+ * @returns Array of ReferenceImage objects ready for use
+ */
+export async function loadReferenceImages(
+  urls: string[],
+  baseUrl: string
+): Promise<ReferenceImage[]> {
+  const references: ReferenceImage[] = [];
+
+  for (const url of urls) {
+    try {
+      // Build full URL if relative path
+      const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+
+      const response = await fetch(fullUrl);
+      if (!response.ok) {
+        console.warn(`Failed to load reference image: ${fullUrl}`);
+        continue;
+      }
+
+      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+
+      references.push({
+        base64,
+        mimeType: contentType,
+      });
+    } catch (error) {
+      console.warn(`Error loading reference image ${url}:`, error);
+    }
+  }
+
+  return references;
+}
+
+/**
+ * Re-export style reference helpers for convenience
+ */
+export { getStyleReferences, hasStyleReferences } from './style-references';

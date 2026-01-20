@@ -1,12 +1,11 @@
 /**
  * RoomPreview Component Tests
  *
- * TDD Test Suite for PC-05: Realistic Mockup Preview
- * Tests room environment visualization with art placement
+ * Tests for the simplified artwork preview component
  */
 
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import RoomPreview from './RoomPreview';
 import type { SizeType, FrameType } from '@/types';
@@ -26,78 +25,53 @@ describe('RoomPreview', () => {
     frameType: 'black' as FrameType,
   };
 
-  describe('Room Environment', () => {
-    it('renders the room preview container', () => {
+  describe('Basic Rendering', () => {
+    it('renders the preview container', () => {
       render(<RoomPreview {...defaultProps} />);
       expect(screen.getByTestId('room-preview')).toBeInTheDocument();
     });
 
-    it('renders a wall background', () => {
-      render(<RoomPreview {...defaultProps} />);
-      expect(screen.getByTestId('wall-background')).toBeInTheDocument();
-    });
-
-    it('renders furniture/context elements', () => {
-      render(<RoomPreview {...defaultProps} />);
-      // Should have at least one context element (sofa, table, plant)
-      expect(screen.getByTestId('room-context')).toBeInTheDocument();
-    });
-
-    it('renders the floor element', () => {
-      render(<RoomPreview {...defaultProps} />);
-      expect(screen.getByTestId('floor-element')).toBeInTheDocument();
-    });
-  });
-
-  describe('Art Print Display', () => {
-    it('renders the art image', () => {
-      render(<RoomPreview {...defaultProps} />);
-      const artImage = screen.getByAltText(/art preview|תצוגה/i);
-      expect(artImage).toBeInTheDocument();
-      expect(artImage).toHaveAttribute('src', defaultProps.imageUrl);
-    });
-
-    it('renders the art print frame container', () => {
+    it('renders the art frame', () => {
       render(<RoomPreview {...defaultProps} />);
       expect(screen.getByTestId('art-frame')).toBeInTheDocument();
     });
 
-    it('positions art on the wall', () => {
+    it('renders the artwork image', () => {
       render(<RoomPreview {...defaultProps} />);
-      const artFrame = screen.getByTestId('art-frame');
-      // Art should be positioned within wall area
-      expect(artFrame.closest('[data-testid="wall-background"]')).toBeInTheDocument();
+      const artImage = screen.getByAltText(/your artwork/i);
+      expect(artImage).toBeInTheDocument();
+      expect(artImage).toHaveAttribute('src', defaultProps.imageUrl);
+    });
+
+    it('displays size dimensions', () => {
+      render(<RoomPreview {...defaultProps} size="A4" />);
+      expect(screen.getByText('21 x 29.7 cm')).toBeInTheDocument();
     });
   });
 
   describe('Size Scaling', () => {
-    it('scales A5 to smallest size', () => {
+    it('applies A5 size attribute', () => {
       render(<RoomPreview {...defaultProps} size="A5" />);
       const artFrame = screen.getByTestId('art-frame');
       expect(artFrame).toHaveAttribute('data-size', 'A5');
     });
 
-    it('scales A4 to medium size', () => {
+    it('applies A4 size attribute', () => {
       render(<RoomPreview {...defaultProps} size="A4" />);
       const artFrame = screen.getByTestId('art-frame');
       expect(artFrame).toHaveAttribute('data-size', 'A4');
     });
 
-    it('scales A3 to large size', () => {
+    it('applies A3 size attribute', () => {
       render(<RoomPreview {...defaultProps} size="A3" />);
       const artFrame = screen.getByTestId('art-frame');
       expect(artFrame).toHaveAttribute('data-size', 'A3');
     });
 
-    it('scales A2 to largest size', () => {
+    it('applies A2 size attribute', () => {
       render(<RoomPreview {...defaultProps} size="A2" />);
       const artFrame = screen.getByTestId('art-frame');
       expect(artFrame).toHaveAttribute('data-size', 'A2');
-    });
-
-    it('displays size dimensions label', () => {
-      render(<RoomPreview {...defaultProps} size="A4" />);
-      expect(screen.getByTestId('size-dimensions')).toHaveTextContent(/21.*29\.7|A4/);
     });
   });
 
@@ -120,84 +94,67 @@ describe('RoomPreview', () => {
       expect(artFrame).toHaveAttribute('data-frame', 'oak');
     });
 
-    it('renders without frame when frameType is none', () => {
+    it('applies none frame style', () => {
       render(<RoomPreview {...defaultProps} frameType="none" />);
       const artFrame = screen.getByTestId('art-frame');
       expect(artFrame).toHaveAttribute('data-frame', 'none');
     });
   });
 
-  describe('View Toggle', () => {
-    it('renders view toggle button', () => {
+  describe('Fullscreen Mode', () => {
+    it('renders fullscreen button', () => {
       render(<RoomPreview {...defaultProps} />);
-      expect(screen.getByRole('button', { name: /room|simple|view|תצוגה/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /fullscreen/i })).toBeInTheDocument();
     });
 
-    it('starts in room view mode by default', () => {
+    it('opens fullscreen modal when clicked', () => {
       render(<RoomPreview {...defaultProps} />);
-      const roomPreview = screen.getByTestId('room-preview');
-      expect(roomPreview).toHaveAttribute('data-view', 'room');
+      const fullscreenButton = screen.getByRole('button', { name: /fullscreen/i });
+      fireEvent.click(fullscreenButton);
+      expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
     });
 
-    it('toggles to simple view when clicked', () => {
+    it('closes fullscreen modal when close button clicked', () => {
       render(<RoomPreview {...defaultProps} />);
-      const toggleButton = screen.getByRole('button', { name: /room|simple|view|תצוגה/i });
-      fireEvent.click(toggleButton);
-      const roomPreview = screen.getByTestId('room-preview');
-      expect(roomPreview).toHaveAttribute('data-view', 'simple');
-    });
-
-    it('toggles back to room view when clicked again', () => {
-      render(<RoomPreview {...defaultProps} />);
-      const toggleButton = screen.getByRole('button', { name: /room|simple|view|תצוגה/i });
-      fireEvent.click(toggleButton); // to simple
-      fireEvent.click(toggleButton); // back to room
-      const roomPreview = screen.getByTestId('room-preview');
-      expect(roomPreview).toHaveAttribute('data-view', 'room');
-    });
-
-    it('hides room context in simple view', () => {
-      render(<RoomPreview {...defaultProps} />);
-      const toggleButton = screen.getByRole('button', { name: /room|simple|view|תצוגה/i });
-      fireEvent.click(toggleButton);
-      expect(screen.queryByTestId('room-context')).not.toBeInTheDocument();
+      const fullscreenButton = screen.getByRole('button', { name: /fullscreen/i });
+      fireEvent.click(fullscreenButton);
+      const closeButton = screen.getByRole('button', { name: /close/i });
+      fireEvent.click(closeButton);
+      expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument();
     });
   });
 
-  describe('Responsive Behavior', () => {
-    it('maintains aspect ratio on different container sizes', () => {
+  describe('Wall Color Selector', () => {
+    it('renders 4 wall color options', () => {
       render(<RoomPreview {...defaultProps} />);
-      const container = screen.getByTestId('room-preview');
-      // Container should have aspect ratio styling
-      expect(container).toBeInTheDocument();
+      const colorButtons = screen.getAllByRole('button', { name: /לבן|בז׳|אפור|כהה/i });
+      expect(colorButtons.length).toBe(4);
     });
 
-    it('keeps art centered on wall', () => {
+    it('changes wall color when clicked', () => {
       render(<RoomPreview {...defaultProps} />);
-      const artFrame = screen.getByTestId('art-frame');
-      // Art should be centered (checked via computed styles or class)
-      expect(artFrame).toBeInTheDocument();
+      const grayButton = screen.getByRole('button', { name: /אפור/i });
+      fireEvent.click(grayButton);
+      // Button should now be selected (has scale-110 class via border-violet-500)
+      expect(grayButton).toHaveClass('scale-110');
     });
   });
 
   describe('Accessibility', () => {
-    it('has accessible alt text for art image', () => {
+    it('has accessible alt text for artwork', () => {
       render(<RoomPreview {...defaultProps} />);
-      const artImage = screen.getByAltText(/art preview|תצוגה/i);
-      expect(artImage).toBeInTheDocument();
+      expect(screen.getByAltText(/your artwork/i)).toBeInTheDocument();
     });
 
-    it('toggle button has accessible name', () => {
+    it('fullscreen button has accessible name', () => {
       render(<RoomPreview {...defaultProps} />);
-      const toggleButton = screen.getByRole('button', { name: /room|simple|view|תצוגה/i });
-      expect(toggleButton).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /fullscreen/i })).toBeInTheDocument();
     });
   });
 
   describe('Error Handling', () => {
-    it('renders fallback when image fails to load', () => {
+    it('renders fallback when no image provided', () => {
       render(<RoomPreview {...defaultProps} imageUrl="" />);
-      // Should still render the container and frame
       expect(screen.getByTestId('room-preview')).toBeInTheDocument();
       expect(screen.getByTestId('art-frame')).toBeInTheDocument();
     });

@@ -226,41 +226,27 @@ export default function TweakPage() {
         </div>
       </header>
 
-      {/* Progress Bar */}
+      {/* Progress Steps */}
       <div className="bg-white border-b border-zinc-200 px-4 py-4">
         <div className="max-w-4xl mx-auto">
-          {/* Progress Track */}
-          <div className="h-1 bg-zinc-200 rounded-full mb-3">
-            <div
-              data-testid="progress-fill"
-              className="h-full bg-gradient-to-l from-purple-600 to-pink-500 rounded-full transition-all"
-              style={{ width: '60%' }}
-            />
-          </div>
-
-          {/* Steps */}
-          <div className="flex justify-between">
+          <div className="flex items-center justify-center gap-1">
             {STEPS.map((step, i) => {
-              const isCompleted = i < 2;
-              const isActive = i === 2;
+              const isCompleted = i < 2; // Upload and Style completed
+              const isActive = i === 2; // Tweak is active
               return (
-                <div
-                  key={step.id}
-                  data-step={step.id}
-                  data-completed={isCompleted ? 'true' : 'false'}
-                  data-active={isActive ? 'true' : 'false'}
-                  className="flex items-center gap-1.5"
-                >
+                <div key={step.id} className="flex items-center gap-1" data-step={step.id} data-completed={isCompleted ? 'true' : undefined} data-active={isActive ? 'true' : undefined}>
                   <div className={`
-                    w-2 h-2 rounded-full
-                    ${isCompleted ? 'bg-emerald-500' : isActive ? 'bg-purple-600' : 'bg-zinc-300'}
-                  `} />
-                  <span className={`
-                    text-xs font-medium
-                    ${isCompleted ? 'text-emerald-600' : isActive ? 'text-purple-600' : 'text-zinc-400'}
+                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                    ${isCompleted ? 'bg-violet-600 text-white' : isActive ? 'bg-violet-600 text-white' : 'bg-zinc-100 text-zinc-500'}
                   `}>
+                    {isCompleted ? <Check className="w-4 h-4" /> : i + 1}
+                  </div>
+                  <span className={`text-sm hidden sm:inline ${isCompleted || isActive ? 'text-zinc-900' : 'text-zinc-500'}`}>
                     {step.label}
                   </span>
+                  {i < STEPS.length - 1 && (
+                    <div className={`w-6 h-px mx-1 ${isCompleted ? 'bg-violet-600' : 'bg-zinc-300'}`} />
+                  )}
                 </div>
               );
             })}
@@ -515,27 +501,19 @@ export default function TweakPage() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 p-3 pb-safe">
-        <div className="max-w-4xl mx-auto flex gap-3">
-          <button
-            onClick={handleBack}
-            className="flex-1 py-3.5 px-5 rounded-xl border-2 border-zinc-200 font-semibold text-zinc-700 hover:bg-zinc-50 transition"
-          >
-            חזרה
-          </button>
-
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 p-4 pb-safe">
+        <div className="max-w-md mx-auto">
           <button
             onClick={handleContinue}
             disabled={isProcessing}
             className={`
-              flex-[2] py-3.5 px-5 rounded-xl font-semibold shadow-md transition flex items-center justify-center gap-2
+              w-full py-3.5 rounded-xl font-semibold shadow-lg transition flex items-center justify-center gap-2
               ${isProcessing
                 ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90'}
+                : 'bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:shadow-xl hover:shadow-violet-500/25 active:scale-[0.98]'}
             `}
           >
             <span>המשך להתאמה</span>
-            <ArrowRight className="w-5 h-5 rotate-180" />
           </button>
         </div>
       </div>

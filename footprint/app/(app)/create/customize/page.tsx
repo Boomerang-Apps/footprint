@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import RoomPreview from '@/components/mockup/RoomPreview';
 import type { SizeType, PaperType, FrameType } from '@/types';
@@ -40,6 +40,8 @@ export default function CustomizePage() {
   const router = useRouter();
   const {
     originalImage,
+    transformedImage,
+    selectedStyle,
     size,
     paperType,
     frameType,
@@ -48,6 +50,11 @@ export default function CustomizePage() {
     setFrameType,
     setStep,
   } = useOrderStore();
+
+  // Use transformed image if available and style is not 'original', otherwise use original
+  const previewImage = (selectedStyle !== 'original' && transformedImage)
+    ? transformedImage
+    : originalImage;
 
   // Redirect if no image
   useEffect(() => {
@@ -98,52 +105,27 @@ export default function CustomizePage() {
         </div>
       </header>
 
-      {/* Progress Bar */}
+      {/* Progress Steps */}
       <div className="bg-white border-b border-zinc-200 py-4 px-4">
-        <div className="max-w-xl mx-auto">
-          {/* Progress fill bar */}
-          <div className="h-1 bg-zinc-200 rounded-full overflow-hidden mb-3">
-            <div
-              data-testid="progress-fill"
-              className="h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full"
-              style={{ width: '80%' }}
-            />
-          </div>
-
-          {/* Step labels */}
-          <div className="flex justify-between">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center gap-1">
             {progressSteps.map((step, i) => {
               const isCompleted = i < 3; // Steps 0, 1, 2 are completed (upload, style, tweak)
               const isActive = i === 3; // Step 3 (customize) is active
-
               return (
-                <div
-                  key={step.key}
-                  data-step={step.key}
-                  data-completed={isCompleted ? 'true' : undefined}
-                  data-active={isActive ? 'true' : undefined}
-                  className="flex items-center gap-1"
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      isCompleted
-                        ? 'bg-emerald-500'
-                        : isActive
-                        ? 'bg-violet-500'
-                        : 'bg-zinc-300'
-                    }`}
-                  />
-                  <span
-                    className={`text-xs ${
-                      isCompleted
-                        ? 'text-emerald-500'
-                        : isActive
-                        ? 'text-violet-500 font-semibold'
-                        : 'text-zinc-400'
-                    }`}
-                  >
+                <div key={step.key} className="flex items-center gap-1" data-step={step.key} data-completed={isCompleted ? 'true' : undefined} data-active={isActive ? 'true' : undefined}>
+                  <div className={`
+                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                    ${isCompleted ? 'bg-violet-600 text-white' : isActive ? 'bg-violet-600 text-white' : 'bg-zinc-100 text-zinc-500'}
+                  `}>
+                    {isCompleted ? <Check className="w-4 h-4" /> : i + 1}
+                  </div>
+                  <span className={`text-sm hidden sm:inline ${isCompleted || isActive ? 'text-zinc-900' : 'text-zinc-500'}`}>
                     {step.label}
                   </span>
+                  {i < progressSteps.length - 1 && (
+                    <div className={`w-6 h-px mx-1 ${isCompleted ? 'bg-violet-600' : 'bg-zinc-300'}`} />
+                  )}
                 </div>
               );
             })}
@@ -152,18 +134,17 @@ export default function CustomizePage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-[400px_1fr]">
-        {/* Preview Section */}
-        <div className="bg-white border-b lg:border-b-0 lg:border-l border-zinc-200 p-5 lg:sticky lg:top-[70px] lg:h-fit">
-          <div data-testid="mockup-container">
+      <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-[1fr_1fr]">
+        {/* Preview Section - Full height */}
+        <div className="bg-zinc-100 border-b lg:border-b-0 lg:border-l border-zinc-200 p-4 lg:sticky lg:top-[70px] lg:h-[calc(100vh-180px)] lg:min-h-[500px]">
+          <div data-testid="mockup-container" className="h-full">
             <RoomPreview
-              imageUrl={originalImage}
+              imageUrl={previewImage || ''}
               size={size}
               frameType={frameType}
+              paperType={paperType}
+              onFrameChange={setFrameType}
             />
-          </div>
-          <div data-testid="size-label" className="text-center mt-3 text-sm text-zinc-500">
-            {currentSize?.name} • {currentSize?.dimensions}
           </div>
         </div>
 
@@ -279,8 +260,11 @@ export default function CustomizePage() {
                       ${f.id === 'white' ? 'border border-zinc-300' : ''}
                     `}
                     style={{
-                      backgroundColor: f.id !== 'none' ? f.color : undefined,
-                      background: f.id === 'oak' ? 'linear-gradient(135deg, #b8860b, #daa520)' : undefined,
+                      background: f.id === 'oak'
+                        ? 'linear-gradient(135deg, #b8860b, #daa520)'
+                        : f.id !== 'none'
+                        ? f.color
+                        : undefined,
                     }}
                   >
                     {f.id === 'none' && (
@@ -304,7 +288,7 @@ export default function CustomizePage() {
 
       {/* Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 p-4 pb-[max(16px,env(safe-area-inset-bottom))]">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-md mx-auto">
           {/* Price summary */}
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-zinc-600">סה״כ</span>
@@ -313,24 +297,13 @@ export default function CustomizePage() {
             </span>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3">
-            <button
-              data-testid="bottom-back-button"
-              onClick={handleBack}
-              className="w-12 h-12 flex items-center justify-center bg-zinc-100 text-zinc-600 rounded-2xl"
-              aria-label="חזרה"
-            >
-              <ArrowRight className="w-6 h-6" />
-            </button>
-            <button
-              onClick={handleContinue}
-              className="flex-1 flex items-center justify-center gap-2 h-12 bg-gradient-to-r from-violet-500 to-pink-500 text-white font-semibold rounded-2xl shadow-lg"
-            >
-              <span>המשך לתשלום</span>
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          </div>
+          {/* Continue Button */}
+          <button
+            onClick={handleContinue}
+            className="w-full py-3.5 rounded-xl font-semibold shadow-lg transition flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:shadow-xl hover:shadow-violet-500/25 active:scale-[0.98]"
+          >
+            <span>המשך לתשלום</span>
+          </button>
         </div>
       </div>
     </main>

@@ -44,14 +44,12 @@ export type ShipmentStatus =
   | 'returned';
 
 export type StyleType =
-  | 'pop_art'
+  | 'original'
   | 'watercolor'
   | 'line_art'
+  | 'line_art_watercolor'
   | 'oil_painting'
-  | 'romantic'
-  | 'comic_book'
-  | 'vintage'
-  | 'original';
+  | 'avatar_cartoon';
 
 export type SizeType = 'A5' | 'A4' | 'A3' | 'A2';
 

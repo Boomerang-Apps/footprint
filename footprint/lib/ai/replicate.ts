@@ -11,50 +11,48 @@ import Replicate from 'replicate';
  * Available artistic styles for image transformation
  */
 export type StyleType =
-  | 'pop_art'
+  | 'original'
   | 'watercolor'
   | 'line_art'
+  | 'line_art_watercolor'
   | 'oil_painting'
-  | 'romantic'
-  | 'comic_book'
-  | 'vintage'
-  | 'original_enhanced';
+  | 'avatar_cartoon';
 
 /**
  * List of all allowed styles for validation
  */
 export const ALLOWED_STYLES: readonly StyleType[] = [
-  'pop_art',
+  'original',
   'watercolor',
   'line_art',
+  'line_art_watercolor',
   'oil_painting',
-  'romantic',
-  'comic_book',
-  'vintage',
-  'original_enhanced',
+  'avatar_cartoon',
 ] as const;
 
 /**
  * Prompt templates for each artistic style
- * These are optimized for the Flux Kontext Pro model
+ * These are optimized for Gemini/Nano Banana image generation
+ * See nano-banana-styles.md for full documentation
  */
 export const STYLE_PROMPTS: Record<StyleType, string> = {
-  pop_art:
-    'Transform into pop art style: bold vibrant colors, halftone dots pattern, Andy Warhol inspired, high contrast',
+  original:
+    'Keep the original photo exactly as-is with no artistic transformation applied. Maintain all original colors, lighting, composition, and details unchanged.',
+
   watercolor:
-    'Transform into watercolor painting: soft flowing edges, translucent color washes, wet-on-wet technique, artistic brushstrokes',
+    'Transform into a beautiful watercolor painting. Style: soft flowing edges with gentle color bleeds, translucent color washes with visible paper texture, wet-on-wet watercolor technique with organic color mixing, delicate brushstrokes following natural forms, light airy feel with areas of white showing through, subtle granulation effects. Colors should be soft and slightly desaturated with gentle transitions. Preserve subject likeness while creating hand-painted watercolor artwork suitable for framing.',
+
   line_art:
-    'Transform into minimalist line art: clean precise lines, single color, elegant simplicity, vector-like quality',
+    'Transform into elegant minimalist line art. Style: clean precise contour lines with consistent weight, single color (black) on white background, minimal detail capturing only essential forms, elegant simplicity with purposeful negative space, vector-like quality with smooth confident strokes. Focus on capturing the essence and character of the subject. Result should look like professional illustration suitable for high-end printing.',
+
+  line_art_watercolor:
+    'Transform into a combination of line art and watercolor. Style: clean precise ink outlines defining main forms, soft watercolor washes filling inside the linework, confident slightly loose lines, translucent slightly imperfect watercolor fills, colors bleeding slightly beyond lines in places for artistic touch. Ink and wash illustration style where outlines anchor composition while watercolor adds warmth and life. Hand-crafted artistic feel suitable for premium printing.',
+
   oil_painting:
-    'Transform into oil painting: thick impasto brushstrokes, rich textures, classical art style, museum quality',
-  romantic:
-    'Transform into romantic style: soft dreamy focus, warm golden tones, ethereal lighting, tender atmosphere',
-  comic_book:
-    'Transform into comic book style: bold black outlines, vibrant flat colors, Ben-Day dots, dynamic composition',
-  vintage:
-    'Transform into vintage style: sepia tones, film grain, retro color grading, nostalgic aesthetic',
-  original_enhanced:
-    'Enhance photo: improve colors, sharpen details, professional color grading, maintain original composition',
+    'Transform into a classical oil painting masterpiece. Style: rich thick impasto brushstrokes with visible texture, deep luminous colors with masterful color mixing, classical painting technique with attention to light and shadow, painterly quality with visible brush marks, museum-quality finish, chiaroscuro lighting effects enhancing depth and drama. Traditional oil painting reminiscent of Old Masters. Rich deep colors with warm undertones. Result should look like hand-painted oil portrait worthy of a gallery.',
+
+  avatar_cartoon:
+    'Transform into a charming 3D cartoon avatar character. Style: Pixar/Disney-inspired 3D character design, smooth stylized skin with soft subsurface scattering, big expressive eyes with life and personality, slightly exaggerated but appealing proportions, vibrant saturated colors with good contrast, professional 3D render quality with soft lighting, friendly approachable character design. High-quality 3D render appearance with smooth surfaces. Capture the subject personality while maintaining recognizable features in stylized cartoon form.',
 };
 
 /**
