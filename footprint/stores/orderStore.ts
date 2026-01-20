@@ -26,9 +26,22 @@ export interface DiscountValidation {
   appliedDiscount: ApplyDiscountResult | null;
 }
 
+/**
+ * Tweak settings for image adjustments
+ */
+export interface TweakSettings {
+  brightness: number;      // -100 to 100, default 0
+  contrast: number;        // -100 to 100, default 0
+  saturation: number;      // -100 to 100, default 0
+  rotation: 0 | 90 | 180 | 270;
+  cropArea: { x: number; y: number; width: number; height: number } | null;
+  backgroundRemoved: boolean;
+  colorFilter: 'none' | 'warm' | 'cool' | 'vintage' | 'bw';
+}
+
 interface OrderState {
   // Step tracking
-  currentStep: 'upload' | 'style' | 'customize' | 'checkout' | 'complete';
+  currentStep: 'upload' | 'style' | 'tweak' | 'customize' | 'checkout' | 'complete';
   
   // Image data
   originalImage: string | null;
@@ -38,6 +51,9 @@ interface OrderState {
   
   // Style selection
   selectedStyle: StyleType;
+
+  // Tweak settings
+  tweakSettings: TweakSettings;
   
   // Product configuration
   size: SizeType;
@@ -84,6 +100,10 @@ interface OrderActions {
   
   // Style
   setSelectedStyle: (style: StyleType) => void;
+
+  // Tweak
+  setTweakSettings: (settings: Partial<TweakSettings>) => void;
+  resetTweakSettings: () => void;
   
   // Configuration
   setSize: (size: SizeType) => void;
@@ -136,6 +156,15 @@ const initialState: OrderState = {
   transformedImage: null,
   isTransforming: false,
   selectedStyle: 'original',
+  tweakSettings: {
+    brightness: 0,
+    contrast: 0,
+    saturation: 0,
+    rotation: 0,
+    cropArea: null,
+    backgroundRemoved: false,
+    colorFilter: 'none',
+  },
   size: 'A4',
   paperType: 'matte',
   frameType: 'none',
@@ -159,7 +188,17 @@ const initialState: OrderState = {
   orderId: null,
 };
 
-const stepOrder: OrderState['currentStep'][] = ['upload', 'style', 'customize', 'checkout', 'complete'];
+const stepOrder: OrderState['currentStep'][] = ['upload', 'style', 'tweak', 'customize', 'checkout', 'complete'];
+
+const defaultTweakSettings: TweakSettings = {
+  brightness: 0,
+  contrast: 0,
+  saturation: 0,
+  rotation: 0,
+  cropArea: null,
+  backgroundRemoved: false,
+  colorFilter: 'none',
+};
 
 export const useOrderStore = create<OrderState & OrderActions>()(
   persist(
@@ -198,6 +237,12 @@ export const useOrderStore = create<OrderState & OrderActions>()(
 
       // Style
       setSelectedStyle: (style) => set({ selectedStyle: style }),
+
+      // Tweak
+      setTweakSettings: (settings) => set((state) => ({
+        tweakSettings: { ...state.tweakSettings, ...settings },
+      })),
+      resetTweakSettings: () => set({ tweakSettings: defaultTweakSettings }),
 
       // Configuration
       setSize: (size) => set({ size }),
@@ -342,6 +387,7 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         originalImage: state.originalImage,
         transformedImage: state.transformedImage,
         selectedStyle: state.selectedStyle,
+        tweakSettings: state.tweakSettings,
         size: state.size,
         paperType: state.paperType,
         frameType: state.frameType,
