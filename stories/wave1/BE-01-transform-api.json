@@ -1,0 +1,17 @@
+{
+  "id": "BE-01",
+  "title": "Transform API Endpoint",
+  "domain": "backend",
+  "story_points": 5,
+  "description": "Implement the /api/transform endpoint for AI image transformation",
+  "acceptance_criteria": [
+    "POST /api/transform accepts imageUrl and style",
+    "Integration with Google Gemini API",
+    "Return transformed image URL",
+    "Error handling for API failures",
+    "Rate limiting implementation",
+    "Response caching for same image/style"
+  ],
+  "status": "completed",
+  "wave": 1
+}

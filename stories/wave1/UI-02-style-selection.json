@@ -1,0 +1,17 @@
+{
+  "id": "UI-02",
+  "title": "Style Selection UI",
+  "domain": "frontend",
+  "story_points": 5,
+  "description": "Implement the style selection page with 6 artistic transformation styles",
+  "acceptance_criteria": [
+    "Display 6 style options in horizontal strip",
+    "Style preview on selection",
+    "AI transformation integration",
+    "Loading state during transformation",
+    "Error handling for failed transforms",
+    "Save/compare multiple versions"
+  ],
+  "status": "completed",
+  "wave": 1
+}

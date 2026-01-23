@@ -1,0 +1,16 @@
+{
+  "id": "UI-03",
+  "title": "Customization Page",
+  "domain": "frontend",
+  "story_points": 5,
+  "description": "Implement the customization page for print options",
+  "acceptance_criteria": [
+    "Size selection (A4, A3, A2)",
+    "Paper type selection (matte, glossy)",
+    "Frame options",
+    "Price calculation display",
+    "Continue to checkout button"
+  ],
+  "status": "completed",
+  "wave": 2
+}

@@ -1,0 +1,17 @@
+{
+  "id": "UI-01",
+  "title": "Photo Upload Flow",
+  "domain": "frontend",
+  "story_points": 3,
+  "description": "Implement the photo upload flow allowing users to upload images from their device or take a new photo",
+  "acceptance_criteria": [
+    "User can upload image from device gallery",
+    "User can take a new photo with camera",
+    "Image preview is displayed after selection",
+    "File size validation (max 10MB)",
+    "File type validation (JPEG, PNG, HEIC)",
+    "Error messages displayed for invalid files"
+  ],
+  "status": "completed",
+  "wave": 1
+}

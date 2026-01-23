@@ -1,0 +1,15 @@
+{
+  "id": "UI-04",
+  "title": "Order Tracking Page",
+  "domain": "frontend",
+  "story_points": 3,
+  "description": "Implement order tracking and status display",
+  "acceptance_criteria": [
+    "Display order status",
+    "Show order details",
+    "Delivery tracking link",
+    "Order history view"
+  ],
+  "status": "in_progress",
+  "wave": 3
+}

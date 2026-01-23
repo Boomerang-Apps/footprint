@@ -63,9 +63,14 @@ describe('StylePage', () => {
       setIsTransforming: mockSetIsTransforming,
       originalImage: 'blob:test-image-url',
       transformedImage: null,
-      selectedStyle: 'pop_art',
+      selectedStyle: 'original',
       isTransforming: false,
       currentStep: 'style',
+      savedVersions: [],
+      addSavedVersion: vi.fn(),
+      removeSavedVersion: vi.fn(),
+      selectSavedVersion: vi.fn(),
+      _hasHydrated: true,
     });
   });
 
@@ -110,10 +115,10 @@ describe('StylePage', () => {
       expect(styleStep).toHaveAttribute('data-active', 'true');
     });
 
-    it('shows progress fill at 40%', () => {
+    it('shows style step as active', () => {
       render(<StylePage />);
-      const progressFill = screen.getByTestId('progress-fill');
-      expect(progressFill).toHaveStyle({ width: '40%' });
+      const styleStep = screen.getByText('סגנון').closest('[data-step]');
+      expect(styleStep).toHaveAttribute('data-active', 'true');
     });
   });
 
@@ -130,10 +135,28 @@ describe('StylePage', () => {
       expect(closeButton).toBeInTheDocument();
     });
 
-    it('renders style badge with current style name', () => {
+    it('renders style badge with current style name when transformed', () => {
+      // Style badge only shows when transformedImage exists and style is not 'original'
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        setStep: mockSetStep,
+        setSelectedStyle: mockSetSelectedStyle,
+        setTransformedImage: mockSetTransformedImage,
+        setIsTransforming: mockSetIsTransforming,
+        originalImage: 'blob:test-image-url',
+        transformedImage: 'blob:transformed-image-url',
+        selectedStyle: 'watercolor',
+        isTransforming: false,
+        currentStep: 'style',
+        savedVersions: [],
+        addSavedVersion: vi.fn(),
+        removeSavedVersion: vi.fn(),
+        selectSavedVersion: vi.fn(),
+        _hasHydrated: true,
+      });
+
       render(<StylePage />);
       const styleBadge = screen.getByTestId('style-badge');
-      expect(styleBadge).toHaveTextContent('פופ ארט');
+      expect(styleBadge).toHaveTextContent('צבעי מים');
     });
   });
 
@@ -148,48 +171,35 @@ describe('StylePage', () => {
       expect(screen.getByText(/הקישו על סגנון לתצוגה מקדימה/i)).toBeInTheDocument();
     });
 
-    it('renders all 8 style options', () => {
+    it('renders all 6 style options', () => {
       render(<StylePage />);
-      // Check for style buttons using aria-label
-      expect(screen.getByRole('button', { name: 'פופ ארט' })).toBeInTheDocument();
+      // Check for style buttons using aria-label - current 6 styles
+      expect(screen.getByRole('button', { name: 'ללא פילטר' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'צבעי מים' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'ציור קווי' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'קו+מים' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'ציור שמן' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'רומנטי' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'קומיקס' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'וינטג׳' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'מקורי משופר' })).toBeInTheDocument();
-    });
-
-    it('shows "פופולרי" badge on Pop Art', () => {
-      render(<StylePage />);
-      const popularBadges = screen.getAllByText('פופולרי');
-      expect(popularBadges.length).toBeGreaterThan(0);
-    });
-
-    it('shows "חדש" badge on Romantic', () => {
-      render(<StylePage />);
-      expect(screen.getByText('חדש')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'אווטאר קרטון' })).toBeInTheDocument();
     });
 
     it('highlights selected style', () => {
       render(<StylePage />);
-      const popArtButton = screen.getByRole('button', { name: /פופ ארט/i });
-      expect(popArtButton).toHaveAttribute('data-selected', 'true');
+      const originalButton = screen.getByRole('button', { name: /ללא פילטר/i });
+      expect(originalButton).toHaveAttribute('data-selected', 'true');
     });
   });
 
-  describe('Free Preview Notice', () => {
-    it('renders free preview notice', () => {
+  describe('Section Headers', () => {
+    it('renders style selection title', () => {
       render(<StylePage />);
-      expect(screen.getByText(/תצוגה מקדימה חינם/i)).toBeInTheDocument();
+      expect(screen.getByText('בחרו סגנון אמנות')).toBeInTheDocument();
     });
   });
 
   describe('Bottom CTA', () => {
-    it('renders back button "חזרה"', () => {
+    it('renders back button with aria-label', () => {
       render(<StylePage />);
-      const backButtons = screen.getAllByText('חזרה');
+      const backButtons = screen.getAllByRole('button', { name: /חזרה|back/i });
       expect(backButtons.length).toBeGreaterThan(0);
     });
 
@@ -215,12 +225,12 @@ describe('StylePage', () => {
       expect(mockPush).toHaveBeenCalledWith('/create');
     });
 
-    it('navigates to customize page when continue clicked', () => {
+    it('navigates to tweak page when continue clicked', () => {
       render(<StylePage />);
       const continueButton = screen.getByText('אהבתי! המשך');
       fireEvent.click(continueButton);
-      expect(mockSetStep).toHaveBeenCalledWith('customize');
-      expect(mockPush).toHaveBeenCalledWith('/create/customize');
+      expect(mockSetStep).toHaveBeenCalledWith('tweak');
+      expect(mockPush).toHaveBeenCalledWith('/create/tweak');
     });
   });
 
@@ -236,9 +246,18 @@ describe('StylePage', () => {
       (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         setStep: mockSetStep,
         setSelectedStyle: mockSetSelectedStyle,
+        setTransformedImage: mockSetTransformedImage,
+        setIsTransforming: mockSetIsTransforming,
         originalImage: 'blob:test-image-url',
+        transformedImage: 'blob:transformed-image-url',
         selectedStyle: 'watercolor',
+        isTransforming: false,
         currentStep: 'style',
+        savedVersions: [],
+        addSavedVersion: vi.fn(),
+        removeSavedVersion: vi.fn(),
+        selectSavedVersion: vi.fn(),
+        _hasHydrated: true,
       });
 
       render(<StylePage />);
@@ -284,9 +303,18 @@ describe('StylePage', () => {
       (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         setStep: mockSetStep,
         setSelectedStyle: mockSetSelectedStyle,
+        setTransformedImage: mockSetTransformedImage,
+        setIsTransforming: mockSetIsTransforming,
         originalImage: null,
+        transformedImage: null,
         selectedStyle: null,
+        isTransforming: false,
         currentStep: 'style',
+        savedVersions: [],
+        addSavedVersion: vi.fn(),
+        removeSavedVersion: vi.fn(),
+        selectSavedVersion: vi.fn(),
+        _hasHydrated: true,
       });
 
       render(<StylePage />);
@@ -319,8 +347,13 @@ describe('StylePage', () => {
         isTransforming: false,
         originalImage: 'https://r2.example.com/uploads/user123/image.jpg',
         transformedImage: null,
-        selectedStyle: 'pop_art',
+        selectedStyle: 'original',
         currentStep: 'style',
+        savedVersions: [],
+        addSavedVersion: vi.fn(),
+        removeSavedVersion: vi.fn(),
+        selectSavedVersion: vi.fn(),
+        _hasHydrated: true,
       });
     });
 
@@ -491,8 +524,13 @@ describe('StylePage', () => {
         isTransforming: true,
         originalImage: 'https://r2.example.com/uploads/user123/image.jpg',
         transformedImage: null,
-        selectedStyle: 'pop_art',
+        selectedStyle: 'original',
         currentStep: 'style',
+        savedVersions: [],
+        addSavedVersion: vi.fn(),
+        removeSavedVersion: vi.fn(),
+        selectSavedVersion: vi.fn(),
+        _hasHydrated: true,
       });
 
       render(<StylePage />);
@@ -515,6 +553,11 @@ describe('StylePage', () => {
         transformedImage: transformedUrl,
         selectedStyle: 'watercolor',
         currentStep: 'style',
+        savedVersions: [],
+        addSavedVersion: vi.fn(),
+        removeSavedVersion: vi.fn(),
+        selectSavedVersion: vi.fn(),
+        _hasHydrated: true,
       });
 
       render(<StylePage />);
@@ -533,8 +576,13 @@ describe('StylePage', () => {
         isTransforming: true,
         originalImage: 'https://r2.example.com/uploads/user123/image.jpg',
         transformedImage: null,
-        selectedStyle: 'pop_art',
+        selectedStyle: 'original',
         currentStep: 'style',
+        savedVersions: [],
+        addSavedVersion: vi.fn(),
+        removeSavedVersion: vi.fn(),
+        selectSavedVersion: vi.fn(),
+        _hasHydrated: true,
       });
 
       render(<StylePage />);

@@ -1,0 +1,11 @@
+{
+  "extends": "./footprint/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["footprint/*"]
+    }
+  },
+  "include": ["footprint/**/*"],
+  "exclude": ["node_modules", "**/node_modules", "footprint-worktrees", "worktrees"]
+}

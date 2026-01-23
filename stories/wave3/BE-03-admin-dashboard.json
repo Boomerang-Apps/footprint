@@ -1,0 +1,15 @@
+{
+  "id": "BE-03",
+  "title": "Admin Dashboard API",
+  "domain": "backend",
+  "story_points": 5,
+  "description": "Implement admin endpoints for order management",
+  "acceptance_criteria": [
+    "List all orders with filters",
+    "Update order status",
+    "Download order images",
+    "Add tracking information"
+  ],
+  "status": "in_progress",
+  "wave": 3
+}

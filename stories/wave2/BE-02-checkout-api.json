@@ -1,0 +1,16 @@
+{
+  "id": "BE-02",
+  "title": "Checkout API",
+  "domain": "backend",
+  "story_points": 8,
+  "description": "Implement checkout flow with PayPlus integration",
+  "acceptance_criteria": [
+    "POST /api/checkout creates order",
+    "PayPlus payment integration",
+    "Order saved to Supabase",
+    "Email confirmation sent",
+    "Webhook handling for payment status"
+  ],
+  "status": "completed",
+  "wave": 2
+}
