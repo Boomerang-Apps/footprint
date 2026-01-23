@@ -48,6 +48,31 @@ const mockFetch = vi.fn();
 describe('CheckoutPage', () => {
   const mockSetStep = vi.fn();
   const mockSetShippingAddress = vi.fn();
+  const mockSetIsGift = vi.fn();
+  const mockSetGiftOccasion = vi.fn();
+  const mockSetGiftMessage = vi.fn();
+  const mockSetHideGiftPrice = vi.fn();
+
+  const defaultMockStore = {
+    setStep: mockSetStep,
+    setShippingAddress: mockSetShippingAddress,
+    setIsGift: mockSetIsGift,
+    setGiftOccasion: mockSetGiftOccasion,
+    setGiftMessage: mockSetGiftMessage,
+    setHideGiftPrice: mockSetHideGiftPrice,
+    originalImage: 'https://r2.example.com/image.jpg',
+    transformedImage: 'https://r2.example.com/transformed.jpg',
+    selectedStyle: 'pop_art',
+    size: 'A4',
+    paperType: 'matte',
+    frameType: 'none',
+    isGift: false,
+    giftOccasion: null,
+    giftMessage: '',
+    hideGiftPrice: true,
+    shippingAddress: null,
+    _hasHydrated: true,
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -55,19 +80,7 @@ describe('CheckoutPage', () => {
     mockFetch.mockReset();
     mockSearchParams.delete('error');
 
-    (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      setStep: mockSetStep,
-      setShippingAddress: mockSetShippingAddress,
-      originalImage: 'https://r2.example.com/image.jpg',
-      transformedImage: 'https://r2.example.com/transformed.jpg',
-      selectedStyle: 'pop_art',
-      size: 'A4',
-      paperType: 'matte',
-      frameType: 'none',
-      isGift: false,
-      giftMessage: '',
-      shippingAddress: null,
-    });
+    (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(defaultMockStore);
   });
 
   afterEach(() => {
@@ -456,30 +469,27 @@ describe('CheckoutPage', () => {
     it('navigates back to customize when back button clicked', () => {
       render(<CheckoutPage />);
 
-      const backButton = screen.getByText('חזרה').closest('button');
-      fireEvent.click(backButton!);
+      const backButton = screen.getByRole('button', { name: /חזרה/i });
+      fireEvent.click(backButton);
 
       expect(mockSetStep).toHaveBeenCalledWith('customize');
       expect(mockPush).toHaveBeenCalledWith('/create/customize');
     });
 
-    it('redirects to upload if no image', () => {
+    it('redirects to upload if no image', async () => {
       (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        setStep: mockSetStep,
-        setShippingAddress: mockSetShippingAddress,
+        ...defaultMockStore,
         originalImage: null,
         transformedImage: null,
         selectedStyle: null,
-        size: 'A4',
-        paperType: 'matte',
-        frameType: 'none',
-        isGift: false,
-        giftMessage: '',
-        shippingAddress: null,
+        _hasHydrated: true,
       });
 
       render(<CheckoutPage />);
-      expect(mockPush).toHaveBeenCalledWith('/create');
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/create');
+      });
     });
   });
 });

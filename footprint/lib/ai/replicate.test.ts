@@ -139,7 +139,7 @@ describe('lib/ai/replicate', () => {
         expect.objectContaining({
           input: expect.objectContaining({
             image: testImageUrl,
-            prompt: expect.stringContaining('Pollock'),
+            prompt: expect.stringContaining('cartoon'),
           }),
         })
       );

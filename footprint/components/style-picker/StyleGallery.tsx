@@ -39,6 +39,7 @@ const STYLES: Style[] = [
     descriptionHe: 'קצוות רכים וצבעים זורמים כמו ציור',
     thumbnailUrl: '/styles/watercolor.jpg',
     processingTime: 10,
+    popular: true,
   },
   {
     id: 'line_art',
@@ -66,6 +67,7 @@ const STYLES: Style[] = [
     descriptionHe: 'משיכות מכחול עבות וסגנון אמנות קלאסי',
     thumbnailUrl: '/styles/oil-painting.jpg',
     processingTime: 12,
+    popular: true,
   },
   {
     id: 'avatar_cartoon',

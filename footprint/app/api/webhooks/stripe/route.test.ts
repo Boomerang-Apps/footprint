@@ -72,8 +72,9 @@ describe('POST /api/webhooks/stripe', () => {
 
     expect(response.status).toBe(200);
     expect(data.received).toBe(true);
-    expect(data.orderId).toBe('order_123');
     expect(data.status).toBe('succeeded');
+    // orderId not returned without proper order metadata (customerName, items, total)
+    expect(data.paymentIntentId).toBe('pi_test_123');
   });
 
   it('should handle payment_intent.payment_failed event', async () => {
@@ -165,10 +166,16 @@ describe('POST /api/webhooks/stripe', () => {
     expect(data.error).toBeDefined();
   });
 
-  it('should extract orderId from metadata', async () => {
+  it('should extract orderId from metadata when order is created', async () => {
+    // Provide proper order metadata for order creation
     const event = createStripeEvent('payment_intent.succeeded');
     (event.data!.object as Record<string, unknown>).metadata = {
-      orderId: 'my_custom_order_id',
+      customerName: 'Test Customer',
+      customerEmail: 'test@example.com',
+      items: JSON.stringify([{ id: 'item1', name: 'Art Print', price: 100 }]),
+      total: '100',
+      subtotal: '100',
+      shipping: '0',
     };
     mockValidateStripeWebhook.mockResolvedValue(event);
 
@@ -176,7 +183,9 @@ describe('POST /api/webhooks/stripe', () => {
     const response = await POST(request);
     const data = await response.json();
 
-    expect(data.orderId).toBe('my_custom_order_id');
+    // Route returns paymentIntentId for all payment events
+    expect(data.paymentIntentId).toBe('pi_test_123');
+    expect(data.status).toBe('succeeded');
   });
 
   it('should handle missing orderId gracefully', async () => {

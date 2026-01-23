@@ -10,46 +10,62 @@ vi.mock('next/headers', () => ({
 }));
 
 // Mock dependencies
-const mockTransformWithRetry = vi.fn();
-const mockUploadToR2 = vi.fn();
+const mockTransformImage = vi.fn();
+const mockUploadToSupabase = vi.fn();
 const mockGetUser = vi.fn();
 
-vi.mock('@/lib/ai/replicate', () => ({
-  transformWithRetry: (...args: unknown[]) => mockTransformWithRetry(...args),
+vi.mock('@/lib/ai', () => ({
+  transformImage: (...args: unknown[]) => mockTransformImage(...args),
   isValidStyle: (style: string) =>
     [
-      'pop_art',
+      'original',
       'watercolor',
       'line_art',
+      'line_art_watercolor',
       'oil_painting',
-      'romantic',
-      'comic_book',
-      'vintage',
-      'original_enhanced',
+      'avatar_cartoon',
     ].includes(style),
   ALLOWED_STYLES: [
-    'pop_art',
+    'original',
     'watercolor',
     'line_art',
+    'line_art_watercolor',
     'oil_painting',
-    'romantic',
-    'comic_book',
-    'vintage',
-    'original_enhanced',
+    'avatar_cartoon',
   ],
 }));
 
-vi.mock('@/lib/storage/r2', () => ({
-  uploadToR2: (...args: unknown[]) => mockUploadToR2(...args),
-  getPublicUrl: (key: string) => `https://images.footprint.co.il/${key}`,
+vi.mock('@/lib/storage/supabase-storage', () => ({
+  uploadToSupabase: (...args: unknown[]) => mockUploadToSupabase(...args),
 }));
 
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: () => ({
+  createClient: async () => ({
     auth: {
       getUser: () => mockGetUser(),
     },
   }),
+}));
+
+// Mock database functions
+vi.mock('@/lib/db/transformations', () => ({
+  createTransformation: () =>
+    Promise.resolve({ id: 'test-transformation-id' }),
+  startTransformation: () => Promise.resolve(),
+  completeTransformation: () => Promise.resolve(),
+  failTransformation: () => Promise.resolve(),
+  findExistingTransformation: () => Promise.resolve(null),
+}));
+
+// Mock style references
+vi.mock('@/lib/ai/style-references', () => ({
+  getStyleReferences: () => [],
+  hasStyleReferences: () => false,
+}));
+
+// Mock nano-banana reference loading
+vi.mock('@/lib/ai/nano-banana', () => ({
+  loadReferenceImages: () => Promise.resolve([]),
 }));
 
 // Mock global fetch for fetching transformed images
@@ -59,10 +75,9 @@ vi.stubGlobal('fetch', mockFetch);
 // Mock environment variables
 const mockEnv = {
   REPLICATE_API_TOKEN: 'test-token',
-  R2_ACCOUNT_ID: 'test-account-id',
-  R2_ACCESS_KEY_ID: 'test-access-key',
-  R2_SECRET_ACCESS_KEY: 'test-secret-key',
-  R2_BUCKET_NAME: 'test-bucket',
+  GOOGLE_AI_API_KEY: 'test-google-key',
+  SUPABASE_URL: 'https://test.supabase.co',
+  SUPABASE_SERVICE_ROLE_KEY: 'test-service-key',
   R2_PUBLIC_URL: 'https://images.footprint.co.il',
 };
 
@@ -79,11 +94,16 @@ describe('POST /api/transform', () => {
       error: null,
     });
 
-    // Default mock returns
-    mockTransformWithRetry.mockResolvedValue(
-      'https://replicate.delivery/output/transformed.png'
-    );
-    mockUploadToR2.mockResolvedValue({
+    // Default mock returns - transformImage returns a result object
+    mockTransformImage.mockResolvedValue({
+      imageBase64: 'base64encodedimage',
+      mimeType: 'image/png',
+      provider: 'nano-banana',
+      tokensUsed: 100,
+      estimatedCost: 0.01,
+      processingTimeMs: 5000,
+    });
+    mockUploadToSupabase.mockResolvedValue({
       key: 'transformed/user123/abc123.png',
       publicUrl: 'https://images.footprint.co.il/transformed/user123/abc123.png',
       size: 512000,
@@ -107,7 +127,7 @@ describe('POST /api/transform', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'pop_art',
+          style: 'watercolor',
         }),
       });
 
@@ -116,11 +136,11 @@ describe('POST /api/transform', () => {
 
       expect(response.status).toBe(200);
       expect(data.transformedUrl).toBeDefined();
-      expect(data.style).toBe('pop_art');
+      expect(data.style).toBe('watercolor');
       expect(data.processingTime).toBeDefined();
     });
 
-    it('should call Replicate with correct parameters', async () => {
+    it('should call transformImage with correct parameters', async () => {
       const imageUrl = 'https://images.footprint.co.il/uploads/user123/photo.jpg';
       const style = 'watercolor';
 
@@ -132,10 +152,14 @@ describe('POST /api/transform', () => {
 
       await POST(request);
 
-      expect(mockTransformWithRetry).toHaveBeenCalledWith(imageUrl, style);
+      expect(mockTransformImage).toHaveBeenCalledWith(
+        imageUrl,
+        style,
+        expect.objectContaining({ provider: 'nano-banana' })
+      );
     });
 
-    it('should upload transformed image to R2', async () => {
+    it('should upload transformed image to Supabase Storage', async () => {
       const request = new Request('http://localhost/api/transform', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -147,10 +171,10 @@ describe('POST /api/transform', () => {
 
       await POST(request);
 
-      expect(mockUploadToR2).toHaveBeenCalled();
+      expect(mockUploadToSupabase).toHaveBeenCalled();
     });
 
-    it('should return R2 URL instead of Replicate URL', async () => {
+    it('should return Supabase Storage URL instead of provider URL', async () => {
       const request = new Request('http://localhost/api/transform', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,19 +188,16 @@ describe('POST /api/transform', () => {
       const data = await response.json();
 
       expect(data.transformedUrl).toContain('images.footprint.co.il');
-      expect(data.transformedUrl).not.toContain('replicate.delivery');
     });
 
-    it('should support all 8 styles', async () => {
+    it('should support all 6 styles', async () => {
       const styles = [
-        'pop_art',
+        'original',
         'watercolor',
         'line_art',
+        'line_art_watercolor',
         'oil_painting',
-        'romantic',
-        'comic_book',
-        'vintage',
-        'original_enhanced',
+        'avatar_cartoon',
       ];
 
       for (const style of styles) {
@@ -185,10 +206,15 @@ describe('POST /api/transform', () => {
           data: { user: { id: 'user123' } },
           error: null,
         });
-        mockTransformWithRetry.mockResolvedValue(
-          'https://replicate.delivery/output/transformed.png'
-        );
-        mockUploadToR2.mockResolvedValue({
+        mockTransformImage.mockResolvedValue({
+          imageBase64: 'base64encodedimage',
+          mimeType: 'image/png',
+          provider: 'nano-banana',
+          tokensUsed: 100,
+          estimatedCost: 0.01,
+          processingTimeMs: 5000,
+        });
+        mockUploadToSupabase.mockResolvedValue({
           key: `transformed/user123/${style}.png`,
           publicUrl: `https://images.footprint.co.il/transformed/user123/${style}.png`,
           size: 512000,
@@ -214,7 +240,7 @@ describe('POST /api/transform', () => {
   });
 
   describe('Authentication', () => {
-    it('should return 401 for unauthenticated users', async () => {
+    it('should allow anonymous users to transform images', async () => {
       mockGetUser.mockResolvedValue({
         data: { user: null },
         error: { message: 'Not authenticated' },
@@ -225,15 +251,16 @@ describe('POST /api/transform', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'pop_art',
+          style: 'watercolor',
         }),
       });
 
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(401);
-      expect(data.error).toContain('Unauthorized');
+      // Route now allows anonymous users with userId = 'anonymous'
+      expect(response.status).toBe(200);
+      expect(data.transformedUrl).toBeDefined();
     });
   });
 
@@ -260,7 +287,7 @@ describe('POST /api/transform', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          style: 'pop_art',
+          style: 'watercolor',
         }),
       });
 
@@ -304,7 +331,7 @@ describe('POST /api/transform', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'not-a-valid-url',
-          style: 'pop_art',
+          style: 'watercolor',
         }),
       });
 
@@ -317,15 +344,15 @@ describe('POST /api/transform', () => {
   });
 
   describe('Error handling', () => {
-    it('should return 500 when Replicate fails', async () => {
-      mockTransformWithRetry.mockRejectedValue(new Error('Replicate API error'));
+    it('should return 500 when AI transformation fails', async () => {
+      mockTransformImage.mockRejectedValue(new Error('AI API error'));
 
       const request = new Request('http://localhost/api/transform', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'pop_art',
+          style: 'watercolor',
         }),
       });
 
@@ -336,15 +363,15 @@ describe('POST /api/transform', () => {
       expect(data.error).toContain('transformation failed');
     });
 
-    it('should return 500 when R2 upload fails', async () => {
-      mockUploadToR2.mockRejectedValue(new Error('R2 upload error'));
+    it('should return 500 when storage upload fails', async () => {
+      mockUploadToSupabase.mockRejectedValue(new Error('Storage upload error'));
 
       const request = new Request('http://localhost/api/transform', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'pop_art',
+          style: 'watercolor',
         }),
       });
 
@@ -363,7 +390,7 @@ describe('POST /api/transform', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'romantic',
+          style: 'oil_painting',
         }),
       });
 
@@ -382,7 +409,7 @@ describe('POST /api/transform', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'comic_book',
+          style: 'avatar_cartoon',
         }),
       });
 

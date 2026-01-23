@@ -25,6 +25,7 @@ export const demoStyles: Style[] = [
     descriptionHe: 'קצוות רכים וצבעים זורמים כמו ציור',
     thumbnailUrl: '/demo/styles/watercolor.jpg',
     processingTime: 10,
+    popular: true,
   },
   {
     id: 'line_art',
@@ -61,6 +62,7 @@ export const demoStyles: Style[] = [
     descriptionHe: 'סגנון אווטאר קרטון תלת מימדי כמו דמויות פיקסאר',
     thumbnailUrl: '/demo/styles/avatar-cartoon.jpg',
     processingTime: 10,
+    popular: true,
   },
 ];
 

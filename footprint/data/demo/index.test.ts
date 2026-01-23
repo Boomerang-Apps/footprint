@@ -343,7 +343,7 @@ describe('Demo Data Module', () => {
       const style = getStyleById('avatar_cartoon');
       expect(style).toBeDefined();
       expect(style?.id).toBe('avatar_cartoon');
-      expect(style?.name).toBe('Pop Art');
+      expect(style?.name).toBe('Avatar Cartoon');
     });
 
     it('should return undefined for invalid id', () => {

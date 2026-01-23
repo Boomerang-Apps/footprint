@@ -86,15 +86,9 @@ describe('CompletePage', () => {
       expect(screen.getByRole('banner')).toBeInTheDocument();
     });
 
-    it('renders Footprint logo text', () => {
+    it('renders Footprint logo image', () => {
       render(<CompletePage />);
-      expect(screen.getByText('Footprint')).toBeInTheDocument();
-    });
-
-    it('renders logo icon', () => {
-      render(<CompletePage />);
-      const logoIcon = screen.getByTestId('logo-icon');
-      expect(logoIcon).toBeInTheDocument();
+      expect(screen.getByAltText('Footprint')).toBeInTheDocument();
     });
   });
 
@@ -115,9 +109,9 @@ describe('CompletePage', () => {
       expect(screen.getByText(/אישור נשלח למייל/)).toBeInTheDocument();
     });
 
-    it('displays customer email in subtitle', () => {
+    it('displays default email in subtitle when no email param', () => {
       render(<CompletePage />);
-      expect(screen.getByText(/shelly@example.com/)).toBeInTheDocument();
+      expect(screen.getByText(/your@email.com/)).toBeInTheDocument();
     });
 
     it('renders order number in FP-YYYY-XXXX format', () => {

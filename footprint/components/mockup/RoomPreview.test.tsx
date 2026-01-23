@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RoomPreview from './RoomPreview';
 import type { SizeType, FrameType } from '@/types';
 
@@ -43,9 +43,12 @@ describe('RoomPreview', () => {
       expect(artImage).toHaveAttribute('src', defaultProps.imageUrl);
     });
 
-    it('displays size dimensions', () => {
+    it('displays size dimensions in fullscreen modal', () => {
       render(<RoomPreview {...defaultProps} size="A4" />);
-      expect(screen.getByText('21 x 29.7 cm')).toBeInTheDocument();
+      // Open fullscreen to see dimensions
+      const fullscreenButton = screen.getByRole('button', { name: /fullscreen/i });
+      fireEvent.click(fullscreenButton);
+      expect(screen.getByText(/21 x 29.7 cm/)).toBeInTheDocument();
     });
   });
 
@@ -124,19 +127,49 @@ describe('RoomPreview', () => {
     });
   });
 
-  describe('Wall Color Selector', () => {
-    it('renders 4 wall color options', () => {
+  describe('Frame Color Selector', () => {
+    it('renders 4 frame color options', () => {
       render(<RoomPreview {...defaultProps} />);
-      const colorButtons = screen.getAllByRole('button', { name: /לבן|בז׳|אפור|כהה/i });
+      // Frame options: ללא, שחור, לבן, אלון
+      const colorButtons = screen.getAllByRole('button', { name: /ללא|שחור|לבן|אלון/i });
       expect(colorButtons.length).toBe(4);
     });
 
-    it('changes wall color when clicked', () => {
+    it('calls onFrameChange when frame option clicked', () => {
+      const onFrameChange = vi.fn();
+      render(<RoomPreview {...defaultProps} onFrameChange={onFrameChange} />);
+      const whiteButton = screen.getByRole('button', { name: /לבן/i });
+      fireEvent.click(whiteButton);
+      expect(onFrameChange).toHaveBeenCalledWith('white');
+    });
+
+    it('shows selected frame with visual indicator', () => {
+      render(<RoomPreview {...defaultProps} frameType="black" />);
+      const blackButton = screen.getByRole('button', { name: /שחור/i });
+      // Selected button has scale-110 class
+      expect(blackButton).toHaveClass('scale-110');
+    });
+  });
+
+  describe('Passepartout Toggle', () => {
+    it('renders passepartout toggle button', () => {
       render(<RoomPreview {...defaultProps} />);
-      const grayButton = screen.getByRole('button', { name: /אפור/i });
-      fireEvent.click(grayButton);
-      // Button should now be selected (has scale-110 class via border-violet-500)
-      expect(grayButton).toHaveClass('scale-110');
+      const passepartoutButton = screen.getByRole('button', { name: /פספרטו/i });
+      expect(passepartoutButton).toBeInTheDocument();
+    });
+
+    it('toggles passepartout state when clicked', async () => {
+      render(<RoomPreview {...defaultProps} />);
+      const artFrame = screen.getByTestId('art-frame');
+      expect(artFrame).toHaveAttribute('data-passepartout', 'false');
+
+      const passepartoutButton = screen.getByRole('button', { name: /פספרטו/i });
+      fireEvent.click(passepartoutButton);
+
+      // Wait for React to re-render after state update
+      await waitFor(() => {
+        expect(screen.getByTestId('art-frame')).toHaveAttribute('data-passepartout', 'true');
+      });
     });
   });
 

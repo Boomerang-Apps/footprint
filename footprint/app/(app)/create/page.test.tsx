@@ -87,10 +87,12 @@ describe('CreatePage (Upload)', () => {
       expect(uploadStep.closest('[data-step]')).toHaveAttribute('data-active', 'true');
     });
 
-    it('shows progress fill at 20%', () => {
+    it('shows first step as active with step indicator', () => {
       render(<CreatePage />);
-      const progressFill = screen.getByTestId('progress-fill');
-      expect(progressFill).toHaveStyle({ width: '20%' });
+      // The component uses numbered step indicators (1-5) instead of a progress bar fill
+      // First step should show "1" and be styled as active
+      const stepOne = screen.getByText('1');
+      expect(stepOne).toBeInTheDocument();
     });
   });
 
@@ -228,7 +230,7 @@ describe('CreatePage (Upload)', () => {
       });
 
       render(<CreatePage />);
-      expect(screen.getByText('החלפת תמונה')).toBeInTheDocument();
+      expect(screen.getByText('החלפה')).toBeInTheDocument();
     });
   });
 

@@ -34,28 +34,25 @@ describe('StyleGallery', () => {
     it('displays all available styles', () => {
       render(<StyleGallery />);
 
-      // Check for style names in Hebrew
-      expect(screen.getByText('מקורי')).toBeInTheDocument(); // Original
-      expect(screen.getByText('פופ ארט')).toBeInTheDocument(); // Pop Art
+      // Check for style names in Hebrew - current 6 styles
+      expect(screen.getByText('ללא פילטר')).toBeInTheDocument(); // Original
       expect(screen.getByText('צבעי מים')).toBeInTheDocument(); // Watercolor
-      expect(screen.getByText('קווים')).toBeInTheDocument(); // Line Art
+      expect(screen.getByText('ציור קווי')).toBeInTheDocument(); // Line Art
+      expect(screen.getByText('קווי + צבעי מים')).toBeInTheDocument(); // Line + Watercolor
       expect(screen.getByText('ציור שמן')).toBeInTheDocument(); // Oil Painting
-      expect(screen.getByText('רומנטי')).toBeInTheDocument(); // Romantic
-      expect(screen.getByText('קומיקס')).toBeInTheDocument(); // Comic Book
-      expect(screen.getByText('וינטג׳')).toBeInTheDocument(); // Vintage
-      expect(screen.getByText('מינימליסטי')).toBeInTheDocument(); // Minimalist
+      expect(screen.getByText('אווטאר קרטון')).toBeInTheDocument(); // Avatar Cartoon
     });
 
     it('renders style cards as clickable buttons', () => {
       render(<StyleGallery />);
       const styleCards = screen.getAllByRole('button');
-      expect(styleCards.length).toBeGreaterThanOrEqual(9); // 9 styles
+      expect(styleCards.length).toBe(6); // 6 styles
     });
 
     it('displays style thumbnails', () => {
       render(<StyleGallery />);
       const images = screen.getAllByRole('img');
-      expect(images.length).toBeGreaterThanOrEqual(9);
+      expect(images.length).toBe(6);
     });
   });
 
@@ -64,7 +61,7 @@ describe('StyleGallery', () => {
       render(<StyleGallery />);
 
       // Original should be selected by default (from mock)
-      const originalCard = screen.getByRole('button', { name: /מקורי/i });
+      const originalCard = screen.getByRole('button', { name: /ללא פילטר/i });
       expect(originalCard).toHaveClass('border-brand-purple');
     });
 
@@ -72,20 +69,21 @@ describe('StyleGallery', () => {
       const user = userEvent.setup();
       render(<StyleGallery />);
 
-      const popArtCard = screen.getByRole('button', { name: /פופ ארט/i });
-      await user.click(popArtCard);
+      // Use getAllByRole since button name includes description text
+      const watercolorCards = screen.getAllByRole('button', { name: /צבעי מים/i });
+      await user.click(watercolorCards[0]);
 
-      expect(mockSetSelectedStyle).toHaveBeenCalledWith('pop_art');
+      expect(mockSetSelectedStyle).toHaveBeenCalledWith('watercolor');
     });
 
     it('updates selection visual when different style clicked', async () => {
       const user = userEvent.setup();
       render(<StyleGallery />);
 
-      const watercolorCard = screen.getByRole('button', { name: /צבעי מים/i });
-      await user.click(watercolorCard);
+      const oilCard = screen.getByRole('button', { name: /ציור שמן/i });
+      await user.click(oilCard);
 
-      expect(mockSetSelectedStyle).toHaveBeenCalledWith('watercolor');
+      expect(mockSetSelectedStyle).toHaveBeenCalledWith('oil_painting');
     });
   });
 
@@ -96,13 +94,13 @@ describe('StyleGallery', () => {
       const styleCards = screen.getAllByRole('button');
       const firstCard = styleCards[0];
 
-      expect(firstCard).toHaveAccessibleName(/מקורי/i);
+      expect(firstCard).toHaveAccessibleName(/ללא פילטר/i);
     });
 
     it('shows Original option with distinct styling', () => {
       render(<StyleGallery />);
 
-      const originalCard = screen.getByRole('button', { name: /מקורי/i });
+      const originalCard = screen.getByRole('button', { name: /ללא פילטר/i });
       expect(originalCard).toBeInTheDocument();
     });
   });
@@ -127,11 +125,11 @@ describe('StyleGallery', () => {
       const user = userEvent.setup();
       render(<StyleGallery />);
 
-      const popArtCard = screen.getByRole('button', { name: /פופ ארט/i });
-      popArtCard.focus();
+      const watercolorCards = screen.getAllByRole('button', { name: /צבעי מים/i });
+      watercolorCards[0].focus();
       await user.keyboard('{Enter}');
 
-      expect(mockSetSelectedStyle).toHaveBeenCalledWith('pop_art');
+      expect(mockSetSelectedStyle).toHaveBeenCalledWith('watercolor');
     });
   });
 
@@ -148,10 +146,10 @@ describe('StyleGallery', () => {
 
       render(<StyleGallery onStyleSelect={onStyleSelect} />);
 
-      const popArtCard = screen.getByRole('button', { name: /פופ ארט/i });
-      await user.click(popArtCard);
+      const watercolorCards = screen.getAllByRole('button', { name: /צבעי מים/i });
+      await user.click(watercolorCards[0]);
 
-      expect(onStyleSelect).toHaveBeenCalledWith('pop_art');
+      expect(onStyleSelect).toHaveBeenCalledWith('watercolor');
     });
   });
 });
@@ -162,7 +160,7 @@ describe('StyleCard', () => {
 
   it('displays style name', () => {
     render(<StyleGallery />);
-    expect(screen.getByText('פופ ארט')).toBeInTheDocument();
+    expect(screen.getByText('צבעי מים')).toBeInTheDocument();
   });
 
   it('displays thumbnail image', () => {
@@ -174,7 +172,7 @@ describe('StyleCard', () => {
 
   it('shows popular badge for popular styles', () => {
     render(<StyleGallery />);
-    // Pop Art and Oil Painting are marked as popular
+    // Watercolor and Oil Painting are marked as popular
     const popularBadges = screen.getAllByText('פופולרי');
     expect(popularBadges.length).toBe(2);
   });
