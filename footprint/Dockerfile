@@ -7,8 +7,8 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable pnpm && pnpm install --frozen-lockfile
+COPY package.json package-lock.json* ./
+RUN npm ci --legacy-peer-deps
 
 # Build the application
 FROM base AS builder
@@ -18,7 +18,7 @@ COPY . .
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN corepack enable pnpm && pnpm build
+RUN npm run build
 
 # Production image
 FROM base AS runner
