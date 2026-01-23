@@ -2,6 +2,8 @@
   "id": "BE-01",
   "title": "Transform API Endpoint",
   "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
   "story_points": 5,
   "description": "Implement the /api/transform endpoint for AI image transformation",
   "acceptance_criteria": [

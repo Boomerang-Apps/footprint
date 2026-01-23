@@ -2,6 +2,8 @@
   "id": "UI-03",
   "title": "Customization Page",
   "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
   "story_points": 5,
   "description": "Implement the customization page for print options",
   "acceptance_criteria": [

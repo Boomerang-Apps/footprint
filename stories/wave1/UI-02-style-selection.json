@@ -2,6 +2,8 @@
   "id": "UI-02",
   "title": "Style Selection UI",
   "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
   "story_points": 5,
   "description": "Implement the style selection page with 6 artistic transformation styles",
   "acceptance_criteria": [

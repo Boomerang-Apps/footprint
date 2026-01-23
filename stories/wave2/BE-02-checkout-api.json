@@ -2,6 +2,8 @@
   "id": "BE-02",
   "title": "Checkout API",
   "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
   "story_points": 8,
   "description": "Implement checkout flow with PayPlus integration",
   "acceptance_criteria": [

@@ -2,6 +2,8 @@
   "id": "UI-04",
   "title": "Order Tracking Page",
   "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "medium",
   "story_points": 3,
   "description": "Implement order tracking and status display",
   "acceptance_criteria": [

@@ -2,6 +2,8 @@
   "id": "UI-01",
   "title": "Photo Upload Flow",
   "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
   "story_points": 3,
   "description": "Implement the photo upload flow allowing users to upload images from their device or take a new photo",
   "acceptance_criteria": [
