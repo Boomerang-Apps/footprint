@@ -1,46 +1,59 @@
 #!/bin/bash
-
-# Footprint Multi-Agent Worktree Setup Script
-# This script creates git worktrees for each agent
+# setup-worktrees.sh - Create isolated worktrees for each agent
+# WAVE Architecture - 7 Agent Setup
 
 set -e
 
-PROJECT_DIR=$(pwd)
-WORKTREES_DIR="${PROJECT_DIR}-worktrees"
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+WORKTREE_DIR="$PROJECT_DIR/worktrees"
 
 echo "=================================================="
-echo "  Footprint Multi-Agent Worktree Setup"
+echo "  Footprint WAVE Multi-Agent Worktree Setup"
 echo "=================================================="
 echo ""
 echo "Project directory: $PROJECT_DIR"
-echo "Worktrees directory: $WORKTREES_DIR"
+echo "Worktrees directory: $WORKTREE_DIR"
 echo ""
 
 # Check if we're in a git repository
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    echo "ERROR: Not a git repository. Please run 'git init' first."
+    echo "ERROR: Not a git repository."
     exit 1
 fi
 
-# Create worktrees directory
-echo "Creating worktrees directory..."
-mkdir -p "$WORKTREES_DIR"
+# Create worktree directory
+mkdir -p "$WORKTREE_DIR"
 
-# Define agents
-AGENTS=("agent-cto" "agent-pm" "agent-qa" "backend-1" "backend-2" "frontend-a" "frontend-b")
+# Function to create worktree safely
+create_worktree() {
+    local name=$1
+    local branch=$2
 
-# Create worktree for each agent
-for agent in "${AGENTS[@]}"; do
-    echo ""
-    echo "Setting up worktree for: $agent"
+    echo "Setting up worktree for: $name"
 
-    if [ -d "$WORKTREES_DIR/$agent" ]; then
+    if [ -d "$WORKTREE_DIR/$name" ]; then
         echo "  -> Worktree already exists, skipping..."
     else
-        git worktree add "$WORKTREES_DIR/$agent" -b "agent/$agent"
-        echo "  -> Created worktree and branch: agent/$agent"
+        if git worktree add "$WORKTREE_DIR/$name" -b "$branch" 2>/dev/null; then
+            echo "  -> Created worktree and branch: $branch"
+        elif git worktree add "$WORKTREE_DIR/$name" "$branch" 2>/dev/null; then
+            echo "  -> Attached to existing branch: $branch"
+        else
+            echo "  -> Warning: Could not create worktree for $name"
+        fi
     fi
-done
+}
+
+# Create worktree for each agent (matching WAVE architecture)
+echo "Creating agent worktrees..."
+echo ""
+create_worktree "cto" "cto/workspace"
+create_worktree "pm" "pm/workspace"
+create_worktree "qa" "qa/workspace"
+create_worktree "fe-dev-1" "fe-dev-1/workspace"
+create_worktree "fe-dev-2" "fe-dev-2/workspace"
+create_worktree "be-dev-1" "be-dev-1/workspace"
+create_worktree "be-dev-2" "be-dev-2/workspace"
 
 echo ""
 echo "=================================================="
@@ -50,29 +63,17 @@ echo ""
 echo "Worktrees created:"
 git worktree list
 echo ""
-echo "To start an agent session:"
+echo "To open each agent in Cursor:"
 echo ""
-echo "  CTO Agent:"
-echo "    cd $WORKTREES_DIR/agent-cto && claude"
+echo "  cursor $WORKTREE_DIR/cto       # CTO Agent"
+echo "  cursor $WORKTREE_DIR/pm        # PM Agent"
+echo "  cursor $WORKTREE_DIR/qa        # QA Agent"
+echo "  cursor $WORKTREE_DIR/fe-dev-1  # Frontend Dev 1"
+echo "  cursor $WORKTREE_DIR/fe-dev-2  # Frontend Dev 2"
+echo "  cursor $WORKTREE_DIR/be-dev-1  # Backend Dev 1"
+echo "  cursor $WORKTREE_DIR/be-dev-2  # Backend Dev 2"
 echo ""
-echo "  PM Agent:"
-echo "    cd $WORKTREES_DIR/agent-pm && claude"
+echo "Or start Claude Code in each worktree:"
 echo ""
-echo "  QA Agent:"
-echo "    cd $WORKTREES_DIR/agent-qa && claude"
-echo ""
-echo "  Backend-1 Agent:"
-echo "    cd $WORKTREES_DIR/backend-1 && claude"
-echo ""
-echo "  Backend-2 Agent:"
-echo "    cd $WORKTREES_DIR/backend-2 && claude"
-echo ""
-echo "  Frontend-A Agent:"
-echo "    cd $WORKTREES_DIR/frontend-a && claude"
-echo ""
-echo "  Frontend-B Agent:"
-echo "    cd $WORKTREES_DIR/frontend-b && claude"
-echo ""
-echo "Remember to read the agent definition files before starting!"
-echo "  .claudecode/agents/[agent-name]-agent.md"
+echo "  cd $WORKTREE_DIR/cto && claude"
 echo ""
