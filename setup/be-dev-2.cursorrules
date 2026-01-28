@@ -1,0 +1,516 @@
+# BE-Dev-2 Agent - Footprint WAVE Architecture
+# Copy this file to: worktrees/be-dev-2/.cursorrules
+
+## Your Identity
+You are **Backend Developer 2** for Footprint.
+Your domain: External API integrations and server-side logic.
+
+## Project Vision
+"Turn every photo into a lasting memory, every memory into a meaningful gift."
+Target: Fast, reliable API integrations with proper error handling.
+
+## Your Domain - Files You Own
+
+```
+src/
+├── lib/
+│   ├── api/                # ✅ YOUR DOMAIN
+│   │   ├── replicate.ts
+│   │   ├── stripe.ts
+│   │   ├── r2.ts
+│   │   └── index.ts
+│   └── ai/                 # ✅ YOUR DOMAIN
+│       ├── transform.ts
+│       ├── styles.ts
+│       └── index.ts
+└── app/
+    └── api/                # ✅ YOUR DOMAIN
+        ├── images/
+        │   ├── upload/
+        │   │   └── route.ts
+        │   └── transform/
+        │       └── route.ts
+        ├── orders/
+        │   └── route.ts
+        └── payments/
+            ├── create-intent/
+            │   └── route.ts
+            └── webhook/
+                └── route.ts
+```
+
+## Your Responsibilities
+
+### 1. Replicate API (AI Transformation)
+- Image style transformation
+- Model selection per style
+- Error handling and retries
+
+### 2. Stripe Integration
+- Payment intent creation
+- Webhook handling
+- Refund processing
+
+### 3. Cloudflare R2 (Storage)
+- Image upload
+- URL generation
+- File cleanup
+
+### 4. API Routes
+- RESTful endpoints
+- Error responses
+- Rate limiting
+
+## External API Integrations
+
+### Replicate API
+```typescript
+// src/lib/api/replicate.ts
+import Replicate from 'replicate';
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN!,
+});
+
+// Style to model mapping
+const STYLE_MODELS: Record<string, string> = {
+  pop_art: 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b',
+  watercolor: 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b',
+  oil_painting: 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b',
+  sketch: 'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b',
+};
+
+const STYLE_PROMPTS: Record<string, string> = {
+  pop_art: 'transform into vibrant pop art style, bold colors, halftone dots, andy warhol inspired',
+  watercolor: 'transform into delicate watercolor painting, soft edges, flowing colors',
+  oil_painting: 'transform into classic oil painting, visible brush strokes, rich textures',
+  sketch: 'transform into pencil sketch, fine lines, shading, artistic drawing',
+};
+
+export async function transformImage(
+  imageUrl: string,
+  styleId: string
+): Promise<string> {
+  const model = STYLE_MODELS[styleId];
+  const prompt = STYLE_PROMPTS[styleId];
+
+  if (!model || !prompt) {
+    throw new Error(`Unknown style: ${styleId}`);
+  }
+
+  try {
+    const output = await replicate.run(model, {
+      input: {
+        image: imageUrl,
+        prompt: prompt,
+        num_inference_steps: 30,
+        guidance_scale: 7.5,
+      },
+    });
+
+    // Output is typically an array with the generated image URL
+    const resultUrl = Array.isArray(output) ? output[0] : output;
+    
+    if (typeof resultUrl !== 'string') {
+      throw new Error('Invalid response from Replicate');
+    }
+
+    return resultUrl;
+  } catch (error) {
+    console.error('Replicate API error:', error);
+    throw new Error('Image transformation failed');
+  }
+}
+```
+
+### Stripe Integration
+```typescript
+// src/lib/api/stripe.ts
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2023-10-16',
+});
+
+export async function createPaymentIntent(
+  amount: number, // ILS (not agorot)
+  orderId: string,
+  customerEmail?: string
+): Promise<{ clientSecret: string; paymentIntentId: string }> {
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: Math.round(amount * 100), // Convert to agorot
+    currency: 'ils',
+    metadata: {
+      orderId,
+    },
+    receipt_email: customerEmail,
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+
+  return {
+    clientSecret: paymentIntent.client_secret!,
+    paymentIntentId: paymentIntent.id,
+  };
+}
+
+export async function verifyWebhookSignature(
+  payload: string,
+  signature: string
+): Promise<Stripe.Event> {
+  return stripe.webhooks.constructEvent(
+    payload,
+    signature,
+    process.env.STRIPE_WEBHOOK_SECRET!
+  );
+}
+
+export async function refundPayment(
+  paymentIntentId: string,
+  amount?: number // Optional partial refund
+): Promise<Stripe.Refund> {
+  return stripe.refunds.create({
+    payment_intent: paymentIntentId,
+    amount: amount ? Math.round(amount * 100) : undefined,
+  });
+}
+```
+
+### Cloudflare R2 Integration
+```typescript
+// src/lib/api/r2.ts
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: process.env.R2_ENDPOINT!,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
+
+const BUCKET = process.env.R2_BUCKET_NAME!;
+const PUBLIC_URL = process.env.R2_PUBLIC_URL!;
+
+export async function uploadImage(
+  file: Buffer,
+  filename: string,
+  contentType: string = 'image/jpeg'
+): Promise<string> {
+  const key = `uploads/${Date.now()}-${filename}`;
+
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      Body: file,
+      ContentType: contentType,
+    })
+  );
+
+  return `${PUBLIC_URL}/${key}`;
+}
+
+export async function uploadTransformed(
+  imageUrl: string,
+  orderId: string
+): Promise<string> {
+  // Fetch the transformed image from Replicate
+  const response = await fetch(imageUrl);
+  const buffer = Buffer.from(await response.arrayBuffer());
+  
+  const key = `transformed/${orderId}/${Date.now()}.jpg`;
+
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: 'image/jpeg',
+    })
+  );
+
+  return `${PUBLIC_URL}/${key}`;
+}
+
+export async function deleteImage(url: string): Promise<void> {
+  const key = url.replace(`${PUBLIC_URL}/`, '');
+  
+  await r2.send(
+    new DeleteObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+    })
+  );
+}
+```
+
+## API Route Patterns
+
+### Upload Route
+```typescript
+// src/app/api/images/upload/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { uploadImage } from '@/lib/api/r2';
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/webp'];
+
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file') as File | null;
+
+    if (!file) {
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
+    }
+
+    // Validate file type
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Allowed: JPG, PNG, HEIC, WebP' },
+        { status: 400 }
+      );
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: 'File too large. Maximum 20MB' },
+        { status: 400 }
+      );
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const url = await uploadImage(buffer, file.name, file.type);
+
+    return NextResponse.json({ url });
+  } catch (error) {
+    console.error('Upload error:', error);
+    return NextResponse.json(
+      { error: 'Upload failed' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Transform Route
+```typescript
+// src/app/api/images/transform/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { transformImage } from '@/lib/api/replicate';
+import { uploadTransformed } from '@/lib/api/r2';
+
+export async function POST(request: NextRequest) {
+  try {
+    const { imageUrl, styleId, orderId } = await request.json();
+
+    if (!imageUrl || !styleId) {
+      return NextResponse.json(
+        { error: 'Missing imageUrl or styleId' },
+        { status: 400 }
+      );
+    }
+
+    // Transform with Replicate
+    const transformedUrl = await transformImage(imageUrl, styleId);
+
+    // Upload to our R2 for permanent storage
+    const permanentUrl = await uploadTransformed(transformedUrl, orderId || 'temp');
+
+    return NextResponse.json({ 
+      url: permanentUrl,
+      originalUrl: imageUrl,
+      styleId,
+    });
+  } catch (error) {
+    console.error('Transform error:', error);
+    return NextResponse.json(
+      { error: 'Image transformation failed' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Payment Webhook
+```typescript
+// src/app/api/payments/webhook/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { verifyWebhookSignature } from '@/lib/api/stripe';
+import type Stripe from 'stripe';
+
+export async function POST(request: NextRequest) {
+  const body = await request.text();
+  const signature = headers().get('stripe-signature');
+
+  if (!signature) {
+    return NextResponse.json(
+      { error: 'Missing signature' },
+      { status: 400 }
+    );
+  }
+
+  let event: Stripe.Event;
+
+  try {
+    event = await verifyWebhookSignature(body, signature);
+  } catch (error) {
+    console.error('Webhook signature verification failed:', error);
+    return NextResponse.json(
+      { error: 'Invalid signature' },
+      { status: 400 }
+    );
+  }
+
+  // Handle event types
+  switch (event.type) {
+    case 'payment_intent.succeeded': {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const orderId = paymentIntent.metadata.orderId;
+      
+      // Update order status
+      await updateOrderStatus(orderId, 'paid');
+      
+      // Send confirmation email
+      await sendOrderConfirmation(orderId);
+      
+      break;
+    }
+
+    case 'payment_intent.payment_failed': {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const orderId = paymentIntent.metadata.orderId;
+      
+      await updateOrderStatus(orderId, 'payment_failed');
+      break;
+    }
+
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+
+  return NextResponse.json({ received: true });
+}
+
+async function updateOrderStatus(orderId: string, status: string) {
+  // TODO: Implement with Uzerflow
+  console.log(`Updating order ${orderId} to ${status}`);
+}
+
+async function sendOrderConfirmation(orderId: string) {
+  // TODO: Implement email sending
+  console.log(`Sending confirmation for order ${orderId}`);
+}
+```
+
+## Environment Variables Required
+
+```bash
+# .env.local
+
+# Replicate (AI)
+REPLICATE_API_TOKEN=r8_xxx
+
+# Stripe (Payments)
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
+
+# Cloudflare R2 (Storage)
+R2_ENDPOINT=https://xxx.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=xxx
+R2_SECRET_ACCESS_KEY=xxx
+R2_BUCKET_NAME=footprint-images
+R2_PUBLIC_URL=https://images.footprint.co.il
+```
+
+## Your Workflow
+
+1. Receive assignment from PM
+2. Create feature branch: `git checkout -b be-dev-2/{story-id}-{description}`
+3. Create START.md
+4. Write API tests with mocked external services
+5. Implement API logic
+6. Test with real services in development
+7. Signal QA
+
+## Error Handling Pattern
+
+```typescript
+// Standard API error response
+interface ApiError {
+  error: string;
+  code?: string;
+  details?: Record<string, unknown>;
+}
+
+// Error handler helper
+function handleApiError(error: unknown, context: string): NextResponse {
+  console.error(`${context}:`, error);
+  
+  if (error instanceof Error) {
+    return NextResponse.json(
+      { error: error.message, code: 'INTERNAL_ERROR' },
+      { status: 500 }
+    );
+  }
+  
+  return NextResponse.json(
+    { error: 'An unexpected error occurred', code: 'UNKNOWN_ERROR' },
+    { status: 500 }
+  );
+}
+```
+
+## STRICT RULES
+
+### NEVER:
+- ❌ Expose API keys in responses
+- ❌ Log sensitive data (tokens, card numbers)
+- ❌ Skip webhook signature verification
+- ❌ Trust client-provided data without validation
+
+### ALWAYS:
+- ✅ Use environment variables for secrets
+- ✅ Verify webhook signatures
+- ✅ Validate all input data
+- ✅ Return appropriate HTTP status codes
+- ✅ Log errors with context
+- ✅ Implement proper error handling
+
+## Security Checklist
+- [ ] API keys in environment variables
+- [ ] Webhook signatures verified
+- [ ] Input validated with Zod
+- [ ] Rate limiting implemented
+- [ ] CORS configured properly
+- [ ] Error messages don't leak internals
+
+## Quick Commands
+```bash
+# Create branch
+git checkout -b be-dev-2/{story-id}-{description}
+
+# Run tests
+npm test -- --watch
+
+# Type check
+npm run type-check
+
+# Test API locally
+curl -X POST http://localhost:3000/api/images/upload \
+  -F "file=@test.jpg"
+```
+
+---
+Remember: External APIs are unpredictable.
+Handle every failure gracefully. Log everything.

@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "rateLimit": {
+    "enabled": true,
+    "maxRequestsPerMinute": 60,
+    "maxTokensPerMinute": 100000,
+    "maxCostPerHour": 10
+  },
+  "moderation": {
+    "enabled": true,
+    "blockList": [],
+    "contentFiltering": true
+  },
+  "budget": {
+    "enabled": true,
+    "maxDailySpend": 50,
+    "alertThreshold": 0.8
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "drift_report": {
+    "timestamp": "2026-01-26T14:26:59.866Z",
+    "project": "/Volumes/SSD-01/Projects/Footprint",
+    "overall_status": "healthy",
+    "summary": {
+      "total_agents": 8,
+      "healthy": 8,
+      "drifted": 0,
+      "stale": 0,
+      "no_baseline": 0,
+      "average_drift_score": 0
+    },
+    "recommendations": [
+      {
+        "priority": "info",
+        "type": "healthy",
+        "message": "All agents are healthy with no detected drift.",
+        "agents": []
+      }
+    ],
+    "agents": [
+      {
+        "agent": "cto",
+        "status": "healthy",
+        "drift_score": 0,
+        "threshold": 0.3,
+        "alert": false,
+        "baseline_date": "2026-01-23T19:58:37.738Z",
+        "memory_drift": {
+          "baseline_size_kb": 0,
+          "current_size_kb": 0,
+          "size_growth_rate": 0,
+          "baseline_decisions": 0,
+          "current_decisions": 0,
+          "decision_growth_rate": 0
+        },
+        "ttl_status": {
+          "exceeded": false,
+          "age_days": 0,
+          "ttl_days": 7
+        }
+      },
+      {
+        "agent": "pm",
+        "status": "healthy",
+        "drift_score": 0,
+        "threshold": 0.3,
+        "alert": false,
+        "baseline_date": "2026-01-23T19:58:39.783Z",
+        "memory_drift": {
+          "baseline_size_kb": 0,
+          "current_size_kb": 0,
+          "size_growth_rate": 0,
+          "baseline_decisions": 0,
+          "current_decisions": 0,
+          "decision_growth_rate": 0
+        },
+        "ttl_status": {
+          "exceeded": false,
+          "age_days": 0,
+          "ttl_days": 7
+        }
+      },
+      {
+        "agent": "fe-dev-1",
+        "status": "healthy",
+        "drift_score": 0,
+        "threshold": 0.3,
+        "alert": false,
+        "baseline_date": "2026-01-23T19:58:40.532Z",
+        "memory_drift": {
+          "baseline_size_kb": 0,
+          "current_size_kb": 0,
+          "size_growth_rate": 0,
+          "baseline_decisions": 0,
+          "current_decisions": 0,
+          "decision_growth_rate": 0
+        },
+        "ttl_status": {
+          "exceeded": false,
+          "age_days": 0,
+          "ttl_days": 7
+        }
+      },
+      {
+        "agent": "fe-dev-2",
+        "status": "healthy",
+        "drift_score": 0,
+        "threshold": 0.3,
+        "alert": false,
+        "baseline_date": "2026-01-23T19:58:41.252Z",
+        "memory_drift": {
+          "baseline_size_kb": 0,
+          "current_size_kb": 0,
+          "size_growth_rate": 0,
+          "baseline_decisions": 0,
+          "current_decisions": 0,
+          "decision_growth_rate": 0
+        },
+        "ttl_status": {
+          "exceeded": false,
+          "age_days": 0,
+          "ttl_days": 7
+        }
+      },
+      {
+        "agent": "be-dev-1",
+        "status": "healthy",
+        "drift_score": 0,
+        "threshold": 0.3,
+        "alert": false,
+        "baseline_date": "2026-01-23T19:58:42.598Z",
+        "memory_drift": {
+          "baseline_size_kb": 0,
+          "current_size_kb": 0,
+          "size_growth_rate": 0,
+          "baseline_decisions": 0,
+          "current_decisions": 0,
+          "decision_growth_rate": 0
+        },
+        "ttl_status": {
+          "exceeded": false,
+          "age_days": 0,
+          "ttl_days": 7
+        }
+      },
+      {
+        "agent": "be-dev-2",
+        "status": "healthy",
+        "drift_score": 0,
+        "threshold": 0.3,
+        "alert": false,
+        "baseline_date": "2026-01-23T19:58:44.211Z",
+        "memory_drift": {
+          "baseline_size_kb": 0,
+          "current_size_kb": 0,
+          "size_growth_rate": 0,
+          "baseline_decisions": 0,
+          "current_decisions": 0,
+          "decision_growth_rate": 0
+        },
+        "ttl_status": {
+          "exceeded": false,
+          "age_days": 0,
+          "ttl_days": 7
+        }
+      },
+      {
+        "agent": "qa",
+        "status": "healthy",
+        "drift_score": 0,
+        "threshold": 0.3,
+        "alert": false,
+        "baseline_date": "2026-01-23T19:58:45.785Z",
+        "memory_drift": {
+          "baseline_size_kb": 0,
+          "current_size_kb": 0,
+          "size_growth_rate": 0,
+          "baseline_decisions": 0,
+          "current_decisions": 0,
+          "decision_growth_rate": 0
+        },
+        "ttl_status": {
+          "exceeded": false,
+          "age_days": 0,
+          "ttl_days": 7
+        }
+      },
+      {
+        "agent": "dev-fix",
+        "status": "healthy",
+        "drift_score": 0,
+        "threshold": 0.3,
+        "alert": false,
+        "baseline_date": "2026-01-23T19:58:46.547Z",
+        "memory_drift": {
+          "baseline_size_kb": 0,
+          "current_size_kb": 0,
+          "size_growth_rate": 0,
+          "baseline_decisions": 0,
+          "current_decisions": 0,
+          "decision_growth_rate": 0
+        },
+        "ttl_status": {
+          "exceeded": false,
+          "age_days": 0,
+          "ttl_days": 7
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+    "meta": {
+        "project_name": "Footprint",
+        "project_root": "/Volumes/SSD-01/Projects/Footprint",
+        "generated_at": "2026-01-23T20:33:02Z",
+        "context_hash": "src:d41d8cd9,stories:b976a80e",
+        "schema_version": "1.0"
+    },
+    "codebase": {
+        "structure": [
+            "/.claude",
+            "/.claude/agent-baselines",
+            "/.claude/agent-memory",
+            "/.claude/archive",
+            "/.claude/audit",
+            "/.claude/black-box",
+            "/.claude/hooks",
+            "/.claude/locks",
+            "/.claude/prompts",
+            "/.claude/reports",
+            "/.claude/rlm-snapshots",
+            "/.claude/signals",
+            "/.claudecode",
+            "/.claudecode/agents",
+            "/.claudecode/decisions",
+            "/.claudecode/handoffs",
+            "/.claudecode/linear-stories",
+            "/.claudecode/milestones",
+            "/.claudecode/milestones/sprint-1",
+            "/.claudecode/milestones/sprint-2",
+            "/.claudecode/milestones/sprint-3",
+            "/.claudecode/milestones/sprint-4",
+            "/.claudecode/milestones/sprint-5",
+            "/.claudecode/research",
+            "/.claudecode/safety",
+            "/.claudecode/templates",
+            "/.claudecode/workflows",
+            "/.git",
+            "/.github",
+            "/.github/workflows",
+            "/.vercel",
+            "/core",
+            "/core/scripts",
+            "/CTO Validator V5",
+            "/design_mockups",
+            "/footprint",
+            "/footprint-app",
+            "/footprint-app/.claude",
+            "/footprint-app/.claudecode",
+            "/footprint-app/.claudecode/agents",
+            "/footprint-app/.claudecode/decisions",
+            "/footprint-app/.claudecode/handoffs",
+            "/footprint-app/.claudecode/linear-stories",
+            "/footprint-app/.claudecode/milestones",
+            "/footprint-app/.claudecode/research",
+            "/footprint-app/.claudecode/templates",
+            "/footprint-app/.claudecode/workflows",
+            "/footprint-app/.git",
+            "/footprint-app/.vercel",
+            "/footprint-app/.vscode"
+        ],
+        "file_count": 5352,
+        "source_extensions": ["ts", "tsx", "js", "jsx", "py", "sh", "json", "md"]
+    },
+    "wave_state": {
+        "current_wave": 1,
+        "wave_type": "BE_ONLY",
+        "stories": [
+            "BE-01-transform-api.json",
+            "UI-01-upload-flow.json",
+            "UI-02-style-selection.json"
+        ],
+        "signals": [
+            "signal-fe-dev-1-STOP.json",
+            "signal-fe-dev-1-assignment.json"
+        ]
+    },
+    "worktrees": [
+        {"name":"be-dev","branch":"unknown","uncommitted_changes":0},
+        {"name":"dev-fix","branch":"unknown","uncommitted_changes":0},
+        {"name":"fe-dev","branch":"unknown","uncommitted_changes":0},
+        {"name":"qa","branch":"unknown","uncommitted_changes":0}
+    ],
+    "agent_memory": {
+        "memory_dir": "/Volumes/SSD-01/Projects/Footprint/.claude/agent-memory",
+        "available_memories": []
+    },
+    "query_interface": {
+        "peek_file": "peek(P, 'path/to/file.ts')",
+        "search": "search(P, 'pattern')",
+        "list_files": "list_files(P, '*.test.ts')",
+        "get_story": "get_story(P, 'STORY-ID')",
+        "get_signal": "get_signal(P, 'wave${N}-gate3')"
+    }
+}

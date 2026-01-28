@@ -718,3 +718,59 @@ npm run dev  # Manual testing
 > Ready for QA validation
 
 ---
+
+## 2025-01-27 - PM: UP-05 Face Detection Cropping - QA Requested
+
+**Story**: UP-05 - Face Detection Cropping
+**Branch**: feature/UP-05-face-detection-cropping
+**Sprint**: Post-MVP (Enhancement)
+**Priority**: P1
+**Routed By**: PM Agent
+
+### Summary
+Backend-2 completed face detection and smart cropping implementation. PM is routing for QA validation.
+
+### Implementation Details
+- Content-aware cropping using smartcrop-sharp library
+- Aspect ratio parsing and validation (1:1, 4:5, 3:4, 16:9, A-series)
+- Smart crop region calculation with confidence scores
+- POST /api/detect-crop API endpoint
+- R2 image fetching helpers
+
+### Test Results (from Backend-2)
+- **Tests**: 51 passing (35 lib + 16 API)
+- **Coverage**: 87.27% statements for faceDetection.ts
+- **TypeScript**: 0 errors
+- **Lint**: Clean
+
+### Files to Validate
+| File | Status |
+|------|--------|
+| footprint/lib/image/faceDetection.ts | Created |
+| footprint/lib/image/faceDetection.test.ts | Created |
+| footprint/app/api/detect-crop/route.ts | Created |
+| footprint/app/api/detect-crop/route.test.ts | Created |
+| footprint/lib/storage/r2.ts | Modified |
+
+### How to Test
+```bash
+cd footprint
+npm test -- faceDetection
+npm test -- detect-crop
+npm run type-check
+npm run lint
+```
+
+### Gate Status
+- [x] Gate 0: Research (N/A)
+- [x] Gate 1: Planning (START.md exists)
+- [x] Gate 2: Implementation (TDD - 51 tests)
+- [ ] Gate 3: QA Validation (PENDING - THIS REQUEST)
+- [x] Gate 4: Review (TypeScript clean, Lint clean)
+- [ ] Gate 5: Deployment (pending QA)
+
+**PM Note**: This story enhances photo upload with intelligent cropping. Please validate and report back to pm-inbox.md.
+
+> Awaiting QA validation
+
+---

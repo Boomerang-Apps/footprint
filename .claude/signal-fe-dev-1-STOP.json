@@ -1,0 +1,6 @@
+{
+  "agent": "fe-dev-1",
+  "reason": "Test stop",
+  "stopped_at": "2026-01-23T16:37:57.812Z",
+  "stopped_by": "portal"
+}

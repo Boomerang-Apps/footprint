@@ -1,0 +1,58 @@
+{
+  "id": "WAVE1-FE-003",
+  "title": "Product Customization and Pricing",
+  "domain": "frontend",
+  "priority": "high",
+  "wave": 1,
+  "objective": {
+    "as_a": "user who has selected an AI style",
+    "i_want": "to customize my print options (size, paper, frame) and see live pricing",
+    "so_that": "I can configure my art print exactly how I want it"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "Size selection (A5/A4/A3/A2) with prices displayed"},
+    {"id": "AC-002", "description": "A4 shows 'most popular' badge"},
+    {"id": "AC-003", "description": "Paper type selection (Matte Fine Art, Glossy, Canvas)"},
+    {"id": "AC-004", "description": "Frame options (None, Black, White, Oak) with price additions"},
+    {"id": "AC-005", "description": "Live price calculator updates on any selection change"},
+    {"id": "AC-006", "description": "Total price displayed in ILS (₪) format"},
+    {"id": "AC-007", "description": "Continue to checkout button enabled when valid selection"},
+    {"id": "AC-008", "description": "Responsive layout for mobile devices"}
+  ],
+  "files": {
+    "create": [],
+    "modify": [
+      "footprint/app/(app)/create/customize/page.tsx",
+      "footprint/components/product-config/SizeSelector.tsx",
+      "footprint/components/product-config/PaperSelector.tsx",
+      "footprint/components/product-config/FrameSelector.tsx",
+      "footprint/lib/pricing/calculator.ts"
+    ],
+    "forbidden": [
+      ".env",
+      ".env.local",
+      "secrets.json",
+      "node_modules/**",
+      "footprint/lib/supabase/admin.ts",
+      "footprint/lib/payments/payplus.ts"
+    ]
+  },
+  "safety": {
+    "stop_conditions": [
+      "Safety score drops below 0.85",
+      "Hardcodes prices instead of using config",
+      "Exposes pricing logic that could be manipulated",
+      "Commits directly to main branch",
+      "Bypasses price validation"
+    ],
+    "escalation_triggers": [
+      "Changes to pricing structure",
+      "New product options added",
+      "Currency or localization changes",
+      "Payment flow modifications"
+    ]
+  },
+  "estimated_tokens": 18000,
+  "dependencies": ["WAVE1-FE-001", "WAVE1-FE-002"],
+  "agent_assignment": "fe-dev-2"
+}

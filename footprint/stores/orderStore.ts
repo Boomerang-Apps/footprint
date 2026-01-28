@@ -16,6 +16,7 @@ import {
   formatDeliveryDate,
   parseDeliveryDate,
 } from '@/lib/delivery/dates';
+import { isValidGuestInfo, type GuestInfo } from '@/lib/auth/guest';
 
 /**
  * Discount validation state
@@ -113,6 +114,10 @@ interface OrderState {
   // Scheduled Delivery (GF-05)
   scheduledDeliveryDate: string | null;
 
+  // Guest checkout (AUTH-02)
+  isGuest: boolean;
+  guestInfo: GuestInfo | null;
+
   // Order result
   orderId: string | null;
 }
@@ -184,6 +189,11 @@ interface OrderActions {
   getMaxDeliveryDate: () => string;
   isValidDeliveryDate: (date: string) => boolean;
 
+  // Guest checkout (AUTH-02)
+  setIsGuest: (value: boolean) => void;
+  setGuestInfo: (info: GuestInfo) => void;
+  clearGuestInfo: () => void;
+
   // Order
   setOrderId: (id: string) => void;
 
@@ -230,6 +240,8 @@ const initialState: OrderState = {
     appliedDiscount: null,
   },
   scheduledDeliveryDate: null,
+  isGuest: false,
+  guestInfo: null,
   orderId: null,
 };
 
@@ -469,6 +481,20 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         return isValidDate(date);
       },
 
+      // Guest checkout (AUTH-02)
+      setIsGuest: (value) => set({ isGuest: value }),
+
+      setGuestInfo: (info) => {
+        // Validate guest info before storing
+        const validation = isValidGuestInfo(info);
+        if (!validation.valid) {
+          throw new Error(`Invalid guest information: ${validation.errors.join(', ')}`);
+        }
+        set({ guestInfo: info });
+      },
+
+      clearGuestInfo: () => set({ guestInfo: null, isGuest: false }),
+
       // Order
       setOrderId: (id) => set({ orderId: id }),
 
@@ -502,6 +528,9 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         useRecipientAddress: state.useRecipientAddress,
         // Scheduled Delivery (GF-05)
         scheduledDeliveryDate: state.scheduledDeliveryDate,
+        // Guest checkout (AUTH-02)
+        isGuest: state.isGuest,
+        guestInfo: state.guestInfo,
       }),
     }
   )
