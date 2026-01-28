@@ -1,0 +1,56 @@
+{
+  "id": "WAVE1-FE-002",
+  "title": "AI Style Selection and Transformation",
+  "domain": "frontend",
+  "priority": "high",
+  "wave": 1,
+  "objective": {
+    "as_a": "user with an uploaded photo",
+    "i_want": "to select from multiple AI artistic styles and preview transformations",
+    "so_that": "I can choose the perfect style for my art print"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "Display 8+ style options (watercolor, line art, oil painting, pop art, romantic, comic, vintage, original)"},
+    {"id": "AC-002", "description": "Each style shows name in Hebrew with appropriate icon"},
+    {"id": "AC-003", "description": "Selected style has purple border highlight"},
+    {"id": "AC-004", "description": "Live preview generated via Gemini/Nano Banana API"},
+    {"id": "AC-005", "description": "Loading overlay with spinner during AI processing"},
+    {"id": "AC-006", "description": "Style badge shows 'popular' or 'new' where applicable"},
+    {"id": "AC-007", "description": "Unlimited free previews notice displayed"},
+    {"id": "AC-008", "description": "Error handling with retry option for failed transformations"}
+  ],
+  "files": {
+    "create": [],
+    "modify": [
+      "footprint/app/(app)/create/style/page.tsx",
+      "footprint/components/style-picker/StyleGrid.tsx",
+      "footprint/lib/ai/transform.ts"
+    ],
+    "forbidden": [
+      ".env",
+      ".env.local",
+      "secrets.json",
+      "node_modules/**",
+      "footprint/lib/supabase/admin.ts",
+      "footprint/lib/ai/replicate.ts"
+    ]
+  },
+  "safety": {
+    "stop_conditions": [
+      "Safety score drops below 0.85",
+      "Exposes API keys or Gemini credentials in client code",
+      "Makes unauthorized API calls to Nano Banana",
+      "Commits directly to main branch",
+      "Removes rate limiting on AI transformations"
+    ],
+    "escalation_triggers": [
+      "Changes to AI API integration",
+      "New style additions",
+      "Pricing or billing changes",
+      "API endpoint modifications"
+    ]
+  },
+  "estimated_tokens": 20000,
+  "dependencies": ["WAVE1-FE-001"],
+  "agent_assignment": "fe-dev-1"
+}

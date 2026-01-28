@@ -1,0 +1,64 @@
+{
+  "id": "WAVE1-FE-001",
+  "title": "Photo Upload Flow",
+  "domain": "frontend",
+  "priority": "high",
+  "wave": 1,
+  "objective": {
+    "as_a": "user wanting to create AI art prints",
+    "i_want": "to upload photos from my device gallery or camera",
+    "so_that": "I can start the AI transformation process"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "User can upload image from device gallery"},
+    {"id": "AC-002", "description": "User can take new photo with camera"},
+    {"id": "AC-003", "description": "Image preview is displayed after selection"},
+    {"id": "AC-004", "description": "File size validation (max 20MB) with error message"},
+    {"id": "AC-005", "description": "File type validation (JPEG, PNG, HEIC/HEIF)"},
+    {"id": "AC-006", "description": "Drag-and-drop upload with visual feedback"},
+    {"id": "AC-007", "description": "Upload progress indicator shown"},
+    {"id": "AC-008", "description": "R2 storage integration for image persistence"}
+  ],
+  "files": {
+    "create": [],
+    "modify": [
+      "footprint/app/(app)/create/page.tsx",
+      "footprint/components/upload/UploadZone.tsx"
+    ],
+    "forbidden": [
+      ".env",
+      ".env.local",
+      "secrets.json",
+      "node_modules/**",
+      "footprint/lib/supabase/admin.ts"
+    ]
+  },
+  "safety": {
+    "stop_conditions": [
+      "Safety score drops below 0.85",
+      "Exposes API keys or secrets in client-side code",
+      "Modifies production database without approval",
+      "Commits directly to main branch",
+      "Bypasses file type or size validation"
+    ],
+    "escalation_triggers": [
+      "Changes to file size limits",
+      "Changes to allowed file types",
+      "R2 storage configuration changes",
+      "Authentication flow modifications"
+    ]
+  },
+  "estimated_tokens": 15000,
+  "dependencies": [],
+  "agent_assignment": "fe-dev-1",
+  "status": "completed",
+  "completed_at": "2026-01-28T07:35:00+02:00",
+  "completed_by": "Claude Opus 4.5 (CTO Master)",
+  "test_results": {
+    "total_tests": 1471,
+    "passed": 1471,
+    "failed": 0,
+    "coverage": "85%+"
+  },
+  "proof_document": "WAVE1-FE-001-COMPLETION-PROOF.md"
+}
