@@ -33,6 +33,7 @@ import {
   OrderStatus,
 } from '@/lib/orders/status';
 import { sendStatusUpdateEmail } from '@/lib/email/resend';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 // Valid order statuses
 const VALID_STATUSES: OrderStatus[] = [
@@ -72,6 +73,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse<StatusUpdateResponse | ErrorResponse>> {
+  // Rate limiting: general limit for admin routes
+  const rateLimited = await checkRateLimit('general', request);
+  if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
+
   try {
     const orderId = params.id;
 

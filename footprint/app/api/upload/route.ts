@@ -8,6 +8,7 @@ import {
   MAX_FILE_SIZE,
   ALLOWED_MIME_TYPES,
 } from '@/lib/image/optimize';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * Request body for presigned URL mode
@@ -49,6 +50,10 @@ function validatePresignedRequest(body: unknown): body is PresignedUrlRequest {
  *    - FormData: file, mode: 'direct', optimize?: 'true'
  */
 export async function POST(request: Request): Promise<Response> {
+  // Rate limiting: 20 uploads per minute
+  const rateLimited = await checkRateLimit('upload', request);
+  if (rateLimited) return rateLimited;
+
   try {
     // Try to authenticate user, but allow anonymous uploads for development
     let userId = 'anonymous';

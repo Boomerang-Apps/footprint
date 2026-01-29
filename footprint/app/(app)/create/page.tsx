@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Camera, ImageIcon, Upload, Check, Lightbulb, Loader2, AlertCircle, RefreshCw, X } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 const STEPS = [
   { id: 'upload', label: 'העלאה' },
@@ -89,10 +90,12 @@ export default function CreatePage() {
   const handleFileSelect = useCallback((file: File) => {
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
+      toast.error('סוג קובץ לא נתמך. אנא העלו תמונה בפורמט JPG, PNG או HEIC');
       return;
     }
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
+      toast.error('הקובץ גדול מדי. גודל מקסימלי: 20MB');
       return;
     }
     // Upload to R2
