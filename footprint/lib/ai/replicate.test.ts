@@ -34,8 +34,8 @@ describe('lib/ai/replicate', () => {
   });
 
   describe('STYLE_PROMPTS', () => {
-    it('should have prompts for all 6 styles', () => {
-      expect(Object.keys(STYLE_PROMPTS)).toHaveLength(6);
+    it('should have prompts for all 9 styles', () => {
+      expect(Object.keys(STYLE_PROMPTS)).toHaveLength(9);
     });
 
     it('should include original style', () => {
@@ -65,14 +65,17 @@ describe('lib/ai/replicate', () => {
   });
 
   describe('ALLOWED_STYLES', () => {
-    it('should contain all 6 style types', () => {
-      expect(ALLOWED_STYLES).toHaveLength(6);
+    it('should contain all 9 style types', () => {
+      expect(ALLOWED_STYLES).toHaveLength(9);
       expect(ALLOWED_STYLES).toContain('original');
       expect(ALLOWED_STYLES).toContain('watercolor');
       expect(ALLOWED_STYLES).toContain('line_art');
       expect(ALLOWED_STYLES).toContain('line_art_watercolor');
       expect(ALLOWED_STYLES).toContain('oil_painting');
       expect(ALLOWED_STYLES).toContain('avatar_cartoon');
+      expect(ALLOWED_STYLES).toContain('pop_art');
+      expect(ALLOWED_STYLES).toContain('vintage');
+      expect(ALLOWED_STYLES).toContain('romantic');
     });
   });
 
@@ -84,6 +87,9 @@ describe('lib/ai/replicate', () => {
       expect(isValidStyle('line_art_watercolor')).toBe(true);
       expect(isValidStyle('oil_painting')).toBe(true);
       expect(isValidStyle('avatar_cartoon')).toBe(true);
+      expect(isValidStyle('pop_art')).toBe(true);
+      expect(isValidStyle('vintage')).toBe(true);
+      expect(isValidStyle('romantic')).toBe(true);
     });
 
     it('should return false for invalid styles', () => {
@@ -94,10 +100,10 @@ describe('lib/ai/replicate', () => {
       expect(isValidStyle(undefined as unknown as string)).toBe(false);
     });
 
-    it('should return false for removed styles', () => {
-      expect(isValidStyle('romantic')).toBe(false);
+    it('should return false for non-existent styles', () => {
       expect(isValidStyle('comic_book')).toBe(false);
-      expect(isValidStyle('vintage')).toBe(false);
+      expect(isValidStyle('sketch')).toBe(false);
+      expect(isValidStyle('pencil')).toBe(false);
     });
   });
 
@@ -344,9 +350,12 @@ describe('lib/ai/replicate', () => {
         'line_art_watercolor',
         'oil_painting',
         'avatar_cartoon',
+        'pop_art',
+        'vintage',
+        'romantic',
       ];
 
-      expect(styles).toHaveLength(6);
+      expect(styles).toHaveLength(9);
     });
   });
 });

@@ -18,6 +18,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { uploadToSupabase } from '@/lib/storage/supabase-storage';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 interface RemoveBgRequest {
   imageUrl: string;
@@ -48,6 +49,10 @@ function isValidUrl(urlString: string): boolean {
 export async function POST(
   request: Request
 ): Promise<NextResponse<RemoveBgResponse | ErrorResponse>> {
+  // Rate limiting: 10 per minute (AI operation)
+  const rateLimited = await checkRateLimit('transform', request);
+  if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
+
   const startTime = Date.now();
 
   try {

@@ -16,7 +16,10 @@ export type StyleType =
   | 'line_art'
   | 'line_art_watercolor'
   | 'oil_painting'
-  | 'avatar_cartoon';
+  | 'avatar_cartoon'
+  | 'pop_art'
+  | 'vintage'
+  | 'romantic';
 
 /**
  * List of all allowed styles for validation
@@ -28,6 +31,9 @@ export const ALLOWED_STYLES: readonly StyleType[] = [
   'line_art_watercolor',
   'oil_painting',
   'avatar_cartoon',
+  'pop_art',
+  'vintage',
+  'romantic',
 ] as const;
 
 /**
@@ -53,6 +59,15 @@ export const STYLE_PROMPTS: Record<StyleType, string> = {
 
   avatar_cartoon:
     'Transform into a charming 3D cartoon avatar character. Style: Pixar/Disney-inspired 3D character design, smooth stylized skin with soft subsurface scattering, big expressive eyes with life and personality, slightly exaggerated but appealing proportions, vibrant saturated colors with good contrast, professional 3D render quality with soft lighting, friendly approachable character design. High-quality 3D render appearance with smooth surfaces. Capture the subject personality while maintaining recognizable features in stylized cartoon form.',
+
+  pop_art:
+    'Transform into bold Pop Art style inspired by Andy Warhol and Roy Lichtenstein. Style: vibrant saturated colors like hot pink, electric blue, bright yellow and orange, visible halftone dot patterns in shadow areas, strong black outlines defining shapes, high contrast with simplified tonal areas, graphic poster-like quality with clean color separations, screen-printed aesthetic. Preserve subject likeness while creating iconic pop art portrait suitable for framing.',
+
+  vintage:
+    'Transform into nostalgic vintage photograph style from the 1970s era. Style: warm sepia and amber color tones, visible film grain texture throughout, slightly faded highlights and lifted blacks, soft vignette darkening the edges, muted desaturated color palette, subtle light leaks or color shifts at edges. Create feeling of treasured old photograph from family album with authentic analog film qualities.',
+
+  romantic:
+    'Transform into soft romantic portrait with ethereal dreamy quality. Style: diffused focus with gentle blur on edges, warm golden-hour lighting with soft highlights, delicate pink and peach tones in highlights, subtle lens flare or light bloom effects, smooth luminous skin with soft gradients, dreamy nostalgic atmosphere. Create sense of warmth and tenderness with late afternoon golden hour lighting that evokes emotion and treasured memories.',
 };
 
 /**

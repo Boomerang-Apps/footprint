@@ -25,6 +25,7 @@ import {
   dataUriToBase64,
   base64ToDataUri,
 } from '@/lib/ai/nano-banana';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 interface TweakRequest {
   imageUrl: string;
@@ -72,6 +73,10 @@ async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeTy
 export async function POST(
   request: Request
 ): Promise<NextResponse<TweakResponse | ErrorResponse>> {
+  // Rate limiting: 10 tweaks per minute (AI operation)
+  const rateLimited = await checkRateLimit('transform', request);
+  if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
+
   const startTime = Date.now();
 
   try {
