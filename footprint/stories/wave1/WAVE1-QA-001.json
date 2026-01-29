@@ -11,24 +11,28 @@
     "so_that": "we have confidence in code quality and can refactor safely"
   },
   "acceptance_criteria": [
-    {"id": "AC-001", "description": "Unit tests for upload validation logic", "status": "pending"},
-    {"id": "AC-002", "description": "Unit tests for style selection components", "status": "pending"},
-    {"id": "AC-003", "description": "Unit tests for price calculation logic", "status": "pending"},
-    {"id": "AC-004", "description": "Unit tests for PayPlus API integration", "status": "pending"},
-    {"id": "AC-005", "description": "Integration tests for /api/upload endpoint", "status": "pending"},
-    {"id": "AC-006", "description": "Integration tests for /api/transform endpoint", "status": "pending"},
-    {"id": "AC-007", "description": "Integration tests for /api/checkout endpoint", "status": "pending"},
+    {"id": "AC-001", "description": "Unit tests for upload validation logic", "status": "complete"},
+    {"id": "AC-002", "description": "Unit tests for style selection components", "status": "complete"},
+    {"id": "AC-003", "description": "Unit tests for price calculation logic", "status": "complete"},
+    {"id": "AC-004", "description": "Unit tests for PayPlus API integration", "status": "complete"},
+    {"id": "AC-005", "description": "Integration tests for /api/upload endpoint", "status": "complete"},
+    {"id": "AC-006", "description": "Integration tests for /api/transform endpoint", "status": "complete"},
+    {"id": "AC-007", "description": "Integration tests for /api/checkout endpoint", "status": "complete"},
     {"id": "AC-008", "description": "E2E test for complete user flow (upload → style → customize → checkout)", "status": "pending"},
     {"id": "AC-009", "description": "Test coverage minimum 80% for Wave 1 files", "status": "pending"},
     {"id": "AC-010", "description": "All tests pass in CI pipeline", "status": "pending"}
   ],
   "files": {
+    "existing": [
+      "lib/payments/payplus.test.ts",
+      "lib/pricing/calculator.test.ts",
+      "lib/orders/create.test.ts",
+      "app/api/upload/route.test.ts",
+      "app/api/transform/route.test.ts",
+      "app/api/checkout/route.test.ts",
+      "app/api/webhooks/payplus/route.test.ts"
+    ],
     "create": [
-      "__tests__/lib/validation.test.ts",
-      "__tests__/lib/payments/payplus.test.ts",
-      "__tests__/api/upload.test.ts",
-      "__tests__/api/transform.test.ts",
-      "__tests__/api/checkout.test.ts",
       "e2e/user-flow.spec.ts"
     ]
   },
@@ -45,8 +49,9 @@
       "E2E flow broken"
     ]
   },
-  "notes": "Focus on TDD for PayPlus integration. Existing UI is complete - validate with tests, don't modify.",
-  "estimated_tokens": 30000,
+  "notes": "Gate 0 research found ~5,000 lines of tests already exist using co-located pattern. Only E2E test and coverage verification needed.",
+  "estimated_tokens": 5000,
   "dependencies": ["WAVE1-INT-001"],
-  "agent_assignment": "qa"
+  "agent_assignment": "qa",
+  "gate0_research": "WAVE1-QA-001-GATE0-RESEARCH.md"
 }
