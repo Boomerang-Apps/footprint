@@ -1,0 +1,47 @@
+{
+  "id": "WAVE1-SEC-001",
+  "title": "API Security & Rate Limiting",
+  "domain": "security",
+  "priority": "P0",
+  "wave": 1,
+  "status": "complete",
+  "objective": {
+    "as_a": "system administrator",
+    "i_want": "to protect APIs from abuse and unauthorized access",
+    "so_that": "the application remains secure and available"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "Upstash Redis rate limiting on all API endpoints", "status": "complete"},
+    {"id": "AC-002", "description": "Rate limits: general(60/min), upload(20/min), transform(10/min), checkout(5/min)", "status": "complete"},
+    {"id": "AC-003", "description": "Admin routes require authentication", "status": "complete"},
+    {"id": "AC-004", "description": "Admin routes verify user role", "status": "complete"},
+    {"id": "AC-005", "description": "Rate limit headers in API responses", "status": "complete"},
+    {"id": "AC-006", "description": "Graceful 429 response when rate limited", "status": "complete"}
+  ],
+  "files": {
+    "created": [
+      "lib/rate-limit.ts",
+      "lib/auth/admin.ts"
+    ],
+    "modified": [
+      "app/api/upload/route.ts",
+      "app/api/transform/route.ts",
+      "app/api/checkout/route.ts",
+      "app/api/admin/orders/[id]/status/route.ts",
+      "app/api/admin/orders/[id]/tracking/route.ts",
+      "app/api/admin/orders/[id]/download/route.ts"
+    ]
+  },
+  "safety": {
+    "stop_conditions": [
+      "Disabling rate limiting",
+      "Bypassing admin authentication",
+      "Exposing admin routes publicly"
+    ]
+  },
+  "estimated_tokens": 20000,
+  "actual_tokens": 18500,
+  "dependencies": ["WAVE1-BE-001", "WAVE1-BE-002"],
+  "agent_assignment": "be-dev-1",
+  "completed_at": "2026-01-29T00:00:00Z"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "WAVE1-FE-003",
+  "title": "Product Customization",
+  "domain": "frontend",
+  "priority": "P0",
+  "wave": 1,
+  "status": "complete",
+  "objective": {
+    "as_a": "user who selected an art style",
+    "i_want": "to customize print size, paper type, and frame options",
+    "so_that": "I can create a personalized product"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "Display size options (A2, A3, A4, A5) with prices in ILS", "status": "complete"},
+    {"id": "AC-002", "description": "Display paper type options (Fine Art Matte, Glossy Photo, Canvas Texture)", "status": "complete"},
+    {"id": "AC-003", "description": "Display frame options (oak, white, black, none) with prices", "status": "complete"},
+    {"id": "AC-004", "description": "Real-time price calculation as options change", "status": "complete"},
+    {"id": "AC-005", "description": "Preview updates to show selected frame", "status": "complete"},
+    {"id": "AC-006", "description": "Hebrew labels and RTL layout", "status": "complete"},
+    {"id": "AC-007", "description": "Continue to checkout button with total price", "status": "complete"}
+  ],
+  "files": {
+    "existing": [
+      "app/(app)/create/customize/page.tsx"
+    ]
+  },
+  "notes": "UI is complete and polished. No changes needed.",
+  "estimated_tokens": 0,
+  "actual_tokens": 0,
+  "dependencies": ["WAVE1-FE-002"],
+  "agent_assignment": "fe-dev-1",
+  "completed_at": "2026-01-29T00:00:00Z"
+}

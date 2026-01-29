@@ -1,0 +1,40 @@
+{
+  "id": "WAVE1-BE-002",
+  "title": "Transform API",
+  "domain": "backend",
+  "priority": "P0",
+  "wave": 1,
+  "status": "complete",
+  "objective": {
+    "as_a": "frontend application",
+    "i_want": "to transform uploaded images using AI",
+    "so_that": "users get styled artwork from their photos"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "POST /api/transform accepts image URL and style", "status": "complete"},
+    {"id": "AC-002", "description": "Integrates with Replicate API for AI transformation", "status": "complete"},
+    {"id": "AC-003", "description": "Supports all 9 art styles", "status": "complete"},
+    {"id": "AC-004", "description": "Returns transformed image URL", "status": "complete"},
+    {"id": "AC-005", "description": "Rate limiting: 10 requests per minute", "status": "complete"},
+    {"id": "AC-006", "description": "Handles Replicate API errors gracefully", "status": "complete"},
+    {"id": "AC-007", "description": "Stores result in R2 for persistence", "status": "complete"}
+  ],
+  "files": {
+    "modified": [
+      "app/api/transform/route.ts",
+      "lib/ai/replicate.ts"
+    ]
+  },
+  "safety": {
+    "stop_conditions": [
+      "Safety score drops below 0.85",
+      "Exposes Replicate API key",
+      "Exceeds rate limits"
+    ]
+  },
+  "estimated_tokens": 15000,
+  "actual_tokens": 13200,
+  "dependencies": ["WAVE1-BE-001"],
+  "agent_assignment": "be-dev-2",
+  "completed_at": "2026-01-28T00:00:00Z"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "WAVE1-INT-001",
+  "title": "PayPlus Payment API Integration",
+  "domain": "integration",
+  "priority": "P0",
+  "wave": 1,
+  "status": "pending",
+  "objective": {
+    "as_a": "checkout system",
+    "i_want": "to process payments via PayPlus.co.il",
+    "so_that": "Israeli customers can pay securely with local payment methods"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "POST /api/checkout creates PayPlus payment page", "status": "pending"},
+    {"id": "AC-002", "description": "PayPlus webhook receives payment confirmation", "status": "pending"},
+    {"id": "AC-003", "description": "Create order in Supabase on successful payment", "status": "pending"},
+    {"id": "AC-004", "description": "Send confirmation email via Resend", "status": "pending"},
+    {"id": "AC-005", "description": "Handle PayPlus payment failures gracefully", "status": "pending"},
+    {"id": "AC-006", "description": "Store PayPlus transaction ID with order", "status": "pending"},
+    {"id": "AC-007", "description": "Rate limiting: 5 checkout attempts per minute", "status": "pending"},
+    {"id": "AC-008", "description": "Redirect to order complete page after payment", "status": "pending"}
+  ],
+  "files": {
+    "create": [
+      "lib/payments/payplus.ts"
+    ],
+    "modify": [
+      "app/api/checkout/route.ts",
+      "app/api/webhooks/payplus/route.ts"
+    ]
+  },
+  "safety": {
+    "stop_conditions": [
+      "Safety score drops below 0.85",
+      "Exposes PayPlus API credentials",
+      "Incorrect price calculations",
+      "Missing payment validation"
+    ],
+    "escalation_triggers": [
+      "Changes to payment flow",
+      "Changes to pricing logic",
+      "Webhook signature validation"
+    ]
+  },
+  "technical_notes": "PayPlus.co.il is Israeli payment gateway. Supports credit cards, Bit, and Israeli payment methods. API docs: https://payplus.co.il/developers",
+  "estimated_tokens": 25000,
+  "dependencies": ["WAVE1-FE-003", "WAVE1-SEC-001"],
+  "agent_assignment": "be-dev-1"
+}
