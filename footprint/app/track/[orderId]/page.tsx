@@ -17,13 +17,13 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { api } from '@/lib/api/client';
 import { OrderTimeline } from '@/components/ui/OrderTimeline';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/types/database';
 import { getStatusLabel } from '@/lib/orders/status';
-import { generateTrackingUrl } from '@/lib/orders/tracking';
+import { generateTrackingUrl, type CarrierCode } from '@/lib/orders/tracking';
 import { Calendar, Package, Truck, MapPin, Gift, CreditCard, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
 
@@ -101,15 +101,13 @@ async function OrderTrackingContent({ orderId }: { orderId: string }) {
 
   // Generate tracking URL if available
   const trackingUrl = order.trackingNumber && order.carrier
-    ? generateTrackingUrl(order.trackingNumber, order.carrier)
+    ? generateTrackingUrl(order.trackingNumber, order.carrier as CarrierCode)
     : null;
 
   // Calculate estimated dates for timeline (mock implementation)
   const estimatedDates = {
     received: order.createdAt.toISOString().split('T')[0],
-    processing: order.status === 'processing' || order.status === 'printing'
-      ? new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // +1 day
-      : undefined,
+    processing: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +1 day
     shipped: order.status === 'shipped' && order.shippedAt
       ? order.shippedAt.toISOString().split('T')[0]
       : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +3 days
@@ -235,15 +233,14 @@ async function OrderTrackingContent({ orderId }: { orderId: string }) {
                     </h4>
                     <div className="text-sm text-muted-foreground space-y-1">
                       <div>Size: {item.size}</div>
-                      <div>Paper: {item.paper}</div>
-                      {item.frame !== 'none' && <div>Frame: {item.frame}</div>}
+                      <div>Paper: {item.paperType}</div>
+                      {item.frameType !== 'none' && <div>Frame: {item.frameType}</div>}
                     </div>
                   </div>
 
                   {/* Item price */}
                   <div className="text-right">
                     <div className="font-medium">{formatPrice(item.price)}</div>
-                    <div className="text-sm text-muted-foreground">Qty: {item.quantity}</div>
                   </div>
                 </div>
               ))}
@@ -296,7 +293,7 @@ async function OrderTrackingContent({ orderId }: { orderId: string }) {
                     {order.giftMessage && (
                       <div>
                         <div className="font-medium">Message:</div>
-                        <div className="text-muted-foreground italic">"{order.giftMessage}"</div>
+                        <div className="text-muted-foreground italic">&ldquo;{order.giftMessage}&rdquo;</div>
                       </div>
                     )}
                   </div>
