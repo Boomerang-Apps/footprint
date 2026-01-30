@@ -1,0 +1,190 @@
+{
+  "story_id": "BE-03",
+  "wave_number": 3,
+  "title": "Admin Orders List API",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create admin API endpoint to list all orders with filtering, sorting, and pagination for admin dashboard",
+  "status": "completed",
+
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to view and manage all customer orders via API",
+    "so_that": "I can monitor order status, track shipments, and manage the fulfillment process"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "GET /api/admin/orders returns paginated list of all orders",
+      "test_approach": "Mock admin auth, verify response structure with orders array and pagination"
+    },
+    {
+      "id": "AC-002",
+      "description": "Endpoint requires admin role authentication",
+      "test_approach": "Test with no auth (401), regular user (403), admin (200)"
+    },
+    {
+      "id": "AC-003",
+      "description": "Supports status filter query parameter",
+      "test_approach": "Test with ?status=shipped, verify filtered results"
+    },
+    {
+      "id": "AC-004",
+      "description": "Supports date range filtering (from, to parameters)",
+      "test_approach": "Test with date range, verify orders within range returned"
+    },
+    {
+      "id": "AC-005",
+      "description": "Supports search by order number",
+      "test_approach": "Test with ?search=FP-2024, verify matching orders"
+    },
+    {
+      "id": "AC-006",
+      "description": "Supports sorting by created_at, total, status",
+      "test_approach": "Test with sortBy and sortOrder params"
+    },
+    {
+      "id": "AC-007",
+      "description": "Supports pagination with page and limit parameters",
+      "test_approach": "Test with page=2&limit=10, verify offset calculation"
+    },
+    {
+      "id": "AC-008",
+      "description": "Returns customer email and name from profiles join",
+      "test_approach": "Mock joined data, verify customerEmail and customerName in response"
+    },
+    {
+      "id": "AC-009",
+      "description": "Converts total from agorot to ILS in response",
+      "test_approach": "Store 23700 agorot, verify response shows 237 ILS"
+    },
+    {
+      "id": "AC-010",
+      "description": "Applies rate limiting",
+      "test_approach": "Mock rate limiter, verify checkRateLimit called"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/api/admin/orders/route.ts",
+      "app/api/admin/orders/route.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "app/api/orders/route.ts",
+      "lib/auth/admin.ts"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "lib/supabase/server.ts - createClient()",
+      "lib/rate-limit.ts - checkRateLimit()"
+    ],
+    "database_tables": [
+      "orders",
+      "order_items",
+      "profiles"
+    ],
+    "response_format": {
+      "list": {
+        "orders": "AdminOrderSummary[]",
+        "total": "number",
+        "page": "number",
+        "limit": "number",
+        "totalPages": "number"
+      }
+    }
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/admin/orders/route.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Authentication",
+        "count": 3,
+        "examples": [
+          "should return 401 when not authenticated",
+          "should return 403 for non-admin users",
+          "should return 200 for admin users"
+        ]
+      },
+      {
+        "name": "Filtering",
+        "count": 6,
+        "examples": [
+          "should filter by status",
+          "should filter by date range",
+          "should search by order number"
+        ]
+      },
+      {
+        "name": "Pagination",
+        "count": 4,
+        "examples": [
+          "should use default pagination",
+          "should respect page and limit params",
+          "should calculate totalPages correctly"
+        ]
+      },
+      {
+        "name": "Sorting",
+        "count": 3,
+        "examples": [
+          "should sort by created_at desc by default",
+          "should sort by custom field",
+          "should reject invalid sort fields"
+        ]
+      },
+      {
+        "name": "Response Format",
+        "count": 3,
+        "examples": [
+          "should convert agorot to ILS",
+          "should include customer info from profiles",
+          "should include item count"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 2,
+        "examples": [
+          "should return 500 on database error",
+          "should return 400 for invalid parameters"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "rate_limit": "vi.mock('@/lib/rate-limit')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to customer-facing order endpoints",
+      "Changes to authentication middleware",
+      "Database schema changes"
+    ],
+    "escalation_triggers": [
+      "Performance issues with large datasets",
+      "Security concerns with admin access"
+    ],
+    "rollback_plan": "Delete new admin endpoint files"
+  },
+
+  "dependencies": {
+    "required_before": [],
+    "blocks": []
+  },
+
+  "estimated_tests": 21
+}
