@@ -80,7 +80,8 @@ describe('OrderCard', () => {
       const thumbnail = screen.getByTestId('order-thumbnail');
       // Next.js Image component transforms src, so check it contains the original URL
       expect(thumbnail.getAttribute('src')).toContain('transformed.jpg');
-      expect(thumbnail).toHaveAttribute('alt', 'Avatar Cartoon artwork');
+      // Alt text uses Hebrew style name
+      expect(thumbnail).toHaveAttribute('alt', 'אווטר קריקטורה artwork');
     });
 
     it('shows Hebrew style name', () => {
