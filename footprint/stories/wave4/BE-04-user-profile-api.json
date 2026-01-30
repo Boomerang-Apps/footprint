@@ -1,0 +1,205 @@
+{
+  "story_id": "BE-04",
+  "wave_number": 4,
+  "title": "User Profile API",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
+  "story_points": 3,
+  "description": "Create API endpoints for user profile management including get, update, and avatar upload",
+  "status": "pending",
+
+  "objective": {
+    "as_a": "Footprint user",
+    "i_want": "to view and update my profile information via API",
+    "so_that": "I can manage my personal details and preferences"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "GET /api/profile returns current user's profile data",
+      "test_approach": "Mock auth, verify response includes name, email, phone, language, avatar"
+    },
+    {
+      "id": "AC-002",
+      "description": "GET /api/profile returns 401 when not authenticated",
+      "test_approach": "Test without auth token, expect 401 Unauthorized"
+    },
+    {
+      "id": "AC-003",
+      "description": "PUT /api/profile updates user profile fields",
+      "test_approach": "Send name/phone/language updates, verify database updated"
+    },
+    {
+      "id": "AC-004",
+      "description": "PUT /api/profile validates input with Zod schema",
+      "test_approach": "Send invalid name (<2 chars), expect 400 with validation error"
+    },
+    {
+      "id": "AC-005",
+      "description": "PUT /api/profile returns 401 when not authenticated",
+      "test_approach": "Test without auth token, expect 401 Unauthorized"
+    },
+    {
+      "id": "AC-006",
+      "description": "POST /api/profile/avatar uploads and stores avatar image",
+      "test_approach": "Upload image file, verify avatar_url updated in profile"
+    },
+    {
+      "id": "AC-007",
+      "description": "POST /api/profile/avatar validates file type (jpg, png, webp)",
+      "test_approach": "Upload .pdf file, expect 400 with invalid file type error"
+    },
+    {
+      "id": "AC-008",
+      "description": "POST /api/profile/avatar enforces 2MB file size limit",
+      "test_approach": "Upload 5MB file, expect 400 with file too large error"
+    },
+    {
+      "id": "AC-009",
+      "description": "All endpoints apply rate limiting",
+      "test_approach": "Mock rate limiter, verify checkRateLimit called"
+    },
+    {
+      "id": "AC-010",
+      "description": "Response format uses camelCase (not snake_case)",
+      "test_approach": "Verify response has preferredLanguage not preferred_language"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/api/profile/route.ts",
+      "app/api/profile/route.test.ts",
+      "app/api/profile/avatar/route.ts",
+      "app/api/profile/avatar/route.test.ts",
+      "lib/validation/profile.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "lib/auth/admin.ts",
+      "supabase/migrations/*"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "lib/supabase/server.ts - createClient()",
+      "lib/rate-limit.ts - checkRateLimit()",
+      "lib/storage/r2.ts - uploadFile() for avatar"
+    ],
+    "database_tables": [
+      "profiles"
+    ],
+    "response_format": {
+      "get": {
+        "id": "string",
+        "email": "string",
+        "name": "string | null",
+        "phone": "string | null",
+        "avatarUrl": "string | null",
+        "preferredLanguage": "'he' | 'en'",
+        "isAdmin": "boolean",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "update": {
+        "success": "boolean",
+        "profile": "ProfileResponse"
+      }
+    }
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/profile/route.test.ts",
+      "app/api/profile/avatar/route.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Authentication",
+        "count": 3,
+        "examples": [
+          "should return 401 when not authenticated (GET)",
+          "should return 401 when not authenticated (PUT)",
+          "should return profile for authenticated user"
+        ]
+      },
+      {
+        "name": "GET Profile",
+        "count": 3,
+        "examples": [
+          "should return complete profile data",
+          "should use camelCase in response",
+          "should handle missing optional fields"
+        ]
+      },
+      {
+        "name": "PUT Profile",
+        "count": 5,
+        "examples": [
+          "should update name field",
+          "should update phone field",
+          "should update language preference",
+          "should validate name minimum length",
+          "should validate phone format"
+        ]
+      },
+      {
+        "name": "Avatar Upload",
+        "count": 5,
+        "examples": [
+          "should upload valid image",
+          "should reject invalid file type",
+          "should reject oversized file",
+          "should update avatar_url in profile",
+          "should return new avatar URL"
+        ]
+      },
+      {
+        "name": "Rate Limiting",
+        "count": 2,
+        "examples": [
+          "should apply rate limiting",
+          "should return 429 when rate limited"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 2,
+        "examples": [
+          "should return 500 on database error",
+          "should return 400 for invalid input"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "rate_limit": "vi.mock('@/lib/rate-limit')",
+      "storage": "vi.mock('@/lib/storage/r2')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to authentication middleware",
+      "Database schema changes",
+      "Changes to admin verification"
+    ],
+    "escalation_triggers": [
+      "Security concerns with profile access",
+      "File upload vulnerabilities"
+    ],
+    "rollback_plan": "Delete new API endpoint files"
+  },
+
+  "dependencies": {
+    "required_before": [],
+    "blocks": ["UI-05A"]
+  },
+
+  "estimated_tests": 20
+}

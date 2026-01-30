@@ -1,0 +1,266 @@
+{
+  "story_id": "BE-05",
+  "wave_number": 4,
+  "title": "Addresses CRUD API",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create RESTful API endpoints for managing user saved addresses with full CRUD operations and default address functionality",
+  "status": "pending",
+
+  "objective": {
+    "as_a": "Footprint user",
+    "i_want": "to manage my saved addresses via API",
+    "so_that": "I can quickly select shipping addresses during checkout"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "GET /api/addresses returns list of user's saved addresses",
+      "test_approach": "Mock auth and addresses, verify array response with all address fields"
+    },
+    {
+      "id": "AC-002",
+      "description": "GET /api/addresses returns empty array for users with no addresses",
+      "test_approach": "Mock auth with no addresses, verify empty array response"
+    },
+    {
+      "id": "AC-003",
+      "description": "POST /api/addresses creates a new address",
+      "test_approach": "Send valid address data, verify database insert and response"
+    },
+    {
+      "id": "AC-004",
+      "description": "POST /api/addresses validates input with Zod schema",
+      "test_approach": "Send invalid postal code, expect 400 with validation error"
+    },
+    {
+      "id": "AC-005",
+      "description": "POST /api/addresses sets isDefault=true if first address",
+      "test_approach": "Create first address for user, verify isDefault is true"
+    },
+    {
+      "id": "AC-006",
+      "description": "GET /api/addresses/[id] returns single address by ID",
+      "test_approach": "Request specific address, verify all fields returned"
+    },
+    {
+      "id": "AC-007",
+      "description": "GET /api/addresses/[id] returns 404 for non-existent address",
+      "test_approach": "Request invalid UUID, expect 404 response"
+    },
+    {
+      "id": "AC-008",
+      "description": "GET /api/addresses/[id] returns 403 for other user's address",
+      "test_approach": "Request address owned by different user, expect 403"
+    },
+    {
+      "id": "AC-009",
+      "description": "PUT /api/addresses/[id] updates address fields",
+      "test_approach": "Update street and city, verify database updated"
+    },
+    {
+      "id": "AC-010",
+      "description": "DELETE /api/addresses/[id] removes address",
+      "test_approach": "Delete address, verify removed from database"
+    },
+    {
+      "id": "AC-011",
+      "description": "DELETE /api/addresses/[id] prevents deleting default address if others exist",
+      "test_approach": "Try to delete default when other addresses exist, expect 400"
+    },
+    {
+      "id": "AC-012",
+      "description": "PATCH /api/addresses/[id]/default sets address as default",
+      "test_approach": "Set non-default address as default, verify others become non-default"
+    },
+    {
+      "id": "AC-013",
+      "description": "All endpoints return 401 when not authenticated",
+      "test_approach": "Test each endpoint without auth, expect 401"
+    },
+    {
+      "id": "AC-014",
+      "description": "All endpoints apply rate limiting",
+      "test_approach": "Mock rate limiter, verify checkRateLimit called"
+    },
+    {
+      "id": "AC-015",
+      "description": "Response format uses camelCase (postalCode not postal_code)",
+      "test_approach": "Verify response fields are camelCase"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/api/addresses/route.ts",
+      "app/api/addresses/route.test.ts",
+      "app/api/addresses/[id]/route.ts",
+      "app/api/addresses/[id]/route.test.ts",
+      "app/api/addresses/[id]/default/route.ts",
+      "app/api/addresses/[id]/default/route.test.ts",
+      "lib/validation/address.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "components/checkout/ShippingAddressForm.tsx",
+      "supabase/migrations/*"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "lib/supabase/server.ts - createClient()",
+      "lib/rate-limit.ts - checkRateLimit()"
+    ],
+    "database_tables": [
+      "addresses",
+      "profiles"
+    ],
+    "response_format": {
+      "list": {
+        "addresses": "Address[]"
+      },
+      "single": {
+        "id": "string",
+        "name": "string",
+        "street": "string",
+        "apartment": "string | null",
+        "city": "string",
+        "postalCode": "string",
+        "country": "string",
+        "phone": "string | null",
+        "isDefault": "boolean",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "create": {
+        "success": "boolean",
+        "address": "Address"
+      }
+    }
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/addresses/route.test.ts",
+      "app/api/addresses/[id]/route.test.ts",
+      "app/api/addresses/[id]/default/route.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Authentication",
+        "count": 5,
+        "examples": [
+          "should return 401 when not authenticated (GET list)",
+          "should return 401 when not authenticated (POST)",
+          "should return 401 when not authenticated (GET single)",
+          "should return 401 when not authenticated (PUT)",
+          "should return 401 when not authenticated (DELETE)"
+        ]
+      },
+      {
+        "name": "List Addresses",
+        "count": 3,
+        "examples": [
+          "should return user's addresses",
+          "should return empty array for new user",
+          "should use camelCase in response"
+        ]
+      },
+      {
+        "name": "Create Address",
+        "count": 5,
+        "examples": [
+          "should create valid address",
+          "should validate required fields",
+          "should validate postal code format",
+          "should set first address as default",
+          "should not override existing default"
+        ]
+      },
+      {
+        "name": "Get Single Address",
+        "count": 3,
+        "examples": [
+          "should return address by ID",
+          "should return 404 for non-existent",
+          "should return 403 for other user's address"
+        ]
+      },
+      {
+        "name": "Update Address",
+        "count": 4,
+        "examples": [
+          "should update address fields",
+          "should validate updated fields",
+          "should return 404 for non-existent",
+          "should return 403 for other user's address"
+        ]
+      },
+      {
+        "name": "Delete Address",
+        "count": 4,
+        "examples": [
+          "should delete address",
+          "should return 404 for non-existent",
+          "should return 403 for other user's address",
+          "should prevent deleting default if others exist"
+        ]
+      },
+      {
+        "name": "Set Default",
+        "count": 3,
+        "examples": [
+          "should set address as default",
+          "should unset previous default",
+          "should return 404 for non-existent"
+        ]
+      },
+      {
+        "name": "Rate Limiting",
+        "count": 2,
+        "examples": [
+          "should apply rate limiting",
+          "should return 429 when rate limited"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 2,
+        "examples": [
+          "should return 500 on database error",
+          "should return 400 for invalid input"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "rate_limit": "vi.mock('@/lib/rate-limit')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to checkout flow",
+      "Database schema changes",
+      "Changes to order address handling"
+    ],
+    "escalation_triggers": [
+      "Address data leakage between users",
+      "Default address race conditions"
+    ],
+    "rollback_plan": "Delete new API endpoint files"
+  },
+
+  "dependencies": {
+    "required_before": [],
+    "blocks": ["UI-05B"]
+  },
+
+  "estimated_tests": 31
+}

@@ -1,0 +1,280 @@
+{
+  "story_id": "UI-05B",
+  "wave_number": 4,
+  "title": "Saved Addresses Management Page",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create saved addresses management page with list view, add/edit/delete functionality, and set default address feature",
+  "status": "pending",
+
+  "objective": {
+    "as_a": "Footprint user",
+    "i_want": "to manage my saved shipping addresses",
+    "so_that": "I can quickly select addresses during checkout"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Page displays list of user's saved addresses",
+      "test_approach": "Mock useAddresses hook with addresses, verify all cards rendered"
+    },
+    {
+      "id": "AC-002",
+      "description": "Page shows loading spinner while fetching addresses",
+      "test_approach": "Set isLoading=true in mock, verify spinner visible"
+    },
+    {
+      "id": "AC-003",
+      "description": "Page shows empty state with add button when no addresses",
+      "test_approach": "Mock empty addresses array, verify empty state message"
+    },
+    {
+      "id": "AC-004",
+      "description": "Each address card shows name, street, city, postal code",
+      "test_approach": "Verify address card contains all address fields"
+    },
+    {
+      "id": "AC-005",
+      "description": "Default address is visually highlighted with badge",
+      "test_approach": "Mock address with isDefault=true, verify badge displayed"
+    },
+    {
+      "id": "AC-006",
+      "description": "Add address button opens form modal/page",
+      "test_approach": "Click add button, verify form appears or navigation occurs"
+    },
+    {
+      "id": "AC-007",
+      "description": "Edit button on card opens pre-filled form",
+      "test_approach": "Click edit, verify form opens with address data populated"
+    },
+    {
+      "id": "AC-008",
+      "description": "Delete button shows confirmation dialog",
+      "test_approach": "Click delete, verify confirmation dialog appears"
+    },
+    {
+      "id": "AC-009",
+      "description": "Delete confirmation removes address from list",
+      "test_approach": "Confirm delete, verify address removed and mutation called"
+    },
+    {
+      "id": "AC-010",
+      "description": "Set as default button updates default address",
+      "test_approach": "Click set default, verify mutation called and badge moves"
+    },
+    {
+      "id": "AC-011",
+      "description": "Address form validates all required fields",
+      "test_approach": "Submit empty form, verify validation errors for all fields"
+    },
+    {
+      "id": "AC-012",
+      "description": "Address form validates Israeli postal code (7 digits)",
+      "test_approach": "Enter invalid postal code, verify validation error"
+    },
+    {
+      "id": "AC-013",
+      "description": "Success toast shown after add/edit/delete",
+      "test_approach": "Complete CRUD operation, verify success toast displayed"
+    },
+    {
+      "id": "AC-014",
+      "description": "Error toast shown on operation failure",
+      "test_approach": "Mock failed mutation, verify error toast displayed"
+    },
+    {
+      "id": "AC-015",
+      "description": "Page is fully RTL with Hebrew labels",
+      "test_approach": "Verify dir='rtl' and Hebrew text for all labels/buttons"
+    },
+    {
+      "id": "AC-016",
+      "description": "Page is mobile-first responsive",
+      "test_approach": "Verify responsive classes on container and cards"
+    },
+    {
+      "id": "AC-017",
+      "description": "Back navigation to account page",
+      "test_approach": "Click back button, verify navigation to /account"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/(app)/account/addresses/page.tsx",
+      "components/account/AddressList.tsx",
+      "components/account/AddressList.test.tsx",
+      "components/account/AddressCard.tsx",
+      "components/account/AddressCard.test.tsx",
+      "components/account/AddressForm.tsx",
+      "components/account/AddressForm.test.tsx",
+      "hooks/useAddresses.ts",
+      "hooks/useAddresses.test.ts",
+      "hooks/useCreateAddress.ts",
+      "hooks/useCreateAddress.test.ts",
+      "hooks/useUpdateAddress.ts",
+      "hooks/useUpdateAddress.test.ts",
+      "hooks/useDeleteAddress.ts",
+      "hooks/useDeleteAddress.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "components/checkout/ShippingAddressForm.tsx",
+      "app/api/addresses/*"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Input.tsx",
+      "components/ui/Button.tsx",
+      "components/ui/Card.tsx",
+      "components/ui/Badge.tsx",
+      "components/checkout/ShippingAddressForm.tsx - validation patterns",
+      "lib/validation/address.ts - Zod schema"
+    ],
+    "hooks": [
+      "useAddresses - fetch user addresses",
+      "useCreateAddress - mutation to add address",
+      "useUpdateAddress - mutation to update address",
+      "useDeleteAddress - mutation to delete address"
+    ],
+    "state_management": "React Query for server state"
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "components/account/AddressList.test.tsx",
+      "components/account/AddressCard.test.tsx",
+      "components/account/AddressForm.test.tsx",
+      "hooks/useAddresses.test.ts",
+      "hooks/useCreateAddress.test.ts",
+      "hooks/useUpdateAddress.test.ts",
+      "hooks/useDeleteAddress.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Loading State",
+        "count": 2,
+        "examples": [
+          "should show loading spinner while fetching",
+          "should hide loading after fetch completes"
+        ]
+      },
+      {
+        "name": "Empty State",
+        "count": 2,
+        "examples": [
+          "should show empty message when no addresses",
+          "should show add button in empty state"
+        ]
+      },
+      {
+        "name": "Address List",
+        "count": 4,
+        "examples": [
+          "should render all addresses",
+          "should highlight default address",
+          "should show address details on each card",
+          "should show edit/delete buttons"
+        ]
+      },
+      {
+        "name": "Add Address",
+        "count": 4,
+        "examples": [
+          "should open form on add click",
+          "should create address on submit",
+          "should close form after success",
+          "should show error on failure"
+        ]
+      },
+      {
+        "name": "Edit Address",
+        "count": 4,
+        "examples": [
+          "should open form with data on edit click",
+          "should update address on submit",
+          "should close form after success",
+          "should show error on failure"
+        ]
+      },
+      {
+        "name": "Delete Address",
+        "count": 4,
+        "examples": [
+          "should show confirmation on delete click",
+          "should delete on confirm",
+          "should cancel on dismiss",
+          "should show error on failure"
+        ]
+      },
+      {
+        "name": "Set Default",
+        "count": 3,
+        "examples": [
+          "should call setDefault mutation",
+          "should update badge position",
+          "should show error on failure"
+        ]
+      },
+      {
+        "name": "Form Validation",
+        "count": 5,
+        "examples": [
+          "should validate name",
+          "should validate street",
+          "should validate city",
+          "should validate postal code format",
+          "should validate phone format (optional)"
+        ]
+      },
+      {
+        "name": "RTL & Accessibility",
+        "count": 3,
+        "examples": [
+          "should have dir=rtl on container",
+          "should use Hebrew labels",
+          "should have proper ARIA attributes"
+        ]
+      },
+      {
+        "name": "Navigation",
+        "count": 2,
+        "examples": [
+          "should have back button",
+          "should navigate to /account on back click"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "hooks": "vi.mock('@/hooks/useAddresses')",
+      "navigation": "vi.mock('next/navigation')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to checkout ShippingAddressForm",
+      "Changes to API endpoints"
+    ],
+    "escalation_triggers": [
+      "Address data leakage",
+      "Default address sync issues"
+    ],
+    "rollback_plan": "Delete new component and page files"
+  },
+
+  "dependencies": {
+    "required_before": ["BE-05"],
+    "blocks": []
+  },
+
+  "estimated_tests": 33
+}
