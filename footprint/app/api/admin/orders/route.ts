@@ -156,7 +156,7 @@ export async function GET(
         updated_at,
         profiles!user_id (
           email,
-          full_name
+          name
         ),
         order_items (
           id
@@ -208,7 +208,7 @@ export async function GET(
       total: convertFromAgorot(order.total || 0),
       itemCount: order.order_items?.length || 0,
       customerEmail: order.profiles?.email || null,
-      customerName: order.profiles?.full_name || null,
+      customerName: order.profiles?.name || null,
       createdAt: order.created_at,
       updatedAt: order.updated_at,
       trackingNumber: order.tracking_number,

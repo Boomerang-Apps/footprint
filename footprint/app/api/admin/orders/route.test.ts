@@ -59,7 +59,7 @@ const mockOrders = [
     total: 23700, // in agorot
     created_at: '2024-12-25T10:00:00Z',
     updated_at: '2024-12-26T10:00:00Z',
-    profiles: { email: 'customer1@example.com', full_name: 'John Doe' },
+    profiles: { email: 'customer1@example.com', name: 'John Doe' },
     order_items: [{ id: 'item-1', style: 'pop_art', size: 'A4' }],
   },
   {
@@ -70,7 +70,7 @@ const mockOrders = [
     total: 45600,
     created_at: '2024-12-24T10:00:00Z',
     updated_at: '2024-12-24T12:00:00Z',
-    profiles: { email: 'customer2@example.com', full_name: 'Jane Smith' },
+    profiles: { email: 'customer2@example.com', name: 'Jane Smith' },
     order_items: [{ id: 'item-2', style: 'watercolor', size: 'A3' }],
   },
 ];
