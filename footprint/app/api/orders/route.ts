@@ -54,7 +54,7 @@ export async function GET(
     // 1. Rate limiting
     const rateLimitResult = await checkRateLimit('general', request);
     if (rateLimitResult) {
-      return rateLimitResult;
+      return rateLimitResult as NextResponse<ErrorResponse>;
     }
 
     // 2. Authentication check
