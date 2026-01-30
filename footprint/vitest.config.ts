@@ -8,11 +8,12 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
+    exclude: ['**/node_modules/**', '**/worktrees/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['lib/**/*.ts', 'stores/**/*.ts', 'data/**/*.ts'],
-      exclude: ['**/*.test.ts', '**/*.d.ts', '**/index.ts'],
+      include: ['lib/**/*.ts', 'stores/**/*.ts', 'data/**/*.ts', 'app/api/**/*.ts'],
+      exclude: ['**/*.test.ts', '**/*.d.ts', '**/index.ts', '**/worktrees/**'],
     },
   },
   resolve: {

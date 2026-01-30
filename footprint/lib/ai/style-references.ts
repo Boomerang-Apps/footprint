@@ -102,6 +102,30 @@ export const STYLE_REFERENCES: Record<StyleType, StyleConfig> = {
     referencePrompt:
       'Apply the exact 3D cartoon style shown in the reference images. Match the eye size, skin smoothness, and overall Pixar/Disney aesthetic.',
   },
+
+  pop_art: {
+    id: 'pop_art',
+    references: [],
+    useReferences: true,
+    referencePrompt:
+      'Transform into bold pop art style with vibrant colors, halftone dots, and strong outlines inspired by Warhol and Lichtenstein.',
+  },
+
+  vintage: {
+    id: 'vintage',
+    references: [],
+    useReferences: true,
+    referencePrompt:
+      'Apply a vintage photographic look with muted tones, film grain, sepia hints, and classic retro aesthetic.',
+  },
+
+  romantic: {
+    id: 'romantic',
+    references: [],
+    useReferences: true,
+    referencePrompt:
+      'Create a soft, romantic atmosphere with dreamy lighting, soft focus effects, pastel tones, and ethereal glow.',
+  },
 };
 
 /**

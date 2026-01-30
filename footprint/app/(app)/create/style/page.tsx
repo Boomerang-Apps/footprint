@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, CircleOff, Layers, AlertCircle, RefreshCw, RotateCcw, Maximize2, Heart, Grid3X3, Trash2 } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, CircleOff, Layers, AlertCircle, RefreshCw, RotateCcw, Maximize2, Heart, Grid3X3, Trash2, Palette, Camera, Flower2 } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import { StyleLoader } from '@/components/ui/StyleLoader';
 import type { StyleType } from '@/types';
@@ -32,6 +32,7 @@ const STYLES: StyleOption[] = [
     nameHe: 'צבעי מים',
     icon: Droplet,
     gradient: 'from-blue-500 to-cyan-400',
+    badge: 'popular',
   },
   {
     id: 'line_art',
@@ -60,6 +61,29 @@ const STYLES: StyleOption[] = [
     nameHe: 'אווטאר קרטון',
     icon: Zap,
     gradient: 'from-violet-500 to-pink-500',
+  },
+  {
+    id: 'pop_art',
+    name: 'Pop Art',
+    nameHe: 'פופ ארט',
+    icon: Palette,
+    gradient: 'from-red-500 to-yellow-400',
+    badge: 'new',
+  },
+  {
+    id: 'vintage',
+    name: 'Vintage',
+    nameHe: 'וינטג׳',
+    icon: Camera,
+    gradient: 'from-amber-700 to-amber-500',
+  },
+  {
+    id: 'romantic',
+    name: 'Romantic',
+    nameHe: 'רומנטי',
+    icon: Flower2,
+    gradient: 'from-pink-400 to-rose-300',
+    badge: 'new',
   },
 ];
 
@@ -461,6 +485,18 @@ export default function StylePage() {
                     {isSelected && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
                         <Check className="w-3 h-3 text-violet-600" strokeWidth={3} />
+                      </div>
+                    )}
+
+                    {/* Badge (Popular/New) */}
+                    {style.badge && !isSelected && (
+                      <div className={`
+                        absolute -top-1 -left-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold
+                        ${style.badge === 'popular'
+                          ? 'bg-amber-400 text-amber-900'
+                          : 'bg-emerald-400 text-emerald-900'}
+                      `}>
+                        {style.badge === 'popular' ? 'פופולרי' : 'חדש'}
                       </div>
                     )}
                   </div>

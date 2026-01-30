@@ -37,6 +37,7 @@ import {
   CarrierCode,
 } from '@/lib/orders/tracking';
 import { sendTrackingNotificationEmail } from '@/lib/email/resend';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 interface TrackingRequest {
   trackingNumber: string;
@@ -68,6 +69,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse<TrackingResponse | ErrorResponse>> {
+  // Rate limiting: general limit for admin routes
+  const rateLimited = await checkRateLimit('general', request);
+  if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
+
   try {
     const orderId = params.id;
 

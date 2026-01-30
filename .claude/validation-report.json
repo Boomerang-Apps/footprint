@@ -1,0 +1,51 @@
+{
+  "validation_report": {
+    "timestamp": "2026-01-23T16:53:14Z",
+    "project": "/Volumes/SSD-01/Projects/Footprint",
+    "overall_status": "FAIL",
+    "summary": {
+      "total_checks": 29,
+      "passed": 21,
+      "failed": 1,
+      "warnings": 7
+    },
+    "checks": [
+      {"name":"stories_directory","status":"PASS","message":"Found 7 story files","details":"/Volumes/SSD-01/Projects/Footprint/stories"},{"name":"story_structure","status":"PASS","message":"7 valid stories found","details":""},{"name":"p_variable","status":"FAIL","message":"P.md (P Variable) not found","details":"Create .claude/P.md"},{"name":"claude_md","status":"PASS","message":"CLAUDE.md project guidelines exist","details":"/Volumes/SSD-01/Projects/Footprint/CLAUDE.md"},{"name":"wave_config","status":"WARN","message":"No wave-config.json found","details":"Optional: configure wave settings"},{"name":"env_file","status":"PASS","message":"Environment file loaded","details":"/Volumes/SSD-01/Projects/Footprint/.env"},{"name":"anthropic_api","status":"PASS","message":"ANTHROPIC_API_KEY is set","details":"Key starts with: sk-ant-..."},{"name":"supabase_db","status":"WARN","message":"Supabase not configured","details":"Optional for persistence"},{"name":"github_token","status":"WARN","message":"GITHUB_TOKEN not set","details":"PR creation may fail"},{"name":"git_repo","status":"PASS","message":"Git repository valid (branch: main)","details":""},{"name":"secret_gitignore_.env","status":"PASS","message":".env is gitignored","details":""},{"name":"secret_gitignore_.env.local","status":"PASS","message":".env.local is gitignored","details":""},{"name":"secrets_exposure","status":"PASS","message":"No exposed secret files detected","details":""},{"name":"docker_installed","status":"PASS","message":"Docker installed: 29.1.3","details":""},{"name":"docker_running","status":"PASS","message":"Docker daemon is running","details":""},{"name":"wave_images","status":"PASS","message":"Found 3 WAVE Docker images","details":""},{"name":"compose_valid","status":"PASS","message":"docker-compose.yml valid (2 services)","details":""},{"name":"containers_running","status":"PASS","message":"1 WAVE containers running","details":""},{"name":"slack_configured","status":"PASS","message":"Slack webhook URL is set","details":""},{"name":"claude_dir","status":"PASS","message":".claude directory exists","details":"/Volumes/SSD-01/Projects/Footprint/.claude"},{"name":"gate0_certified","status":"WARN","message":"Gate 0 not yet certified","details":"Will be created on first agent start"},{"name":"stale_signals","status":"PASS","message":"No stale signal files","details":""},{"name":"error_signals","status":"WARN","message":"1 error/stop signals present","details":"Review agent errors"},{"name":"agent_definitions","status":"PASS","message":"Found 7 agent definitions","details":"/Volumes/SSD-01/Projects/Footprint/.claudecode/agents"},{"name":"agent_cto","status":"PASS","message":"cto agent definition exists","details":""},{"name":"agent_pm","status":"PASS","message":"pm agent definition exists","details":""},{"name":"agent_fe-dev","status":"WARN","message":"fe-dev agent definition missing","details":""},{"name":"agent_be-dev","status":"WARN","message":"be-dev agent definition missing","details":""},{"name":"agent_qa","status":"PASS","message":"qa agent definition exists","details":""}
+    ],
+    "passed_checks": [
+  "stories_directory",
+  "story_structure",
+  "claude_md",
+  "env_file",
+  "anthropic_api",
+  "git_repo",
+  "secret_gitignore_.env",
+  "secret_gitignore_.env.local",
+  "secrets_exposure",
+  "docker_installed",
+  "docker_running",
+  "wave_images",
+  "compose_valid",
+  "containers_running",
+  "slack_configured",
+  "claude_dir",
+  "stale_signals",
+  "agent_definitions",
+  "agent_cto",
+  "agent_pm",
+  "agent_qa"
+],
+    "failed_checks": [
+  "p_variable"
+],
+    "warning_checks": [
+  "wave_config",
+  "supabase_db",
+  "github_token",
+  "gate0_certified",
+  "error_signals",
+  "agent_fe-dev",
+  "agent_be-dev"
+]
+  }
+}

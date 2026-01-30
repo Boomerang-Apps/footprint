@@ -1,0 +1,41 @@
+{
+  "id": "WAVE1-FE-001",
+  "title": "Photo Upload Flow",
+  "domain": "frontend",
+  "priority": "P0",
+  "wave": 1,
+  "status": "complete",
+  "objective": {
+    "as_a": "user wanting to create AI art prints",
+    "i_want": "to upload photos from my device gallery or camera",
+    "so_that": "I can start the AI transformation process"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "User can upload image from device gallery", "status": "complete"},
+    {"id": "AC-002", "description": "User can take new photo with camera", "status": "complete"},
+    {"id": "AC-003", "description": "Image preview is displayed after selection", "status": "complete"},
+    {"id": "AC-004", "description": "File size validation (max 20MB) with Hebrew error toast", "status": "complete"},
+    {"id": "AC-005", "description": "File type validation (JPEG, PNG, HEIC) with Hebrew error toast", "status": "complete"},
+    {"id": "AC-006", "description": "Drag-and-drop upload with visual feedback", "status": "complete"},
+    {"id": "AC-007", "description": "Upload progress indicator shown", "status": "complete"},
+    {"id": "AC-008", "description": "R2 storage integration for image persistence", "status": "complete"}
+  ],
+  "files": {
+    "modified": [
+      "app/(app)/create/page.tsx",
+      "components/upload/UploadZone.tsx"
+    ]
+  },
+  "safety": {
+    "stop_conditions": [
+      "Safety score drops below 0.85",
+      "Exposes API keys in client-side code",
+      "Bypasses file validation"
+    ]
+  },
+  "estimated_tokens": 15000,
+  "actual_tokens": 12500,
+  "dependencies": [],
+  "agent_assignment": "fe-dev-1",
+  "completed_at": "2026-01-29T00:00:00Z"
+}

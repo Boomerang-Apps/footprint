@@ -14,6 +14,7 @@ export { Input, type InputProps } from './Input';
 export { Select, type SelectProps, type SelectOption } from './Select';
 export { Checkbox, type CheckboxProps } from './Checkbox';
 export { Badge, type BadgeProps } from './Badge';
+export { OrderStatusBadge, type OrderStatusBadgeProps } from './OrderStatusBadge';
 export { StepProgress, type StepProgressProps, type StepConfig } from './StepProgress';
 export { PriceDisplay, type PriceDisplayProps } from './PriceDisplay';
 export { OrderTimeline, type OrderTimelineProps, type OrderStatus } from './OrderTimeline';

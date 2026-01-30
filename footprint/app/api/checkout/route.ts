@@ -23,6 +23,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createPaymentLink } from '@/lib/payments/payplus';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 interface CheckoutRequest {
   orderId: string;
@@ -44,6 +45,10 @@ interface ErrorResponse {
 export async function POST(
   request: Request
 ): Promise<NextResponse<CheckoutResponse | ErrorResponse>> {
+  // Rate limiting: 5 checkouts per minute
+  const rateLimited = await checkRateLimit('checkout', request);
+  if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
+
   try {
     // 1. Verify authentication
     const supabase = await createClient();

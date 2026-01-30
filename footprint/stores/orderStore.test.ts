@@ -662,4 +662,275 @@ describe('Order Store', () => {
       });
     });
   });
+
+  // =========================================================================
+  // AUTH-02: Guest Checkout State Tests
+  // =========================================================================
+
+  describe('Guest Checkout State (AUTH-02)', () => {
+    describe('Initial State', () => {
+      it('should have isGuest as false by default', () => {
+        const state = useOrderStore.getState();
+        expect(state.isGuest).toBe(false);
+      });
+
+      it('should have null guestInfo by default', () => {
+        const state = useOrderStore.getState();
+        expect(state.guestInfo).toBeNull();
+      });
+    });
+
+    describe('setIsGuest', () => {
+      it('should set isGuest to true', () => {
+        const { setIsGuest } = useOrderStore.getState();
+
+        act(() => {
+          setIsGuest(true);
+        });
+
+        expect(useOrderStore.getState().isGuest).toBe(true);
+      });
+
+      it('should set isGuest to false', () => {
+        const store = useOrderStore.getState();
+
+        // Set to true first
+        act(() => {
+          store.setIsGuest(true);
+        });
+
+        // Set back to false
+        act(() => {
+          store.setIsGuest(false);
+        });
+
+        expect(useOrderStore.getState().isGuest).toBe(false);
+      });
+
+      it('should toggle isGuest', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.setIsGuest(true);
+        });
+        expect(useOrderStore.getState().isGuest).toBe(true);
+
+        act(() => {
+          store.setIsGuest(false);
+        });
+        expect(useOrderStore.getState().isGuest).toBe(false);
+
+        act(() => {
+          store.setIsGuest(true);
+        });
+        expect(useOrderStore.getState().isGuest).toBe(true);
+      });
+    });
+
+    describe('setGuestInfo', () => {
+      const validGuestInfo = {
+        email: 'john@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        phone: '050-1234567',
+        marketingConsent: false,
+      };
+
+      it('should set valid guest info', () => {
+        const { setGuestInfo } = useOrderStore.getState();
+
+        act(() => {
+          setGuestInfo(validGuestInfo);
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.guestInfo).toEqual(validGuestInfo);
+      });
+
+      it('should update existing guest info', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.setGuestInfo(validGuestInfo);
+        });
+
+        const updatedInfo = {
+          ...validGuestInfo,
+          phone: '052-9876543',
+        };
+
+        act(() => {
+          store.setGuestInfo(updatedInfo);
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.guestInfo).toEqual(updatedInfo);
+      });
+
+      it('should accept guest info without phone', () => {
+        const store = useOrderStore.getState();
+        const infoWithoutPhone = {
+          email: 'jane@example.com',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          marketingConsent: true,
+        };
+
+        act(() => {
+          store.setGuestInfo(infoWithoutPhone);
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.guestInfo).toEqual(infoWithoutPhone);
+      });
+
+      it('should throw error for invalid email', () => {
+        const store = useOrderStore.getState();
+        const invalidInfo = {
+          ...validGuestInfo,
+          email: 'not-an-email',
+        };
+
+        expect(() => {
+          act(() => {
+            store.setGuestInfo(invalidInfo);
+          });
+        }).toThrow('Invalid guest information');
+      });
+
+      it('should throw error for empty first name', () => {
+        const store = useOrderStore.getState();
+        const invalidInfo = {
+          ...validGuestInfo,
+          firstName: '',
+        };
+
+        expect(() => {
+          act(() => {
+            store.setGuestInfo(invalidInfo);
+          });
+        }).toThrow('Invalid guest information');
+      });
+
+      it('should throw error for empty last name', () => {
+        const store = useOrderStore.getState();
+        const invalidInfo = {
+          ...validGuestInfo,
+          lastName: '',
+        };
+
+        expect(() => {
+          act(() => {
+            store.setGuestInfo(invalidInfo);
+          });
+        }).toThrow('Invalid guest information');
+      });
+
+      it('should throw error for invalid phone', () => {
+        const store = useOrderStore.getState();
+        const invalidInfo = {
+          ...validGuestInfo,
+          phone: 'abc',
+        };
+
+        expect(() => {
+          act(() => {
+            store.setGuestInfo(invalidInfo);
+          });
+        }).toThrow('Invalid guest information');
+      });
+    });
+
+    describe('clearGuestInfo', () => {
+      it('should clear guest info', () => {
+        const store = useOrderStore.getState();
+
+        // Set guest info first
+        act(() => {
+          store.setGuestInfo({
+            email: 'test@example.com',
+            firstName: 'Test',
+            lastName: 'User',
+            marketingConsent: false,
+          });
+        });
+
+        // Clear it
+        act(() => {
+          store.clearGuestInfo();
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.guestInfo).toBeNull();
+        expect(state.isGuest).toBe(false);
+      });
+
+      it('should work when guest info is already null', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.clearGuestInfo();
+        });
+
+        expect(useOrderStore.getState().guestInfo).toBeNull();
+      });
+    });
+
+    describe('reset', () => {
+      it('should clear guest state on reset', () => {
+        const store = useOrderStore.getState();
+
+        // Set guest info
+        act(() => {
+          store.setIsGuest(true);
+          store.setGuestInfo({
+            email: 'test@example.com',
+            firstName: 'Test',
+            lastName: 'User',
+            marketingConsent: true,
+          });
+        });
+
+        // Reset
+        act(() => {
+          store.reset();
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.isGuest).toBe(false);
+        expect(state.guestInfo).toBeNull();
+      });
+    });
+
+    describe('persistence', () => {
+      it('should persist isGuest to localStorage', () => {
+        const store = useOrderStore.getState();
+
+        act(() => {
+          store.setIsGuest(true);
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.isGuest).toBe(true);
+      });
+
+      it('should persist guestInfo to localStorage', () => {
+        const store = useOrderStore.getState();
+        const guestInfo = {
+          email: 'persist@example.com',
+          firstName: 'Persist',
+          lastName: 'Test',
+          phone: '050-1111111',
+          marketingConsent: true,
+        };
+
+        act(() => {
+          store.setGuestInfo(guestInfo);
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.guestInfo).toEqual(guestInfo);
+      });
+    });
+  });
 });

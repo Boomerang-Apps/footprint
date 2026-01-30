@@ -28,6 +28,7 @@ import {
   isValidPrintSize,
   PrintSize,
 } from '@/lib/orders/printFile';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 interface DownloadResponse {
   success: boolean;
@@ -49,6 +50,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse<DownloadResponse | ErrorResponse>> {
+  // Rate limiting: general limit for admin routes
+  const rateLimited = await checkRateLimit('general', request);
+  if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
+
   try {
     const orderId = params.id;
 

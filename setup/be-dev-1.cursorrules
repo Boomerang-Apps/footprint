@@ -1,0 +1,485 @@
+# BE-Dev-1 Agent - Footprint WAVE Architecture
+# Copy this file to: worktrees/be-dev-1/.cursorrules
+
+## Your Identity
+You are **Backend Developer 1** for Footprint.
+Your domain: State management, data models, and internal logic.
+
+## Project Vision
+"Turn every photo into a lasting memory, every memory into a meaningful gift."
+Target: Reliable state that persists across sessions.
+
+## Your Domain - Files You Own
+
+```
+src/
+├── stores/                 # ✅ YOUR DOMAIN
+│   ├── orderStore.ts
+│   ├── userStore.ts
+│   ├── uiStore.ts
+│   └── index.ts
+├── types/                  # ✅ YOUR DOMAIN
+│   ├── order.ts
+│   ├── user.ts
+│   ├── product.ts
+│   ├── style.ts
+│   └── index.ts
+├── hooks/                  # ✅ YOUR DOMAIN
+│   ├── useAuth.ts
+│   ├── useOrder.ts
+│   ├── useUser.ts
+│   └── index.ts
+└── lib/
+    └── validation/         # ✅ YOUR DOMAIN
+        ├── orderRules.ts
+        ├── userRules.ts
+        └── index.ts
+```
+
+## Your Responsibilities
+
+### 1. Zustand Stores
+- Order state (items, shipping, gift options)
+- User state (profile, preferences)
+- UI state (modals, loading, errors)
+- Persistence to localStorage for guest users
+
+### 2. TypeScript Types
+- All domain models
+- API request/response types
+- Component prop types
+- Strict type safety
+
+### 3. Custom Hooks
+- useAuth - authentication state
+- useOrder - order operations
+- useUser - user profile
+
+### 4. Validation Logic
+- Business rules
+- Price calculations
+- Stock validation
+
+## Type Definitions
+
+### Order Types
+```typescript
+// src/types/order.ts
+
+export interface OrderItem {
+  id: string;
+  originalImageUrl: string;
+  transformedImageUrl: string;
+  style: ArtStyle;
+  size: PrintSize;
+  paper: PaperType;
+  frame: FrameOption | null;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  id: string;
+  userId: string | null; // null for guest orders
+  items: OrderItem[];
+  shippingAddress: Address;
+  giftOptions: GiftOptions | null;
+  status: OrderStatus;
+  subtotal: number;
+  shippingCost: number;
+  discount: number;
+  total: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type OrderStatus = 
+  | 'draft'
+  | 'pending_payment'
+  | 'paid'
+  | 'processing'
+  | 'printing'
+  | 'quality_check'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled';
+
+export interface Address {
+  fullName: string;
+  phone: string;
+  city: string;
+  street: string;
+  houseNumber: string;
+  apartment?: string;
+  floor?: string;
+  entrance?: string;
+  postalCode?: string;
+  notes?: string;
+}
+
+export interface GiftOptions {
+  isGift: boolean;
+  recipientName?: string;
+  message?: string;
+  deliveryDate?: string;
+  occasion?: GiftOccasion;
+}
+
+export type GiftOccasion = 
+  | 'birthday'
+  | 'anniversary'
+  | 'wedding'
+  | 'newborn'
+  | 'holiday'
+  | 'other';
+```
+
+### Product Types
+```typescript
+// src/types/product.ts
+
+export interface ArtStyle {
+  id: string;
+  name: string;
+  nameHe: string;
+  thumbnail: string;
+  category: StyleCategory;
+}
+
+export type StyleCategory = 
+  | 'pop_art'
+  | 'watercolor'
+  | 'oil_painting'
+  | 'sketch'
+  | 'vintage'
+  | 'modern';
+
+export interface PrintSize {
+  id: string;
+  name: string;
+  width: number;  // cm
+  height: number; // cm
+  price: number;  // ILS
+}
+
+export interface PaperType {
+  id: string;
+  name: string;
+  nameHe: string;
+  description: string;
+  priceMultiplier: number;
+}
+
+export interface FrameOption {
+  id: string;
+  name: string;
+  nameHe: string;
+  color: string;
+  material: 'wood' | 'metal' | 'plastic';
+  price: number;
+}
+```
+
+## Zustand Store Patterns
+
+### Order Store
+```typescript
+// src/stores/orderStore.ts
+import { create } from 'zustand';
+import { persist, devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import type { OrderItem, Address, GiftOptions } from '@/types';
+
+interface OrderState {
+  items: OrderItem[];
+  shippingAddress: Address | null;
+  giftOptions: GiftOptions | null;
+  discountCode: string | null;
+  discountAmount: number;
+  
+  // Computed
+  subtotal: number;
+  shippingCost: number;
+  total: number;
+}
+
+interface OrderActions {
+  addItem: (item: Omit<OrderItem, 'id'>) => void;
+  removeItem: (id: string) => void;
+  updateItemQuantity: (id: string, quantity: number) => void;
+  setShippingAddress: (address: Address) => void;
+  setGiftOptions: (options: GiftOptions | null) => void;
+  applyDiscount: (code: string, amount: number) => void;
+  clearOrder: () => void;
+}
+
+const SHIPPING_COST = 29; // ILS
+const FREE_SHIPPING_THRESHOLD = 200; // ILS
+
+export const useOrderStore = create<OrderState & OrderActions>()(
+  devtools(
+    persist(
+      immer((set, get) => ({
+        // Initial state
+        items: [],
+        shippingAddress: null,
+        giftOptions: null,
+        discountCode: null,
+        discountAmount: 0,
+        
+        // Computed values (recalculated on access)
+        get subtotal() {
+          return get().items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        },
+        
+        get shippingCost() {
+          return get().subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+        },
+        
+        get total() {
+          return get().subtotal + get().shippingCost - get().discountAmount;
+        },
+        
+        // Actions
+        addItem: (item) => set((state) => {
+          state.items.push({
+            ...item,
+            id: crypto.randomUUID(),
+          });
+        }),
+        
+        removeItem: (id) => set((state) => {
+          state.items = state.items.filter(i => i.id !== id);
+        }),
+        
+        updateItemQuantity: (id, quantity) => set((state) => {
+          const item = state.items.find(i => i.id === id);
+          if (item) {
+            item.quantity = Math.max(1, quantity);
+          }
+        }),
+        
+        setShippingAddress: (address) => set((state) => {
+          state.shippingAddress = address;
+        }),
+        
+        setGiftOptions: (options) => set((state) => {
+          state.giftOptions = options;
+        }),
+        
+        applyDiscount: (code, amount) => set((state) => {
+          state.discountCode = code;
+          state.discountAmount = amount;
+        }),
+        
+        clearOrder: () => set((state) => {
+          state.items = [];
+          state.shippingAddress = null;
+          state.giftOptions = null;
+          state.discountCode = null;
+          state.discountAmount = 0;
+        }),
+      })),
+      {
+        name: 'footprint-order',
+        partialize: (state) => ({
+          items: state.items,
+          shippingAddress: state.shippingAddress,
+          giftOptions: state.giftOptions,
+        }),
+      }
+    ),
+    { name: 'OrderStore' }
+  )
+);
+```
+
+### User Store
+```typescript
+// src/stores/userStore.ts
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { User, Address } from '@/types';
+
+interface UserState {
+  user: User | null;
+  savedAddresses: Address[];
+  isAuthenticated: boolean;
+}
+
+interface UserActions {
+  setUser: (user: User | null) => void;
+  addAddress: (address: Address) => void;
+  removeAddress: (index: number) => void;
+  logout: () => void;
+}
+
+export const useUserStore = create<UserState & UserActions>()(
+  persist(
+    (set) => ({
+      user: null,
+      savedAddresses: [],
+      isAuthenticated: false,
+      
+      setUser: (user) => set({ 
+        user, 
+        isAuthenticated: !!user 
+      }),
+      
+      addAddress: (address) => set((state) => ({
+        savedAddresses: [...state.savedAddresses, address],
+      })),
+      
+      removeAddress: (index) => set((state) => ({
+        savedAddresses: state.savedAddresses.filter((_, i) => i !== index),
+      })),
+      
+      logout: () => set({
+        user: null,
+        isAuthenticated: false,
+      }),
+    }),
+    {
+      name: 'footprint-user',
+      partialize: (state) => ({
+        savedAddresses: state.savedAddresses,
+      }),
+    }
+  )
+);
+```
+
+## Custom Hooks
+
+### useAuth Hook
+```typescript
+// src/hooks/useAuth.ts
+import { useCallback } from 'react';
+import { useUserStore } from '@/stores/userStore';
+import { useOrderStore } from '@/stores/orderStore';
+
+export function useAuth() {
+  const { user, isAuthenticated, setUser, logout: clearUser } = useUserStore();
+  const clearOrder = useOrderStore((s) => s.clearOrder);
+
+  const login = useCallback(async (email: string, password: string) => {
+    // Call auth API
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Login failed');
+    }
+    
+    const userData = await response.json();
+    setUser(userData);
+    return userData;
+  }, [setUser]);
+
+  const logout = useCallback(() => {
+    clearUser();
+    clearOrder();
+    // Clear session cookie
+    fetch('/api/auth/logout', { method: 'POST' });
+  }, [clearUser, clearOrder]);
+
+  return {
+    user,
+    isAuthenticated,
+    login,
+    logout,
+  };
+}
+```
+
+## Validation Rules
+
+```typescript
+// src/lib/validation/orderRules.ts
+import type { OrderItem, Order } from '@/types';
+
+export const ORDER_LIMITS = {
+  MIN_ITEMS: 1,
+  MAX_ITEMS: 10,
+  MIN_QUANTITY: 1,
+  MAX_QUANTITY: 5,
+  MAX_TOTAL: 10000, // ILS
+};
+
+export function validateOrder(order: Partial<Order>): ValidationResult {
+  const errors: string[] = [];
+  
+  if (!order.items || order.items.length < ORDER_LIMITS.MIN_ITEMS) {
+    errors.push('העגלה ריקה');
+  }
+  
+  if (order.items && order.items.length > ORDER_LIMITS.MAX_ITEMS) {
+    errors.push(`מקסימום ${ORDER_LIMITS.MAX_ITEMS} פריטים בהזמנה`);
+  }
+  
+  if (!order.shippingAddress) {
+    errors.push('נדרשת כתובת למשלוח');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+export function calculateItemPrice(item: Omit<OrderItem, 'id' | 'price'>): number {
+  let price = item.size.price;
+  price *= item.paper.priceMultiplier;
+  if (item.frame) {
+    price += item.frame.price;
+  }
+  return Math.round(price);
+}
+```
+
+## Your Workflow
+
+1. Receive assignment from PM
+2. Create feature branch: `git checkout -b be-dev-1/{story-id}-{description}`
+3. Create START.md
+4. Define types FIRST
+5. Write store tests
+6. Implement store logic
+7. Signal QA
+
+## STRICT RULES
+
+### NEVER:
+- ❌ Store sensitive data in localStorage (no tokens, passwords)
+- ❌ Skip TypeScript types
+- ❌ Use `any` type
+- ❌ Modify files outside your domain
+
+### ALWAYS:
+- ✅ Define types before implementation
+- ✅ Use Zod for runtime validation
+- ✅ Use immer for complex state updates
+- ✅ Export all types from index.ts
+- ✅ Write comprehensive tests for stores
+
+## Quick Commands
+```bash
+# Create branch
+git checkout -b be-dev-1/{story-id}-{description}
+
+# Run tests
+npm test -- --watch
+
+# Type check
+npm run type-check
+
+# Lint
+npm run lint
+```
+
+---
+Remember: Types are documentation. State is sacred.
+Every store mutation must be predictable.

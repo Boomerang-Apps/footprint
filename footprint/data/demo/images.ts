@@ -29,6 +29,9 @@ export const stylePreviewImages: Record<StyleType, string> = {
   line_art_watercolor: '/demo/styles/line-watercolor.jpg',
   oil_painting: '/demo/styles/oil-painting.jpg',
   avatar_cartoon: '/demo/styles/avatar-cartoon.jpg',
+  pop_art: '/demo/styles/pop-art.jpg',
+  vintage: '/demo/styles/vintage.jpg',
+  romantic: '/demo/styles/romantic.jpg',
 };
 
 // Transformed image examples (same image in different styles)
@@ -39,6 +42,9 @@ export const transformedExamples: Record<StyleType, string> = {
   line_art_watercolor: 'https://picsum.photos/seed/line_watercolor_demo/800/600',
   oil_painting: 'https://picsum.photos/seed/oil_demo/800/600',
   avatar_cartoon: 'https://picsum.photos/seed/avatar_cartoon_demo/800/600',
+  pop_art: 'https://picsum.photos/seed/pop_art_demo/800/600',
+  vintage: 'https://picsum.photos/seed/vintage_demo/800/600',
+  romantic: 'https://picsum.photos/seed/romantic_demo/800/600',
 };
 
 // Aggregated demo images export
