@@ -113,6 +113,7 @@ export function AvatarUpload({
       <div className="relative">
         <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200">
           {displayUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- Using img for blob URLs (preview) which next/image doesn't support */
             <img
               src={displayUrl}
               alt={previewUrl ? 'תצוגה מקדימה' : 'תמונת פרופיל'}

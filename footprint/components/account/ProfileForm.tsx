@@ -129,7 +129,7 @@ export function ProfileForm({
       }
 
       // Build update payload with only changed fields
-      const updates: { name?: string; phone?: string } = {};
+      const updates: { name?: string; phone?: string | null } = {};
       if (formData.name !== originalData.name) {
         updates.name = formData.name;
       }
