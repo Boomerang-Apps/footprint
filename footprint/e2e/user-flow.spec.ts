@@ -16,7 +16,8 @@ import fs from 'fs';
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 const TEST_IMAGE_PATH = path.join(FIXTURES_DIR, 'test-image.jpg');
 
-test.beforeAll(async () => {
+// Setup fixtures synchronously before tests run
+function ensureFixtures() {
   // Ensure fixtures directory exists
   if (!fs.existsSync(FIXTURES_DIR)) {
     fs.mkdirSync(FIXTURES_DIR, { recursive: true });
@@ -58,7 +59,10 @@ test.beforeAll(async () => {
     ]);
     fs.writeFileSync(TEST_IMAGE_PATH, minimalJpeg);
   }
-});
+}
+
+// Run fixture setup synchronously at module load time
+ensureFixtures();
 
 test.describe('User Flow E2E', () => {
 
