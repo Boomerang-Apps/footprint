@@ -1,0 +1,100 @@
+{
+    "meta": {
+        "project_name": "project",
+        "project_root": "/project",
+        "generated_at": "2026-01-29T17:57:10Z",
+        "context_hash": "src:,lib:,app:,components:,stories:",
+        "schema_version": "1.0"
+    },
+    "codebase": {
+        "structure": [
+            "/.claude",
+            "/.claude/agent-memory",
+            "/.claude/archive",
+            "/.claude/black-box",
+            "/.claude/commands",
+            "/.claude/handoffs",
+            "/.claude/rlm-snapshots",
+            "/.claude/safety",
+            "/.claudecode",
+            "/.claudecode/agents",
+            "/.claudecode/decisions",
+            "/.claudecode/handoffs",
+            "/.claudecode/milestones",
+            "/.claudecode/milestones/sprint-1",
+            "/.claudecode/milestones/sprint-2",
+            "/.claudecode/milestones/sprint-4",
+            "/.claudecode/milestones/sprint-5",
+            "/.claudecode/templates",
+            "/.claudecode/workflows",
+            "/.github",
+            "/.github/workflows",
+            "/.next",
+            "/.next/cache",
+            "/.next/cache/eslint",
+            "/.next/cache/swc",
+            "/.next/cache/webpack",
+            "/.next/server",
+            "/.next/static",
+            "/.next/static/chunks",
+            "/.next/static/development",
+            "/.next/types",
+            "/.vercel",
+            "/app",
+            "/app/(app)",
+            "/app/(app)/create",
+            "/app/(app)/order",
+            "/app/(auth)",
+            "/app/(auth)/login",
+            "/app/admin",
+            "/app/api",
+            "/app/api/admin",
+            "/app/api/checkout",
+            "/app/api/detect-crop",
+            "/app/api/dev",
+            "/app/api/orchestration",
+            "/app/api/orders",
+            "/app/api/remove-bg",
+            "/app/api/stories",
+            "/app/api/transform",
+            "/app/api/tweak"
+        ],
+        "file_count": 588,
+        "source_extensions": ["ts", "tsx", "js", "jsx", "py", "sh", "json", "md"]
+    },
+    "wave_state": {
+        "current_wave": 3,
+        "wave_type": "FULL",
+        "stories": [
+            "UI-04A-order-details-api.json",
+            "UI-04B-order-tracking-page.json",
+            "UI-04C-order-history-page.json"
+        ],
+        "signals": [
+            "signal-merge-watcher-status.json",
+            "signal-fe-dev-1-status.json",
+            "signal-fe-dev-2-status.json",
+            "signal-qa-status.json",
+            "signal-wave3-dispatch.json",
+            "signal-fe-dev-1-assignment.json",
+            "signal-be-dev-1-status.json",
+            "signal-wave3-start.json",
+            "signal-be-dev-2-status.json",
+            "signal-dev-fix-status.json"
+        ]
+    },
+    "worktrees": [
+
+    ],
+    "agent_memory": {
+        "memory_dir": "/project/.claude/agent-memory",
+        "available_memories": []
+    },
+    "query_interface": {
+        "peek_file": "peek(P, 'path/to/file.ts')",
+        "search": "search(P, 'pattern')",
+        "list_files": "list_files(P, '*.test.ts')",
+        "get_story": "get_story(P, 'STORY-ID')",
+        "get_signal": "get_signal(P, 'wave${N}-gate3')"
+    }
+}

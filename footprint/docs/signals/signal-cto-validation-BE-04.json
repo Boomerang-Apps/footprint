@@ -1,0 +1,44 @@
+{
+  "gate": 0,
+  "story_id": "BE-04",
+  "status": "APPROVED",
+  "validator": "CTO",
+  "timestamp": "2026-01-30T17:15:00Z",
+  "wave": 4,
+  "title": "User Profile API",
+  "domain": "backend",
+  "story_points": 3,
+
+  "technical_notes": "Standard REST API implementation following existing patterns. Database schema (profiles table) already exists with all required columns: id, email, name, phone, avatar_url, preferred_language, is_admin. Types defined in types/user.ts.",
+
+  "security_review": "PASSED - Profile access protected by RLS policy. Avatar upload should enforce 2MB limit and validate file types (jpg, png, webp). No admin-level permissions affected.",
+
+  "dependencies": [
+    "Supabase profiles table (exists)",
+    "lib/supabase/server.ts (exists)",
+    "lib/storage/r2.ts for avatar upload (exists)",
+    "lib/rate-limit.ts (exists)"
+  ],
+
+  "approach": "Create API routes following existing order API patterns. Use Zod for validation, existing R2 storage for avatar, standard auth middleware.",
+
+  "files_to_create": [
+    "app/api/profile/route.ts",
+    "app/api/profile/route.test.ts",
+    "app/api/profile/avatar/route.ts",
+    "app/api/profile/avatar/route.test.ts",
+    "lib/validation/profile.ts"
+  ],
+
+  "acceptance_criteria_review": {
+    "count": 10,
+    "testable": true,
+    "complete": true,
+    "notes": "All ACs have clear test approaches defined"
+  },
+
+  "estimated_tests": 20,
+  "coverage_target": 90,
+
+  "blocks": ["UI-05A"]
+}

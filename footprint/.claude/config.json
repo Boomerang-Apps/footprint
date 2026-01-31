@@ -1,0 +1,55 @@
+{
+  "framework": "wave-v2",
+  "version": "2.0.0",
+  "project": {
+    "type": "nextjs",
+    "name": "footprint",
+    "path": "/Volumes/SSD-01/Projects/Footprint/footprint"
+  },
+  "commands": {
+    "install": "pnpm install",
+    "build": "pnpm build",
+    "dev": "pnpm dev",
+    "test": "pnpm test:run",
+    "testWatch": "pnpm test",
+    "testCoverage": "pnpm test:coverage",
+    "testE2E": "pnpm test:e2e",
+    "testE2EUI": "pnpm test:e2e:ui",
+    "lint": "pnpm lint",
+    "typeCheck": "pnpm type-check",
+    "securityAudit": "pnpm audit"
+  },
+  "paths": {
+    "stories": "stories/",
+    "contracts": "contracts/",
+    "planning": "planning/",
+    "signals": ".claude/signals/",
+    "commands": ".claude/commands/",
+    "safety": ".claude/safety/",
+    "handoffs": ".claude/handoffs/"
+  },
+  "gates": {
+    "coverageThreshold": 70,
+    "branchCoverageThreshold": 60,
+    "maxBundleSize": "500KB",
+    "retryLimit": 3,
+    "requiredGates": ["gate-0", "gate-1", "gate-2", "gate-3", "gate-4", "gate-5", "gate-6", "gate-7"]
+  },
+  "agents": ["be-dev", "fe-dev", "qa", "pm", "cto"],
+  "safety": {
+    "constitutionalEnabled": true,
+    "emergencyStopFile": ".claude/EMERGENCY-STOP",
+    "preflightRequired": true,
+    "preflightLock": ".claude/PREFLIGHT.lock"
+  },
+  "git": {
+    "mainBranch": "main",
+    "branchPattern": "feature/{EPIC}-{TYPE}-{ID}",
+    "commitCoAuthor": "Claude Opus 4.5 <noreply@anthropic.com>"
+  },
+  "metadata": {
+    "createdAt": "2026-01-31T00:00:00Z",
+    "updatedAt": "2026-01-31T00:00:00Z",
+    "schemaVersion": "4.1"
+  }
+}

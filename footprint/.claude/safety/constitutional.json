@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "threshold": 0.85,
+  "principles": [
+    "Never compromise user data security",
+    "Always validate inputs before processing",
+    "Never bypass authentication or authorization",
+    "Always use parameterized queries",
+    "Never log sensitive information",
+    "Always handle errors gracefully",
+    "Never expose internal system details",
+    "Follow principle of least privilege",
+    "Never modify production data directly",
+    "Always write tests for new code",
+    "Never disable security features",
+    "Always sanitize user inputs",
+    "Never store passwords in plain text",
+    "Always use HTTPS for external calls",
+    "Never trust client-side validation alone"
+  ]
+}

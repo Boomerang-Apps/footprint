@@ -1,0 +1,47 @@
+{
+  "gate": 0,
+  "story_id": "UI-05A",
+  "status": "APPROVED",
+  "validator": "CTO",
+  "timestamp": "2026-01-30T17:15:00Z",
+  "wave": 4,
+  "title": "User Profile Settings Page",
+  "domain": "frontend",
+  "story_points": 3,
+
+  "technical_notes": "Frontend page and form components for profile management. Reuses existing UI primitives (Input, Button, Card, Select). Follow patterns from OrderHistoryList for page layout. React Query hooks for server state.",
+
+  "security_review": "PASSED - Frontend only, reads from authenticated API. Email field read-only prevents email modification attempts. No sensitive data handling on client.",
+
+  "dependencies": [
+    "BE-04 (User Profile API) - REQUIRED",
+    "components/ui/* (exists)",
+    "React Query patterns from hooks/ (exists)"
+  ],
+
+  "approach": "Create ProfileForm component with controlled inputs, useProfile hook for data fetching, useUpdateProfile for mutations. AvatarUpload as separate component with file picker integration.",
+
+  "files_to_create": [
+    "app/(app)/account/profile/page.tsx",
+    "components/account/ProfileForm.tsx",
+    "components/account/ProfileForm.test.tsx",
+    "components/account/AvatarUpload.tsx",
+    "components/account/AvatarUpload.test.tsx",
+    "hooks/useProfile.ts",
+    "hooks/useProfile.test.ts",
+    "hooks/useUpdateProfile.ts",
+    "hooks/useUpdateProfile.test.ts"
+  ],
+
+  "acceptance_criteria_review": {
+    "count": 14,
+    "testable": true,
+    "complete": true,
+    "notes": "Good coverage of loading, error, validation, RTL, accessibility states"
+  },
+
+  "estimated_tests": 24,
+  "coverage_target": 90,
+
+  "ui_notes": "Must be RTL (dir='rtl'), Hebrew labels, mobile-first responsive design"
+}

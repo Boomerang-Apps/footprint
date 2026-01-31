@@ -1,0 +1,54 @@
+{
+  "gate": 0,
+  "story_id": "UI-05B",
+  "status": "APPROVED",
+  "validator": "CTO",
+  "timestamp": "2026-01-30T17:15:00Z",
+  "wave": 4,
+  "title": "Saved Addresses Management Page",
+  "domain": "frontend",
+  "story_points": 5,
+
+  "technical_notes": "Full CRUD UI for addresses with list view, add/edit modal, delete confirmation, and default address selection. Extract shared validation patterns from ShippingAddressForm without modifying it.",
+
+  "security_review": "PASSED - Frontend only, relies on authenticated API. Address data displayed only to authenticated owner. Delete confirmation prevents accidental data loss.",
+
+  "dependencies": [
+    "BE-05 (Addresses CRUD API) - REQUIRED",
+    "components/ui/* (exists)",
+    "lib/validation/address.ts (from BE-05)",
+    "React Query patterns (exists)"
+  ],
+
+  "approach": "AddressList as container, AddressCard for display with edit/delete/default buttons, AddressForm as reusable modal form. Four mutation hooks for CRUD operations.",
+
+  "files_to_create": [
+    "app/(app)/account/addresses/page.tsx",
+    "components/account/AddressList.tsx",
+    "components/account/AddressList.test.tsx",
+    "components/account/AddressCard.tsx",
+    "components/account/AddressCard.test.tsx",
+    "components/account/AddressForm.tsx",
+    "components/account/AddressForm.test.tsx",
+    "hooks/useAddresses.ts",
+    "hooks/useAddresses.test.ts",
+    "hooks/useCreateAddress.ts",
+    "hooks/useCreateAddress.test.ts",
+    "hooks/useUpdateAddress.ts",
+    "hooks/useUpdateAddress.test.ts",
+    "hooks/useDeleteAddress.ts",
+    "hooks/useDeleteAddress.test.ts"
+  ],
+
+  "acceptance_criteria_review": {
+    "count": 17,
+    "testable": true,
+    "complete": true,
+    "notes": "Comprehensive CRUD coverage plus empty state, loading, error, validation, RTL"
+  },
+
+  "estimated_tests": 33,
+  "coverage_target": 90,
+
+  "ui_notes": "Must be RTL, Hebrew labels, mobile-first. Default address highlighted with badge. Confirmation dialog for delete."
+}

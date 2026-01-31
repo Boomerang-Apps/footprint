@@ -1,0 +1,48 @@
+{
+  "gate": 0,
+  "story_id": "BE-05",
+  "status": "APPROVED",
+  "validator": "CTO",
+  "timestamp": "2026-01-30T17:15:00Z",
+  "wave": 4,
+  "title": "Addresses CRUD API",
+  "domain": "backend",
+  "story_points": 5,
+
+  "technical_notes": "Full CRUD API for addresses table. Database schema exists with: id, user_id, name, street, apartment, city, postal_code, country, phone, is_default. RLS policy 'Users can manage own addresses' already configured. Need transaction for set-default to prevent race conditions.",
+
+  "security_review": "PASSED - Address ownership verified via user_id FK and RLS. Prevents cross-user data access (AC-008 tests 403 for other user's address). Default address logic needs transaction to ensure atomicity.",
+
+  "dependencies": [
+    "Supabase addresses table (exists)",
+    "RLS policy for addresses (exists)",
+    "lib/supabase/server.ts (exists)",
+    "lib/rate-limit.ts (exists)"
+  ],
+
+  "approach": "Create RESTful endpoints with nested routes for [id] and [id]/default. Use Supabase transactions for default address switching. Validate with Zod schema (7-digit Israeli postal code).",
+
+  "files_to_create": [
+    "app/api/addresses/route.ts",
+    "app/api/addresses/route.test.ts",
+    "app/api/addresses/[id]/route.ts",
+    "app/api/addresses/[id]/route.test.ts",
+    "app/api/addresses/[id]/default/route.ts",
+    "app/api/addresses/[id]/default/route.test.ts",
+    "lib/validation/address.ts"
+  ],
+
+  "acceptance_criteria_review": {
+    "count": 15,
+    "testable": true,
+    "complete": true,
+    "notes": "Comprehensive coverage including auth, CRUD, default logic, validation"
+  },
+
+  "estimated_tests": 31,
+  "coverage_target": 90,
+
+  "risk_notes": "Default address race condition mitigated by using database transaction when setting new default.",
+
+  "blocks": ["UI-05B"]
+}

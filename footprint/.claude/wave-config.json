@@ -1,0 +1,86 @@
+{
+  "project": {
+    "name": "footprint",
+    "type": "nextjs",
+    "version": "0.1.0",
+    "path": "/Volumes/SSD-01/Projects/Footprint/footprint"
+  },
+  "wave": {
+    "controller": "/Volumes/SSD-01/Projects/WAVE",
+    "current_wave": 1,
+    "budget": {
+      "wave_limit": 2.00,
+      "story_limit": 0.50,
+      "warning_threshold": 75,
+      "critical_threshold": 90
+    }
+  },
+  "agents": {
+    "enabled": ["pm", "cto", "fe-dev", "be-dev", "qa"],
+    "models": {
+      "cto": "claude-opus-4-5-20251101",
+      "pm": "claude-opus-4-5-20251101",
+      "fe-dev": "claude-sonnet-4-20250514",
+      "be-dev": "claude-sonnet-4-20250514",
+      "qa": "claude-haiku-4-5-20251001"
+    }
+  },
+  "safety": {
+    "constitutional_enabled": true,
+    "emergency_stop_file": ".claude/EMERGENCY-STOP",
+    "emergency_stop_redis": "wave:emergency",
+    "preflight_required": true,
+    "preflight_lock": ".claude/PREFLIGHT.lock"
+  },
+  "domains": {
+    "supported": ["frontend", "backend", "database", "api", "testing"],
+    "isolation_enabled": true
+  },
+  "git": {
+    "main_branch": "main",
+    "branch_pattern": "wave/{wave}-{story}",
+    "worktrees_path": "/Volumes/SSD-01/Projects/Footprint/worktrees"
+  },
+  "integrations": {
+    "supabase": {
+      "enabled": true,
+      "stories_table": "stories",
+      "sprints_table": "sprints"
+    },
+    "slack": {
+      "enabled": true,
+      "channel": "#wave-notifications"
+    },
+    "sentry": {
+      "enabled": true
+    },
+    "langsmith": {
+      "enabled": true,
+      "tracing": true
+    }
+  },
+  "validation": {
+    "required_files": [
+      "CLAUDE.md",
+      ".claude/PREFLIGHT.lock",
+      ".claude/P.md",
+      "src/safety/__init__.py",
+      "src/safety/constitutional.py",
+      "src/safety/emergency_stop.py",
+      "src/safety/budget.py",
+      "package.json",
+      "tsconfig.json"
+    ],
+    "required_env_vars": [
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SENTRY_DSN"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-01-29T10:00:00Z",
+    "version": "2.0.0",
+    "schema_version": 1
+  }
+}
