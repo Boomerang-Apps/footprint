@@ -1,2 +1,58 @@
 .vercel
 .env*.local
+
+# OS files
+.DS_Store
+*.DS_Store
+
+# Build/Generated artifacts
+coverage/
+test-results/
+playwright-report/
+tsconfig.tsbuildinfo
+
+# Claude Code signals and runtime files
+.claude/signal-*
+.claude/black-box/
+.claude/locks/
+.claude/gate0-lock.json
+.claude/preflight-report.json
+.claude/validation-report.json
+.claude/*.lock
+.claude/PREFLIGHT.lock
+.claude/P.json
+.claude/P.md
+
+# Session/Handoff files
+SESSION-HANDOFF-*.md
+SNAPSHOT-*.md
+
+# Wave V2 infrastructure (local development)
+.claude/wave-config.json
+.claude/config.json
+.claude/retrospectives/
+.claude/safety/
+.claude/QA-*.md
+.claude/SKILLS-*.md
+.claude/SESSION-HANDOFF-*.md
+
+# Project documentation (if not tracked)
+CLAUDE.md
+CLAUDE.md.template
+orchestrator/
+contracts/
+planning/
+docs/signals/
+docs/wave4/
+
+# Python/Scripts (Wave orchestration)
+src/agents/
+src/domains/
+src/gates/
+src/safety/
+src/multi_llm.py
+src/task_queue.py
+scripts/*.py
+scripts/*.sh
+__pycache__/
+*.pyc
