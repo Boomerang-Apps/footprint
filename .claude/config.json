@@ -1,0 +1,80 @@
+{
+  "framework": "wave-v2",
+  "version": "1.0",
+  "project": {
+    "type": "nextjs-monorepo",
+    "name": "Footprint",
+    "description": "Footprint project management platform"
+  },
+  "commands": {
+    "install": "npm run postinstall",
+    "build": "npm run build",
+    "test": "npm run test",
+    "lint": "npm run lint",
+    "typeCheck": "npm run type-check",
+    "dev": "npm run dev"
+  },
+  "paths": {
+    "stories": "stories/",
+    "contracts": "contracts/",
+    "planning": "planning/",
+    "signals": ".claude/signals/",
+    "app": "footprint/",
+    "src": "footprint/src/"
+  },
+  "gates": {
+    "coverageThreshold": 70,
+    "branchCoverageThreshold": 60,
+    "maxBundleSize": "500KB",
+    "retryLimit": 3,
+    "gateOwners": {
+      "gate0": "CTO",
+      "gate1": "Agent",
+      "gate2": "Agent",
+      "gate3": "Agent",
+      "gate4": "QA",
+      "gate5": "PM",
+      "gate6": "CTO",
+      "gate7": "CTO"
+    }
+  },
+  "agents": ["be-dev", "fe-dev", "qa", "pm", "cto"],
+  "domains": {
+    "auth": {
+      "agent": "be-dev",
+      "paths": ["footprint/src/features/auth/**"]
+    },
+    "projects": {
+      "agent": "be-dev",
+      "paths": ["footprint/src/features/projects/**"]
+    },
+    "tracking": {
+      "agent": "be-dev",
+      "paths": ["footprint/src/features/tracking/**"]
+    },
+    "ui": {
+      "agent": "fe-dev",
+      "paths": ["footprint/src/components/**", "footprint/src/app/**"]
+    },
+    "contracts": {
+      "agent": "cto",
+      "paths": ["contracts/**"]
+    },
+    "stories": {
+      "agent": "pm",
+      "paths": ["stories/**"]
+    }
+  },
+  "techStack": {
+    "frontend": "Next.js 14 App Router",
+    "styling": "Tailwind CSS",
+    "backend": "Supabase",
+    "hosting": "Vercel"
+  },
+  "mcp": {
+    "github": true,
+    "notion": true,
+    "slack": true,
+    "memory": true
+  }
+}
