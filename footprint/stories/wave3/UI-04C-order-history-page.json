@@ -1,0 +1,279 @@
+{
+  "story_id": "UI-04C",
+  "wave_number": 3,
+  "title": "Order History Page",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create customer-facing order history page that lists all orders with filtering, status badges, and navigation to individual order tracking pages",
+  "status": "complete",
+
+  "objective": {
+    "as_a": "Footprint customer",
+    "i_want": "to view all my past and current orders in one place",
+    "so_that": "I can track my order history and access specific order details"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Page displays list of user's orders with thumbnail, order number, status, date, and total",
+      "test_approach": "Mock orders API, verify all fields rendered"
+    },
+    {
+      "id": "AC-002",
+      "description": "Each order row is clickable and navigates to /order/[id]",
+      "test_approach": "Click order row, verify router.push called with correct path"
+    },
+    {
+      "id": "AC-003",
+      "description": "Page has status filter tabs: All, Pending, Processing, Shipped, Delivered",
+      "test_approach": "Render page, verify filter buttons exist"
+    },
+    {
+      "id": "AC-004",
+      "description": "Clicking filter tab filters the displayed orders",
+      "test_approach": "Click filter, verify API called with status param"
+    },
+    {
+      "id": "AC-005",
+      "description": "Page shows order count in each filter tab",
+      "test_approach": "Mock counts, verify displayed in tabs"
+    },
+    {
+      "id": "AC-006",
+      "description": "Page shows empty state when no orders exist",
+      "test_approach": "Mock empty response, verify empty state message"
+    },
+    {
+      "id": "AC-007",
+      "description": "Page shows loading skeleton while fetching orders",
+      "test_approach": "Delay API, verify skeleton elements shown"
+    },
+    {
+      "id": "AC-008",
+      "description": "Page shows error state with retry option on API failure",
+      "test_approach": "Mock API error, verify error message and retry button"
+    },
+    {
+      "id": "AC-009",
+      "description": "Order status is displayed with appropriate Badge variant",
+      "test_approach": "Render orders with different statuses, verify badge variants"
+    },
+    {
+      "id": "AC-010",
+      "description": "Page is mobile-first responsive with max-width 600px",
+      "test_approach": "Verify container classes"
+    },
+    {
+      "id": "AC-011",
+      "description": "Page supports pull-to-refresh gesture (via retry button)",
+      "test_approach": "Verify refresh button exists and refetches data"
+    },
+    {
+      "id": "AC-012",
+      "description": "Orders sorted by date descending (newest first)",
+      "test_approach": "Mock multiple orders, verify display order"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/(app)/account/orders/page.tsx",
+      "app/(app)/account/orders/page.test.tsx"
+    ],
+    "modify": [],
+    "forbidden": [
+      "components/ui/Badge.tsx",
+      "components/ui/Card.tsx",
+      "components/ui/Button.tsx",
+      "lib/orders/status.ts"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Badge.tsx - Status badges",
+      "components/ui/Card.tsx - Order cards",
+      "components/ui/Button.tsx - Actions"
+    ],
+    "reuse_patterns": {
+      "page_layout": "app/admin/page.tsx - Filter tabs pattern",
+      "order_row": "app/admin/page.tsx - Order row pattern",
+      "loading_skeleton": "Skeleton div with animate-pulse"
+    },
+    "reuse_functions": [
+      "lib/orders/status.ts - getStatusLabel(status, 'he')"
+    ],
+    "api_endpoints": [
+      "GET /api/orders",
+      "GET /api/orders?status=shipped"
+    ],
+    "icons_from_lucide": [
+      "Package",
+      "Clock",
+      "Truck",
+      "CheckCircle",
+      "RefreshCw",
+      "ChevronLeft",
+      "ShoppingBag",
+      "AlertCircle"
+    ]
+  },
+
+  "design_specs": {
+    "layout": {
+      "max_width": "600px",
+      "padding": "px-4 py-6",
+      "direction": "RTL"
+    },
+    "filter_tabs": {
+      "active": "bg-violet-600 text-white",
+      "inactive": "bg-white border-zinc-200 text-zinc-600",
+      "shape": "rounded-full px-4 py-2"
+    },
+    "order_card": {
+      "background": "bg-white",
+      "border": "border border-zinc-200 rounded-2xl",
+      "padding": "p-4",
+      "hover": "hover:shadow-md"
+    },
+    "status_badge_variants": {
+      "pending": "warning",
+      "paid": "info",
+      "processing": "info",
+      "printing": "info",
+      "shipped": "brand",
+      "delivered": "success",
+      "cancelled": "error"
+    },
+    "empty_state": {
+      "icon": "ShoppingBag",
+      "message": "אין הזמנות עדיין",
+      "cta": "התחילו לעצב"
+    }
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/(app)/account/orders/page.test.tsx"
+    ],
+    "coverage_target": 85,
+    "test_categories": [
+      {
+        "name": "Rendering",
+        "count": 10,
+        "examples": [
+          "renders page title",
+          "renders filter tabs",
+          "renders order list",
+          "renders order thumbnail"
+        ]
+      },
+      {
+        "name": "Loading State",
+        "count": 4,
+        "examples": [
+          "shows skeleton while loading",
+          "shows correct number of skeleton items"
+        ]
+      },
+      {
+        "name": "Empty State",
+        "count": 4,
+        "examples": [
+          "shows empty message when no orders",
+          "shows CTA to create first order"
+        ]
+      },
+      {
+        "name": "Error State",
+        "count": 4,
+        "examples": [
+          "shows error message on API failure",
+          "shows retry button"
+        ]
+      },
+      {
+        "name": "Filter Tabs",
+        "count": 10,
+        "examples": [
+          "All tab selected by default",
+          "clicking tab updates active state",
+          "clicking tab fetches filtered data",
+          "shows count in each tab"
+        ]
+      },
+      {
+        "name": "Order List",
+        "count": 10,
+        "examples": [
+          "displays order number",
+          "displays order date formatted",
+          "displays order total",
+          "displays status badge"
+        ]
+      },
+      {
+        "name": "Navigation",
+        "count": 6,
+        "examples": [
+          "clicking order navigates to detail page",
+          "back button works correctly"
+        ]
+      },
+      {
+        "name": "Status Badges",
+        "count": 8,
+        "examples": [
+          "pending shows warning badge",
+          "shipped shows brand badge",
+          "delivered shows success badge"
+        ]
+      },
+      {
+        "name": "Accessibility",
+        "count": 4,
+        "examples": [
+          "filter tabs have proper ARIA",
+          "order rows are keyboard accessible"
+        ]
+      },
+      {
+        "name": "RTL Support",
+        "count": 4,
+        "examples": [
+          "content direction is RTL",
+          "Hebrew labels correct"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "api": "vi.mock fetch or MSW",
+      "router": "vi.mock next/navigation",
+      "image": "vi.mock next/image"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to existing UI components",
+      "Any modification to status.ts",
+      "Database changes"
+    ],
+    "escalation_triggers": [
+      "Need pagination (defer to future story)",
+      "Need search functionality (defer to future story)"
+    ],
+    "rollback_plan": "Delete new page files"
+  },
+
+  "dependencies": {
+    "required_before": ["UI-04A"],
+    "blocks": []
+  },
+
+  "estimated_tests": 64
+}

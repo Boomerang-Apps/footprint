@@ -1,0 +1,238 @@
+{
+  "story_id": "UI-04B",
+  "wave_number": 3,
+  "title": "Order Tracking Page",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create customer-facing order tracking page that displays order status, details, timeline, and external carrier tracking link",
+  "status": "complete",
+
+  "objective": {
+    "as_a": "Footprint customer",
+    "i_want": "to view my order status and tracking information on a dedicated page",
+    "so_that": "I can track my order progress and access carrier tracking"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Page displays order status using OrderTimeline component",
+      "test_approach": "Render with mocked order data, verify OrderTimeline rendered with correct status"
+    },
+    {
+      "id": "AC-002",
+      "description": "Page shows order details: order number, items, total, shipping address",
+      "test_approach": "Verify all order fields displayed correctly"
+    },
+    {
+      "id": "AC-003",
+      "description": "Page displays external tracking link when tracking number exists",
+      "test_approach": "Mock order with tracking, verify link href matches carrier URL"
+    },
+    {
+      "id": "AC-004",
+      "description": "Tracking link opens in new tab with carrier's tracking page",
+      "test_approach": "Verify link has target='_blank' and rel='noopener noreferrer'"
+    },
+    {
+      "id": "AC-005",
+      "description": "Page shows loading state while fetching order",
+      "test_approach": "Delay API response, verify loading spinner shown"
+    },
+    {
+      "id": "AC-006",
+      "description": "Page shows error state for non-existent or unauthorized orders",
+      "test_approach": "Mock 404 response, verify error message displayed"
+    },
+    {
+      "id": "AC-007",
+      "description": "Page is fully RTL with Hebrew labels",
+      "test_approach": "Verify dir='rtl' and Hebrew text content"
+    },
+    {
+      "id": "AC-008",
+      "description": "Page is mobile-first responsive (max-width 550px)",
+      "test_approach": "Check container max-width classes"
+    },
+    {
+      "id": "AC-009",
+      "description": "Page has 'Back to Orders' navigation link",
+      "test_approach": "Verify link to /account/orders exists"
+    },
+    {
+      "id": "AC-010",
+      "description": "Page shows estimated delivery date when available",
+      "test_approach": "Mock order with delivery estimate, verify displayed"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/(app)/order/[id]/page.tsx",
+      "app/(app)/order/[id]/page.test.tsx"
+    ],
+    "modify": [],
+    "forbidden": [
+      "components/ui/OrderTimeline.tsx",
+      "components/ui/Button.tsx",
+      "components/ui/Card.tsx",
+      "components/ui/Badge.tsx"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/OrderTimeline.tsx - Order status visualization",
+      "components/ui/Card.tsx - Content containers",
+      "components/ui/Badge.tsx - Status badges",
+      "components/ui/Button.tsx - Actions"
+    ],
+    "reuse_patterns": {
+      "page_layout": "app/(app)/create/complete/page.tsx",
+      "loading_state": "Loader2 from lucide-react with animate-spin",
+      "error_state": "AlertCircle from lucide-react"
+    },
+    "api_endpoints": [
+      "GET /api/orders/[id]"
+    ],
+    "icons_from_lucide": [
+      "Package",
+      "Truck",
+      "MapPin",
+      "ArrowRight",
+      "ExternalLink",
+      "Loader2",
+      "AlertCircle",
+      "ChevronRight"
+    ]
+  },
+
+  "design_specs": {
+    "layout": {
+      "max_width": "550px",
+      "padding": "px-4 py-6",
+      "direction": "RTL"
+    },
+    "colors": {
+      "background": "bg-zinc-50",
+      "cards": "bg-white border-zinc-200",
+      "primary_accent": "violet-600",
+      "success": "emerald-500",
+      "text_primary": "zinc-900",
+      "text_secondary": "zinc-500"
+    },
+    "typography": {
+      "page_title": "text-xl font-bold",
+      "section_title": "text-sm font-semibold",
+      "body": "text-sm",
+      "caption": "text-xs text-zinc-500"
+    }
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/(app)/order/[id]/page.test.tsx"
+    ],
+    "coverage_target": 85,
+    "test_categories": [
+      {
+        "name": "Rendering",
+        "count": 12,
+        "examples": [
+          "renders page title with order number",
+          "renders OrderTimeline component",
+          "renders order items list",
+          "renders shipping address"
+        ]
+      },
+      {
+        "name": "Loading State",
+        "count": 4,
+        "examples": [
+          "shows loading spinner while fetching",
+          "hides content during loading"
+        ]
+      },
+      {
+        "name": "Error State",
+        "count": 6,
+        "examples": [
+          "shows error message for 404",
+          "shows error message for network failure",
+          "provides retry option"
+        ]
+      },
+      {
+        "name": "Order Status",
+        "count": 8,
+        "examples": [
+          "passes correct status to OrderTimeline",
+          "shows status badge with correct variant"
+        ]
+      },
+      {
+        "name": "Tracking Link",
+        "count": 8,
+        "examples": [
+          "shows tracking button when tracking exists",
+          "hides tracking section when no tracking",
+          "opens carrier URL in new tab",
+          "displays carrier name"
+        ]
+      },
+      {
+        "name": "Navigation",
+        "count": 4,
+        "examples": [
+          "back button navigates to /account/orders",
+          "logo links to home"
+        ]
+      },
+      {
+        "name": "Accessibility",
+        "count": 6,
+        "examples": [
+          "has proper heading hierarchy",
+          "tracking link has descriptive aria-label",
+          "images have alt text"
+        ]
+      },
+      {
+        "name": "RTL Support",
+        "count": 4,
+        "examples": [
+          "main content has dir=rtl",
+          "Hebrew labels displayed correctly"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "api": "vi.mock fetch or MSW",
+      "router": "vi.mock next/navigation",
+      "image": "vi.mock next/image"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to OrderTimeline component",
+      "Any modification to existing UI primitives",
+      "Changes to order types"
+    ],
+    "escalation_triggers": [
+      "Need to add new props to OrderTimeline",
+      "Design requirements not covered by existing components"
+    ],
+    "rollback_plan": "Delete new page files"
+  },
+
+  "dependencies": {
+    "required_before": ["UI-04A"],
+    "blocks": []
+  },
+
+  "estimated_tests": 52
+}

@@ -1,0 +1,181 @@
+{
+  "story_id": "UI-04A",
+  "wave_number": 3,
+  "title": "Order Details API",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create REST API endpoints for customer order access - list all orders and get individual order details with tracking information",
+  "status": "complete",
+
+  "objective": {
+    "as_a": "Footprint customer",
+    "i_want": "to access my order information via API",
+    "so_that": "I can view my order status and tracking details in the app"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "GET /api/orders returns list of authenticated user's orders",
+      "test_approach": "Mock Supabase auth and orders table, verify response structure"
+    },
+    {
+      "id": "AC-002",
+      "description": "GET /api/orders supports status filter query parameter",
+      "test_approach": "Test with ?status=shipped, verify filtered results"
+    },
+    {
+      "id": "AC-003",
+      "description": "GET /api/orders returns orders sorted by createdAt descending",
+      "test_approach": "Create multiple orders, verify sort order"
+    },
+    {
+      "id": "AC-004",
+      "description": "GET /api/orders/[id] returns full order details including items",
+      "test_approach": "Mock order with items, verify complete response"
+    },
+    {
+      "id": "AC-005",
+      "description": "GET /api/orders/[id] includes tracking URL when tracking number exists",
+      "test_approach": "Mock order with tracking, verify trackingUrl generation"
+    },
+    {
+      "id": "AC-006",
+      "description": "Both endpoints return 401 for unauthenticated requests",
+      "test_approach": "Call without auth, verify 401 status"
+    },
+    {
+      "id": "AC-007",
+      "description": "GET /api/orders/[id] returns 404 for non-existent or other user's orders",
+      "test_approach": "Test with wrong ID and different user ID"
+    },
+    {
+      "id": "AC-008",
+      "description": "Both endpoints apply rate limiting (30 requests/minute)",
+      "test_approach": "Mock rate limiter, verify checkRateLimit called"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/api/orders/route.ts",
+      "app/api/orders/route.test.ts",
+      "app/api/orders/[id]/route.ts",
+      "app/api/orders/[id]/route.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "lib/orders/status.ts",
+      "lib/orders/tracking.ts",
+      "types/order.ts"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "lib/orders/tracking.ts - generateTrackingUrl()",
+      "lib/orders/status.ts - getStatusLabel()",
+      "lib/supabase/server.ts - createClient()",
+      "lib/rate-limit.ts - checkRateLimit()"
+    ],
+    "database_tables": [
+      "orders",
+      "order_items"
+    ],
+    "response_format": {
+      "list": {
+        "orders": "Order[]",
+        "total": "number"
+      },
+      "detail": {
+        "order": "Order with items, tracking, status history"
+      }
+    }
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/orders/route.test.ts",
+      "app/api/orders/[id]/route.test.ts"
+    ],
+    "coverage_target": 100,
+    "test_categories": [
+      {
+        "name": "Authentication",
+        "count": 4,
+        "examples": [
+          "should return 401 when not authenticated",
+          "should return orders for authenticated user"
+        ]
+      },
+      {
+        "name": "Authorization",
+        "count": 4,
+        "examples": [
+          "should only return user's own orders",
+          "should return 404 for other user's order"
+        ]
+      },
+      {
+        "name": "Input Validation",
+        "count": 6,
+        "examples": [
+          "should validate status filter values",
+          "should validate order ID format"
+        ]
+      },
+      {
+        "name": "Success Responses",
+        "count": 10,
+        "examples": [
+          "should return order list with correct structure",
+          "should include tracking URL when available"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 6,
+        "examples": [
+          "should return 500 on database error",
+          "should handle empty results gracefully"
+        ]
+      },
+      {
+        "name": "Filtering and Sorting",
+        "count": 6,
+        "examples": [
+          "should filter by status parameter",
+          "should sort by createdAt descending"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "rate_limit": "vi.mock('@/lib/rate-limit')",
+      "tracking": "vi.mock('@/lib/orders/tracking')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to existing order types",
+      "Any change to tracking.ts or status.ts",
+      "Database schema changes"
+    ],
+    "escalation_triggers": [
+      "Authentication logic changes",
+      "Rate limiting configuration changes"
+    ],
+    "rollback_plan": "Delete new files, no migration needed"
+  },
+
+  "dependencies": {
+    "required_before": [],
+    "blocks": ["UI-04B", "UI-04C"]
+  },
+
+  "estimated_tests": 36
+}
