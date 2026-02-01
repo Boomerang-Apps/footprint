@@ -93,7 +93,6 @@ export const NoLabel: Story = {
 };
 
 export const FormExample: Story = {
-  name: 'Form Example',
   render: () => (
     <div className="space-y-4" style={{ width: '300px' }}>
       <div className="space-y-3">

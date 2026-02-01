@@ -161,7 +161,6 @@ export const MutedColor: Story = {
 };
 
 export const AllSizes: Story = {
-  name: 'All Sizes',
   render: () => (
     <div className="space-y-4 bg-zinc-900 p-6 rounded-lg">
       <div className="flex items-center gap-4">

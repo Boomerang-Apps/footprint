@@ -1,0 +1,544 @@
+{
+  "documentId": "HAZ-ALL-WAVES-001",
+  "title": "Hazard Analysis - All Waves (1, 3, 4)",
+  "version": "1.0",
+  "createdAt": "2026-02-01T00:00:00Z",
+  "createdBy": "cto",
+  "scope": {
+    "waves": [1, 3, 4],
+    "totalStories": 16
+  },
+  "riskMatrix": {
+    "severityLevels": [
+      { "level": 1, "name": "Catastrophic", "description": "Data loss, security breach, financial loss" },
+      { "level": 2, "name": "Hazardous", "description": "Major feature failure, data corruption" },
+      { "level": 3, "name": "Major", "description": "Feature degraded, workaround available" },
+      { "level": 4, "name": "Minor", "description": "Cosmetic issue, minimal impact" },
+      { "level": 5, "name": "No Effect", "description": "Documentation, logging only" }
+    ],
+    "likelihoodLevels": [
+      { "level": "A", "name": "Frequent", "description": "Likely to occur often" },
+      { "level": "B", "name": "Probable", "description": "Will occur several times" },
+      { "level": "C", "name": "Occasional", "description": "Likely to occur sometime" },
+      { "level": "D", "name": "Remote", "description": "Unlikely but possible" },
+      { "level": "E", "name": "Improbable", "description": "Very unlikely to occur" }
+    ]
+  },
+  "hazards": [
+    {
+      "id": "HAZ-001",
+      "title": "Payment Processing Failure",
+      "category": "Data / Financial",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "HIGH",
+      "description": "Payment processed via PayPlus but order not created in Supabase, causing customer charged without order record",
+      "affectedStories": ["WAVE1-INT-001"],
+      "potentialCauses": [
+        "Database connection failure during order creation",
+        "Webhook processing timeout",
+        "Race condition in order creation"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-001-A",
+          "action": "Use database transaction for order creation",
+          "owner": "be-dev",
+          "verificationMethod": "Unit test with transaction rollback",
+          "status": "required"
+        },
+        {
+          "id": "MIT-001-B",
+          "action": "Implement idempotency key for webhook",
+          "owner": "be-dev",
+          "verificationMethod": "Test duplicate webhook handling",
+          "status": "required"
+        },
+        {
+          "id": "MIT-001-C",
+          "action": "Store PayPlus transaction ID before completion",
+          "owner": "be-dev",
+          "verificationMethod": "Verify transaction ID in database",
+          "status": "implemented"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-002",
+      "title": "API Credential Exposure",
+      "category": "Security",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Improbable",
+      "likelihoodLevel": "E",
+      "riskLevel": "MEDIUM",
+      "description": "R2, Replicate, or PayPlus API keys exposed in client-side code or logs",
+      "affectedStories": ["WAVE1-FE-001", "WAVE1-BE-001", "WAVE1-BE-002", "WAVE1-INT-001"],
+      "potentialCauses": [
+        "Keys accidentally included in client bundle",
+        "Keys logged in error messages",
+        "Keys committed to repository"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-002-A",
+          "action": "Server-side only API calls",
+          "owner": "be-dev",
+          "verificationMethod": "Audit client bundle for secrets",
+          "status": "implemented"
+        },
+        {
+          "id": "MIT-002-B",
+          "action": "Environment variable validation",
+          "owner": "be-dev",
+          "verificationMethod": "Pre-deploy check for NEXT_PUBLIC_ prefix",
+          "status": "required"
+        },
+        {
+          "id": "MIT-002-C",
+          "action": "No PII/secrets in error responses",
+          "owner": "be-dev",
+          "verificationMethod": "Test error response sanitization",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-003",
+      "title": "File Upload Bypass",
+      "category": "Security",
+      "severity": "Hazardous",
+      "severityLevel": 2,
+      "likelihood": "Occasional",
+      "likelihoodLevel": "C",
+      "riskLevel": "HIGH",
+      "description": "Malicious file uploaded bypassing client validation, stored in R2, potential for XSS or server-side vulnerabilities",
+      "affectedStories": ["WAVE1-FE-001", "WAVE1-BE-001", "BE-04"],
+      "potentialCauses": [
+        "Client-side validation bypassed via direct API call",
+        "MIME type spoofing",
+        "File extension mismatch"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-003-A",
+          "action": "Server-side file type validation",
+          "owner": "be-dev",
+          "verificationMethod": "Upload test with spoofed content-type",
+          "status": "implemented"
+        },
+        {
+          "id": "MIT-003-B",
+          "action": "File size enforcement server-side",
+          "owner": "be-dev",
+          "verificationMethod": "Upload test exceeding limit",
+          "status": "implemented"
+        },
+        {
+          "id": "MIT-003-C",
+          "action": "Content-type header verification",
+          "owner": "be-dev",
+          "verificationMethod": "Magic bytes validation test",
+          "status": "required"
+        },
+        {
+          "id": "MIT-003-D",
+          "action": "Image processing/resizing on upload",
+          "owner": "be-dev",
+          "verificationMethod": "Verify image is re-encoded",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-004",
+      "title": "Rate Limiting Bypass",
+      "category": "Availability",
+      "severity": "Major",
+      "severityLevel": 3,
+      "likelihood": "Probable",
+      "likelihoodLevel": "B",
+      "riskLevel": "MEDIUM",
+      "description": "Attacker bypasses rate limiting via IP rotation or distributed attack, causing API abuse or DoS",
+      "affectedStories": ["WAVE1-SEC-001"],
+      "potentialCauses": [
+        "IP-only rate limiting bypassed with proxies",
+        "Distributed attack from multiple sources",
+        "Rate limit not applied to all endpoints"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-004-A",
+          "action": "Upstash Redis rate limiting",
+          "owner": "be-dev",
+          "verificationMethod": "Rate limit test with burst traffic",
+          "status": "implemented"
+        },
+        {
+          "id": "MIT-004-B",
+          "action": "Per-endpoint rate limits",
+          "owner": "be-dev",
+          "verificationMethod": "Verify limits on each endpoint",
+          "status": "implemented"
+        },
+        {
+          "id": "MIT-004-C",
+          "action": "User-based rate limiting (not just IP)",
+          "owner": "be-dev",
+          "verificationMethod": "Test rate limit with auth token",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-005",
+      "title": "Admin Authorization Bypass",
+      "category": "Security",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "HIGH",
+      "description": "Non-admin user gains access to admin order list or admin functions, exposing all customer data",
+      "affectedStories": ["BE-03", "WAVE1-SEC-001"],
+      "potentialCauses": [
+        "Role check missing on endpoint",
+        "Client-side role check only",
+        "JWT token manipulation"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-005-A",
+          "action": "Server-side role verification",
+          "owner": "be-dev",
+          "verificationMethod": "Test with non-admin token",
+          "status": "implemented"
+        },
+        {
+          "id": "MIT-005-B",
+          "action": "RLS policies on database",
+          "owner": "be-dev",
+          "verificationMethod": "Direct DB query test",
+          "status": "required"
+        },
+        {
+          "id": "MIT-005-C",
+          "action": "Admin routes under /api/admin/ namespace",
+          "owner": "be-dev",
+          "verificationMethod": "URL structure audit",
+          "status": "implemented"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-006",
+      "title": "Customer Data Cross-Access",
+      "category": "Privacy",
+      "severity": "Hazardous",
+      "severityLevel": 2,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "MEDIUM",
+      "description": "User A can view User B's orders, profile, or addresses due to missing or bypassed authorization checks",
+      "affectedStories": ["UI-04A", "BE-04", "BE-05", "UI-05A", "UI-05B"],
+      "potentialCauses": [
+        "User ID from request body instead of token",
+        "Missing ownership check on resource access",
+        "IDOR vulnerability"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-006-A",
+          "action": "User ID from auth token, not request body",
+          "owner": "be-dev",
+          "verificationMethod": "Test with forged user_id in request",
+          "status": "required"
+        },
+        {
+          "id": "MIT-006-B",
+          "action": "RLS policies enforce user_id match",
+          "owner": "be-dev",
+          "verificationMethod": "Direct DB query as different user",
+          "status": "required"
+        },
+        {
+          "id": "MIT-006-C",
+          "action": "404 response for unauthorized access (not 403)",
+          "owner": "be-dev",
+          "verificationMethod": "Test accessing other user's resource",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-007",
+      "title": "Order Tracking Data Leakage",
+      "category": "Privacy",
+      "severity": "Major",
+      "severityLevel": 3,
+      "likelihood": "Occasional",
+      "likelihoodLevel": "C",
+      "riskLevel": "MEDIUM",
+      "description": "Order tracking URLs or data exposed to unauthorized users through URL guessing or shared links",
+      "affectedStories": ["UI-04A", "UI-04B", "UI-04C"],
+      "potentialCauses": [
+        "Sequential order IDs allow enumeration",
+        "Unauthenticated tracking page",
+        "Sensitive data in shareable URL"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-007-A",
+          "action": "Auth required for /api/orders/[id]",
+          "owner": "be-dev",
+          "verificationMethod": "Test without auth token",
+          "status": "implemented"
+        },
+        {
+          "id": "MIT-007-B",
+          "action": "Order ID as UUID (not sequential)",
+          "owner": "be-dev",
+          "verificationMethod": "Verify UUID format in database",
+          "status": "required"
+        },
+        {
+          "id": "MIT-007-C",
+          "action": "No sensitive data in tracking URL",
+          "owner": "be-dev",
+          "verificationMethod": "Audit external tracking links",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-008",
+      "title": "Address Default Race Condition",
+      "category": "Data",
+      "severity": "Minor",
+      "severityLevel": 4,
+      "likelihood": "Occasional",
+      "likelihoodLevel": "C",
+      "riskLevel": "LOW",
+      "description": "Concurrent requests to set default address result in multiple addresses marked as default",
+      "affectedStories": ["BE-05", "UI-05B"],
+      "potentialCauses": [
+        "No transaction on default toggle",
+        "Race between read and write",
+        "Eventual consistency issue"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-008-A",
+          "action": "Database transaction for default toggle",
+          "owner": "be-dev",
+          "verificationMethod": "Concurrent request test",
+          "status": "required"
+        },
+        {
+          "id": "MIT-008-B",
+          "action": "Optimistic locking with updated_at",
+          "owner": "be-dev",
+          "verificationMethod": "Conflict detection test",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-009",
+      "title": "AI Transformation Abuse",
+      "category": "Performance / Financial",
+      "severity": "Hazardous",
+      "severityLevel": 2,
+      "likelihood": "Probable",
+      "likelihoodLevel": "B",
+      "riskLevel": "HIGH",
+      "description": "Automated abuse of /api/transform endpoint causes excessive Replicate API costs",
+      "affectedStories": ["WAVE1-BE-002"],
+      "potentialCauses": [
+        "No rate limiting on transform",
+        "Unauthenticated access to transform",
+        "No daily/monthly limits"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-009-A",
+          "action": "Rate limit 10/min on transform",
+          "owner": "be-dev",
+          "verificationMethod": "Rate limit test",
+          "status": "implemented"
+        },
+        {
+          "id": "MIT-009-B",
+          "action": "Require auth for transform",
+          "owner": "be-dev",
+          "verificationMethod": "Test without auth",
+          "status": "required"
+        },
+        {
+          "id": "MIT-009-C",
+          "action": "Daily user transform limit",
+          "owner": "be-dev",
+          "verificationMethod": "Daily limit enforcement test",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-010",
+      "title": "Price Calculation Manipulation",
+      "category": "Financial",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "HIGH",
+      "description": "Client-side price sent to checkout, allowing manipulation of order total",
+      "affectedStories": ["WAVE1-INT-001", "WAVE1-FE-003"],
+      "potentialCauses": [
+        "Price from client request, not server calculation",
+        "No price validation before payment",
+        "Cart tampering"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-010-A",
+          "action": "Server-side price calculation",
+          "owner": "be-dev",
+          "verificationMethod": "Verify price recalculated on checkout",
+          "status": "required"
+        },
+        {
+          "id": "MIT-010-B",
+          "action": "Price from product DB, not client",
+          "owner": "be-dev",
+          "verificationMethod": "Test with modified client price",
+          "status": "required"
+        },
+        {
+          "id": "MIT-010-C",
+          "action": "Price validation before PayPlus call",
+          "owner": "be-dev",
+          "verificationMethod": "Price mismatch rejection test",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-011",
+      "title": "Avatar Upload Vulnerability",
+      "category": "Security",
+      "severity": "Major",
+      "severityLevel": 3,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "LOW",
+      "description": "Malicious file uploaded as avatar could be served with executable content-type",
+      "affectedStories": ["BE-04", "UI-05A"],
+      "potentialCauses": [
+        "No file type validation",
+        "Content-type not overridden on serve",
+        "XSS via SVG upload"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-011-A",
+          "action": "File type validation (jpg, png, webp only)",
+          "owner": "be-dev",
+          "verificationMethod": "Upload test with .svg and .html",
+          "status": "required"
+        },
+        {
+          "id": "MIT-011-B",
+          "action": "2MB file size limit",
+          "owner": "be-dev",
+          "verificationMethod": "Large file rejection test",
+          "status": "required"
+        },
+        {
+          "id": "MIT-011-C",
+          "action": "Image reprocessing on upload",
+          "owner": "be-dev",
+          "verificationMethod": "Verify image is re-encoded",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    },
+    {
+      "id": "HAZ-012",
+      "title": "Input Validation Bypass",
+      "category": "Security",
+      "severity": "Hazardous",
+      "severityLevel": 2,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "MEDIUM",
+      "description": "SQL injection or NoSQL injection through unvalidated user input in API parameters",
+      "affectedStories": ["BE-04", "BE-05"],
+      "potentialCauses": [
+        "Missing Zod validation",
+        "Raw user input in queries",
+        "String interpolation in queries"
+      ],
+      "mitigations": [
+        {
+          "id": "MIT-012-A",
+          "action": "Zod validation on all inputs",
+          "owner": "be-dev",
+          "verificationMethod": "Schema validation coverage test",
+          "status": "required"
+        },
+        {
+          "id": "MIT-012-B",
+          "action": "Parameterized queries via Supabase",
+          "owner": "be-dev",
+          "verificationMethod": "SQL injection test",
+          "status": "required"
+        },
+        {
+          "id": "MIT-012-C",
+          "action": "Input sanitization",
+          "owner": "be-dev",
+          "verificationMethod": "XSS payload test",
+          "status": "required"
+        }
+      ],
+      "residualRisk": "Low"
+    }
+  ],
+  "summary": {
+    "totalHazards": 12,
+    "preMitigation": {
+      "high": 5,
+      "medium": 5,
+      "low": 2
+    },
+    "postMitigation": {
+      "high": 0,
+      "medium": 0,
+      "low": 12
+    },
+    "mitigations": {
+      "total": 30,
+      "implemented": 8,
+      "required": 22
+    }
+  },
+  "approvals": {
+    "createdBy": "cto",
+    "reviewedBy": null,
+    "approvedBy": null
+  }
+}

@@ -124,7 +124,6 @@ export const AllStatuses: Story = {
 };
 
 export const SizeComparison: Story = {
-  name: 'Size Comparison',
   render: () => (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
@@ -144,7 +143,6 @@ export const SizeComparison: Story = {
 };
 
 export const OrderListExample: Story = {
-  name: 'Order List Example',
   render: () => (
     <div className="space-y-3 p-4 bg-zinc-900 rounded-lg" style={{ width: '350px' }}>
       <div className="flex justify-between items-center p-3 bg-zinc-800 rounded">

@@ -91,7 +91,6 @@ export const Disabled: Story = {
 };
 
 export const FrameSelection: Story = {
-  name: 'Frame Selection',
   args: {
     options: frameOptions,
     placeholder: 'בחר סוג מסגרת',
@@ -99,7 +98,6 @@ export const FrameSelection: Story = {
 };
 
 export const PaperSelection: Story = {
-  name: 'Paper Selection',
   args: {
     options: paperOptions,
     placeholder: 'בחר סוג נייר',
