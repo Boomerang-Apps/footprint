@@ -495,7 +495,7 @@ describe('OrderTrackingContent - UI-04B', () => {
 
       await waitFor(() => {
         const badge = screen.getByTestId('badge');
-        expect(badge).toHaveAttribute('data-variant', 'brand'); // shipped = brand
+        expect(badge).toHaveAttribute('data-variant', 'info'); // shipped = info
       });
     });
   });

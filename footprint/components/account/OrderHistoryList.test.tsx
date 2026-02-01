@@ -179,7 +179,7 @@ describe('OrderHistoryList', () => {
       const firstOrderCard = screen.getAllByTestId('order-card')[0];
       fireEvent.click(firstOrderCard);
 
-      expect(mockPush).toHaveBeenCalledWith('/account/orders/demo_order_001');
+      expect(mockPush).toHaveBeenCalledWith('/order/demo_order_001');
     });
   });
 
