@@ -12,13 +12,15 @@ export function cn(...inputs: ClassValue[]): string {
  * Format date for Hebrew order display
  * Returns Hebrew formatted date with appropriate labels
  */
-export function formatOrderDate(date: Date): string {
+export function formatOrderDate(date: Date | string): string {
+  // Convert string to Date if needed
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
-  const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  const diffInDays = Math.floor((now.getTime() - dateObj.getTime()) / (1000 * 60 * 60 * 24));
 
   // Today
   if (diffInDays === 0) {
-    const timeString = date.toLocaleTimeString('he-IL', {
+    const timeString = dateObj.toLocaleTimeString('he-IL', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
@@ -28,7 +30,7 @@ export function formatOrderDate(date: Date): string {
 
   // Yesterday
   if (diffInDays === 1) {
-    const timeString = date.toLocaleTimeString('he-IL', {
+    const timeString = dateObj.toLocaleTimeString('he-IL', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
@@ -37,7 +39,7 @@ export function formatOrderDate(date: Date): string {
   }
 
   // Older dates - full date format
-  return date.toLocaleDateString('he-IL', {
+  return dateObj.toLocaleDateString('he-IL', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

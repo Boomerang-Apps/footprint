@@ -70,7 +70,7 @@ function CheckoutPageContent() {
 
   // Check for payment error on return from PayPlus
   useEffect(() => {
-    const error = searchParams.get('error');
+    const error = searchParams?.get('error');
     if (error === 'payment_failed') {
       toast.error('התשלום נכשל. אנא נסו שוב.');
     }

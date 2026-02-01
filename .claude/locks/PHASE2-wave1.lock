@@ -1,0 +1,13 @@
+{
+    "phase": 2,
+    "phase_name": "Smoke Test",
+    "wave": 1,
+    "status": "PASSED",
+    "validator": "phase2-validator.sh",
+    "validator_version": "1.0.0",
+    "checks": {"phase0_valid":true,"install":{"status":"PASS","exit_code":0},"build":{"status":"PASS","exit_code":0},"typecheck":{"status":"PASS"},"lint":{"status":"PASS","errors":0},"test":{"status":"PASS"},"all_passed":true},
+    "checksum": "df474d14f5f25c6497896df20353835aee3f29219f6d9a42024950ad0e33c864",
+    "previous_phase_checksum": "ea70bec72b0edbb72389a7038321a73de2073fe8adc54dc5dbebaf93951f33fa",
+    "timestamp": "2026-01-27T08:21:15Z",
+    "created_by": "lock-manager.sh"
+}

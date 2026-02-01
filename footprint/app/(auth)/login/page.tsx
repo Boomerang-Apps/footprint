@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { LoginForm, type LoginFormData } from '@/components/auth/LoginForm';
 import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -14,14 +17,35 @@ export default function LoginPage() {
   const handleSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError(undefined);
+    console.log('Login attempt:', data.email);
 
     try {
-      // TODO: Implement actual login logic via Backend-1 auth store
-      console.log('Login attempt:', data.email);
-      // Simulating API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Redirect would happen here on success
-    } catch {
+      const supabase = createClient();
+      console.log('Supabase client created, calling signInWithPassword...');
+
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      console.log('Auth response:', { authData, authError });
+
+      if (authError) {
+        console.error('Auth error:', authError);
+        setError(authError.message);
+        return;
+      }
+
+      if (authData.session) {
+        console.log('Login successful, redirecting...');
+        router.push('/');
+        router.refresh();
+      } else {
+        console.log('No session returned');
+        setError('Login failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
       setError('Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
@@ -33,9 +57,17 @@ export default function LoginPage() {
     setError(undefined);
 
     try {
-      // TODO: Implement Google OAuth via Backend-1
-      console.log('Google login initiated');
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (authError) {
+        setError(authError.message);
+      }
     } catch {
       setError('Failed to sign in with Google. Please try again.');
     } finally {
@@ -48,9 +80,17 @@ export default function LoginPage() {
     setError(undefined);
 
     try {
-      // TODO: Implement Apple OAuth via Backend-1
-      console.log('Apple login initiated');
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (authError) {
+        setError(authError.message);
+      }
     } catch {
       setError('Failed to sign in with Apple. Please try again.');
     } finally {

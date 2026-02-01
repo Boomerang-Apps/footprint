@@ -30,9 +30,11 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
+  orderNumber?: string;
   userId: string;
   status: OrderStatus;
   items: OrderItem[];
+  itemCount?: number;
   
   // Pricing
   subtotal: number;

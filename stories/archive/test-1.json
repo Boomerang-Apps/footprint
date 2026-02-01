@@ -1,0 +1,14 @@
+{
+  "story_id": "test-1",
+  "title": "Add Basic Carbon Calculator Component",
+  "description": "Create a simple carbon footprint calculator component that allows users to input their travel distance and calculates estimated CO2 emissions",
+  "domains": ["ui"],
+  "priority": "high",
+  "acceptance_criteria": [
+    "Component renders a distance input field",
+    "Component shows calculated CO2 emissions",
+    "Uses standard conversion: 0.21 kg CO2 per km for car travel"
+  ],
+  "estimated_complexity": "simple",
+  "dependencies": []
+}

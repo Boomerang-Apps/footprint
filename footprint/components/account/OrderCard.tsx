@@ -69,8 +69,8 @@ export function OrderCard({
   onClick,
   className,
 }: OrderCardProps): React.ReactElement {
-  const primaryItem = order.items[0];
-  const additionalItemsCount = order.items.length - 1;
+  const primaryItem = order.items?.[0];
+  const additionalItemsCount = (order.items?.length || 0) - 1;
 
   const handleClick = () => {
     onClick?.(order);
@@ -117,14 +117,20 @@ export function OrderCard({
         <div className="flex gap-3.5">
           {/* Product Thumbnail */}
           <div className="relative flex-shrink-0">
-            <Image
-              data-testid="order-thumbnail"
-              src={primaryItem.transformedImageUrl || primaryItem.originalImageUrl}
-              alt={`${styleTranslations[primaryItem.style] || primaryItem.style} artwork`}
-              width={90}
-              height={90}
-              className="w-[70px] h-[70px] sm:w-[80px] sm:h-[80px] lg:w-[90px] lg:h-[90px] rounded-xl object-cover bg-gray-100"
-            />
+            {primaryItem ? (
+              <Image
+                data-testid="order-thumbnail"
+                src={primaryItem.transformedImageUrl || primaryItem.originalImageUrl}
+                alt={`${styleTranslations[primaryItem.style] || primaryItem.style} artwork`}
+                width={90}
+                height={90}
+                className="w-[70px] h-[70px] sm:w-[80px] sm:h-[80px] lg:w-[90px] lg:h-[90px] rounded-xl object-cover bg-gray-100"
+              />
+            ) : (
+              <div className="w-[70px] h-[70px] sm:w-[80px] sm:h-[80px] lg:w-[90px] lg:h-[90px] rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                <span className="text-2xl">🖼️</span>
+              </div>
+            )}
 
             {/* Gift Indicator */}
             {order.isGift && (
@@ -147,10 +153,10 @@ export function OrderCard({
           {/* Order Details */}
           <div className="flex-1 min-w-0">
             <div className="text-sm font-semibold text-gray-900 mb-1">
-              {styleTranslations[primaryItem.style] || primaryItem.style}
+              {primaryItem ? (styleTranslations[primaryItem.style] || primaryItem.style) : `הזמנה ${order.orderNumber || ''}`}
             </div>
             <div className="text-xs text-gray-500 mb-2 leading-relaxed">
-              {primaryItem.size} • {frameTranslations[primaryItem.frameType] || primaryItem.frameType}
+              {primaryItem ? `${primaryItem.size} • ${frameTranslations[primaryItem.frameType] || primaryItem.frameType}` : `${order.itemCount || 1} פריטים`}
             </div>
             <div className="text-base font-bold text-gray-900">
               <PriceDisplay

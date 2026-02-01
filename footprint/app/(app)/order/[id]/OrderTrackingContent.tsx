@@ -12,7 +12,9 @@ import {
   Loader2,
   AlertCircle,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  Download,
+  XCircle
 } from 'lucide-react'
 import { OrderTimeline } from '@/components/ui/OrderTimeline'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -28,13 +30,17 @@ interface OrderDetailItem {
   size: string
   paperType: string
   frameType: string
-  price: number
+  quantity: number
+  basePrice: number
+  paperAddon: number
+  frameAddon: number
+  itemTotal: number
 }
 
 interface OrderDetailResponse {
   id: string
   orderNumber: string
-  status: 'received' | 'processing' | 'shipped' | 'delivered'
+  status: 'pending' | 'paid' | 'processing' | 'printing' | 'shipped' | 'delivered' | 'cancelled'
   statusLabel: string
   subtotal: number
   shippingCost: number
@@ -45,14 +51,16 @@ interface OrderDetailResponse {
   giftMessage: string | null
   giftWrap: boolean
   shippingAddress: {
-    fullName: string
-    phone: string
-    email: string
-    street: string
-    city: string
-    postalCode: string
-    country: string
-  }
+    name?: string
+    fullName?: string
+    phone?: string
+    email?: string
+    street?: string
+    apartment?: string
+    city?: string
+    postalCode?: string
+    country?: string
+  } | null
   trackingNumber: string | null
   trackingUrl: string | null
   carrier: string | null
@@ -144,20 +152,26 @@ export function OrderTrackingContent() {
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'received':
+      case 'pending':
+        return 'warning'
+      case 'paid':
         return 'info'
       case 'processing':
-        return 'warning'
-      case 'shipped':
+      case 'printing':
         return 'brand'
+      case 'shipped':
+        return 'info'
       case 'delivered':
         return 'success'
+      case 'cancelled':
+        return 'destructive'
       default:
         return 'default'
     }
   }
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number | undefined | null) => {
+    if (price == null) return '₪0.00'
     return `₪${price.toFixed(2)}`
   }
 
@@ -176,15 +190,26 @@ export function OrderTrackingContent() {
         <div className="max-w-[550px] mx-auto px-4 py-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
+            <Link
+              href="/account/orders"
+              className="text-sm text-zinc-600 hover:text-zinc-900 flex items-center gap-1"
+            >
+              <ChevronRight className="h-4 w-4" />
+              חזרה להזמנות
+            </Link>
             <Link href="/" className="flex-shrink-0">
-              <div className="w-8 h-8 bg-violet-600 rounded-full" />
+              <img
+              src="/footprint-logo-black-v2.svg"
+              alt="פוטפרינט"
+              className="h-12 w-auto"
+            />
             </Link>
           </div>
 
           {/* Loading content */}
           <div className="space-y-6">
             <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-violet-600 mx-auto mb-4" />
+              <Loader2 className="h-8 w-8 animate-spin text-zinc-900 mx-auto mb-4" />
               <p className="text-sm text-zinc-500">טוען פרטי הזמנה...</p>
             </div>
           </div>
@@ -200,8 +225,19 @@ export function OrderTrackingContent() {
         <div className="max-w-[550px] mx-auto px-4 py-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
+            <Link
+              href="/account/orders"
+              className="text-sm text-zinc-600 hover:text-zinc-900 flex items-center gap-1"
+            >
+              <ChevronRight className="h-4 w-4" />
+              חזרה להזמנות
+            </Link>
             <Link href="/" className="flex-shrink-0">
-              <div className="w-8 h-8 bg-violet-600 rounded-full" />
+              <img
+              src="/footprint-logo-black-v2.svg"
+              alt="פוטפרינט"
+              className="h-12 w-auto"
+            />
             </Link>
           </div>
 
@@ -236,15 +272,19 @@ export function OrderTrackingContent() {
       <div className="max-w-[550px] mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Link href="/" className="flex-shrink-0">
-            <div className="w-8 h-8 bg-violet-600 rounded-full" />
-          </Link>
           <Link
             href="/account/orders"
-            className="text-sm text-violet-600 hover:text-violet-700 flex items-center gap-1"
+            className="text-sm text-zinc-600 hover:text-zinc-900 flex items-center gap-1"
           >
-            חזרה להזמנות
             <ChevronRight className="h-4 w-4" />
+            חזרה להזמנות
+          </Link>
+          <Link href="/" className="flex-shrink-0">
+            <img
+              src="/footprint-logo-black-v2.svg"
+              alt="פוטפרינט"
+              className="h-12 w-auto"
+            />
           </Link>
         </div>
 
@@ -272,11 +312,9 @@ export function OrderTrackingContent() {
           </CardHeader>
           <CardContent>
             <OrderTimeline
-              currentStatus={order.status as 'received' | 'processing' | 'shipped' | 'delivered'}
-              estimatedDates={order.estimatedDeliveryDate ? {
-                [order.status]: order.estimatedDeliveryDate
-              } as Record<'received' | 'processing' | 'shipped' | 'delivered', string> : undefined}
+              currentStatus={order.status}
               locale="he"
+              layout="horizontal"
             />
           </CardContent>
         </Card>
@@ -306,25 +344,20 @@ export function OrderTrackingContent() {
                 </div>
               )}
               {order.trackingUrl && (
-                <Button
-                  asChild
-                  variant="outline"
-                  className="w-full"
+                <a
+                  href={order.trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`מעקב משלוח באתר ${order.carrier || 'חברת השילוח'}`}
+                  className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 text-white font-medium rounded-xl transition-colors"
                 >
-                  <a
-                    href={order.trackingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`מעקב משלוח באתר ${order.carrier || 'חברת השילוח'}`}
-                  >
-                    <ExternalLink className="h-4 w-4 ml-2" />
-                    מעקב משלוח באתר חברת השילוח
-                  </a>
-                </Button>
+                  <ExternalLink className="h-4 w-4" />
+                  <span>עקוב אחר המשלוח</span>
+                </a>
               )}
               {order.estimatedDeliveryDate && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-emerald-700">
+                <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-zinc-700">
                     <Package className="h-4 w-4" />
                     <span className="text-sm font-medium">
                       משלוח צפוי: {formatDate(order.estimatedDeliveryDate)}
@@ -371,7 +404,7 @@ export function OrderTrackingContent() {
                         </div>
                       </div>
                       <span className="text-sm font-medium text-zinc-900">
-                        {formatPrice(item.price)}
+                        {formatPrice(item.itemTotal)}
                       </span>
                     </div>
                   </div>
@@ -421,25 +454,36 @@ export function OrderTrackingContent() {
         </Card>
 
         {/* Shipping Address */}
-        <Card className="bg-white border-zinc-200 mb-6">
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              כתובת משלוח
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="font-medium text-zinc-900">{order.shippingAddress.fullName}</div>
-              <div className="text-zinc-500">{order.shippingAddress.street}</div>
-              <div className="text-zinc-500">
-                {order.shippingAddress.city}, {order.shippingAddress.postalCode}
+        {order.shippingAddress && (
+          <Card className="bg-white border-zinc-200 mb-6">
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                כתובת משלוח
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div className="font-medium text-zinc-900">
+                  {order.shippingAddress.name || order.shippingAddress.fullName || ''}
+                </div>
+                <div className="text-zinc-500">
+                  {order.shippingAddress.street}
+                  {order.shippingAddress.apartment && `, ${order.shippingAddress.apartment}`}
+                </div>
+                <div className="text-zinc-500">
+                  {order.shippingAddress.city}{order.shippingAddress.postalCode && `, ${order.shippingAddress.postalCode}`}
+                </div>
+                {order.shippingAddress.country && (
+                  <div className="text-zinc-500">{order.shippingAddress.country}</div>
+                )}
+                {order.shippingAddress.phone && (
+                  <div className="text-zinc-500">{order.shippingAddress.phone}</div>
+                )}
               </div>
-              <div className="text-zinc-500">{order.shippingAddress.country}</div>
-              <div className="text-zinc-500">{order.shippingAddress.phone}</div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Gift Information */}
         {order.isGift && (
@@ -453,7 +497,7 @@ export function OrderTrackingContent() {
               <div className="space-y-3">
                 {order.giftWrap && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Package className="h-4 w-4 text-violet-600" />
+                    <Package className="h-4 w-4 text-zinc-900" />
                     <span className="text-zinc-900">הזמנה כוללת אריזת מתנה</span>
                   </div>
                 )}
@@ -469,6 +513,44 @@ export function OrderTrackingContent() {
             </CardContent>
           </Card>
         )}
+
+        {/* Action Buttons */}
+        <div className="space-y-3 mt-6">
+          {/* Download Image Button - show if order has any images */}
+          {order.items.length > 0 && (
+            <Button
+              onClick={() => {
+                // Download the transformed image if available, otherwise original
+                const item = order.items[0]
+                const imageUrl = item?.transformedImageUrl || item?.originalImageUrl
+                if (imageUrl) {
+                  window.open(imageUrl, '_blank')
+                }
+              }}
+              className="w-full bg-zinc-900 hover:bg-zinc-800 text-white py-3 rounded-xl"
+            >
+              <Download className="h-5 w-5 ml-2" />
+              הורד תמונה
+            </Button>
+          )}
+
+          {/* Cancel Order Button - only show for pending/processing orders */}
+          {['pending', 'paid', 'processing'].includes(order.status) && (
+            <Button
+              onClick={() => {
+                if (confirm('האם אתה בטוח שברצונך לבטל את ההזמנה?')) {
+                  // TODO: Implement cancel order API
+                  alert('פונקציונליות ביטול הזמנה תתווסף בקרוב')
+                }
+              }}
+              variant="outline"
+              className="w-full border-zinc-300 text-zinc-900 hover:bg-zinc-100 py-3 rounded-xl"
+            >
+              <XCircle className="h-5 w-5 ml-2" />
+              בטל הזמנה
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

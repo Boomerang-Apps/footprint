@@ -55,15 +55,31 @@ export default function RegisterPage() {
       });
 
       if (signUpError) {
+        console.error('Signup error:', signUpError);
         setError(signUpError.message);
         return;
       }
 
+      console.log('Signup response:', data);
+
       if (data.user) {
-        // Redirect to home or confirmation page
+        // Check if email confirmation is required
+        if (data.user.identities?.length === 0) {
+          setError('This email is already registered. Please sign in instead.');
+          return;
+        }
+
+        // Check if email confirmation is pending
+        if (data.session === null) {
+          setError('Please check your email to confirm your account.');
+          return;
+        }
+
+        // Redirect to home on success
         router.push('/');
       }
     } catch (err) {
+      console.error('Unexpected error:', err);
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);

@@ -11,6 +11,15 @@ import { generateTrackingUrl } from '@/lib/orders/tracking';
 import { getStatusLabel } from '@/lib/orders/status';
 import type { OrderStatus } from '@/types/order';
 
+interface OrderItemSummary {
+  id: string;
+  originalImageUrl: string;
+  transformedImageUrl: string | null;
+  style: string;
+  size: string;
+  frameType: string;
+}
+
 interface OrderListItem {
   id: string;
   orderNumber: string;
@@ -22,6 +31,7 @@ interface OrderListItem {
   trackingNumber: string | null;
   trackingUrl: string | null;
   carrier: string | null;
+  items: OrderItemSummary[];
 }
 
 interface OrdersListResponse {
@@ -93,7 +103,7 @@ export async function GET(
       );
     }
 
-    // 5. Build query
+    // 5. Build query - include first order item for thumbnail
     let query = supabase
       .from('orders')
       .select(`
@@ -104,7 +114,14 @@ export async function GET(
         created_at,
         tracking_number,
         carrier,
-        order_items(count)
+        order_items(
+          id,
+          original_image_url,
+          transformed_image_url,
+          style,
+          size,
+          frame_type
+        )
       `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
@@ -138,17 +155,37 @@ export async function GET(
         ? generateTrackingUrl(order.tracking_number, order.carrier)
         : null;
 
+      // Transform order items to camelCase
+      const items: OrderItemSummary[] = Array.isArray(order.order_items)
+        ? order.order_items.map((item: {
+            id: string;
+            original_image_url: string;
+            transformed_image_url: string | null;
+            style: string;
+            size: string;
+            frame_type: string;
+          }) => ({
+            id: item.id,
+            originalImageUrl: item.original_image_url,
+            transformedImageUrl: item.transformed_image_url,
+            style: item.style,
+            size: item.size,
+            frameType: item.frame_type,
+          }))
+        : [];
+
       return {
         id: order.id,
         orderNumber: order.order_number,
         status: order.status as OrderStatus,
         statusLabel: getStatusLabel(order.status as OrderStatus, 'en'),
         total: order.total,
-        itemCount: Array.isArray(order.order_items) ? order.order_items.length : 0,
+        itemCount: items.length,
         createdAt: order.created_at,
         trackingNumber: order.tracking_number,
         trackingUrl,
         carrier: order.carrier,
+        items,
       };
     });
 

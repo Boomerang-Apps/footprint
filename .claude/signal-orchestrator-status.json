@@ -1,0 +1,8 @@
+{
+  "agent": "orchestrator",
+  "status": "RUNNING",
+  "message": "Orchestrator active",
+  "wave_number": 1,
+  "timestamp": "2026-01-28T16:55:17Z",
+  "pid": 1
+}

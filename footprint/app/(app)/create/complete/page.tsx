@@ -104,9 +104,9 @@ function getHebrewMonth(month: number): string {
 function CompletePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId');
-  const isSandbox = searchParams.get('sandbox') === 'true';
-  const emailFromParams = searchParams.get('email');
+  const orderId = searchParams?.get('orderId');
+  const isSandbox = searchParams?.get('sandbox') === 'true';
+  const emailFromParams = searchParams?.get('email');
 
   const {
     originalImage,

@@ -45,7 +45,7 @@ export function OrderHistoryList(): React.ReactElement {
   });
 
   const handleOrderClick = (order: { id: string }) => {
-    router.push(`/account/orders/${order.id}`);
+    router.push(`/order/${order.id}`);
   };
 
   const handleBackClick = () => {

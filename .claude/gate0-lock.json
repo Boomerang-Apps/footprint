@@ -1,0 +1,11 @@
+{
+  "certified": true,
+  "certified_at": "2026-01-27T07:50:19Z",
+  "certified_by": "merge-watcher",
+  "wave_number": 1,
+  "checks": {
+    "api_key_valid": true,
+    "project_accessible": true,
+    "git_configured": true
+  }
+}
