@@ -187,6 +187,27 @@ all           # Full project analysis
 ║                                                                              ║
 ║  QUALITY & SAFETY                                                            ║
 ║  ────────────────                                                            ║
+║  /harden                       Production hardening & quality gate           ║
+║                                Args: "quick" | "security" | "performance" |  ║
+║                                      "quality" | "a11y" | "production"       ║
+║                                      "--fix" | "--ci" | "--report"           ║
+║                                Aliases: /quality, /production-check          ║
+║                                                                              ║
+║  /security                     Security scan (OWASP, vulns, secrets)         ║
+║                                Args: "deps" | "secrets" | "owasp" |          ║
+║                                      "headers" | "--fix"                     ║
+║                                Aliases: /sec, /audit-security, /vuln         ║
+║                                                                              ║
+║  /perf                         Performance analysis (Core Web Vitals)        ║
+║                                Args: "bundle" | "lighthouse" | "vitals" |    ║
+║                                      "images" | "--fix"                      ║
+║                                Aliases: /performance, /lighthouse            ║
+║                                                                              ║
+║  /a11y                         Accessibility audit (WCAG 2.1 AA)             ║
+║                                Args: "contrast" | "keyboard" | "aria" |      ║
+║                                      "forms" | "--fix"                       ║
+║                                Aliases: /accessibility, /wcag                ║
+║                                                                              ║
 ║  /hazard                       Hazard analysis (DO-178C style)               ║
 ║                                Args: "story {ID}" | "wave {N}" | "all"       ║
 ║                                                                              ║
@@ -205,6 +226,11 @@ all           # Full project analysis
 ║  /design-verify                Visual design-to-code validation              ║
 ║                                Args: "{design-source} {react-target}"        ║
 ║                                Uses: Playwright MCP for comparison           ║
+║                                                                              ║
+║  /ui-trace                     Story ↔ Component traceability                ║
+║                                Args: "stories" | "components" | "wave {N}"   ║
+║                                Checks: missing components, missing stories   ║
+║                                Aliases: /component-trace, /storybook-trace   ║
 ║                                                                              ║
 ║  SESSION MANAGEMENT                                                          ║
 ║  ──────────────────                                                          ║
@@ -264,9 +290,11 @@ all           # Full project analysis
 /rearchitect plan                    # Generate reorganization plan
 ```
 
-### Design Verification Commands
+### Design & Component Commands
 ```bash
 /design-verify ./design.html http://localhost:3000           # Compare HTML to React
+/ui-trace                                                    # Story ↔ Component trace
+/ui-trace --fix                                              # Generate fix plan
 /design-verify ./mockups/button.html localhost:3000/button   # Component level
 /design-verify figma:123456 http://localhost:5173            # Figma source
 ```
@@ -287,7 +315,7 @@ all           # Full project analysis
 /story-audit today                   # Today only
 ```
 
-### Infrastructure Commands (NEW)
+### Infrastructure Commands
 ```bash
 # Credential validation
 /keys                                # Check all API keys/credentials
@@ -301,6 +329,36 @@ all           # Full project analysis
 /docker status                       # Container status only
 /docker build                        # Build agent image
 /docker start                        # Start all containers
+```
+
+### Production Hardening Commands
+```bash
+# Full hardening suite
+/harden                              # All checks (security, perf, quality, a11y)
+/harden quick                        # Fast essential checks only (~2 min)
+/harden --fix                        # Auto-fix what's possible
+/harden --ci                         # CI mode with exit codes
+
+# Security scanning
+/security                            # Full security scan
+/security deps                       # Dependency vulnerabilities only
+/security secrets                    # Secret detection only
+/security owasp                      # OWASP pattern check
+/security --fix                      # Auto-fix security issues
+
+# Performance analysis
+/perf                                # Full performance analysis
+/perf bundle                         # Bundle size analysis only
+/perf lighthouse                     # Lighthouse CI only
+/perf vitals                         # Core Web Vitals only
+/perf --fix                          # Auto-optimize images
+
+# Accessibility audit
+/a11y                                # Full accessibility audit
+/a11y contrast                       # Color contrast only
+/a11y keyboard                       # Keyboard navigation only
+/a11y aria                           # ARIA attributes only
+/a11y --fix                          # Auto-fix a11y issues
 ```
 
 ## Usage Examples
