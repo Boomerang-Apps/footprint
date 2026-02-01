@@ -23,3 +23,7 @@ __pycache__/
 .claude/gate0-lock.json
 .claude/preflight-report.json
 .claude/validation-report.json
+
+*storybook.log
+storybook-static
+storybook-static
