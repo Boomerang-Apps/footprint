@@ -1,0 +1,220 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "UP-05",
+  "type": "feature",
+  "wave_number": "8",
+  "title": "Face Detection Cropping",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "medium",
+  "story_points": 8,
+  "description": "Implement AI-powered face detection to automatically suggest optimal crop positions for portrait photos, ensuring faces are properly centered and framed in the final print",
+  "status": "in_progress",
+  "objective": {
+    "as_a": "customer uploading a portrait photo",
+    "i_want": "the system to automatically detect faces and suggest optimal cropping",
+    "so_that": "my prints are perfectly framed without cutting off important parts of the photo"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Detect faces in uploaded images",
+      "ears_format": "WHEN user uploads a photo THEN analyze image for face detection within 2 seconds",
+      "threshold": "latency: <2000ms",
+      "test_approach": "Upload test images with faces, verify detection API returns within threshold"
+    },
+    {
+      "id": "AC-002",
+      "description": "Return face bounding boxes",
+      "ears_format": "WHEN faces detected THEN return array of bounding boxes with x, y, width, height coordinates",
+      "test_approach": "Verify API response contains properly formatted bounding box data"
+    },
+    {
+      "id": "AC-003",
+      "description": "Calculate optimal crop region",
+      "ears_format": "WHEN faces detected and target aspect ratio provided THEN calculate crop region that centers faces with appropriate headroom",
+      "test_approach": "Test with various aspect ratios, verify faces centered with 15-20% headroom"
+    },
+    {
+      "id": "AC-004",
+      "description": "Handle multiple faces",
+      "ears_format": "WHEN multiple faces detected THEN calculate crop region that includes all faces with balanced framing",
+      "test_approach": "Upload group photos, verify all faces included in suggested crop"
+    },
+    {
+      "id": "AC-005",
+      "description": "Handle no faces detected",
+      "ears_format": "WHEN no faces detected THEN return center-weighted crop suggestion as fallback",
+      "test_approach": "Upload landscape/object photos, verify fallback crop returned"
+    },
+    {
+      "id": "AC-006",
+      "description": "Confidence score for detection",
+      "ears_format": "WHEN faces detected THEN return confidence score (0-1) for each detection",
+      "test_approach": "Verify confidence scores returned, filter low-confidence detections"
+    },
+    {
+      "id": "AC-007",
+      "description": "Support multiple image formats",
+      "ears_format": "WHEN image uploaded in JPEG, PNG, HEIC, or WebP format THEN process successfully",
+      "test_approach": "Upload images in each format, verify detection works"
+    },
+    {
+      "id": "AC-008",
+      "description": "Handle large images efficiently",
+      "ears_format": "WHEN image exceeds 10MB THEN downsample for detection while preserving crop coordinates for original",
+      "threshold": "max_size: 10MB",
+      "test_approach": "Upload large images, verify processing completes within timeout"
+    },
+    {
+      "id": "AC-009",
+      "description": "Return rotation suggestion",
+      "ears_format": "WHEN face detected at angle THEN suggest rotation correction if tilt > 5 degrees",
+      "test_approach": "Upload tilted photos, verify rotation suggestion returned"
+    },
+    {
+      "id": "AC-010",
+      "description": "API endpoint security",
+      "ears_format": "WHEN unauthenticated request made THEN return 401 Unauthorized",
+      "test_approach": "Make request without auth token, verify 401 response"
+    }
+  ],
+  "files": {
+    "create": [
+      "lib/image/face-detection.ts",
+      "lib/image/face-detection.test.ts",
+      "lib/image/crop-calculator.ts",
+      "lib/image/crop-calculator.test.ts",
+      "app/api/images/detect-faces/route.ts",
+      "app/api/images/detect-faces/route.test.ts"
+    ],
+    "modify": [
+      "lib/image/index.ts",
+      "types/image.ts"
+    ],
+    "forbidden": [
+      "app/api/upload/*",
+      "components/*"
+    ]
+  },
+  "technical_requirements": {
+    "ai_provider": "Replicate or Cloudflare Workers AI for face detection model",
+    "models_considered": [
+      "mediapipe/face_detection",
+      "mtcnn",
+      "retinaface"
+    ],
+    "performance": {
+      "max_latency_ms": 2000,
+      "max_memory_mb": 512
+    },
+    "caching": "Cache detection results by image hash for 24 hours"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "lib/image/face-detection.test.ts",
+      "lib/image/crop-calculator.test.ts",
+      "app/api/images/detect-faces/route.test.ts"
+    ],
+    "coverage_target": 85,
+    "test_categories": [
+      {
+        "name": "Face Detection",
+        "count": 6,
+        "examples": [
+          "should detect single face in portrait",
+          "should detect multiple faces in group photo",
+          "should return empty array for no faces",
+          "should return confidence scores",
+          "should handle various image formats",
+          "should timeout for very large images"
+        ]
+      },
+      {
+        "name": "Crop Calculation",
+        "count": 5,
+        "examples": [
+          "should center single face with headroom",
+          "should include all faces in group crop",
+          "should respect target aspect ratio",
+          "should fallback to center crop when no faces",
+          "should handle edge cases (face at edge)"
+        ]
+      },
+      {
+        "name": "API Endpoint",
+        "count": 4,
+        "examples": [
+          "should return 401 without auth",
+          "should return 400 for invalid image",
+          "should return detection results",
+          "should handle timeout gracefully"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "ai_service": "vi.mock('@/lib/ai/face-detection-provider')",
+      "storage": "vi.mock('@/lib/storage/r2')"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "False negative - face not detected in valid portrait",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Allow manual crop override, use high-quality detection model"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Privacy concern - face data stored inappropriately",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Only store bounding boxes, not facial features. Delete detection cache after 24h"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "High latency impacts user experience",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Show loading state, allow skip option, optimize image preprocessing"
+      }
+    ],
+    "risk_level": "medium"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any storage of biometric facial data",
+      "Modification to image upload flow"
+    ],
+    "escalation_triggers": [
+      "Detection latency consistently > 3 seconds",
+      "Error rate > 10%"
+    ],
+    "rollback_plan": "Disable face detection endpoint, revert to center-crop default"
+  },
+  "dependencies": {
+    "required_before": [],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-PHOTO-UPLOAD"
+    ],
+    "epic": "PHOTO-UPLOAD",
+    "related_stories": [
+      "UP-01",
+      "UP-02",
+      "UP-03",
+      "UP-04"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 15
+}

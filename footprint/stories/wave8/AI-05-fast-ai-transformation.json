@@ -1,0 +1,262 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "AI-05",
+  "type": "feature",
+  "wave_number": "8",
+  "title": "Fast AI Transformation",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "medium",
+  "story_points": 8,
+  "description": "Optimize AI style transformation pipeline for sub-3-second generation time, implementing caching, queue management, and progressive loading for better user experience",
+  "status": "backlog",
+  "objective": {
+    "as_a": "customer previewing art styles",
+    "i_want": "to see style transformations quickly",
+    "so_that": "I can explore different styles without waiting"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Fast preview generation",
+      "ears_format": "WHEN user selects a style THEN show preview transformation within 3 seconds",
+      "threshold": "latency: <3000ms",
+      "test_approach": "Measure time from style click to preview display"
+    },
+    {
+      "id": "AC-002",
+      "description": "Low-res preview first",
+      "ears_format": "WHEN transformation requested THEN return 512px preview immediately, upgrade to full-res in background",
+      "test_approach": "Verify low-res returned first, then high-res update"
+    },
+    {
+      "id": "AC-003",
+      "description": "Result caching",
+      "ears_format": "WHEN same image+style combination requested THEN return cached result instantly",
+      "threshold": "cache_hit_latency: <200ms",
+      "test_approach": "Request same transformation twice, verify second is instant"
+    },
+    {
+      "id": "AC-004",
+      "description": "Cache invalidation",
+      "ears_format": "WHEN cached result older than 7 days THEN regenerate on next request",
+      "test_approach": "Mock old cache entry, verify regeneration"
+    },
+    {
+      "id": "AC-005",
+      "description": "Queue management",
+      "ears_format": "WHEN transformation queue full THEN prioritize paid/logged-in users, show queue position to others",
+      "test_approach": "Fill queue, verify priority ordering"
+    },
+    {
+      "id": "AC-006",
+      "description": "Concurrent request limiting",
+      "ears_format": "WHEN user has 3 pending transformations THEN queue additional requests, show 'עיבוד...' indicator",
+      "threshold": "max_concurrent: 3",
+      "test_approach": "Submit 5 requests, verify 2 queued"
+    },
+    {
+      "id": "AC-007",
+      "description": "Progressive image loading",
+      "ears_format": "WHEN transformation completes THEN stream image progressively (JPEG progressive or blurhash)",
+      "test_approach": "Verify progressive JPEG headers or blurhash placeholder"
+    },
+    {
+      "id": "AC-008",
+      "description": "Preload popular styles",
+      "ears_format": "WHEN image uploaded THEN pre-generate top 3 most popular styles in background",
+      "test_approach": "Upload image, verify background jobs queued"
+    },
+    {
+      "id": "AC-009",
+      "description": "GPU instance scaling",
+      "ears_format": "WHEN queue depth > 10 THEN scale up GPU workers, scale down after 5 min idle",
+      "test_approach": "Monitor scaling triggers in logs"
+    },
+    {
+      "id": "AC-010",
+      "description": "Failure retry with backoff",
+      "ears_format": "WHEN transformation fails THEN retry 3 times with exponential backoff, then show error",
+      "test_approach": "Mock failures, verify retry behavior"
+    },
+    {
+      "id": "AC-011",
+      "description": "Rate limiting per user",
+      "ears_format": "WHEN user exceeds 20 transformations/minute THEN return 429 with retry-after header",
+      "threshold": "rate_limit: 20/min",
+      "test_approach": "Exceed rate limit, verify 429 response"
+    },
+    {
+      "id": "AC-012",
+      "description": "Metrics and monitoring",
+      "ears_format": "WHEN transformation completes THEN log duration, model, cache_hit to observability system",
+      "test_approach": "Verify metrics emitted"
+    }
+  ],
+  "files": {
+    "create": [
+      "lib/ai/transformation-queue.ts",
+      "lib/ai/transformation-queue.test.ts",
+      "lib/ai/transformation-cache.ts",
+      "lib/ai/transformation-cache.test.ts",
+      "lib/ai/progressive-loader.ts",
+      "lib/ai/progressive-loader.test.ts",
+      "app/api/ai/transform/route.ts",
+      "app/api/ai/transform/route.test.ts"
+    ],
+    "modify": [
+      "lib/ai/style-transformer.ts",
+      "lib/ai/index.ts"
+    ],
+    "forbidden": [
+      "components/*",
+      "store/*"
+    ]
+  },
+  "technical_requirements": {
+    "infrastructure": {
+      "cache": "Redis for transformation cache with R2 for result storage",
+      "queue": "BullMQ for job queue management",
+      "gpu": "Replicate or Modal for GPU inference"
+    },
+    "performance": {
+      "preview_latency_p95_ms": 3000,
+      "cache_hit_latency_ms": 200,
+      "max_concurrent_per_user": 3
+    },
+    "caching_strategy": {
+      "key_format": "transform:{image_hash}:{style_id}:{resolution}",
+      "ttl_days": 7,
+      "storage": "R2 for images, Redis for metadata"
+    }
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "lib/ai/transformation-queue.test.ts",
+      "lib/ai/transformation-cache.test.ts",
+      "lib/ai/progressive-loader.test.ts",
+      "app/api/ai/transform/route.test.ts"
+    ],
+    "coverage_target": 85,
+    "test_categories": [
+      {
+        "name": "Caching",
+        "count": 5,
+        "examples": [
+          "should return cached result instantly",
+          "should cache new transformation",
+          "should invalidate old cache entries",
+          "should handle cache miss gracefully",
+          "should generate cache key correctly"
+        ]
+      },
+      {
+        "name": "Queue Management",
+        "count": 5,
+        "examples": [
+          "should prioritize paid users",
+          "should limit concurrent requests per user",
+          "should return queue position",
+          "should process in order",
+          "should handle queue full scenario"
+        ]
+      },
+      {
+        "name": "Progressive Loading",
+        "count": 3,
+        "examples": [
+          "should return low-res preview first",
+          "should upgrade to full-res",
+          "should use progressive JPEG format"
+        ]
+      },
+      {
+        "name": "Rate Limiting",
+        "count": 3,
+        "examples": [
+          "should allow requests under limit",
+          "should return 429 over limit",
+          "should reset after window"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 3,
+        "examples": [
+          "should retry on failure",
+          "should use exponential backoff",
+          "should return error after max retries"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "redis": "vi.mock('ioredis')",
+      "queue": "vi.mock('bullmq')",
+      "ai_provider": "vi.mock('@/lib/ai/replicate-client')"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "GPU costs spike from high usage",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Budget alerts, auto-scaling limits, usage dashboard"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Cache fills storage quota",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "TTL expiration, LRU eviction, storage monitoring"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Queue backup during peak traffic",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Auto-scaling, queue depth alerts, graceful degradation"
+      }
+    ],
+    "risk_level": "medium"
+  },
+  "safety": {
+    "stop_conditions": [
+      "GPU costs exceed daily budget by 2x",
+      "Queue depth > 100 for > 5 minutes"
+    ],
+    "escalation_triggers": [
+      "P95 latency > 5 seconds",
+      "Error rate > 5%"
+    ],
+    "rollback_plan": "Disable caching and queue, fall back to synchronous processing with longer timeouts"
+  },
+  "dependencies": {
+    "required_before": [
+      "AI-01",
+      "AI-02"
+    ],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-AI-STYLES",
+      "PRD-PERFORMANCE"
+    ],
+    "epic": "AI-CUSTOMIZATION",
+    "related_stories": [
+      "AI-01",
+      "AI-02",
+      "AI-03",
+      "AI-04"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 19
+}

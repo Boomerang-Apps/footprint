@@ -1,0 +1,219 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "GF-04",
+  "type": "feature",
+  "wave_number": "8",
+  "title": "Gift Wrapping Option",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "medium",
+  "story_points": 5,
+  "description": "Allow customers to add premium gift wrapping to their orders during checkout, with visual preview and pricing",
+  "status": "in_progress",
+  "objective": {
+    "as_a": "customer purchasing a gift",
+    "i_want": "to add beautiful gift wrapping to my order",
+    "so_that": "the recipient receives a professionally wrapped present"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Gift wrapping toggle in checkout",
+      "ears_format": "WHEN customer is on checkout page THEN display gift wrapping option with toggle switch",
+      "test_approach": "Render checkout, verify toggle present"
+    },
+    {
+      "id": "AC-002",
+      "description": "Show wrapping price",
+      "ears_format": "WHEN gift wrapping toggle shown THEN display price '+ 15 ש\"ח' next to option",
+      "test_approach": "Verify price displayed correctly"
+    },
+    {
+      "id": "AC-003",
+      "description": "Visual preview of wrapping styles",
+      "ears_format": "WHEN customer enables gift wrapping THEN show preview images of available wrapping styles",
+      "test_approach": "Enable toggle, verify preview images appear"
+    },
+    {
+      "id": "AC-004",
+      "description": "Select wrapping style",
+      "ears_format": "WHEN wrapping enabled THEN allow selection from 3 wrapping styles: classic, festive, minimalist",
+      "test_approach": "Enable toggle, verify 3 style options selectable"
+    },
+    {
+      "id": "AC-005",
+      "description": "Update order total",
+      "ears_format": "WHEN gift wrapping enabled THEN add wrapping price to order total immediately",
+      "test_approach": "Toggle wrapping, verify total updates"
+    },
+    {
+      "id": "AC-006",
+      "description": "Persist selection in order store",
+      "ears_format": "WHEN gift wrapping selected THEN persist giftWrapping: { enabled: true, style: string } in order state",
+      "test_approach": "Select wrapping, verify Zustand store updated"
+    },
+    {
+      "id": "AC-007",
+      "description": "Show wrapping in order summary",
+      "ears_format": "WHEN order summary displays THEN show gift wrapping line item if enabled",
+      "test_approach": "Enable wrapping, verify appears in summary"
+    },
+    {
+      "id": "AC-008",
+      "description": "Combine with gift message",
+      "ears_format": "WHEN gift wrapping and gift message both enabled THEN show combined preview of wrapped package with message card",
+      "test_approach": "Enable both, verify combined preview"
+    },
+    {
+      "id": "AC-009",
+      "description": "RTL layout support",
+      "ears_format": "WHEN component renders THEN labels and prices display correctly in RTL",
+      "test_approach": "Verify Hebrew labels and RTL alignment"
+    },
+    {
+      "id": "AC-010",
+      "description": "Mobile responsive design",
+      "ears_format": "WHEN viewport < 640px THEN wrapping options stack vertically with touch-friendly targets",
+      "test_approach": "Test on mobile viewport, verify touch targets"
+    }
+  ],
+  "files": {
+    "create": [
+      "components/checkout/GiftWrappingOption.tsx",
+      "components/checkout/GiftWrappingOption.test.tsx",
+      "components/checkout/WrappingStyleSelector.tsx",
+      "components/checkout/WrappingStyleSelector.test.tsx"
+    ],
+    "modify": [
+      "components/checkout/CheckoutForm.tsx",
+      "store/orderStore.ts",
+      "types/order.ts"
+    ],
+    "forbidden": [
+      "app/api/*",
+      "lib/payments/*"
+    ]
+  },
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Switch.tsx",
+      "components/ui/RadioGroup.tsx",
+      "components/ui/Card.tsx",
+      "components/ui/Badge.tsx"
+    ],
+    "state_management": "Zustand orderStore for gift wrapping state",
+    "images": "Wrapping style preview images in /public/images/gift-wrapping/"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "components/checkout/GiftWrappingOption.test.tsx",
+      "components/checkout/WrappingStyleSelector.test.tsx"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Toggle Behavior",
+        "count": 3,
+        "examples": [
+          "should show toggle in off state by default",
+          "should enable wrapping on toggle click",
+          "should show style selector when enabled"
+        ]
+      },
+      {
+        "name": "Style Selection",
+        "count": 4,
+        "examples": [
+          "should display 3 wrapping styles",
+          "should select classic style by default",
+          "should update selection on click",
+          "should show preview for selected style"
+        ]
+      },
+      {
+        "name": "Pricing",
+        "count": 3,
+        "examples": [
+          "should display wrapping price",
+          "should update total when enabled",
+          "should remove price when disabled"
+        ]
+      },
+      {
+        "name": "State Management",
+        "count": 2,
+        "examples": [
+          "should persist selection in store",
+          "should restore selection on remount"
+        ]
+      },
+      {
+        "name": "Accessibility",
+        "count": 2,
+        "examples": [
+          "should have proper ARIA labels",
+          "should be keyboard navigable"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "store": "vi.mock('@/store/orderStore')",
+      "images": "Mock next/image component"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Price not added to total correctly",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Unit tests for price calculation, E2E test for full checkout"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Wrapping selection lost during checkout flow",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Persist to Zustand with localStorage rehydration"
+      }
+    ],
+    "risk_level": "low"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Modification to payment processing logic",
+      "Changes to order submission API"
+    ],
+    "escalation_triggers": [
+      "Price calculation errors in production"
+    ],
+    "rollback_plan": "Remove GiftWrappingOption from CheckoutForm, revert store changes"
+  },
+  "dependencies": {
+    "required_before": [
+      "GF-01",
+      "GF-02"
+    ],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-GIFTING"
+    ],
+    "epic": "CHECKOUT-GIFTING",
+    "related_stories": [
+      "GF-01",
+      "GF-02",
+      "GF-03",
+      "GF-05"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 14
+}

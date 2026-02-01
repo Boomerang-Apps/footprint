@@ -1,0 +1,286 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "CO-06",
+  "type": "feature",
+  "wave_number": "8",
+  "title": "PayPlus Israeli Payment Integration",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "critical",
+  "story_points": 13,
+  "description": "Complete integration with PayPlus payment gateway for Israeli credit card processing, including recurring payments, refunds, and compliance with Israeli payment regulations",
+  "status": "backlog",
+  "objective": {
+    "as_a": "Israeli customer",
+    "i_want": "to pay securely with my local credit card",
+    "so_that": "I can complete purchases using familiar payment methods"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Initialize PayPlus payment session",
+      "ears_format": "WHEN checkout initiated THEN create PayPlus payment page session with order details",
+      "test_approach": "Mock PayPlus API, verify session creation request"
+    },
+    {
+      "id": "AC-002",
+      "description": "Redirect to PayPlus hosted page",
+      "ears_format": "WHEN payment session created THEN redirect customer to PayPlus hosted payment page",
+      "test_approach": "Verify redirect URL generated correctly"
+    },
+    {
+      "id": "AC-003",
+      "description": "Handle successful payment callback",
+      "ears_format": "WHEN PayPlus sends success callback THEN verify signature, update order status to 'paid', record transaction",
+      "test_approach": "Mock callback with valid signature, verify order updated"
+    },
+    {
+      "id": "AC-004",
+      "description": "Handle failed payment callback",
+      "ears_format": "WHEN PayPlus sends failure callback THEN update order status to 'payment_failed', show error to customer",
+      "test_approach": "Mock failure callback, verify error handling"
+    },
+    {
+      "id": "AC-005",
+      "description": "Signature verification",
+      "ears_format": "WHEN callback received THEN verify HMAC signature using secret key, reject invalid signatures",
+      "test_approach": "Test with valid and invalid signatures"
+    },
+    {
+      "id": "AC-006",
+      "description": "Support Israeli Shekel currency",
+      "ears_format": "WHEN payment created THEN use ILS currency code with amounts in agorot (1/100 shekel)",
+      "test_approach": "Verify currency and amount format in API request"
+    },
+    {
+      "id": "AC-007",
+      "description": "Store transaction record",
+      "ears_format": "WHEN payment succeeds THEN store transaction_id, approval_number, last_4_digits, card_brand in payments table",
+      "test_approach": "Verify payment record created with required fields"
+    },
+    {
+      "id": "AC-008",
+      "description": "Process refunds",
+      "ears_format": "WHEN admin initiates refund THEN call PayPlus refund API, update payment status to 'refunded'",
+      "test_approach": "Mock refund API, verify refund processing"
+    },
+    {
+      "id": "AC-009",
+      "description": "Partial refund support",
+      "ears_format": "WHEN admin initiates partial refund THEN specify amount and create partial refund record",
+      "test_approach": "Test partial refund with various amounts"
+    },
+    {
+      "id": "AC-010",
+      "description": "Handle duplicate callbacks",
+      "ears_format": "WHEN duplicate callback received THEN idempotently skip if already processed",
+      "test_approach": "Send same callback twice, verify no duplicate processing"
+    },
+    {
+      "id": "AC-011",
+      "description": "Timeout handling",
+      "ears_format": "WHEN payment page times out (15 min) THEN expire order, allow retry",
+      "threshold": "timeout: 15min",
+      "test_approach": "Simulate timeout, verify order status"
+    },
+    {
+      "id": "AC-012",
+      "description": "Test mode support",
+      "ears_format": "WHEN PAYPLUS_TEST_MODE=true THEN use sandbox credentials and test card numbers",
+      "test_approach": "Verify test mode configuration"
+    },
+    {
+      "id": "AC-013",
+      "description": "PCI compliance",
+      "ears_format": "WHEN payment processed THEN never store full card number, CVV, or track data on our servers",
+      "test_approach": "Audit stored data, verify no PCI scope data"
+    },
+    {
+      "id": "AC-014",
+      "description": "Webhook endpoint security",
+      "ears_format": "WHEN webhook endpoint called THEN only accept requests from PayPlus IP whitelist",
+      "test_approach": "Test with allowed and blocked IPs"
+    }
+  ],
+  "files": {
+    "create": [
+      "lib/payments/payplus-client.ts",
+      "lib/payments/payplus-client.test.ts",
+      "lib/payments/payplus-webhook.ts",
+      "lib/payments/payplus-webhook.test.ts",
+      "lib/payments/refund-service.ts",
+      "lib/payments/refund-service.test.ts",
+      "app/api/payments/payplus/create-session/route.ts",
+      "app/api/payments/payplus/create-session/route.test.ts",
+      "app/api/payments/payplus/webhook/route.ts",
+      "app/api/payments/payplus/webhook/route.test.ts",
+      "app/api/admin/refunds/route.ts",
+      "app/api/admin/refunds/route.test.ts"
+    ],
+    "modify": [
+      "lib/payments/index.ts",
+      "types/payment.ts",
+      "supabase/migrations/xxx_add_payplus_fields.sql"
+    ],
+    "forbidden": [
+      "store/orderStore.ts",
+      "components/*"
+    ]
+  },
+  "technical_requirements": {
+    "payplus_api": {
+      "version": "v1.7",
+      "base_url": "https://api.payplus.co.il",
+      "docs": "https://docs.payplus.co.il"
+    },
+    "security": {
+      "hmac_algorithm": "SHA256",
+      "ip_whitelist": ["195.28.xxx.xxx/24"],
+      "webhook_timeout_ms": 5000
+    },
+    "compliance": {
+      "pci_level": "SAQ-A (hosted page)",
+      "data_retention": "Transaction records only, no card data"
+    },
+    "environment_vars": [
+      "PAYPLUS_API_KEY",
+      "PAYPLUS_SECRET_KEY",
+      "PAYPLUS_TERMINAL_ID",
+      "PAYPLUS_TEST_MODE"
+    ]
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "lib/payments/payplus-client.test.ts",
+      "lib/payments/payplus-webhook.test.ts",
+      "lib/payments/refund-service.test.ts",
+      "app/api/payments/payplus/create-session/route.test.ts",
+      "app/api/payments/payplus/webhook/route.test.ts",
+      "app/api/admin/refunds/route.test.ts"
+    ],
+    "coverage_target": 95,
+    "test_categories": [
+      {
+        "name": "Session Creation",
+        "count": 5,
+        "examples": [
+          "should create payment session with order details",
+          "should use ILS currency",
+          "should include callback URLs",
+          "should handle API errors",
+          "should use test mode when configured"
+        ]
+      },
+      {
+        "name": "Webhook Processing",
+        "count": 6,
+        "examples": [
+          "should verify valid signature",
+          "should reject invalid signature",
+          "should update order on success",
+          "should handle failure callback",
+          "should be idempotent",
+          "should reject non-whitelisted IPs"
+        ]
+      },
+      {
+        "name": "Refunds",
+        "count": 4,
+        "examples": [
+          "should process full refund",
+          "should process partial refund",
+          "should reject refund exceeding payment",
+          "should handle refund API errors"
+        ]
+      },
+      {
+        "name": "Security",
+        "count": 4,
+        "examples": [
+          "should never log card numbers",
+          "should timeout long requests",
+          "should validate callback IP",
+          "should use HTTPS only"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "payplus_api": "vi.mock('@/lib/payments/payplus-client')",
+      "database": "vi.mock('@/lib/supabase/server')",
+      "crypto": "Use real crypto for signature tests"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Payment processed but order not updated",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Idempotent webhook processing, reconciliation job, payment status dashboard"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Duplicate charge to customer",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Idempotency key in payment session, order-payment one-to-one constraint"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Refund processed to wrong customer",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Admin-only refund endpoint, transaction ID verification, audit log"
+      },
+      {
+        "id": "HAZ-004",
+        "description": "API credentials exposed",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Environment variables only, never log credentials, secret rotation"
+      }
+    ],
+    "risk_level": "high"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any suspected fraudulent transaction patterns",
+      "API credential compromise",
+      "PCI compliance violation"
+    ],
+    "escalation_triggers": [
+      "Payment success rate < 90%",
+      "Webhook failure rate > 1%",
+      "Any refund dispute"
+    ],
+    "rollback_plan": "Disable PayPlus integration, show 'Payment temporarily unavailable' message"
+  },
+  "dependencies": {
+    "required_before": [
+      "CO-01",
+      "CO-02"
+    ],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-PAYMENTS",
+      "PRD-CHECKOUT"
+    ],
+    "epic": "PAYMENTS",
+    "related_stories": [
+      "CO-01",
+      "CO-02",
+      "CO-03",
+      "CO-04"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 19
+}

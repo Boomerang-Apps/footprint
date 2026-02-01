@@ -1,0 +1,259 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "UA-02",
+  "type": "feature",
+  "wave_number": "8",
+  "title": "Order Detail Page",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create detailed order view page showing complete order information including items, shipping details, payment summary, and delivery timeline",
+  "status": "backlog",
+  "objective": {
+    "as_a": "customer",
+    "i_want": "to view complete details of my order",
+    "so_that": "I can track progress and review what I purchased"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Display order header",
+      "ears_format": "WHEN page loads THEN show order number, date, and current status prominently",
+      "test_approach": "Verify header displays correct information"
+    },
+    {
+      "id": "AC-002",
+      "description": "Order items list",
+      "ears_format": "WHEN order has items THEN display each item with image, name, style, size, quantity, and price",
+      "test_approach": "Mock order with items, verify all displayed"
+    },
+    {
+      "id": "AC-003",
+      "description": "Item thumbnail preview",
+      "ears_format": "WHEN user clicks item thumbnail THEN open lightbox with larger preview",
+      "test_approach": "Click thumbnail, verify lightbox opens"
+    },
+    {
+      "id": "AC-004",
+      "description": "Shipping address section",
+      "ears_format": "WHEN order has shipping address THEN display formatted address with recipient name",
+      "test_approach": "Verify address displayed correctly"
+    },
+    {
+      "id": "AC-005",
+      "description": "Payment summary",
+      "ears_format": "WHEN order displays THEN show subtotal, shipping, discount (if any), and total",
+      "test_approach": "Verify all price lines displayed"
+    },
+    {
+      "id": "AC-006",
+      "description": "Order timeline",
+      "ears_format": "WHEN order has status history THEN display visual timeline with dates for each status change",
+      "test_approach": "Mock status history, verify timeline renders"
+    },
+    {
+      "id": "AC-007",
+      "description": "Tracking information",
+      "ears_format": "WHEN order shipped THEN display carrier, tracking number, and 'עקוב' button",
+      "test_approach": "Mock shipped order, verify tracking displayed"
+    },
+    {
+      "id": "AC-008",
+      "description": "Multi-shipment support",
+      "ears_format": "WHEN order has multiple shipments THEN display each shipment separately with its tracking",
+      "test_approach": "Mock multi-shipment order"
+    },
+    {
+      "id": "AC-009",
+      "description": "Gift options display",
+      "ears_format": "WHEN order is a gift THEN display gift message and wrapping style",
+      "test_approach": "Mock gift order, verify gift info shown"
+    },
+    {
+      "id": "AC-010",
+      "description": "Download invoice",
+      "ears_format": "WHEN order is paid THEN show 'הורד חשבונית' button to download PDF invoice",
+      "test_approach": "Verify download button, mock PDF generation"
+    },
+    {
+      "id": "AC-011",
+      "description": "Contact support",
+      "ears_format": "WHEN user needs help THEN show 'צור קשר לגבי הזמנה זו' button linking to support with order context",
+      "test_approach": "Verify support link includes order ID"
+    },
+    {
+      "id": "AC-012",
+      "description": "Reorder from details",
+      "ears_format": "WHEN user clicks 'הזמן שוב' THEN add all items to cart",
+      "test_approach": "Click reorder, verify cart populated"
+    },
+    {
+      "id": "AC-013",
+      "description": "Loading state",
+      "ears_format": "WHEN order loading THEN show skeleton layout",
+      "test_approach": "Set loading, verify skeletons"
+    },
+    {
+      "id": "AC-014",
+      "description": "Error handling",
+      "ears_format": "WHEN order not found THEN show 'הזמנה לא נמצאה' error with back link",
+      "test_approach": "Mock 404, verify error state"
+    },
+    {
+      "id": "AC-015",
+      "description": "Breadcrumb navigation",
+      "ears_format": "WHEN page renders THEN show breadcrumb: חשבון > הזמנות > #12345",
+      "test_approach": "Verify breadcrumb structure"
+    }
+  ],
+  "files": {
+    "create": [
+      "app/account/orders/[id]/page.tsx",
+      "app/account/orders/[id]/page.test.tsx",
+      "components/account/OrderDetailView.tsx",
+      "components/account/OrderDetailView.test.tsx",
+      "components/account/OrderTimeline.tsx",
+      "components/account/OrderTimeline.test.tsx",
+      "components/account/OrderItemCard.tsx",
+      "components/account/OrderItemCard.test.tsx",
+      "hooks/useOrderDetail.ts",
+      "hooks/useOrderDetail.test.tsx"
+    ],
+    "modify": [],
+    "forbidden": [
+      "app/api/*",
+      "lib/*"
+    ]
+  },
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Card.tsx",
+      "components/ui/Badge.tsx",
+      "components/ui/Button.tsx",
+      "components/ui/Skeleton.tsx",
+      "components/ui/Breadcrumb.tsx",
+      "components/ui/Dialog.tsx"
+    ],
+    "hooks": [
+      "useOrderDetail - fetch single order with items and shipments"
+    ],
+    "state_management": "React Query for server state"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/account/orders/[id]/page.test.tsx",
+      "components/account/OrderDetailView.test.tsx",
+      "components/account/OrderTimeline.test.tsx",
+      "components/account/OrderItemCard.test.tsx",
+      "hooks/useOrderDetail.test.tsx"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Order Display",
+        "count": 5,
+        "examples": [
+          "should display order header",
+          "should render all items",
+          "should show payment summary",
+          "should display shipping address",
+          "should show gift options if present"
+        ]
+      },
+      {
+        "name": "Timeline",
+        "count": 3,
+        "examples": [
+          "should render status timeline",
+          "should highlight current status",
+          "should show dates for each step"
+        ]
+      },
+      {
+        "name": "Tracking",
+        "count": 3,
+        "examples": [
+          "should display tracking number",
+          "should link to carrier tracking",
+          "should handle multiple shipments"
+        ]
+      },
+      {
+        "name": "Actions",
+        "count": 3,
+        "examples": [
+          "should download invoice",
+          "should add items to cart on reorder",
+          "should open support with context"
+        ]
+      },
+      {
+        "name": "States",
+        "count": 3,
+        "examples": [
+          "should show loading skeleton",
+          "should handle order not found",
+          "should show error with retry"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "hooks": "vi.mock('@/hooks/useOrderDetail')",
+      "router": "vi.mock('next/navigation')",
+      "pdf": "vi.mock('@/lib/pdf/invoice-generator')"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "User accesses another user's order detail",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "RLS on orders table, verify user_id matches session"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Invoice download exposes sensitive data",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Generate invoice server-side with auth check"
+      }
+    ],
+    "risk_level": "low"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any modification to order API authentication",
+      "Changes to invoice generation"
+    ],
+    "escalation_triggers": [
+      "User reports seeing wrong order"
+    ],
+    "rollback_plan": "Remove order detail route, redirect to order list"
+  },
+  "dependencies": {
+    "required_before": [
+      "UA-01"
+    ],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-USER-ACCOUNTS"
+    ],
+    "epic": "USER-ACCOUNTS",
+    "related_stories": [
+      "UA-01",
+      "AUTH-01"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 17
+}

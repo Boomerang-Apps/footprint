@@ -1,0 +1,239 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "UA-01",
+  "type": "feature",
+  "wave_number": "8",
+  "title": "Order History Page",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create a user-facing order history page showing all past orders with status, tracking info, and quick actions for reordering or viewing details",
+  "status": "backlog",
+  "objective": {
+    "as_a": "registered customer",
+    "i_want": "to view my order history",
+    "so_that": "I can track my purchases and reorder favorites"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Display order list",
+      "ears_format": "WHEN user navigates to /account/orders THEN display paginated list of their orders",
+      "test_approach": "Mock orders, verify list renders"
+    },
+    {
+      "id": "AC-002",
+      "description": "Order card information",
+      "ears_format": "WHEN order card renders THEN show order number, date, total, status badge, and thumbnail",
+      "test_approach": "Verify all fields displayed on card"
+    },
+    {
+      "id": "AC-003",
+      "description": "Sort by date",
+      "ears_format": "WHEN page loads THEN display orders sorted by date descending (newest first)",
+      "test_approach": "Verify sort order"
+    },
+    {
+      "id": "AC-004",
+      "description": "Filter by status",
+      "ears_format": "WHEN user selects status filter THEN show only orders matching that status",
+      "test_approach": "Select filter, verify filtered results"
+    },
+    {
+      "id": "AC-005",
+      "description": "Pagination",
+      "ears_format": "WHEN more than 10 orders THEN show pagination controls, load 10 per page",
+      "test_approach": "Mock >10 orders, verify pagination"
+    },
+    {
+      "id": "AC-006",
+      "description": "View order details",
+      "ears_format": "WHEN user clicks order card THEN navigate to /account/orders/[id]",
+      "test_approach": "Click card, verify navigation"
+    },
+    {
+      "id": "AC-007",
+      "description": "Track shipment",
+      "ears_format": "WHEN order has tracking THEN show 'עקוב אחרי משלוח' button linking to carrier tracking",
+      "test_approach": "Mock order with tracking, verify button and link"
+    },
+    {
+      "id": "AC-008",
+      "description": "Reorder action",
+      "ears_format": "WHEN user clicks 'הזמן שוב' THEN add same items to cart and navigate to checkout",
+      "test_approach": "Click reorder, verify cart populated"
+    },
+    {
+      "id": "AC-009",
+      "description": "Empty state",
+      "ears_format": "WHEN user has no orders THEN display 'אין הזמנות עדיין' message with shop CTA",
+      "test_approach": "Mock empty response, verify empty state"
+    },
+    {
+      "id": "AC-010",
+      "description": "Loading state",
+      "ears_format": "WHEN orders loading THEN display skeleton cards",
+      "test_approach": "Set loading state, verify skeletons"
+    },
+    {
+      "id": "AC-011",
+      "description": "Error state",
+      "ears_format": "WHEN API fails THEN display error message with retry button",
+      "test_approach": "Mock API error, verify error state"
+    },
+    {
+      "id": "AC-012",
+      "description": "RTL layout",
+      "ears_format": "WHEN page renders THEN use RTL layout with Hebrew labels",
+      "test_approach": "Verify dir='rtl' and Hebrew text"
+    },
+    {
+      "id": "AC-013",
+      "description": "Mobile responsive",
+      "ears_format": "WHEN viewport < 640px THEN cards stack vertically with touch-friendly targets",
+      "test_approach": "Test mobile viewport"
+    }
+  ],
+  "files": {
+    "create": [
+      "app/account/orders/page.tsx",
+      "app/account/orders/page.test.tsx",
+      "components/account/OrderHistoryList.tsx",
+      "components/account/OrderHistoryList.test.tsx",
+      "components/account/OrderHistoryCard.tsx",
+      "components/account/OrderHistoryCard.test.tsx",
+      "hooks/useOrderHistory.ts",
+      "hooks/useOrderHistory.test.tsx"
+    ],
+    "modify": [
+      "app/account/layout.tsx"
+    ],
+    "forbidden": [
+      "app/api/*",
+      "lib/*"
+    ]
+  },
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Card.tsx",
+      "components/ui/Badge.tsx",
+      "components/ui/Button.tsx",
+      "components/ui/Skeleton.tsx",
+      "components/ui/Select.tsx",
+      "components/ui/Pagination.tsx"
+    ],
+    "hooks": [
+      "useOrderHistory - fetch paginated orders with filters"
+    ],
+    "state_management": "React Query for server state"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/account/orders/page.test.tsx",
+      "components/account/OrderHistoryList.test.tsx",
+      "components/account/OrderHistoryCard.test.tsx",
+      "hooks/useOrderHistory.test.tsx"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Order Display",
+        "count": 4,
+        "examples": [
+          "should render order cards",
+          "should display all order info",
+          "should show status badge",
+          "should sort by date descending"
+        ]
+      },
+      {
+        "name": "Filtering & Pagination",
+        "count": 4,
+        "examples": [
+          "should filter by status",
+          "should paginate results",
+          "should load more on page change",
+          "should reset pagination on filter change"
+        ]
+      },
+      {
+        "name": "Actions",
+        "count": 3,
+        "examples": [
+          "should navigate to details on click",
+          "should open tracking link",
+          "should populate cart on reorder"
+        ]
+      },
+      {
+        "name": "States",
+        "count": 3,
+        "examples": [
+          "should show loading skeleton",
+          "should show empty state",
+          "should show error with retry"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "hooks": "vi.mock('@/hooks/useOrderHistory')",
+      "router": "vi.mock('next/navigation')",
+      "cart": "vi.mock('@/store/cartStore')"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "User sees another user's orders",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "RLS on orders table, verify user_id in API"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Reorder adds out-of-stock items",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Check stock before adding to cart, show warning"
+      }
+    ],
+    "risk_level": "low"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any modification to order API",
+      "Changes to authentication"
+    ],
+    "escalation_triggers": [
+      "User reports seeing wrong orders"
+    ],
+    "rollback_plan": "Remove order history route, hide nav link"
+  },
+  "dependencies": {
+    "required_before": [
+      "AUTH-01"
+    ],
+    "blocks": [
+      "UA-02"
+    ]
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-USER-ACCOUNTS"
+    ],
+    "epic": "USER-ACCOUNTS",
+    "related_stories": [
+      "AUTH-01",
+      "UA-02"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 14
+}

@@ -1,0 +1,249 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "AUTH-02",
+  "type": "feature",
+  "wave_number": "8",
+  "title": "Guest Checkout Option",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 8,
+  "description": "Allow customers to complete purchases without creating an account, reducing friction in the checkout flow while offering optional account creation post-purchase",
+  "status": "in_progress",
+  "objective": {
+    "as_a": "first-time customer",
+    "i_want": "to complete my purchase without creating an account",
+    "so_that": "I can buy quickly without the friction of registration"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Guest checkout option on auth gate",
+      "ears_format": "WHEN unauthenticated user reaches checkout THEN display 'המשך כאורח' (Continue as Guest) button alongside login options",
+      "test_approach": "Navigate to checkout without auth, verify guest button present"
+    },
+    {
+      "id": "AC-002",
+      "description": "Collect email for guest checkout",
+      "ears_format": "WHEN guest checkout selected THEN require email address for order confirmation and updates",
+      "test_approach": "Click guest button, verify email field required"
+    },
+    {
+      "id": "AC-003",
+      "description": "Email validation",
+      "ears_format": "WHEN guest enters email THEN validate format and show error for invalid emails",
+      "test_approach": "Enter invalid email, verify error message"
+    },
+    {
+      "id": "AC-004",
+      "description": "Skip account creation flow",
+      "ears_format": "WHEN guest email submitted THEN proceed directly to shipping address without password creation",
+      "test_approach": "Submit valid email, verify redirect to shipping step"
+    },
+    {
+      "id": "AC-005",
+      "description": "Create guest session",
+      "ears_format": "WHEN guest checkout initiated THEN create anonymous session with guestEmail stored in order state",
+      "test_approach": "Verify session created with guest flag"
+    },
+    {
+      "id": "AC-006",
+      "description": "Order confirmation sent to guest email",
+      "ears_format": "WHEN guest order completed THEN send confirmation email to provided address",
+      "test_approach": "Complete guest order, verify confirmation email sent"
+    },
+    {
+      "id": "AC-007",
+      "description": "Post-purchase account creation offer",
+      "ears_format": "WHEN guest reaches confirmation page THEN display 'צור חשבון לעקוב אחרי ההזמנה' option with password field",
+      "test_approach": "Complete guest order, verify account creation prompt"
+    },
+    {
+      "id": "AC-008",
+      "description": "Convert guest to registered user",
+      "ears_format": "WHEN guest creates account post-purchase THEN link order to new account and send verification email",
+      "test_approach": "Create account after guest purchase, verify order linked"
+    },
+    {
+      "id": "AC-009",
+      "description": "Guest order lookup by email",
+      "ears_format": "WHEN guest visits order status page THEN allow lookup by order number + email combination",
+      "test_approach": "Enter order number and email, verify order details shown"
+    },
+    {
+      "id": "AC-010",
+      "description": "Remember guest email",
+      "ears_format": "WHEN guest returns to site THEN pre-fill email from localStorage if previously used",
+      "test_approach": "Complete guest order, return to site, verify email pre-filled"
+    },
+    {
+      "id": "AC-011",
+      "description": "Guest checkout analytics",
+      "ears_format": "WHEN guest checkout used THEN track guest_checkout event with conversion data",
+      "test_approach": "Verify analytics event fired with correct properties"
+    },
+    {
+      "id": "AC-012",
+      "description": "RTL and Hebrew support",
+      "ears_format": "WHEN guest checkout renders THEN all labels in Hebrew with RTL layout",
+      "test_approach": "Verify Hebrew text and RTL direction"
+    }
+  ],
+  "files": {
+    "create": [
+      "components/auth/GuestCheckoutForm.tsx",
+      "components/auth/GuestCheckoutForm.test.tsx",
+      "components/auth/PostPurchaseSignup.tsx",
+      "components/auth/PostPurchaseSignup.test.tsx",
+      "components/orders/GuestOrderLookup.tsx",
+      "components/orders/GuestOrderLookup.test.tsx",
+      "lib/auth/guest-session.ts",
+      "lib/auth/guest-session.test.ts"
+    ],
+    "modify": [
+      "app/checkout/page.tsx",
+      "app/order-confirmation/[id]/page.tsx",
+      "store/orderStore.ts",
+      "types/auth.ts"
+    ],
+    "forbidden": [
+      "app/api/auth/*",
+      "supabase/functions/*"
+    ]
+  },
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Input.tsx",
+      "components/ui/Button.tsx",
+      "components/ui/Card.tsx",
+      "components/ui/Alert.tsx"
+    ],
+    "state_management": "Zustand for guest email, localStorage for persistence",
+    "session": "Anonymous Supabase session with guest metadata",
+    "analytics": "Track guest vs authenticated checkout conversions"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "components/auth/GuestCheckoutForm.test.tsx",
+      "components/auth/PostPurchaseSignup.test.tsx",
+      "components/orders/GuestOrderLookup.test.tsx",
+      "lib/auth/guest-session.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Guest Checkout Flow",
+        "count": 5,
+        "examples": [
+          "should show guest option on checkout gate",
+          "should require valid email",
+          "should proceed to shipping after email",
+          "should create guest session",
+          "should store guest email in order"
+        ]
+      },
+      {
+        "name": "Post-Purchase Signup",
+        "count": 4,
+        "examples": [
+          "should show signup prompt on confirmation",
+          "should create account with password",
+          "should link order to new account",
+          "should skip if dismissed"
+        ]
+      },
+      {
+        "name": "Order Lookup",
+        "count": 3,
+        "examples": [
+          "should require order number and email",
+          "should show order details on match",
+          "should show error on invalid combo"
+        ]
+      },
+      {
+        "name": "Email Persistence",
+        "count": 2,
+        "examples": [
+          "should save email to localStorage",
+          "should pre-fill on return visit"
+        ]
+      },
+      {
+        "name": "Analytics",
+        "count": 2,
+        "examples": [
+          "should track guest checkout start",
+          "should track conversion to account"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/client')",
+      "analytics": "vi.mock('@/lib/analytics')",
+      "localStorage": "Mock localStorage API"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Guest loses access to order without account",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Send order details via email, allow lookup by email+order number"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Spam orders from disposable emails",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Rate limiting by IP, email domain validation"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Guest email typo prevents order access",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Email confirmation step, show email in confirmation screen"
+      }
+    ],
+    "risk_level": "medium"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Modification to authentication endpoints",
+      "Changes to user creation logic"
+    ],
+    "escalation_triggers": [
+      "High rate of failed email deliveries",
+      "Suspicious order patterns from guest checkout"
+    ],
+    "rollback_plan": "Disable guest checkout button, require login for all purchases"
+  },
+  "dependencies": {
+    "required_before": [
+      "AUTH-01"
+    ],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-AUTH",
+      "PRD-CHECKOUT"
+    ],
+    "epic": "USER-AUTH",
+    "related_stories": [
+      "AUTH-01",
+      "CO-01",
+      "CO-04"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T21:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 16
+}

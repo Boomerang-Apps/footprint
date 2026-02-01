@@ -1,0 +1,98 @@
+{
+  "command": "/story-audit",
+  "scope": "wave 8",
+  "timestamp": "2026-02-01T21:45:00Z",
+  "result": "PASS",
+  "complianceScore": 100,
+  "summary": {
+    "storiesAudited": 7,
+    "passed": 7,
+    "warnings": 0,
+    "failed": 0
+  },
+  "stories": [
+    {
+      "storyId": "UP-05",
+      "title": "Face Detection Cropping",
+      "status": "in_progress",
+      "priority": "medium",
+      "storyPoints": 8,
+      "schema": { "status": "pass", "score": 100, "fields": 23 },
+      "acceptanceCriteria": { "status": "pass", "score": 100, "total": 10, "earsValid": 10 },
+      "tdd": { "status": "pass", "framework": "vitest", "coverage": 85, "tests": 15 },
+      "hazards": { "count": 3, "riskLevel": "medium" }
+    },
+    {
+      "storyId": "GF-04",
+      "title": "Gift Wrapping Option",
+      "status": "in_progress",
+      "priority": "medium",
+      "storyPoints": 5,
+      "schema": { "status": "pass", "score": 100, "fields": 23 },
+      "acceptanceCriteria": { "status": "pass", "score": 100, "total": 10, "earsValid": 10 },
+      "tdd": { "status": "pass", "framework": "vitest", "coverage": 90, "tests": 14 },
+      "hazards": { "count": 2, "riskLevel": "low" }
+    },
+    {
+      "storyId": "AUTH-02",
+      "title": "Guest Checkout Option",
+      "status": "in_progress",
+      "priority": "high",
+      "storyPoints": 8,
+      "schema": { "status": "pass", "score": 100, "fields": 23 },
+      "acceptanceCriteria": { "status": "pass", "score": 100, "total": 12, "earsValid": 12 },
+      "tdd": { "status": "pass", "framework": "vitest", "coverage": 90, "tests": 16 },
+      "hazards": { "count": 3, "riskLevel": "medium" }
+    },
+    {
+      "storyId": "CO-06",
+      "title": "PayPlus Israeli Payment Integration",
+      "status": "backlog",
+      "priority": "critical",
+      "storyPoints": 13,
+      "schema": { "status": "pass", "score": 100, "fields": 23 },
+      "acceptanceCriteria": { "status": "pass", "score": 100, "total": 14, "earsValid": 14 },
+      "tdd": { "status": "pass", "framework": "vitest", "coverage": 95, "tests": 19 },
+      "hazards": { "count": 4, "riskLevel": "high" }
+    },
+    {
+      "storyId": "AI-05",
+      "title": "Fast AI Transformation",
+      "status": "backlog",
+      "priority": "medium",
+      "storyPoints": 8,
+      "schema": { "status": "pass", "score": 100, "fields": 23 },
+      "acceptanceCriteria": { "status": "pass", "score": 100, "total": 12, "earsValid": 12 },
+      "tdd": { "status": "pass", "framework": "vitest", "coverage": 85, "tests": 19 },
+      "hazards": { "count": 3, "riskLevel": "medium" }
+    },
+    {
+      "storyId": "UA-01",
+      "title": "Order History Page",
+      "status": "backlog",
+      "priority": "high",
+      "storyPoints": 5,
+      "schema": { "status": "pass", "score": 100, "fields": 23 },
+      "acceptanceCriteria": { "status": "pass", "score": 100, "total": 13, "earsValid": 13 },
+      "tdd": { "status": "pass", "framework": "vitest", "coverage": 90, "tests": 14 },
+      "hazards": { "count": 2, "riskLevel": "low" }
+    },
+    {
+      "storyId": "UA-02",
+      "title": "Order Detail Page",
+      "status": "backlog",
+      "priority": "high",
+      "storyPoints": 5,
+      "schema": { "status": "pass", "score": 100, "fields": 23 },
+      "acceptanceCriteria": { "status": "pass", "score": 100, "total": 15, "earsValid": 15 },
+      "tdd": { "status": "pass", "framework": "vitest", "coverage": 90, "tests": 17 },
+      "hazards": { "count": 2, "riskLevel": "low" }
+    }
+  ],
+  "totals": {
+    "storyPoints": 52,
+    "acceptanceCriteria": 86,
+    "estimatedTests": 114,
+    "testFiles": 28
+  }
+}

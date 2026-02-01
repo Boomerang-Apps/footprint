@@ -360,7 +360,7 @@ export default function AdminOrderDetailPage() {
                   {order.giftMessage ? (
                     <div className="bg-pink-50 border border-pink-100 rounded-xl p-4">
                       <p className="text-sm text-zinc-700 italic">
-                        "{order.giftMessage}"
+                        &ldquo;{order.giftMessage}&rdquo;
                       </p>
                     </div>
                   ) : (
