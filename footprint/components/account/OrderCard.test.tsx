@@ -145,7 +145,7 @@ describe('OrderCard', () => {
 
   describe('Multiple Items', () => {
     it('displays first item and shows additional items count', () => {
-      const multiItemOrder = {
+      const multiItemOrder: Order = {
         ...mockOrder,
         items: [
           ...mockOrder.items,
@@ -154,10 +154,10 @@ describe('OrderCard', () => {
             orderId: 'demo_order_001',
             originalImageUrl: 'https://example.com/image2.jpg',
             transformedImageUrl: 'https://example.com/transformed2.jpg',
-            style: 'watercolor',
-            size: 'A3',
-            paperType: 'canvas',
-            frameType: 'white',
+            style: 'watercolor' as const,
+            size: 'A3' as const,
+            paperType: 'canvas' as const,
+            frameType: 'white' as const,
             price: 309,
             createdAt: new Date('2024-12-24T10:00:00'),
           },

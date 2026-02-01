@@ -104,36 +104,6 @@ async function OrderTrackingContent({ orderId }: { orderId: string }) {
     ? generateTrackingUrl(order.trackingNumber, order.carrier as CarrierCode)
     : null;
 
-  // Calculate estimated dates for timeline (mock implementation)
-  const estimatedDates = {
-    received: order.createdAt.toISOString().split('T')[0],
-    processing: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +1 day
-    shipped: order.status === 'shipped' && order.shippedAt
-      ? order.shippedAt.toISOString().split('T')[0]
-      : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +3 days
-    delivered: order.status === 'delivered' && order.deliveredAt
-      ? order.deliveredAt.toISOString().split('T')[0]
-      : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +7 days
-  };
-
-  // Map order status to timeline status
-  const getTimelineStatus = (status: string) => {
-    switch (status) {
-      case 'pending':
-      case 'paid':
-        return 'received';
-      case 'processing':
-      case 'printing':
-        return 'processing';
-      case 'shipped':
-        return 'shipped';
-      case 'delivered':
-        return 'delivered';
-      default:
-        return 'received';
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="space-y-8">
@@ -163,8 +133,7 @@ async function OrderTrackingContent({ orderId }: { orderId: string }) {
           </CardHeader>
           <CardContent>
             <OrderTimeline
-              currentStatus={getTimelineStatus(order.status) as any}
-              estimatedDates={estimatedDates}
+              currentStatus={order.status as any}
               layout="horizontal"
               className="py-4"
             />

@@ -1,6 +1,7 @@
 /**
  * OrderTimeline Component Tests
  * TDD Test Suite for UI-09: Price Display & Timeline Components
+ * Updated to match 5-step horizontal/vertical stepper implementation
  */
 
 import { describe, it, expect } from 'vitest';
@@ -9,166 +10,133 @@ import { OrderTimeline, type OrderStatus } from './OrderTimeline';
 
 describe('OrderTimeline', () => {
   describe('Rendering', () => {
-    it('renders all 4 order status steps', () => {
-      render(<OrderTimeline currentStatus="received" />);
+    it('renders all 5 order status steps', () => {
+      render(<OrderTimeline currentStatus="pending" />);
 
-      expect(screen.getByText('הזמנה התקבלה')).toBeInTheDocument();
+      expect(screen.getByText('התקבלה')).toBeInTheDocument();
+      expect(screen.getByText('שולם')).toBeInTheDocument();
       expect(screen.getByText('בהכנה')).toBeInTheDocument();
       expect(screen.getByText('נשלח')).toBeInTheDocument();
-      expect(screen.getByText('נמסר')).toBeInTheDocument();
+      expect(screen.getByText('הגיע')).toBeInTheDocument();
     });
 
     it('renders English labels when locale is en', () => {
-      render(<OrderTimeline currentStatus="received" locale="en" />);
+      render(<OrderTimeline currentStatus="pending" locale="en" />);
 
-      expect(screen.getByText('Order Received')).toBeInTheDocument();
-      expect(screen.getByText('Processing')).toBeInTheDocument();
+      expect(screen.getByText('Received')).toBeInTheDocument();
+      expect(screen.getByText('Paid')).toBeInTheDocument();
+      expect(screen.getByText('In Production')).toBeInTheDocument();
       expect(screen.getByText('Shipped')).toBeInTheDocument();
       expect(screen.getByText('Delivered')).toBeInTheDocument();
     });
 
     it('accepts custom className', () => {
       const { container } = render(
-        <OrderTimeline currentStatus="received" className="custom-class" />
+        <OrderTimeline currentStatus="pending" className="custom-class" />
       );
       expect(container.firstChild).toHaveClass('custom-class');
     });
   });
 
   describe('Current Status Highlighting', () => {
-    it('highlights received as current when status is received', () => {
-      render(<OrderTimeline currentStatus="received" />);
+    it('highlights first step as current when status is pending', () => {
+      render(<OrderTimeline currentStatus="pending" />);
 
-      const step = screen.getByTestId('status-received');
+      const step = screen.getByTestId('status-step-0');
       expect(step).toHaveAttribute('aria-current', 'step');
     });
 
-    it('highlights processing as current when status is processing', () => {
+    it('highlights second step as current when status is paid', () => {
+      render(<OrderTimeline currentStatus="paid" />);
+
+      const step = screen.getByTestId('status-step-1');
+      expect(step).toHaveAttribute('aria-current', 'step');
+    });
+
+    it('highlights third step as current when status is processing', () => {
       render(<OrderTimeline currentStatus="processing" />);
 
-      const step = screen.getByTestId('status-processing');
+      const step = screen.getByTestId('status-step-2');
       expect(step).toHaveAttribute('aria-current', 'step');
     });
 
-    it('highlights shipped as current when status is shipped', () => {
+    it('highlights fourth step as current when status is shipped', () => {
       render(<OrderTimeline currentStatus="shipped" />);
 
-      const step = screen.getByTestId('status-shipped');
+      const step = screen.getByTestId('status-step-3');
       expect(step).toHaveAttribute('aria-current', 'step');
     });
 
-    it('highlights delivered as current when status is delivered', () => {
+    it('highlights fifth step as current when status is delivered', () => {
       render(<OrderTimeline currentStatus="delivered" />);
 
-      const step = screen.getByTestId('status-delivered');
+      const step = screen.getByTestId('status-step-4');
       expect(step).toHaveAttribute('aria-current', 'step');
     });
 
     it('applies active styling to current status indicator', () => {
-      render(<OrderTimeline currentStatus="processing" />);
+      render(<OrderTimeline currentStatus="processing" layout="horizontal" />);
 
-      const indicator = screen.getByTestId('status-indicator-processing');
-      expect(indicator).toHaveClass('bg-brand-purple');
+      const indicator = screen.getByTestId('status-indicator-2');
+      expect(indicator).toHaveClass('bg-zinc-900');
     });
   });
 
   describe('Completed Steps', () => {
     it('shows checkmark for completed steps', () => {
-      render(<OrderTimeline currentStatus="shipped" />);
+      render(<OrderTimeline currentStatus="shipped" layout="horizontal" />);
 
-      // Received and Processing should be completed
-      expect(screen.getByTestId('status-check-received')).toBeInTheDocument();
-      expect(screen.getByTestId('status-check-processing')).toBeInTheDocument();
+      // First 3 steps (0, 1, 2) should show checkmarks
+      const indicator0 = screen.getByTestId('status-indicator-0');
+      const indicator1 = screen.getByTestId('status-indicator-1');
+      const indicator2 = screen.getByTestId('status-indicator-2');
+
+      expect(indicator0.querySelector('svg')).toBeInTheDocument();
+      expect(indicator1.querySelector('svg')).toBeInTheDocument();
+      expect(indicator2.querySelector('svg')).toBeInTheDocument();
     });
 
     it('does not show checkmark for current step', () => {
-      render(<OrderTimeline currentStatus="processing" />);
+      render(<OrderTimeline currentStatus="processing" layout="horizontal" />);
 
-      expect(screen.queryByTestId('status-check-processing')).not.toBeInTheDocument();
+      // Step 2 (processing) is current, should show number not checkmark
+      const indicator = screen.getByTestId('status-indicator-2');
+      expect(indicator).toHaveTextContent('3');
     });
 
     it('does not show checkmark for future steps', () => {
-      render(<OrderTimeline currentStatus="processing" />);
+      render(<OrderTimeline currentStatus="processing" layout="horizontal" />);
 
-      expect(screen.queryByTestId('status-check-shipped')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('status-check-delivered')).not.toBeInTheDocument();
+      // Steps 3 and 4 are future, should show numbers
+      const indicator3 = screen.getByTestId('status-indicator-3');
+      const indicator4 = screen.getByTestId('status-indicator-4');
+
+      expect(indicator3).toHaveTextContent('4');
+      expect(indicator4).toHaveTextContent('5');
     });
 
-    it('applies completed styling to completed indicators', () => {
-      render(<OrderTimeline currentStatus="shipped" />);
+    it('applies active styling to completed indicators', () => {
+      render(<OrderTimeline currentStatus="shipped" layout="horizontal" />);
 
-      const indicator = screen.getByTestId('status-indicator-received');
-      expect(indicator).toHaveClass('bg-brand-purple');
+      const indicator = screen.getByTestId('status-indicator-0');
+      expect(indicator).toHaveClass('bg-zinc-900');
     });
   });
 
   describe('Future Steps', () => {
     it('applies muted styling to future step indicators', () => {
-      render(<OrderTimeline currentStatus="received" />);
+      render(<OrderTimeline currentStatus="pending" layout="horizontal" />);
 
-      const indicator = screen.getByTestId('status-indicator-shipped');
-      expect(indicator).toHaveClass('bg-zinc-700');
-    });
-
-    it('applies muted styling to future step labels', () => {
-      render(<OrderTimeline currentStatus="received" />);
-
-      const step = screen.getByTestId('status-shipped');
-      const label = within(step).getByText('נשלח');
-      expect(label).toHaveClass('text-zinc-500');
-    });
-  });
-
-  describe('Connector Lines', () => {
-    it('renders connector lines between steps', () => {
-      render(<OrderTimeline currentStatus="received" />);
-
-      expect(screen.getByTestId('connector-received-processing')).toBeInTheDocument();
-      expect(screen.getByTestId('connector-processing-shipped')).toBeInTheDocument();
-      expect(screen.getByTestId('connector-shipped-delivered')).toBeInTheDocument();
-    });
-
-    it('applies active styling to completed connectors', () => {
-      render(<OrderTimeline currentStatus="shipped" />);
-
-      const connector = screen.getByTestId('connector-received-processing');
-      expect(connector).toHaveClass('bg-brand-purple');
-    });
-
-    it('applies muted styling to future connectors', () => {
-      render(<OrderTimeline currentStatus="received" />);
-
-      const connector = screen.getByTestId('connector-processing-shipped');
-      expect(connector).toHaveClass('bg-zinc-700');
-    });
-  });
-
-  describe('Estimated Dates', () => {
-    it('displays estimated dates when provided', () => {
-      const dates: Record<OrderStatus, string> = {
-        received: '2025-12-26',
-        processing: '2025-12-27',
-        shipped: '2025-12-28',
-        delivered: '2025-12-30',
-      };
-
-      render(<OrderTimeline currentStatus="received" estimatedDates={dates} />);
-
-      expect(screen.getByText('26/12')).toBeInTheDocument();
-      expect(screen.getByText('27/12')).toBeInTheDocument();
-    });
-
-    it('does not show dates when not provided', () => {
-      render(<OrderTimeline currentStatus="received" />);
-
-      expect(screen.queryByTestId('date-received')).not.toBeInTheDocument();
+      const indicator = screen.getByTestId('status-indicator-3');
+      expect(indicator).toHaveClass('bg-white');
+      expect(indicator).toHaveClass('text-zinc-400');
     });
   });
 
   describe('RTL Support', () => {
     it('applies RTL direction when locale is he', () => {
       const { container } = render(
-        <OrderTimeline currentStatus="received" locale="he" />
+        <OrderTimeline currentStatus="pending" locale="he" />
       );
 
       expect(container.firstChild).toHaveAttribute('dir', 'rtl');
@@ -176,14 +144,14 @@ describe('OrderTimeline', () => {
 
     it('applies LTR direction when locale is en', () => {
       const { container } = render(
-        <OrderTimeline currentStatus="received" locale="en" />
+        <OrderTimeline currentStatus="pending" locale="en" />
       );
 
       expect(container.firstChild).toHaveAttribute('dir', 'ltr');
     });
 
     it('defaults to Hebrew (RTL)', () => {
-      const { container } = render(<OrderTimeline currentStatus="received" />);
+      const { container } = render(<OrderTimeline currentStatus="pending" />);
 
       expect(container.firstChild).toHaveAttribute('dir', 'rtl');
     });
@@ -191,42 +159,35 @@ describe('OrderTimeline', () => {
 
   describe('Accessibility', () => {
     it('has proper nav role', () => {
-      render(<OrderTimeline currentStatus="received" />);
+      render(<OrderTimeline currentStatus="pending" />);
 
       expect(screen.getByRole('navigation')).toBeInTheDocument();
     });
 
     it('has aria-label for navigation', () => {
-      render(<OrderTimeline currentStatus="received" />);
+      render(<OrderTimeline currentStatus="pending" />);
 
       const nav = screen.getByRole('navigation');
       expect(nav).toHaveAttribute('aria-label', 'סטטוס הזמנה');
     });
 
     it('has English aria-label when locale is en', () => {
-      render(<OrderTimeline currentStatus="received" locale="en" />);
+      render(<OrderTimeline currentStatus="pending" locale="en" />);
 
       const nav = screen.getByRole('navigation');
       expect(nav).toHaveAttribute('aria-label', 'Order status');
     });
 
     it('uses ordered list for steps', () => {
-      render(<OrderTimeline currentStatus="received" />);
+      render(<OrderTimeline currentStatus="pending" />);
 
       expect(screen.getByRole('list')).toBeInTheDocument();
-    });
-
-    it('marks completed steps with aria-label', () => {
-      render(<OrderTimeline currentStatus="shipped" />);
-
-      const step = screen.getByTestId('status-received');
-      expect(step).toHaveAttribute('aria-label', expect.stringContaining('completed'));
     });
   });
 
   describe('Layout Variants', () => {
     it('renders vertical layout by default', () => {
-      const { container } = render(<OrderTimeline currentStatus="received" />);
+      const { container } = render(<OrderTimeline currentStatus="pending" />);
 
       const list = container.querySelector('ol');
       expect(list).toHaveClass('flex-col');
@@ -234,29 +195,53 @@ describe('OrderTimeline', () => {
 
     it('renders horizontal layout when specified', () => {
       const { container } = render(
-        <OrderTimeline currentStatus="received" layout="horizontal" />
+        <OrderTimeline currentStatus="pending" layout="horizontal" />
       );
 
       const list = container.querySelector('ol');
-      expect(list).toHaveClass('flex-row');
+      expect(list).not.toHaveClass('flex-col');
     });
   });
 
   describe('Edge Cases', () => {
     it('handles first status correctly', () => {
-      render(<OrderTimeline currentStatus="received" />);
+      render(<OrderTimeline currentStatus="pending" />);
 
-      expect(screen.queryByTestId('status-check-received')).not.toBeInTheDocument();
-      expect(screen.getByTestId('status-received')).toHaveAttribute('aria-current', 'step');
+      expect(screen.getByTestId('status-step-0')).toHaveAttribute('aria-current', 'step');
     });
 
     it('handles last status correctly (all previous completed)', () => {
-      render(<OrderTimeline currentStatus="delivered" />);
+      render(<OrderTimeline currentStatus="delivered" layout="horizontal" />);
 
-      expect(screen.getByTestId('status-check-received')).toBeInTheDocument();
-      expect(screen.getByTestId('status-check-processing')).toBeInTheDocument();
-      expect(screen.getByTestId('status-check-shipped')).toBeInTheDocument();
-      expect(screen.queryByTestId('status-check-delivered')).not.toBeInTheDocument();
+      // All previous steps should have checkmarks
+      const indicator0 = screen.getByTestId('status-indicator-0');
+      const indicator1 = screen.getByTestId('status-indicator-1');
+      const indicator2 = screen.getByTestId('status-indicator-2');
+      const indicator3 = screen.getByTestId('status-indicator-3');
+
+      expect(indicator0.querySelector('svg')).toBeInTheDocument();
+      expect(indicator1.querySelector('svg')).toBeInTheDocument();
+      expect(indicator2.querySelector('svg')).toBeInTheDocument();
+      expect(indicator3.querySelector('svg')).toBeInTheDocument();
+
+      // Current step shows number
+      const indicator4 = screen.getByTestId('status-indicator-4');
+      expect(indicator4).toHaveTextContent('5');
+    });
+
+    it('handles cancelled status', () => {
+      render(<OrderTimeline currentStatus="cancelled" />);
+
+      // Cancelled maps to step -1, so no step should be current
+      expect(screen.queryByTestId('status-step-0')).not.toHaveAttribute('aria-current');
+    });
+
+    it('handles printing status (maps to processing step)', () => {
+      render(<OrderTimeline currentStatus="printing" />);
+
+      // printing maps to step 2 (same as processing)
+      const step = screen.getByTestId('status-step-2');
+      expect(step).toHaveAttribute('aria-current', 'step');
     });
   });
 });

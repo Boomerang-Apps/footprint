@@ -5,6 +5,7 @@
  */
 
 import type { ApiClient } from './types';
+import type { Order, OrderStatus, OrderItem, StyleType, SizeType, PaperType, FrameType } from '@/types';
 
 // Helper for API requests to local Next.js routes
 async function apiFetch<T>(
@@ -61,7 +62,7 @@ export const supabaseClient: ApiClient = {
       return apiFetch(`/orders/${id}`);
     },
 
-    async list() {
+    async list(): Promise<Order[]> {
       // API returns { orders: [...], total: number }
       // Transform to array of Order objects
       interface ApiOrderItem {
@@ -88,25 +89,25 @@ export const supabaseClient: ApiClient = {
       const response = await apiFetch<{ orders: ApiOrder[]; total: number }>('/orders');
 
       // Map API response to Order type expected by hooks
-      return response.orders.map(order => ({
+      return response.orders.map((order): Order => ({
         id: order.id,
         orderNumber: order.orderNumber,
-        status: order.status,
+        status: order.status as OrderStatus,
         total: order.total / 100, // Convert agorot to shekels
         itemCount: order.itemCount,
-        createdAt: order.createdAt,
+        createdAt: new Date(order.createdAt),
         trackingNumber: order.trackingNumber,
         carrier: order.carrier,
         // Map items from API
-        items: order.items.map(item => ({
+        items: order.items.map((item): OrderItem => ({
           id: item.id,
           orderId: order.id,
           originalImageUrl: item.originalImageUrl,
           transformedImageUrl: item.transformedImageUrl,
-          style: item.style,
-          size: item.size,
-          paperType: 'matte',
-          frameType: item.frameType,
+          style: item.style as StyleType,
+          size: item.size as SizeType,
+          paperType: 'matte' as PaperType,
+          frameType: item.frameType as FrameType,
           price: 0,
           createdAt: new Date(order.createdAt),
         })),
@@ -119,13 +120,13 @@ export const supabaseClient: ApiClient = {
         giftMessage: null,
         giftWrap: false,
         scheduledDeliveryDate: null,
-        shippingAddress: { name: '', street: '', city: '', postalCode: '', phone: '' },
-        billingAddress: { name: '', street: '', city: '', postalCode: '', phone: '' },
+        shippingAddress: { name: '', street: '', city: '', postalCode: '', country: '' },
+        billingAddress: { name: '', street: '', city: '', postalCode: '', country: '' },
         stripePaymentIntentId: null,
         paidAt: null,
         shippedAt: null,
         deliveredAt: null,
-        updatedAt: order.createdAt,
+        updatedAt: new Date(order.createdAt),
       }));
     },
 
@@ -159,7 +160,15 @@ export const supabaseClient: ApiClient = {
       return [];
     },
     async calculatePrice() {
-      return { basePrice: 0, addons: 0, total: 0 };
+      return {
+        basePrice: 0,
+        paperModifier: 0,
+        framePrice: 0,
+        subtotal: 0,
+        shipping: 0,
+        discount: 0,
+        total: 0,
+      };
     },
   },
 

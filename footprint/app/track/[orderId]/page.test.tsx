@@ -84,13 +84,16 @@ vi.mock('@/components/ui/separator', () => ({
 }));
 
 // Sample order data - matches page.tsx expectations
-const mockOrder = {
+import type { Order } from '@/types/order';
+
+const mockOrder: Order = {
   id: 'ord_12345678',
   userId: 'user_123',
   status: 'shipped',
   items: [
     {
       id: 'item_1',
+      orderId: 'ord_12345678',
       originalImageUrl: 'https://example.com/original.jpg',
       transformedImageUrl: 'https://example.com/transformed.jpg',
       style: 'pop_art',
@@ -98,6 +101,7 @@ const mockOrder = {
       paperType: 'matte',
       frameType: 'black',
       price: 99.00,
+      createdAt: new Date('2024-01-10T10:00:00Z'),
     },
   ],
   subtotal: 99.00,
@@ -123,6 +127,8 @@ const mockOrder = {
     postalCode: '12345',
     country: 'Israel',
   },
+  stripePaymentIntentId: 'pi_123456789',
+  paidAt: new Date('2024-01-10T11:00:00Z'),
   trackingNumber: 'RR123456789IL',
   carrier: 'israel_post',
   shippedAt: new Date('2024-01-15T10:00:00Z'),
@@ -323,7 +329,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should call notFound when API returns null', async () => {
-      mockApiGet.mockResolvedValue(null);
+      mockApiGet.mockResolvedValue(null as unknown as Order);
 
       await expect(
         OrderTrackingPage({ params: { orderId: 'ord_12345678' } })

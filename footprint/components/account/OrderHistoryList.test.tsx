@@ -56,7 +56,7 @@ const { mockUseOrderHistory, mockOrderHistoryData } = vi.hoisted(() => {
     data: mockOrderHistoryData,
     isLoading: false,
     isError: false,
-    error: null,
+    error: null as Error | null,
     refetch: vi.fn(),
   }));
 
