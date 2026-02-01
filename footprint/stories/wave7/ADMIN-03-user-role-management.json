@@ -10,14 +10,12 @@
   "priority": "high",
   "story_points": 3,
   "description": "Create API endpoints for managing user roles (promote to admin, demote to user) and account status (activate/deactivate)",
-  "status": "pending",
-
+  "status": "complete",
   "objective": {
     "as_a": "Footprint admin",
     "i_want": "to manage user roles and account status",
     "so_that": "I can control access and moderate the platform"
   },
-
   "acceptance_criteria": [
     {
       "id": "AC-001",
@@ -81,7 +79,6 @@
       "test_approach": "Mock rate limiter, verify checkRateLimit called"
     }
   ],
-
   "files": {
     "create": [
       "app/api/admin/users/[id]/role/route.ts",
@@ -96,7 +93,6 @@
       "supabase/migrations/*"
     ]
   },
-
   "technical_requirements": {
     "reuse_components": [
       "lib/supabase/server.ts - createClient()",
@@ -108,8 +104,16 @@
       "admin_audit_log"
     ],
     "api_endpoints": [
-      { "method": "PATCH", "path": "/api/admin/users/:id/role", "description": "Update user admin status" },
-      { "method": "PATCH", "path": "/api/admin/users/:id/status", "description": "Update user account status" }
+      {
+        "method": "PATCH",
+        "path": "/api/admin/users/:id/role",
+        "description": "Update user admin status"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/users/:id/status",
+        "description": "Update user account status"
+      }
     ],
     "response_format": {
       "role_update": {
@@ -132,7 +136,6 @@
       }
     }
   },
-
   "tdd": {
     "test_framework": "vitest",
     "test_files": [
@@ -202,7 +205,6 @@
       "rate_limit": "vi.mock('@/lib/rate-limit')"
     }
   },
-
   "hazard_analysis": {
     "identified_hazards": [
       {
@@ -236,7 +238,6 @@
     ],
     "risk_level": "high"
   },
-
   "safety": {
     "stop_conditions": [
       "Any modification to authentication middleware",
@@ -250,22 +251,27 @@
     ],
     "rollback_plan": "Delete new role/status API endpoint files"
   },
-
   "dependencies": {
-    "required_before": ["ADMIN-02"],
+    "required_before": [
+      "ADMIN-02"
+    ],
     "blocks": []
   },
-
   "traceability": {
-    "requirements": ["PRD-ADMIN-USER-MGMT", "SEC-ROLE-MGMT"],
+    "requirements": [
+      "PRD-ADMIN-USER-MGMT",
+      "SEC-ROLE-MGMT"
+    ],
     "epic": "ADMIN-USERS",
-    "related_stories": ["ADMIN-01", "ADMIN-02", "ADMIN-04"]
+    "related_stories": [
+      "ADMIN-01",
+      "ADMIN-02",
+      "ADMIN-04"
+    ]
   },
-
   "metadata": {
     "created_at": "2026-02-01T12:00:00Z",
     "created_by": "claude-opus-4-5"
   },
-
   "estimated_tests": 18
 }

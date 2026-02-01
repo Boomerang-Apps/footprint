@@ -10,14 +10,12 @@
   "priority": "medium",
   "story_points": 3,
   "description": "Create admin user detail page showing full profile, order history, account actions, and activity timeline",
-  "status": "pending",
-
+  "status": "complete",
   "objective": {
     "as_a": "Footprint admin",
     "i_want": "to view complete user details and order history",
     "so_that": "I can provide customer support and manage accounts effectively"
   },
-
   "acceptance_criteria": [
     {
       "id": "AC-001",
@@ -116,7 +114,6 @@
       "test_approach": "Verify responsive layout on different screen sizes"
     }
   ],
-
   "files": {
     "create": [
       "app/admin/users/[id]/page.tsx",
@@ -140,7 +137,6 @@
       "lib/auth/admin.ts"
     ]
   },
-
   "technical_requirements": {
     "reuse_components": [
       "components/ui/Card.tsx",
@@ -157,7 +153,6 @@
     ],
     "state_management": "React Query for server state"
   },
-
   "tdd": {
     "test_framework": "vitest",
     "test_files": [
@@ -251,7 +246,6 @@
       "navigation": "vi.mock('next/navigation')"
     }
   },
-
   "hazard_analysis": {
     "identified_hazards": [
       {
@@ -278,7 +272,6 @@
     ],
     "risk_level": "medium"
   },
-
   "safety": {
     "stop_conditions": [
       "Any modification to authentication middleware",
@@ -290,22 +283,28 @@
     ],
     "rollback_plan": "Delete new admin user detail components and page files"
   },
-
   "dependencies": {
-    "required_before": ["ADMIN-01", "ADMIN-02", "ADMIN-03"],
+    "required_before": [
+      "ADMIN-01",
+      "ADMIN-02",
+      "ADMIN-03"
+    ],
     "blocks": []
   },
-
   "traceability": {
-    "requirements": ["PRD-ADMIN-USER-MGMT"],
+    "requirements": [
+      "PRD-ADMIN-USER-MGMT"
+    ],
     "epic": "ADMIN-USERS",
-    "related_stories": ["ADMIN-01", "ADMIN-02", "ADMIN-03"]
+    "related_stories": [
+      "ADMIN-01",
+      "ADMIN-02",
+      "ADMIN-03"
+    ]
   },
-
   "metadata": {
     "created_at": "2026-02-01T12:00:00Z",
     "created_by": "claude-opus-4-5"
   },
-
   "estimated_tests": 25
 }
