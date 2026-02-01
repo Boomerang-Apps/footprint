@@ -1,0 +1,254 @@
+{
+  "story_id": "ADMIN-04",
+  "wave_number": 7,
+  "title": "Admin User Detail Page",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "medium",
+  "story_points": 3,
+  "description": "Create admin user detail page showing full profile, order history, account actions, and activity timeline",
+  "status": "pending",
+
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to view complete user details and order history",
+    "so_that": "I can provide customer support and manage accounts effectively"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Page displays user profile card with avatar, name, email, phone",
+      "test_approach": "Mock useAdminUser hook, verify profile card rendered"
+    },
+    {
+      "id": "AC-002",
+      "description": "Page shows loading spinner while fetching user",
+      "test_approach": "Set isLoading=true in mock, verify spinner visible"
+    },
+    {
+      "id": "AC-003",
+      "description": "Page shows error state for non-existent user",
+      "test_approach": "Mock 404 response, verify error message displayed"
+    },
+    {
+      "id": "AC-004",
+      "description": "Profile card shows registration date and account status",
+      "test_approach": "Verify createdAt and status displayed in card"
+    },
+    {
+      "id": "AC-005",
+      "description": "Admin badge shown if user is admin",
+      "test_approach": "Mock user with isAdmin=true, verify badge visible"
+    },
+    {
+      "id": "AC-006",
+      "description": "Stats section shows order count, total spent, last order date",
+      "test_approach": "Verify stats section displays correct values"
+    },
+    {
+      "id": "AC-007",
+      "description": "Order history table shows user's orders with status, date, total",
+      "test_approach": "Mock orders array, verify table rendered"
+    },
+    {
+      "id": "AC-008",
+      "description": "Click order row navigates to order detail page",
+      "test_approach": "Click row, verify navigation to /admin/orders/[id]"
+    },
+    {
+      "id": "AC-009",
+      "description": "Addresses section shows user's saved addresses",
+      "test_approach": "Mock addresses array, verify addresses displayed"
+    },
+    {
+      "id": "AC-010",
+      "description": "Action buttons for Make Admin / Remove Admin",
+      "test_approach": "Click button, verify role mutation called"
+    },
+    {
+      "id": "AC-011",
+      "description": "Action button for Deactivate / Reactivate account",
+      "test_approach": "Click button, verify status mutation called"
+    },
+    {
+      "id": "AC-012",
+      "description": "Confirmation modal before role or status changes",
+      "test_approach": "Click action, verify confirmation modal appears"
+    },
+    {
+      "id": "AC-013",
+      "description": "Success/error toast after actions complete",
+      "test_approach": "Complete action, verify appropriate toast shown"
+    },
+    {
+      "id": "AC-014",
+      "description": "Back button navigates to users list",
+      "test_approach": "Click back, verify navigation to /admin/users"
+    },
+    {
+      "id": "AC-015",
+      "description": "Page is fully RTL with Hebrew labels",
+      "test_approach": "Verify dir='rtl' and Hebrew text for all labels"
+    },
+    {
+      "id": "AC-016",
+      "description": "Page is mobile-first responsive",
+      "test_approach": "Verify responsive layout on different screen sizes"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/admin/users/[id]/page.tsx",
+      "app/admin/users/[id]/page.test.tsx",
+      "components/admin/UserProfileCard.tsx",
+      "components/admin/UserProfileCard.test.tsx",
+      "components/admin/UserOrdersTable.tsx",
+      "components/admin/UserOrdersTable.test.tsx",
+      "components/admin/UserActions.tsx",
+      "components/admin/UserActions.test.tsx",
+      "hooks/useAdminUser.ts",
+      "hooks/useAdminUser.test.ts",
+      "hooks/useUpdateUserRole.ts",
+      "hooks/useUpdateUserRole.test.ts",
+      "hooks/useUpdateUserStatus.ts",
+      "hooks/useUpdateUserStatus.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "app/api/admin/users/*",
+      "lib/auth/admin.ts"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Card.tsx",
+      "components/ui/Badge.tsx",
+      "components/ui/Button.tsx",
+      "components/ui/Table.tsx",
+      "components/ui/Modal.tsx",
+      "components/ui/Avatar.tsx"
+    ],
+    "hooks": [
+      "useAdminUser - fetch single user with details",
+      "useUpdateUserRole - mutation to change admin status",
+      "useUpdateUserStatus - mutation to activate/deactivate"
+    ],
+    "state_management": "React Query for server state"
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/admin/users/[id]/page.test.tsx",
+      "components/admin/UserProfileCard.test.tsx",
+      "components/admin/UserOrdersTable.test.tsx",
+      "components/admin/UserActions.test.tsx",
+      "hooks/useAdminUser.test.ts",
+      "hooks/useUpdateUserRole.test.ts",
+      "hooks/useUpdateUserStatus.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Loading State",
+        "count": 2,
+        "examples": [
+          "should show loading spinner while fetching",
+          "should hide loading after fetch completes"
+        ]
+      },
+      {
+        "name": "Error State",
+        "count": 2,
+        "examples": [
+          "should show error for non-existent user",
+          "should show error on fetch failure"
+        ]
+      },
+      {
+        "name": "Profile Display",
+        "count": 5,
+        "examples": [
+          "should display user avatar",
+          "should display user name and email",
+          "should display registration date",
+          "should show admin badge for admins",
+          "should show account status"
+        ]
+      },
+      {
+        "name": "Stats Section",
+        "count": 3,
+        "examples": [
+          "should show order count",
+          "should show total spent",
+          "should show last order date"
+        ]
+      },
+      {
+        "name": "Order History",
+        "count": 3,
+        "examples": [
+          "should display orders table",
+          "should show order details in rows",
+          "should navigate to order on click"
+        ]
+      },
+      {
+        "name": "Actions",
+        "count": 5,
+        "examples": [
+          "should show make admin button for users",
+          "should show remove admin button for admins",
+          "should show confirmation modal",
+          "should call role mutation on confirm",
+          "should show success/error toast"
+        ]
+      },
+      {
+        "name": "Navigation",
+        "count": 2,
+        "examples": [
+          "should have back button",
+          "should navigate to /admin/users on back"
+        ]
+      },
+      {
+        "name": "RTL & Accessibility",
+        "count": 3,
+        "examples": [
+          "should have dir=rtl on container",
+          "should use Hebrew labels",
+          "should have proper ARIA attributes"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "hooks": "vi.mock('@/hooks/useAdminUser')",
+      "mutations": "vi.mock('@/hooks/useUpdateUserRole')",
+      "navigation": "vi.mock('next/navigation')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to authentication middleware",
+      "Changes to API endpoints"
+    ],
+    "escalation_triggers": [
+      "User data exposure to non-admins",
+      "Role change without confirmation"
+    ],
+    "rollback_plan": "Delete new admin user detail components and page files"
+  },
+
+  "dependencies": {
+    "required_before": ["ADMIN-01", "ADMIN-02", "ADMIN-03"],
+    "blocks": []
+  },
+
+  "estimated_tests": 25
+}

@@ -1,0 +1,267 @@
+{
+  "story_id": "ADMIN-02",
+  "wave_number": 7,
+  "title": "Admin Users API",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create RESTful API endpoints for admin user management with list, search, filtering, and pagination",
+  "status": "pending",
+
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to access user data via secure API endpoints",
+    "so_that": "I can integrate user management into the admin dashboard"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "GET /api/admin/users returns paginated list of all users",
+      "test_approach": "Mock admin auth and profiles, verify array response with pagination"
+    },
+    {
+      "id": "AC-002",
+      "description": "Endpoint requires admin role authentication",
+      "test_approach": "Test without auth (401), regular user (403), admin (200)"
+    },
+    {
+      "id": "AC-003",
+      "description": "Supports search by email or name query parameter",
+      "test_approach": "Test with ?search=john, verify filtered results"
+    },
+    {
+      "id": "AC-004",
+      "description": "Supports role filter (all, admin, user)",
+      "test_approach": "Test with ?role=admin, verify only admin users returned"
+    },
+    {
+      "id": "AC-005",
+      "description": "Supports date range filtering (registeredFrom, registeredTo)",
+      "test_approach": "Test with date range, verify users within range returned"
+    },
+    {
+      "id": "AC-006",
+      "description": "Supports sorting by created_at, name, order_count",
+      "test_approach": "Test with sortBy and sortOrder params"
+    },
+    {
+      "id": "AC-007",
+      "description": "Supports pagination with page and limit parameters",
+      "test_approach": "Test with page=2&limit=20, verify offset calculation"
+    },
+    {
+      "id": "AC-008",
+      "description": "GET /api/admin/users/[id] returns single user with full details",
+      "test_approach": "Request specific user, verify all profile fields returned"
+    },
+    {
+      "id": "AC-009",
+      "description": "GET /api/admin/users/[id] returns 404 for non-existent user",
+      "test_approach": "Request invalid UUID, expect 404 response"
+    },
+    {
+      "id": "AC-010",
+      "description": "Response includes order_count from orders aggregation",
+      "test_approach": "Mock user with orders, verify orderCount in response"
+    },
+    {
+      "id": "AC-011",
+      "description": "Response includes last_order_date from orders join",
+      "test_approach": "Mock user with orders, verify lastOrderDate in response"
+    },
+    {
+      "id": "AC-012",
+      "description": "Response uses camelCase (isAdmin not is_admin)",
+      "test_approach": "Verify response fields are camelCase"
+    },
+    {
+      "id": "AC-013",
+      "description": "GET /api/admin/users/stats returns user statistics",
+      "test_approach": "Verify totalUsers, newThisWeek, adminCount in response"
+    },
+    {
+      "id": "AC-014",
+      "description": "All endpoints apply rate limiting",
+      "test_approach": "Mock rate limiter, verify checkRateLimit called"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/api/admin/users/route.ts",
+      "app/api/admin/users/route.test.ts",
+      "app/api/admin/users/[id]/route.ts",
+      "app/api/admin/users/[id]/route.test.ts",
+      "app/api/admin/users/stats/route.ts",
+      "app/api/admin/users/stats/route.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "app/api/profile/route.ts",
+      "lib/auth/admin.ts",
+      "supabase/migrations/*"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "lib/supabase/server.ts - createClient()",
+      "lib/rate-limit.ts - checkRateLimit()"
+    ],
+    "database_tables": [
+      "profiles",
+      "orders"
+    ],
+    "response_format": {
+      "list": {
+        "users": "AdminUserSummary[]",
+        "total": "number",
+        "page": "number",
+        "limit": "number",
+        "totalPages": "number"
+      },
+      "single": {
+        "id": "string",
+        "email": "string",
+        "name": "string | null",
+        "phone": "string | null",
+        "avatarUrl": "string | null",
+        "preferredLanguage": "'he' | 'en'",
+        "isAdmin": "boolean",
+        "orderCount": "number",
+        "lastOrderDate": "string | null",
+        "totalSpent": "number",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "stats": {
+        "totalUsers": "number",
+        "newThisWeek": "number",
+        "newThisMonth": "number",
+        "adminCount": "number",
+        "activeUsers": "number"
+      }
+    }
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/admin/users/route.test.ts",
+      "app/api/admin/users/[id]/route.test.ts",
+      "app/api/admin/users/stats/route.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Authentication",
+        "count": 4,
+        "examples": [
+          "should return 401 when not authenticated",
+          "should return 403 for non-admin users",
+          "should return 200 for admin users (list)",
+          "should return 200 for admin users (single)"
+        ]
+      },
+      {
+        "name": "List Users",
+        "count": 3,
+        "examples": [
+          "should return paginated users",
+          "should include orderCount and lastOrderDate",
+          "should use camelCase in response"
+        ]
+      },
+      {
+        "name": "Search & Filter",
+        "count": 5,
+        "examples": [
+          "should search by email",
+          "should search by name",
+          "should filter by admin role",
+          "should filter by date range",
+          "should combine search and filters"
+        ]
+      },
+      {
+        "name": "Sorting",
+        "count": 3,
+        "examples": [
+          "should sort by created_at desc by default",
+          "should sort by order_count",
+          "should reject invalid sort fields"
+        ]
+      },
+      {
+        "name": "Pagination",
+        "count": 3,
+        "examples": [
+          "should use default pagination",
+          "should respect page and limit params",
+          "should calculate totalPages correctly"
+        ]
+      },
+      {
+        "name": "Single User",
+        "count": 3,
+        "examples": [
+          "should return user by ID",
+          "should return 404 for non-existent user",
+          "should include full profile details"
+        ]
+      },
+      {
+        "name": "Stats",
+        "count": 3,
+        "examples": [
+          "should return total user count",
+          "should return new users this week",
+          "should return admin count"
+        ]
+      },
+      {
+        "name": "Rate Limiting",
+        "count": 2,
+        "examples": [
+          "should apply rate limiting",
+          "should return 429 when rate limited"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 2,
+        "examples": [
+          "should return 500 on database error",
+          "should return 400 for invalid parameters"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "rate_limit": "vi.mock('@/lib/rate-limit')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to customer-facing profile endpoints",
+      "Changes to authentication middleware",
+      "Database schema changes"
+    ],
+    "escalation_triggers": [
+      "User data exposure to non-admins",
+      "Performance issues with large datasets",
+      "Password or sensitive data in response"
+    ],
+    "rollback_plan": "Delete new admin user API endpoint files"
+  },
+
+  "dependencies": {
+    "required_before": [],
+    "blocks": ["ADMIN-01", "ADMIN-03", "ADMIN-04"]
+  },
+
+  "estimated_tests": 28
+}

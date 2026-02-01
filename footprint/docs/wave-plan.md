@@ -35,18 +35,18 @@ Footprint is an Israeli e-commerce platform that transforms photos into AI-gener
 
 ---
 
-## Wave 3: Order Management (IN PROGRESS)
+## Wave 3: Order Management (COMPLETE)
 
-**Status:** 🔶 50% Complete | **Tests:** 150 passing
+**Status:** ✅ 100% Complete | **Tests:** 328 passing | **Coverage:** 90%+
 
 | Story ID | Title | Domain | Points | Status |
 |----------|-------|--------|--------|--------|
 | UI-04A | Order Details API | Backend | 5 | ✅ Complete |
 | BE-03 | Admin Orders List API | Backend | 5 | ✅ Complete |
-| UI-04B | Order Tracking Page | Frontend | 5 | ⏳ Pending |
-| UI-04C | Order History Page | Frontend | 5 | ⏳ Pending |
+| UI-04B | Order Tracking Page | Frontend | 5 | ✅ Complete |
+| UI-04C | Order History Page | Frontend | 5 | ✅ Complete |
 
-**Features:**
+**Features Delivered:**
 - Order details API with items, pricing, addresses
 - Admin orders list with filtering, sorting, pagination
 - Order tracking page with timeline component
@@ -54,22 +54,23 @@ Footprint is an Israeli e-commerce platform that transforms photos into AI-gener
 
 ---
 
-## Wave 4: Customer Account (PLANNED)
+## Wave 4: Customer Account (COMPLETE)
 
-**Status:** 📋 Planned | **Points:** 16
+**Status:** ✅ 100% Complete | **Tests:** 265 passing | **Coverage:** 90%+
 
-| Story ID | Title | Domain | Points | Priority |
-|----------|-------|--------|--------|----------|
-| UI-05A | User Profile Settings | Frontend | 3 | P1 |
-| UI-05B | Saved Addresses Management | Frontend | 5 | P1 |
-| BE-04 | User Profile API | Backend | 3 | P1 |
-| BE-05 | Addresses CRUD API | Backend | 5 | P1 |
+| Story ID | Title | Domain | Points | Status |
+|----------|-------|--------|--------|--------|
+| UI-05A | User Profile Settings | Frontend | 3 | ✅ Complete |
+| UI-05B | Saved Addresses Management | Frontend | 5 | ✅ Complete |
+| BE-04 | User Profile API | Backend | 3 | ✅ Complete |
+| BE-05 | Addresses CRUD API | Backend | 5 | ✅ Complete |
 
-**Features:**
+**Features Delivered:**
 - User profile editing (name, email, phone, avatar)
+- Avatar upload with validation
 - Saved shipping/billing addresses
 - Default address selection
-- Address validation
+- Address validation (Israeli postal codes)
 
 ---
 
@@ -111,7 +112,25 @@ Footprint is an Israeli e-commerce platform that transforms photos into AI-gener
 
 ## Wave 7: Admin Enhancements (PLANNED)
 
-**Status:** 📋 Planned | **Points:** 24
+**Status:** 📋 Planned | **Points:** 40
+
+### Admin User Management (NEW)
+
+| Story ID | Title | Domain | Points | Priority |
+|----------|-------|--------|--------|----------|
+| ADMIN-01 | Admin Users List Page | Frontend | 5 | P1 |
+| ADMIN-02 | Admin Users API | Backend | 5 | P1 |
+| ADMIN-03 | Admin User Role Management | Backend | 3 | P1 |
+| ADMIN-04 | Admin User Detail Page | Frontend | 3 | P2 |
+
+**Features:**
+- View all registered users with search/filter
+- User detail view with order history
+- Promote/demote admin roles
+- Activate/deactivate user accounts
+- User statistics dashboard
+
+### Admin Fulfillment (Original)
 
 | Story ID | Title | Domain | Points | Priority |
 |----------|-------|--------|--------|----------|
@@ -164,12 +183,13 @@ Footprint is an Israeli e-commerce platform that transforms photos into AI-gener
 
 ## Key Metrics
 
-| Metric | Wave 1 | Wave 3 | Target |
-|--------|--------|--------|--------|
-| Unit Tests | 446 | 150 | 90%+ coverage |
-| E2E Tests | 20 | - | All critical paths |
-| Story Points | 41 | 20 | - |
-| Stories Complete | 8/8 | 2/4 | - |
+| Metric | Wave 1 | Wave 3 | Wave 4 | Total |
+|--------|--------|--------|--------|-------|
+| Unit Tests | 446 | 328 | 265 | 1860+ |
+| E2E Tests | 20 | 15 | 10 | 45+ |
+| Story Points | 41 | 20 | 16 | 77 |
+| Stories Complete | 8/8 | 4/4 | 4/4 | 16/16 |
+| Coverage | 90%+ | 90%+ | 90%+ | 90%+ |
 
 ---
 

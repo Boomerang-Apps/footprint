@@ -1,0 +1,208 @@
+{
+  "story_id": "ADMIN-03",
+  "wave_number": 7,
+  "title": "Admin User Role Management",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
+  "story_points": 3,
+  "description": "Create API endpoints for managing user roles (promote to admin, demote to user) and account status (activate/deactivate)",
+  "status": "pending",
+
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to manage user roles and account status",
+    "so_that": "I can control access and moderate the platform"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "PATCH /api/admin/users/[id]/role updates user admin status",
+      "test_approach": "Send isAdmin=true, verify database updated"
+    },
+    {
+      "id": "AC-002",
+      "description": "Endpoint requires admin role authentication",
+      "test_approach": "Test without auth (401), regular user (403), admin (200)"
+    },
+    {
+      "id": "AC-003",
+      "description": "Admin cannot demote themselves",
+      "test_approach": "Try to set own isAdmin=false, expect 400 error"
+    },
+    {
+      "id": "AC-004",
+      "description": "Returns 404 for non-existent user",
+      "test_approach": "Try to update invalid UUID, expect 404"
+    },
+    {
+      "id": "AC-005",
+      "description": "PATCH /api/admin/users/[id]/status updates account status",
+      "test_approach": "Send status='inactive', verify database updated"
+    },
+    {
+      "id": "AC-006",
+      "description": "Deactivating user logs them out of all sessions",
+      "test_approach": "Mock Supabase admin API, verify signOut called"
+    },
+    {
+      "id": "AC-007",
+      "description": "Admin cannot deactivate themselves",
+      "test_approach": "Try to deactivate own account, expect 400 error"
+    },
+    {
+      "id": "AC-008",
+      "description": "Status change is logged in audit table",
+      "test_approach": "Change status, verify audit log entry created"
+    },
+    {
+      "id": "AC-009",
+      "description": "Response includes updated user object",
+      "test_approach": "Verify response contains updated user data"
+    },
+    {
+      "id": "AC-010",
+      "description": "All endpoints apply rate limiting",
+      "test_approach": "Mock rate limiter, verify checkRateLimit called"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/api/admin/users/[id]/role/route.ts",
+      "app/api/admin/users/[id]/role/route.test.ts",
+      "app/api/admin/users/[id]/status/route.ts",
+      "app/api/admin/users/[id]/status/route.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "app/api/profile/route.ts",
+      "lib/auth/admin.ts",
+      "supabase/migrations/*"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "lib/supabase/server.ts - createClient()",
+      "lib/supabase/admin.ts - admin client for session invalidation",
+      "lib/rate-limit.ts - checkRateLimit()"
+    ],
+    "database_tables": [
+      "profiles",
+      "admin_audit_log"
+    ],
+    "response_format": {
+      "role_update": {
+        "success": "boolean",
+        "user": {
+          "id": "string",
+          "email": "string",
+          "isAdmin": "boolean",
+          "updatedAt": "string"
+        }
+      },
+      "status_update": {
+        "success": "boolean",
+        "user": {
+          "id": "string",
+          "email": "string",
+          "status": "'active' | 'inactive' | 'suspended'",
+          "updatedAt": "string"
+        }
+      }
+    }
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/admin/users/[id]/role/route.test.ts",
+      "app/api/admin/users/[id]/status/route.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Authentication",
+        "count": 4,
+        "examples": [
+          "should return 401 when not authenticated",
+          "should return 403 for non-admin users",
+          "should return 200 for admin users (role)",
+          "should return 200 for admin users (status)"
+        ]
+      },
+      {
+        "name": "Role Management",
+        "count": 4,
+        "examples": [
+          "should promote user to admin",
+          "should demote admin to user",
+          "should prevent self-demotion",
+          "should return 404 for non-existent user"
+        ]
+      },
+      {
+        "name": "Status Management",
+        "count": 4,
+        "examples": [
+          "should deactivate user account",
+          "should reactivate user account",
+          "should prevent self-deactivation",
+          "should log out deactivated user"
+        ]
+      },
+      {
+        "name": "Audit Logging",
+        "count": 2,
+        "examples": [
+          "should log role changes",
+          "should log status changes"
+        ]
+      },
+      {
+        "name": "Rate Limiting",
+        "count": 2,
+        "examples": [
+          "should apply rate limiting",
+          "should return 429 when rate limited"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 2,
+        "examples": [
+          "should return 500 on database error",
+          "should return 400 for invalid input"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "supabase_admin": "vi.mock('@/lib/supabase/admin')",
+      "rate_limit": "vi.mock('@/lib/rate-limit')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to authentication middleware",
+      "Changes to customer-facing endpoints",
+      "Database schema changes"
+    ],
+    "escalation_triggers": [
+      "Role escalation vulnerabilities",
+      "Unauthorized privilege changes",
+      "Session invalidation failures"
+    ],
+    "rollback_plan": "Delete new role/status API endpoint files"
+  },
+
+  "dependencies": {
+    "required_before": ["ADMIN-02"],
+    "blocks": []
+  },
+
+  "estimated_tests": 18
+}

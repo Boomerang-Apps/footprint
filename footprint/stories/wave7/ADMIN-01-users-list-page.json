@@ -1,0 +1,230 @@
+{
+  "story_id": "ADMIN-01",
+  "wave_number": 7,
+  "title": "Admin Users List Page",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create admin users management page with list view, search, filtering, and quick actions for user management",
+  "status": "pending",
+
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to view and search all registered users",
+    "so_that": "I can manage user accounts and monitor platform usage"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Page displays paginated list of all users",
+      "test_approach": "Mock useAdminUsers hook with users, verify table rendered with pagination"
+    },
+    {
+      "id": "AC-002",
+      "description": "Page shows loading spinner while fetching users",
+      "test_approach": "Set isLoading=true in mock, verify spinner visible"
+    },
+    {
+      "id": "AC-003",
+      "description": "Page shows empty state when no users match filters",
+      "test_approach": "Mock empty users array, verify empty state message"
+    },
+    {
+      "id": "AC-004",
+      "description": "Each user row shows email, name, registration date, order count, role",
+      "test_approach": "Verify user row contains all required fields"
+    },
+    {
+      "id": "AC-005",
+      "description": "Admin users are visually distinguished with badge",
+      "test_approach": "Mock user with isAdmin=true, verify admin badge displayed"
+    },
+    {
+      "id": "AC-006",
+      "description": "Search input filters users by email or name",
+      "test_approach": "Type in search, verify API called with search param"
+    },
+    {
+      "id": "AC-007",
+      "description": "Filter tabs for All, Active, Admin users",
+      "test_approach": "Click filter tab, verify API called with role filter"
+    },
+    {
+      "id": "AC-008",
+      "description": "Sort by registration date, order count, name",
+      "test_approach": "Click column header, verify sort order changes"
+    },
+    {
+      "id": "AC-009",
+      "description": "Click user row navigates to user detail page",
+      "test_approach": "Click row, verify navigation to /admin/users/[id]"
+    },
+    {
+      "id": "AC-010",
+      "description": "Quick action menu with View, Make Admin, Deactivate options",
+      "test_approach": "Click action button, verify dropdown menu appears"
+    },
+    {
+      "id": "AC-011",
+      "description": "Stats cards show total users, new this week, admin count",
+      "test_approach": "Verify stats cards rendered with correct values"
+    },
+    {
+      "id": "AC-012",
+      "description": "Page is fully RTL with Hebrew labels",
+      "test_approach": "Verify dir='rtl' and Hebrew text for all labels"
+    },
+    {
+      "id": "AC-013",
+      "description": "Page is mobile-first responsive",
+      "test_approach": "Verify responsive classes on container and table"
+    },
+    {
+      "id": "AC-014",
+      "description": "Pagination controls for page navigation",
+      "test_approach": "Click next page, verify API called with page param"
+    }
+  ],
+
+  "files": {
+    "create": [
+      "app/admin/users/page.tsx",
+      "app/admin/users/page.test.tsx",
+      "components/admin/UsersList.tsx",
+      "components/admin/UsersList.test.tsx",
+      "components/admin/UserRow.tsx",
+      "components/admin/UserRow.test.tsx",
+      "hooks/useAdminUsers.ts",
+      "hooks/useAdminUsers.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "app/api/admin/users/*",
+      "lib/auth/admin.ts"
+    ]
+  },
+
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Input.tsx",
+      "components/ui/Button.tsx",
+      "components/ui/Badge.tsx",
+      "components/ui/Table.tsx",
+      "components/ui/Dropdown.tsx"
+    ],
+    "hooks": [
+      "useAdminUsers - fetch paginated users with filters"
+    ],
+    "state_management": "React Query for server state"
+  },
+
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/admin/users/page.test.tsx",
+      "components/admin/UsersList.test.tsx",
+      "components/admin/UserRow.test.tsx",
+      "hooks/useAdminUsers.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Loading State",
+        "count": 2,
+        "examples": [
+          "should show loading spinner while fetching",
+          "should hide loading after fetch completes"
+        ]
+      },
+      {
+        "name": "Empty State",
+        "count": 2,
+        "examples": [
+          "should show empty message when no users",
+          "should show empty message when filter has no results"
+        ]
+      },
+      {
+        "name": "Users List",
+        "count": 5,
+        "examples": [
+          "should render all users in table",
+          "should highlight admin users with badge",
+          "should show user details on each row",
+          "should navigate to detail on row click",
+          "should show quick action menu"
+        ]
+      },
+      {
+        "name": "Search & Filter",
+        "count": 4,
+        "examples": [
+          "should filter by search query",
+          "should filter by role tab",
+          "should combine search and filter",
+          "should debounce search input"
+        ]
+      },
+      {
+        "name": "Sorting",
+        "count": 3,
+        "examples": [
+          "should sort by registration date",
+          "should sort by order count",
+          "should toggle sort direction"
+        ]
+      },
+      {
+        "name": "Pagination",
+        "count": 3,
+        "examples": [
+          "should show pagination controls",
+          "should navigate between pages",
+          "should update page size"
+        ]
+      },
+      {
+        "name": "Stats Cards",
+        "count": 2,
+        "examples": [
+          "should display total user count",
+          "should display admin count"
+        ]
+      },
+      {
+        "name": "RTL & Accessibility",
+        "count": 3,
+        "examples": [
+          "should have dir=rtl on container",
+          "should use Hebrew labels",
+          "should have proper ARIA attributes"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "hooks": "vi.mock('@/hooks/useAdminUsers')",
+      "navigation": "vi.mock('next/navigation')"
+    }
+  },
+
+  "safety": {
+    "stop_conditions": [
+      "Any modification to authentication middleware",
+      "Changes to API endpoints"
+    ],
+    "escalation_triggers": [
+      "User data exposure to non-admins",
+      "Role escalation vulnerabilities"
+    ],
+    "rollback_plan": "Delete new admin user components and page files"
+  },
+
+  "dependencies": {
+    "required_before": ["ADMIN-02"],
+    "blocks": ["ADMIN-04"]
+  },
+
+  "estimated_tests": 24
+}
