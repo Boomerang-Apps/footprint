@@ -1,0 +1,294 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "BE-07",
+  "type": "feature",
+  "wave_number": "7b",
+  "title": "Bulk Order Operations API",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Create API endpoints for bulk order operations including batch status updates, batch assignments, and fulfillment workflow actions",
+  "status": "pending",
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to update multiple orders at once via API",
+    "so_that": "I can efficiently process large volumes of orders during fulfillment"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Bulk status update endpoint",
+      "ears_format": "WHEN admin POSTs to /api/admin/orders/bulk-status with orderIds and newStatus THEN update all specified orders and return success count",
+      "test_approach": "Mock Supabase update, verify all orders updated"
+    },
+    {
+      "id": "AC-002",
+      "description": "Validate status transitions",
+      "ears_format": "WHEN bulk update includes invalid status transition THEN reject those orders with error details, process valid ones",
+      "test_approach": "Include invalid transition, verify partial success with errors"
+    },
+    {
+      "id": "AC-003",
+      "description": "Limit batch size to 100 orders",
+      "ears_format": "WHEN request includes more than 100 orderIds THEN return 400 with 'מקסימום 100 הזמנות בפעולה אחת' error",
+      "test_approach": "Send 101 orderIds, verify 400 response"
+    },
+    {
+      "id": "AC-004",
+      "description": "Record status history for each order",
+      "ears_format": "WHEN order status changes THEN insert record into order_status_history with timestamp and admin_id",
+      "test_approach": "Verify order_status_history insert for each order"
+    },
+    {
+      "id": "AC-005",
+      "description": "Return detailed results",
+      "ears_format": "WHEN bulk operation completes THEN return { success: number, failed: number, errors: [{orderId, reason}] }",
+      "test_approach": "Verify response structure with success and failed counts"
+    },
+    {
+      "id": "AC-006",
+      "description": "Fulfillment orders list endpoint",
+      "ears_format": "WHEN admin GETs /api/admin/fulfillment/orders THEN return orders grouped by status with pagination",
+      "test_approach": "Mock orders, verify grouped response structure"
+    },
+    {
+      "id": "AC-007",
+      "description": "Filter by date range",
+      "ears_format": "WHEN request includes startDate and endDate params THEN return only orders created within that range",
+      "test_approach": "Set date params, verify date filter applied"
+    },
+    {
+      "id": "AC-008",
+      "description": "Filter by product attributes",
+      "ears_format": "WHEN request includes size, paper, or frame params THEN return orders containing items matching those attributes",
+      "test_approach": "Set product filter, verify filtered results"
+    },
+    {
+      "id": "AC-009",
+      "description": "Search by order number or customer",
+      "ears_format": "WHEN request includes search param THEN return orders matching orderNumber or customer name/email",
+      "test_approach": "Set search param, verify search applied"
+    },
+    {
+      "id": "AC-010",
+      "description": "Include fulfillment stats in response",
+      "ears_format": "WHEN fetching fulfillment orders THEN include stats: pendingCount, printingCount, readyCount, shippedTodayCount",
+      "test_approach": "Verify stats object in response"
+    },
+    {
+      "id": "AC-011",
+      "description": "Single order status update",
+      "ears_format": "WHEN admin PATCHes /api/admin/orders/[id]/fulfillment-status THEN update order status and return updated order",
+      "test_approach": "Mock single update, verify response"
+    },
+    {
+      "id": "AC-012",
+      "description": "Admin authentication required",
+      "ears_format": "WHEN request lacks valid admin session THEN return 401 'נדרשת הרשאת מנהל'",
+      "test_approach": "Request without auth, verify 401 response"
+    },
+    {
+      "id": "AC-013",
+      "description": "Rate limit bulk operations",
+      "ears_format": "WHEN admin exceeds 10 bulk operations per minute THEN return 429 'יותר מדי בקשות'",
+      "threshold": "rate: 10/minute",
+      "test_approach": "Mock rate limit exceeded, verify 429 response"
+    },
+    {
+      "id": "AC-014",
+      "description": "Audit log for bulk operations",
+      "ears_format": "WHEN bulk operation completes THEN log action to admin_audit_log with admin_id, action, affected_orders",
+      "test_approach": "Verify audit log insert"
+    },
+    {
+      "id": "AC-015",
+      "description": "Handle database errors gracefully",
+      "ears_format": "WHEN database error occurs THEN return 500 with 'שגיאת מערכת' and log error details",
+      "test_approach": "Mock database error, verify 500 response and logging"
+    }
+  ],
+  "files": {
+    "create": [
+      "app/api/admin/orders/bulk-status/route.ts",
+      "app/api/admin/orders/bulk-status/route.test.ts",
+      "app/api/admin/fulfillment/orders/route.ts",
+      "app/api/admin/fulfillment/orders/route.test.ts",
+      "app/api/admin/orders/[id]/fulfillment-status/route.ts",
+      "app/api/admin/orders/[id]/fulfillment-status/route.test.ts",
+      "lib/fulfillment/status-transitions.ts",
+      "lib/fulfillment/status-transitions.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "app/admin/fulfillment/*",
+      "components/admin/*"
+    ]
+  },
+  "technical_requirements": {
+    "database_tables": [
+      "orders - status field update",
+      "order_status_history - new entries",
+      "admin_audit_log - bulk action logging"
+    ],
+    "status_values": [
+      "pending",
+      "printing",
+      "ready_to_ship",
+      "shipped",
+      "delivered",
+      "cancelled"
+    ],
+    "valid_transitions": {
+      "pending": ["printing", "cancelled"],
+      "printing": ["ready_to_ship", "pending"],
+      "ready_to_ship": ["shipped", "printing"],
+      "shipped": ["delivered"],
+      "delivered": [],
+      "cancelled": []
+    },
+    "rate_limiting": "Upstash Redis with 10 req/min for bulk endpoints"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/admin/orders/bulk-status/route.test.ts",
+      "app/api/admin/fulfillment/orders/route.test.ts",
+      "app/api/admin/orders/[id]/fulfillment-status/route.test.ts",
+      "lib/fulfillment/status-transitions.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Bulk Status Update",
+        "count": 6,
+        "examples": [
+          "should update all orders successfully",
+          "should handle partial failures",
+          "should reject invalid transitions",
+          "should limit batch size to 100",
+          "should return detailed results",
+          "should record status history"
+        ]
+      },
+      {
+        "name": "Fulfillment Orders List",
+        "count": 5,
+        "examples": [
+          "should return orders grouped by status",
+          "should filter by date range",
+          "should filter by product attributes",
+          "should search by order number",
+          "should include fulfillment stats"
+        ]
+      },
+      {
+        "name": "Single Status Update",
+        "count": 3,
+        "examples": [
+          "should update single order status",
+          "should validate status transition",
+          "should return updated order"
+        ]
+      },
+      {
+        "name": "Authentication",
+        "count": 2,
+        "examples": [
+          "should require admin authentication",
+          "should reject non-admin users"
+        ]
+      },
+      {
+        "name": "Rate Limiting",
+        "count": 2,
+        "examples": [
+          "should enforce rate limit on bulk operations",
+          "should return 429 when limit exceeded"
+        ]
+      },
+      {
+        "name": "Audit Logging",
+        "count": 2,
+        "examples": [
+          "should log bulk operations",
+          "should include affected order IDs"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 3,
+        "examples": [
+          "should handle database errors",
+          "should return appropriate error messages",
+          "should log errors for debugging"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "rate_limit": "vi.mock('@/lib/rate-limit')"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Mass incorrect status update affecting many orders",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Batch size limit of 100, status transition validation, audit logging"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Status history not recorded due to transaction failure",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Use database transaction for status update and history insert"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Rate limit bypass allowing system overload",
+        "severity": "major",
+        "likelihood": "improbable",
+        "mitigation": "Redis-based rate limiting with strict enforcement"
+      }
+    ],
+    "risk_level": "medium"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any modification to payment processing",
+      "Changes to order creation logic"
+    ],
+    "escalation_triggers": [
+      "Bulk operation affecting more than 100 orders",
+      "Status change to cancelled affecting orders with payments"
+    ],
+    "rollback_plan": "Delete new API routes and lib/fulfillment directory"
+  },
+  "dependencies": {
+    "required_before": [],
+    "blocks": [
+      "UI-07A",
+      "BE-08"
+    ]
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-ADMIN-FULFILLMENT"
+    ],
+    "epic": "ADMIN-FULFILLMENT",
+    "related_stories": [
+      "UI-07A",
+      "BE-08",
+      "INT-07"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T16:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 23
+}

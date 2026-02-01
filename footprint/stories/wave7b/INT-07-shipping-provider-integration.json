@@ -1,0 +1,360 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "INT-07",
+  "type": "feature",
+  "wave_number": "7b",
+  "title": "Shipping Provider Integration",
+  "domain": "integration",
+  "agent": "be-dev",
+  "priority": "medium",
+  "story_points": 8,
+  "description": "Integrate with Israel Post and DHL APIs for automated shipping label generation, tracking number assignment, and delivery status updates",
+  "status": "pending",
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to automatically generate shipping labels and track deliveries",
+    "so_that": "I can streamline the shipping process and provide customers with accurate tracking"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Create shipment with Israel Post",
+      "ears_format": "WHEN admin POSTs to /api/admin/shipments/create with orderId and carrier='israel_post' THEN create shipment via Israel Post API and return tracking number",
+      "test_approach": "Mock Israel Post API, verify shipment created with tracking"
+    },
+    {
+      "id": "AC-002",
+      "description": "Create shipment with DHL",
+      "ears_format": "WHEN admin POSTs to /api/admin/shipments/create with orderId and carrier='dhl' THEN create shipment via DHL API and return tracking number",
+      "test_approach": "Mock DHL API, verify shipment created with tracking"
+    },
+    {
+      "id": "AC-003",
+      "description": "Generate shipping label PDF",
+      "ears_format": "WHEN shipment is created THEN generate and store shipping label PDF in R2, return label URL",
+      "test_approach": "Verify label PDF generated and stored"
+    },
+    {
+      "id": "AC-004",
+      "description": "Bulk create shipments",
+      "ears_format": "WHEN admin POSTs to /api/admin/shipments/bulk-create with orderIds THEN create shipments for all orders, return results summary",
+      "test_approach": "Mock bulk creation, verify all shipments created"
+    },
+    {
+      "id": "AC-005",
+      "description": "Store tracking number on order",
+      "ears_format": "WHEN shipment is created THEN update order with trackingNumber, carrier, and labelUrl",
+      "test_approach": "Verify order updated with shipping details"
+    },
+    {
+      "id": "AC-006",
+      "description": "Validate shipping address",
+      "ears_format": "WHEN creating shipment THEN validate address with carrier API, return validation errors if invalid",
+      "test_approach": "Send invalid address, verify validation error returned"
+    },
+    {
+      "id": "AC-007",
+      "description": "Calculate shipping cost",
+      "ears_format": "WHEN admin GETs /api/admin/shipments/quote with orderId and carrier THEN return shipping cost quote from carrier",
+      "test_approach": "Mock quote API, verify cost returned"
+    },
+    {
+      "id": "AC-008",
+      "description": "Webhook for delivery updates",
+      "ears_format": "WHEN carrier sends delivery status webhook THEN update order status and shipment record",
+      "test_approach": "Send mock webhook, verify order status updated"
+    },
+    {
+      "id": "AC-009",
+      "description": "Validate webhook signature",
+      "ears_format": "WHEN webhook signature is invalid THEN return 401 and do not process update",
+      "test_approach": "Send invalid signature, verify 401 response"
+    },
+    {
+      "id": "AC-010",
+      "description": "Track shipment status",
+      "ears_format": "WHEN admin GETs /api/admin/shipments/[id]/track THEN return current status and tracking history from carrier",
+      "test_approach": "Mock tracking API, verify status and history returned"
+    },
+    {
+      "id": "AC-011",
+      "description": "Retry failed shipment creation",
+      "ears_format": "WHEN shipment creation fails THEN allow retry via PATCH /api/admin/shipments/[id]/retry",
+      "test_approach": "Mock failed then successful creation, verify retry works"
+    },
+    {
+      "id": "AC-012",
+      "description": "Cancel shipment",
+      "ears_format": "WHEN admin DELETEs /api/admin/shipments/[id] THEN cancel shipment with carrier if possible, update status",
+      "test_approach": "Mock cancel API, verify shipment cancelled"
+    },
+    {
+      "id": "AC-013",
+      "description": "Handle carrier API errors",
+      "ears_format": "WHEN carrier API returns error THEN return 502 with translated error message and log details",
+      "test_approach": "Mock API error, verify 502 with Hebrew message"
+    },
+    {
+      "id": "AC-014",
+      "description": "Rate limit shipment creation",
+      "ears_format": "WHEN admin exceeds 20 shipment requests per minute THEN return 429",
+      "threshold": "rate: 20/minute",
+      "test_approach": "Mock rate limit, verify 429 response"
+    },
+    {
+      "id": "AC-015",
+      "description": "Admin authentication required",
+      "ears_format": "WHEN request lacks valid admin session THEN return 401 'נדרשת הרשאת מנהל'",
+      "test_approach": "Request without auth, verify 401 response"
+    },
+    {
+      "id": "AC-016",
+      "description": "Audit log shipping actions",
+      "ears_format": "WHEN shipment is created/cancelled THEN log action to admin_audit_log",
+      "test_approach": "Verify audit log insert"
+    },
+    {
+      "id": "AC-017",
+      "description": "Support multiple shipping services per carrier",
+      "ears_format": "WHEN creating shipment THEN allow selection of service type (standard, express, economy)",
+      "test_approach": "Create with different service types, verify correct API calls"
+    },
+    {
+      "id": "AC-018",
+      "description": "Download batch shipping labels",
+      "ears_format": "WHEN admin POSTs to /api/admin/shipments/batch-labels with shipmentIds THEN return merged PDF with all labels",
+      "test_approach": "Mock multiple labels, verify merged PDF returned"
+    }
+  ],
+  "files": {
+    "create": [
+      "app/api/admin/shipments/create/route.ts",
+      "app/api/admin/shipments/create/route.test.ts",
+      "app/api/admin/shipments/bulk-create/route.ts",
+      "app/api/admin/shipments/bulk-create/route.test.ts",
+      "app/api/admin/shipments/quote/route.ts",
+      "app/api/admin/shipments/quote/route.test.ts",
+      "app/api/admin/shipments/[id]/route.ts",
+      "app/api/admin/shipments/[id]/route.test.ts",
+      "app/api/admin/shipments/[id]/track/route.ts",
+      "app/api/admin/shipments/[id]/track/route.test.ts",
+      "app/api/admin/shipments/[id]/retry/route.ts",
+      "app/api/admin/shipments/[id]/retry/route.test.ts",
+      "app/api/admin/shipments/batch-labels/route.ts",
+      "app/api/admin/shipments/batch-labels/route.test.ts",
+      "app/api/webhooks/israel-post/route.ts",
+      "app/api/webhooks/israel-post/route.test.ts",
+      "app/api/webhooks/dhl/route.ts",
+      "app/api/webhooks/dhl/route.test.ts",
+      "lib/shipping/israel-post.ts",
+      "lib/shipping/israel-post.test.ts",
+      "lib/shipping/dhl.ts",
+      "lib/shipping/dhl.test.ts",
+      "lib/shipping/types.ts",
+      "lib/shipping/label-generator.ts",
+      "lib/shipping/label-generator.test.ts"
+    ],
+    "modify": [
+      "types/order.ts"
+    ],
+    "forbidden": [
+      "app/admin/*",
+      "components/*"
+    ]
+  },
+  "technical_requirements": {
+    "carriers": {
+      "israel_post": {
+        "api_url": "https://api.israelpost.co.il",
+        "auth": "API key in header",
+        "services": ["standard", "express", "registered"]
+      },
+      "dhl": {
+        "api_url": "https://api.dhl.com",
+        "auth": "OAuth2",
+        "services": ["express", "economy"]
+      }
+    },
+    "database_tables": [
+      "shipments - new table for tracking shipment records",
+      "orders - add trackingNumber, carrier, labelUrl fields"
+    ],
+    "storage": {
+      "labels_path": "shipments/{shipmentId}/label.pdf"
+    },
+    "pdf_library": "pdf-lib for label merging"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/admin/shipments/create/route.test.ts",
+      "app/api/admin/shipments/bulk-create/route.test.ts",
+      "app/api/admin/shipments/quote/route.test.ts",
+      "app/api/admin/shipments/[id]/route.test.ts",
+      "app/api/admin/shipments/[id]/track/route.test.ts",
+      "app/api/webhooks/israel-post/route.test.ts",
+      "app/api/webhooks/dhl/route.test.ts",
+      "lib/shipping/israel-post.test.ts",
+      "lib/shipping/dhl.test.ts",
+      "lib/shipping/label-generator.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Shipment Creation",
+        "count": 6,
+        "examples": [
+          "should create Israel Post shipment",
+          "should create DHL shipment",
+          "should generate shipping label",
+          "should store tracking number on order",
+          "should validate shipping address",
+          "should support different service types"
+        ]
+      },
+      {
+        "name": "Bulk Operations",
+        "count": 3,
+        "examples": [
+          "should create multiple shipments",
+          "should handle partial failures",
+          "should merge labels into single PDF"
+        ]
+      },
+      {
+        "name": "Tracking",
+        "count": 3,
+        "examples": [
+          "should fetch tracking status",
+          "should return tracking history",
+          "should handle carrier API errors"
+        ]
+      },
+      {
+        "name": "Webhooks",
+        "count": 4,
+        "examples": [
+          "should process Israel Post webhook",
+          "should process DHL webhook",
+          "should validate webhook signature",
+          "should update order status"
+        ]
+      },
+      {
+        "name": "Quote",
+        "count": 2,
+        "examples": [
+          "should return shipping quote",
+          "should compare carrier prices"
+        ]
+      },
+      {
+        "name": "Cancel & Retry",
+        "count": 3,
+        "examples": [
+          "should cancel shipment",
+          "should retry failed shipment",
+          "should handle non-cancellable shipments"
+        ]
+      },
+      {
+        "name": "Authentication",
+        "count": 2,
+        "examples": [
+          "should require admin authentication",
+          "should reject non-admin users"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 3,
+        "examples": [
+          "should handle carrier API errors",
+          "should return translated error messages",
+          "should log errors for debugging"
+        ]
+      },
+      {
+        "name": "Rate Limiting",
+        "count": 2,
+        "examples": [
+          "should enforce rate limits",
+          "should return 429 when exceeded"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "israel_post": "vi.mock('@/lib/shipping/israel-post')",
+      "dhl": "vi.mock('@/lib/shipping/dhl')",
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "r2": "vi.mock('@/lib/storage/r2')"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Shipment created but tracking not stored on order",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Database transaction for shipment creation and order update"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Carrier API credentials exposed in logs",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Sanitize logs, use environment variables, never log credentials"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Webhook spoofing leading to false delivery status",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Validate webhook signatures for all carrier webhooks"
+      },
+      {
+        "id": "HAZ-004",
+        "description": "Double shipment creation for same order",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Check for existing shipment before creation, use idempotency keys"
+      }
+    ],
+    "risk_level": "medium"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any modification to customer payment data",
+      "Changes to order creation logic"
+    ],
+    "escalation_triggers": [
+      "Carrier API returning persistent errors",
+      "Webhook validation failing repeatedly",
+      "Shipment costs exceeding expected thresholds"
+    ],
+    "rollback_plan": "Delete shipping API routes and lib/shipping directory, revert orders table changes"
+  },
+  "dependencies": {
+    "required_before": [],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-ADMIN-FULFILLMENT",
+      "PRD-SHIPPING"
+    ],
+    "epic": "ADMIN-FULFILLMENT",
+    "related_stories": [
+      "UI-07A",
+      "BE-07",
+      "BE-08"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T16:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 28
+}

@@ -1,0 +1,256 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "BE-08",
+  "type": "feature",
+  "wave_number": "7b",
+  "title": "Print File Batch Download",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "medium",
+  "story_points": 3,
+  "description": "Create API endpoint for batch downloading print-ready files from multiple orders as a ZIP archive, optimized for production printing workflow",
+  "status": "pending",
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to download print files for multiple orders at once",
+    "so_that": "I can efficiently prepare batch print jobs for production"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Batch download endpoint returns ZIP file",
+      "ears_format": "WHEN admin POSTs to /api/admin/orders/batch-download with orderIds THEN return ZIP file containing all print files",
+      "test_approach": "Mock R2 files, verify ZIP response with correct content"
+    },
+    {
+      "id": "AC-002",
+      "description": "ZIP file organized by order number",
+      "ears_format": "WHEN ZIP is created THEN organize files in folders named by orderNumber (e.g., FP-2026-001/print.jpg)",
+      "test_approach": "Verify ZIP structure matches expected folder layout"
+    },
+    {
+      "id": "AC-003",
+      "description": "Include order manifest JSON",
+      "ears_format": "WHEN ZIP is created THEN include manifest.json with order details, sizes, and file mappings",
+      "test_approach": "Verify manifest.json present with correct structure"
+    },
+    {
+      "id": "AC-004",
+      "description": "Limit batch to 50 orders",
+      "ears_format": "WHEN request includes more than 50 orderIds THEN return 400 with 'מקסימום 50 הזמנות להורדה'",
+      "test_approach": "Send 51 orderIds, verify 400 response"
+    },
+    {
+      "id": "AC-005",
+      "description": "Handle missing print files gracefully",
+      "ears_format": "WHEN order has no print file in R2 THEN skip order and include in errors array of response manifest",
+      "test_approach": "Include order with missing file, verify error in manifest"
+    },
+    {
+      "id": "AC-006",
+      "description": "Stream ZIP for large batches",
+      "ears_format": "WHEN batch size > 10 orders THEN use streaming ZIP response to avoid memory issues",
+      "threshold": "memory: <512MB for 50 orders",
+      "test_approach": "Verify streaming response headers for large batch"
+    },
+    {
+      "id": "AC-007",
+      "description": "Include high-resolution print files",
+      "ears_format": "WHEN downloading print files THEN fetch the print-ready version (not thumbnail) from R2",
+      "test_approach": "Verify correct R2 path used for print files"
+    },
+    {
+      "id": "AC-008",
+      "description": "Name files descriptively",
+      "ears_format": "WHEN creating ZIP THEN name files as {orderNumber}_{size}_{style}.jpg",
+      "test_approach": "Verify file naming convention in ZIP"
+    },
+    {
+      "id": "AC-009",
+      "description": "Admin authentication required",
+      "ears_format": "WHEN request lacks valid admin session THEN return 401 'נדרשת הרשאת מנהל'",
+      "test_approach": "Request without auth, verify 401 response"
+    },
+    {
+      "id": "AC-010",
+      "description": "Rate limit downloads",
+      "ears_format": "WHEN admin exceeds 5 batch downloads per minute THEN return 429 'יותר מדי בקשות'",
+      "threshold": "rate: 5/minute",
+      "test_approach": "Mock rate limit, verify 429 response"
+    },
+    {
+      "id": "AC-011",
+      "description": "Log download for audit",
+      "ears_format": "WHEN batch download completes THEN log to admin_audit_log with admin_id and downloaded order IDs",
+      "test_approach": "Verify audit log insert"
+    },
+    {
+      "id": "AC-012",
+      "description": "Return download progress for async option",
+      "ears_format": "WHEN request includes async=true THEN return job ID and poll endpoint for progress",
+      "test_approach": "Set async param, verify job ID response"
+    }
+  ],
+  "files": {
+    "create": [
+      "app/api/admin/orders/batch-download/route.ts",
+      "app/api/admin/orders/batch-download/route.test.ts",
+      "lib/fulfillment/zip-generator.ts",
+      "lib/fulfillment/zip-generator.test.ts",
+      "lib/fulfillment/print-manifest.ts",
+      "lib/fulfillment/print-manifest.test.ts"
+    ],
+    "modify": [],
+    "forbidden": [
+      "app/admin/*",
+      "components/*"
+    ]
+  },
+  "technical_requirements": {
+    "storage": {
+      "provider": "Cloudflare R2",
+      "print_path": "prints/{orderId}/print.jpg",
+      "thumbnail_path": "prints/{orderId}/thumb.jpg"
+    },
+    "zip_library": "archiver",
+    "streaming": "Use Node.js streams for memory efficiency",
+    "max_batch_size": 50,
+    "rate_limit": "5 downloads/minute per admin"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/api/admin/orders/batch-download/route.test.ts",
+      "lib/fulfillment/zip-generator.test.ts",
+      "lib/fulfillment/print-manifest.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "ZIP Generation",
+        "count": 5,
+        "examples": [
+          "should create ZIP with print files",
+          "should organize files by order number",
+          "should include manifest.json",
+          "should name files descriptively",
+          "should handle multi-item orders"
+        ]
+      },
+      {
+        "name": "Batch Limits",
+        "count": 2,
+        "examples": [
+          "should limit batch to 50 orders",
+          "should return error for oversized batch"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 3,
+        "examples": [
+          "should handle missing print files",
+          "should include errors in manifest",
+          "should handle R2 connection errors"
+        ]
+      },
+      {
+        "name": "Streaming",
+        "count": 2,
+        "examples": [
+          "should stream large batches",
+          "should set correct content headers"
+        ]
+      },
+      {
+        "name": "Authentication",
+        "count": 2,
+        "examples": [
+          "should require admin authentication",
+          "should reject non-admin users"
+        ]
+      },
+      {
+        "name": "Rate Limiting",
+        "count": 2,
+        "examples": [
+          "should enforce download rate limit",
+          "should return 429 when exceeded"
+        ]
+      },
+      {
+        "name": "Audit Logging",
+        "count": 2,
+        "examples": [
+          "should log download action",
+          "should include order IDs in log"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "r2": "vi.mock('@/lib/storage/r2')",
+      "supabase": "vi.mock('@/lib/supabase/server')",
+      "archiver": "vi.mock('archiver')"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Memory exhaustion from large ZIP generation",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Stream ZIP generation, limit batch size to 50"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Unauthorized access to print files",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Admin authentication check, signed R2 URLs"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Corrupted ZIP due to partial failure",
+        "severity": "minor",
+        "likelihood": "remote",
+        "mitigation": "Include manifest with success/failure status for each file"
+      }
+    ],
+    "risk_level": "low"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any modification to R2 upload logic",
+      "Changes to order file storage paths"
+    ],
+    "escalation_triggers": [
+      "Download request for more than 50 orders",
+      "R2 access errors affecting multiple orders"
+    ],
+    "rollback_plan": "Delete batch-download route and lib/fulfillment/zip-* files"
+  },
+  "dependencies": {
+    "required_before": [
+      "BE-07"
+    ],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-ADMIN-FULFILLMENT"
+    ],
+    "epic": "ADMIN-FULFILLMENT",
+    "related_stories": [
+      "UI-07A",
+      "BE-07",
+      "INT-07"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T16:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 18
+}

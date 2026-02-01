@@ -110,40 +110,47 @@ Footprint is an Israeli e-commerce platform that transforms photos into AI-gener
 
 ---
 
-## Wave 7: Admin Enhancements (PLANNED)
+## Wave 7: Admin User Management (COMPLETE)
 
-**Status:** 📋 Planned | **Points:** 40
+**Status:** ✅ 100% Complete | **Tests:** 145 passing | **Coverage:** 90%+
 
-### Admin User Management (NEW)
+| Story ID | Title | Domain | Points | Status |
+|----------|-------|--------|--------|--------|
+| ADMIN-01 | Admin Users List Page | Frontend | 5 | ✅ Complete |
+| ADMIN-02 | Admin Users API | Backend | 5 | ✅ Complete |
+| ADMIN-03 | Admin User Role Management | Backend | 3 | ✅ Complete |
+| ADMIN-04 | Admin User Detail Page | Frontend | 3 | ✅ Complete |
 
-| Story ID | Title | Domain | Points | Priority |
-|----------|-------|--------|--------|----------|
-| ADMIN-01 | Admin Users List Page | Frontend | 5 | P1 |
-| ADMIN-02 | Admin Users API | Backend | 5 | P1 |
-| ADMIN-03 | Admin User Role Management | Backend | 3 | P1 |
-| ADMIN-04 | Admin User Detail Page | Frontend | 3 | P2 |
-
-**Features:**
+**Features Delivered:**
 - View all registered users with search/filter
 - User detail view with order history
 - Promote/demote admin roles
 - Activate/deactivate user accounts
-- User statistics dashboard
+- User statistics dashboard (total, new this week, admin count)
+- Self-action prevention (cannot demote/deactivate self)
 
-### Admin Fulfillment (Original)
+---
+
+## Wave 7B: Admin Fulfillment (PLANNED)
+
+**Status:** 📋 Planned | **Points:** 24
 
 | Story ID | Title | Domain | Points | Priority |
 |----------|-------|--------|--------|----------|
-| UI-07A | Admin Fulfillment Dashboard | Frontend | 8 | P1 |
 | BE-07 | Bulk Order Operations API | Backend | 5 | P1 |
+| UI-07A | Admin Fulfillment Dashboard | Frontend | 8 | P1 |
 | BE-08 | Print File Batch Download | Backend | 3 | P2 |
 | INT-07 | Shipping Provider Integration | Integration | 8 | P2 |
 
 **Features:**
-- Fulfillment workflow dashboard
-- Bulk status updates
-- Batch print file downloads
-- Israel Post / DHL API integration
+- Kanban-style fulfillment workflow dashboard
+- Drag-and-drop order status management
+- Bulk status updates (up to 100 orders)
+- Batch print file downloads as ZIP
+- Israel Post API integration
+- DHL API integration
+- Shipping label generation
+- Delivery tracking webhooks
 
 ---
 
@@ -183,13 +190,13 @@ Footprint is an Israeli e-commerce platform that transforms photos into AI-gener
 
 ## Key Metrics
 
-| Metric | Wave 1 | Wave 3 | Wave 4 | Total |
-|--------|--------|--------|--------|-------|
-| Unit Tests | 446 | 328 | 265 | 1860+ |
-| E2E Tests | 20 | 15 | 10 | 45+ |
-| Story Points | 41 | 20 | 16 | 77 |
-| Stories Complete | 8/8 | 4/4 | 4/4 | 16/16 |
-| Coverage | 90%+ | 90%+ | 90%+ | 90%+ |
+| Metric | Wave 1 | Wave 3 | Wave 4 | Wave 7 | Total |
+|--------|--------|--------|--------|--------|-------|
+| Unit Tests | 446 | 328 | 265 | 145 | 2005+ |
+| E2E Tests | 20 | 15 | 10 | 9 | 54+ |
+| Story Points | 41 | 20 | 16 | 16 | 93 |
+| Stories Complete | 8/8 | 4/4 | 4/4 | 4/4 | 20/20 |
+| Coverage | 90%+ | 90%+ | 90%+ | 90%+ | 90%+ |
 
 ---
 

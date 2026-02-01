@@ -1,0 +1,361 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "UI-07A",
+  "type": "feature",
+  "wave_number": "7b",
+  "title": "Admin Fulfillment Dashboard",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 8,
+  "description": "Create a comprehensive fulfillment dashboard for admins to manage order processing, printing, and shipping workflow with batch operations support",
+  "status": "pending",
+  "objective": {
+    "as_a": "Footprint admin",
+    "i_want": "to manage the fulfillment workflow from a centralized dashboard",
+    "so_that": "I can efficiently process orders from printing through shipping"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Dashboard displays orders grouped by fulfillment status",
+      "ears_format": "WHEN admin navigates to /admin/fulfillment THEN display orders grouped into columns: pending, printing, ready_to_ship, shipped",
+      "test_approach": "Mock orders with different statuses, verify kanban-style columns rendered"
+    },
+    {
+      "id": "AC-002",
+      "description": "Each order card shows key info for fulfillment",
+      "ears_format": "WHEN order card renders THEN display orderNumber, customerName, itemCount, createdAt, and thumbnail preview",
+      "test_approach": "Verify order card contains all required fields"
+    },
+    {
+      "id": "AC-003",
+      "description": "Drag-and-drop to move orders between status columns",
+      "ears_format": "WHEN admin drags order card to different column THEN update order status via API and show success toast",
+      "test_approach": "Simulate drag event, verify API called with new status"
+    },
+    {
+      "id": "AC-004",
+      "description": "Bulk selection with checkboxes",
+      "ears_format": "WHEN admin clicks order checkbox THEN add to selection, show selection count in toolbar",
+      "test_approach": "Click checkboxes, verify selection state updates"
+    },
+    {
+      "id": "AC-005",
+      "description": "Select all in column",
+      "ears_format": "WHEN admin clicks 'בחר הכל' in column header THEN select all orders in that column",
+      "test_approach": "Click select all, verify all orders in column selected"
+    },
+    {
+      "id": "AC-006",
+      "description": "Bulk status update action",
+      "ears_format": "WHEN admin selects orders and clicks bulk status button THEN open modal to select new status and apply to all",
+      "test_approach": "Select orders, click bulk action, verify modal opens"
+    },
+    {
+      "id": "AC-007",
+      "description": "Bulk download print files action",
+      "ears_format": "WHEN admin selects orders and clicks 'הורד קבצי הדפסה' THEN trigger batch download of print-ready files",
+      "test_approach": "Select orders, click download, verify API called"
+    },
+    {
+      "id": "AC-008",
+      "description": "Filter by date range",
+      "ears_format": "WHEN admin selects date range filter THEN show only orders created within that range",
+      "test_approach": "Set date filter, verify API called with date params"
+    },
+    {
+      "id": "AC-009",
+      "description": "Filter by product type (size, paper, frame)",
+      "ears_format": "WHEN admin selects product filter THEN show only orders containing items matching that filter",
+      "test_approach": "Set product filter, verify filtered results"
+    },
+    {
+      "id": "AC-010",
+      "description": "Search by order number or customer name",
+      "ears_format": "WHEN admin types in search input THEN filter orders matching orderNumber or customerName after 300ms debounce",
+      "threshold": "debounce: 300ms",
+      "test_approach": "Type search, verify debounced API call"
+    },
+    {
+      "id": "AC-011",
+      "description": "Order detail slide-out panel",
+      "ears_format": "WHEN admin clicks order card THEN open slide-out panel showing full order details, items, and shipping info",
+      "test_approach": "Click card, verify panel opens with order details"
+    },
+    {
+      "id": "AC-012",
+      "description": "Quick print action on order card",
+      "ears_format": "WHEN admin clicks print icon on order card THEN download print file for that single order",
+      "test_approach": "Click print icon, verify download triggered"
+    },
+    {
+      "id": "AC-013",
+      "description": "Stats bar showing fulfillment metrics",
+      "ears_format": "WHEN dashboard loads THEN display stats: pending count, printing count, ready count, shipped today count",
+      "test_approach": "Verify stats bar renders with correct counts"
+    },
+    {
+      "id": "AC-014",
+      "description": "Real-time updates with polling",
+      "ears_format": "WHEN dashboard is open THEN poll for updates every 30 seconds and refresh order positions",
+      "threshold": "poll_interval: 30s",
+      "test_approach": "Verify polling interval configured in React Query"
+    },
+    {
+      "id": "AC-015",
+      "description": "Loading skeleton while fetching",
+      "ears_format": "WHEN orders are loading THEN display skeleton cards in each column",
+      "test_approach": "Set isLoading=true, verify skeletons visible"
+    },
+    {
+      "id": "AC-016",
+      "description": "Empty state per column",
+      "ears_format": "WHEN column has no orders THEN display 'אין הזמנות' message with relevant icon",
+      "test_approach": "Mock empty column, verify empty state displayed"
+    },
+    {
+      "id": "AC-017",
+      "description": "Error state with retry",
+      "ears_format": "WHEN API fails THEN display error message with 'נסה שוב' retry button",
+      "test_approach": "Mock API error, verify error state and retry button"
+    },
+    {
+      "id": "AC-018",
+      "description": "RTL layout with Hebrew labels",
+      "ears_format": "WHEN dashboard renders THEN container has dir='rtl' and all labels in Hebrew",
+      "test_approach": "Verify dir='rtl' and Hebrew text"
+    },
+    {
+      "id": "AC-019",
+      "description": "Responsive layout for tablet/desktop",
+      "ears_format": "WHEN viewport < 1024px THEN columns stack vertically with accordion toggle",
+      "test_approach": "Verify responsive classes and accordion behavior"
+    },
+    {
+      "id": "AC-020",
+      "description": "Keyboard navigation support",
+      "ears_format": "WHEN admin uses arrow keys THEN navigate between order cards, Enter to open details",
+      "test_approach": "Simulate keyboard events, verify focus management"
+    }
+  ],
+  "files": {
+    "create": [
+      "app/admin/fulfillment/page.tsx",
+      "app/admin/fulfillment/page.test.tsx",
+      "components/admin/FulfillmentBoard.tsx",
+      "components/admin/FulfillmentBoard.test.tsx",
+      "components/admin/FulfillmentColumn.tsx",
+      "components/admin/FulfillmentColumn.test.tsx",
+      "components/admin/OrderCard.tsx",
+      "components/admin/OrderCard.test.tsx",
+      "components/admin/OrderDetailPanel.tsx",
+      "components/admin/OrderDetailPanel.test.tsx",
+      "components/admin/BulkActionToolbar.tsx",
+      "components/admin/BulkActionToolbar.test.tsx",
+      "hooks/useFulfillmentOrders.ts",
+      "hooks/useFulfillmentOrders.test.tsx"
+    ],
+    "modify": [
+      "app/admin/layout.tsx"
+    ],
+    "forbidden": [
+      "app/api/admin/fulfillment/*",
+      "lib/fulfillment/*"
+    ]
+  },
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Card.tsx",
+      "components/ui/Button.tsx",
+      "components/ui/Checkbox.tsx",
+      "components/ui/Input.tsx",
+      "components/ui/Badge.tsx",
+      "components/ui/Sheet.tsx",
+      "components/ui/Skeleton.tsx",
+      "components/ui/DatePicker.tsx"
+    ],
+    "hooks": [
+      "useFulfillmentOrders - fetch orders with filters and polling",
+      "useBulkOrderOperations - batch status updates",
+      "useOrderDetails - fetch single order details"
+    ],
+    "state_management": "React Query for server state, Zustand for selection state",
+    "drag_and_drop": "@dnd-kit/core for drag-and-drop functionality"
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "app/admin/fulfillment/page.test.tsx",
+      "components/admin/FulfillmentBoard.test.tsx",
+      "components/admin/FulfillmentColumn.test.tsx",
+      "components/admin/OrderCard.test.tsx",
+      "components/admin/OrderDetailPanel.test.tsx",
+      "components/admin/BulkActionToolbar.test.tsx",
+      "hooks/useFulfillmentOrders.test.tsx"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Loading State",
+        "count": 2,
+        "examples": [
+          "should show skeleton cards while loading",
+          "should hide skeletons after fetch completes"
+        ]
+      },
+      {
+        "name": "Order Display",
+        "count": 5,
+        "examples": [
+          "should render orders in correct status columns",
+          "should display order card with all required fields",
+          "should show thumbnail preview on card",
+          "should display item count badge",
+          "should show time since order created"
+        ]
+      },
+      {
+        "name": "Drag and Drop",
+        "count": 4,
+        "examples": [
+          "should allow dragging order cards",
+          "should highlight drop zone on hover",
+          "should update status on drop",
+          "should show success toast after move"
+        ]
+      },
+      {
+        "name": "Selection",
+        "count": 4,
+        "examples": [
+          "should toggle selection on checkbox click",
+          "should show selection count in toolbar",
+          "should select all in column",
+          "should clear selection on action complete"
+        ]
+      },
+      {
+        "name": "Bulk Actions",
+        "count": 4,
+        "examples": [
+          "should show bulk toolbar when items selected",
+          "should open status modal on bulk status click",
+          "should trigger download on bulk download click",
+          "should show progress during bulk operation"
+        ]
+      },
+      {
+        "name": "Filtering",
+        "count": 4,
+        "examples": [
+          "should filter by date range",
+          "should filter by product type",
+          "should search by order number",
+          "should combine multiple filters"
+        ]
+      },
+      {
+        "name": "Order Detail Panel",
+        "count": 3,
+        "examples": [
+          "should open panel on card click",
+          "should display full order details",
+          "should close panel on outside click"
+        ]
+      },
+      {
+        "name": "Stats Bar",
+        "count": 2,
+        "examples": [
+          "should display fulfillment stats",
+          "should update stats on order move"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "count": 3,
+        "examples": [
+          "should show error state on fetch failure",
+          "should show retry button on error",
+          "should show error toast on action failure"
+        ]
+      },
+      {
+        "name": "RTL & Accessibility",
+        "count": 4,
+        "examples": [
+          "should have dir=rtl on container",
+          "should use Hebrew labels",
+          "should support keyboard navigation",
+          "should have proper ARIA attributes"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "hooks": "vi.mock('@/hooks/useFulfillmentOrders')",
+      "dnd": "vi.mock('@dnd-kit/core')",
+      "navigation": "vi.mock('next/navigation')"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Accidental bulk status change to wrong state",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Confirmation modal for bulk actions showing affected order count"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Race condition during concurrent status updates",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Optimistic updates with rollback on failure, polling for latest state"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Order moved to wrong column via drag-drop",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Undo action available for 5 seconds after move"
+      }
+    ],
+    "risk_level": "medium"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any modification to order status logic in API",
+      "Changes to payment or refund handling"
+    ],
+    "escalation_triggers": [
+      "Bulk action affects more than 100 orders",
+      "Status change to 'cancelled' or 'refunded'"
+    ],
+    "rollback_plan": "Delete fulfillment page and components, remove nav link"
+  },
+  "dependencies": {
+    "required_before": [
+      "BE-07"
+    ],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-ADMIN-FULFILLMENT"
+    ],
+    "epic": "ADMIN-FULFILLMENT",
+    "related_stories": [
+      "BE-07",
+      "BE-08",
+      "INT-07"
+    ]
+  },
+  "metadata": {
+    "created_at": "2026-02-01T16:00:00Z",
+    "created_by": "claude-opus-4-5"
+  },
+  "estimated_tests": 35
+}
