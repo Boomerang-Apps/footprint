@@ -1,0 +1,76 @@
+{
+  "command": "/harden",
+  "timestamp": "2026-02-01T22:30:00Z",
+  "branch": "main",
+  "overallScore": 68,
+  "status": "BLOCKING_ISSUES",
+  "scores": {
+    "security": 45,
+    "codeQuality": 85,
+    "testCoverage": 63,
+    "production": 70
+  },
+  "blocking": [
+    {
+      "category": "security",
+      "issue": "Next.js 14.2.0 has critical vulnerability (CVE-2025-XXXX)",
+      "severity": "critical",
+      "fix": "pnpm update next@latest"
+    },
+    {
+      "category": "security",
+      "issue": "7 high severity vulnerabilities in dependencies",
+      "severity": "high",
+      "fix": "pnpm audit fix"
+    }
+  ],
+  "warnings": [
+    {
+      "category": "codeQuality",
+      "issue": "15 console statements in production code",
+      "files": [
+        "app/admin/fulfillment/page.tsx",
+        "app/api/webhooks/payplus/route.ts",
+        "app/api/webhooks/stripe/route.ts",
+        "app/api/transform/route.ts",
+        "app/api/remove-bg/route.ts"
+      ]
+    },
+    {
+      "category": "codeQuality",
+      "issue": "8 components using <img> instead of next/image",
+      "files": [
+        "app/admin/fulfillment/page.tsx",
+        "app/admin/users/[id]/page.tsx",
+        "app/admin/users/page.tsx",
+        "app/page.tsx",
+        "components/layout/Header.tsx"
+      ]
+    },
+    {
+      "category": "production",
+      "issue": "No Content-Security-Policy header configured",
+      "fix": "Add CSP to next.config.js headers"
+    },
+    {
+      "category": "production",
+      "issue": "No /api/health endpoint",
+      "fix": "Create health check endpoint"
+    },
+    {
+      "category": "testCoverage",
+      "issue": "Overall coverage 62.75% below 80% target",
+      "current": 62.75,
+      "target": 80
+    }
+  ],
+  "passed": [
+    "TypeScript compilation: 0 errors",
+    "ESLint: 0 errors (8 warnings)",
+    "No eval() usage",
+    "No dangerouslySetInnerHTML",
+    "Rate limiting implemented (Upstash)",
+    ".env.example documented",
+    "Build successful"
+  ]
+}

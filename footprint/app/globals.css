@@ -1,9 +1,9 @@
+/* Import Heebo font for Hebrew - must be first */
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Heebo font for Hebrew */
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
 
 :root {
   /* Brand Colors */

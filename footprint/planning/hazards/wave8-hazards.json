@@ -1,0 +1,469 @@
+{
+  "documentId": "HAZ-WAVE8-001",
+  "title": "Hazard Analysis - Wave 8",
+  "wave": 8,
+  "createdAt": "2026-02-01T22:00:00Z",
+  "createdBy": "claude-opus-4-5",
+  "summary": {
+    "totalHazards": 19,
+    "unacceptable": 7,
+    "medium": 0,
+    "acceptable": 12,
+    "storiesAnalyzed": 7,
+    "totalStoryPoints": 52
+  },
+  "riskMatrix": {
+    "description": "DO-178C inspired risk assessment",
+    "severityLevels": {
+      "1": "Catastrophic - Data loss, security breach, financial loss",
+      "2": "Hazardous - Major feature failure, data corruption",
+      "3": "Major - Feature degraded, workaround available",
+      "4": "Minor - Cosmetic issue, minimal impact",
+      "5": "No Effect - Documentation, logging only"
+    },
+    "likelihoodLevels": {
+      "A": "Frequent - Likely to occur often",
+      "B": "Probable - Will occur several times",
+      "C": "Occasional - Likely to occur sometime",
+      "D": "Remote - Unlikely but possible",
+      "E": "Improbable - Very unlikely to occur"
+    }
+  },
+  "hazards": [
+    {
+      "id": "HAZ-W8-001",
+      "storyId": "CO-06",
+      "title": "Payment processed but order not updated",
+      "category": "Financial",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "UNACCEPTABLE",
+      "description": "Customer pays but order status remains unpaid due to webhook failure or race condition",
+      "potentialCauses": [
+        "Webhook timeout or network failure",
+        "Database transaction failure after payment confirmation",
+        "Race condition between payment callback and order update"
+      ],
+      "affectedStories": ["CO-06"],
+      "mitigations": [
+        {
+          "id": "MIT-W8-001-A",
+          "action": "Implement idempotent webhook processing with transaction ID tracking",
+          "owner": "be-dev",
+          "verificationMethod": "Unit tests for duplicate callback handling",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-001-B",
+          "action": "Create reconciliation job that runs every 5 minutes to sync payment status",
+          "owner": "be-dev",
+          "verificationMethod": "Integration test for reconciliation flow",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-001-C",
+          "action": "Add payment status dashboard for admin monitoring",
+          "owner": "fe-dev",
+          "verificationMethod": "E2E test showing unmatched payments",
+          "status": "defined"
+        }
+      ],
+      "residualRisk": "Low",
+      "residualRationale": "Multiple layers of protection ensure eventual consistency"
+    },
+    {
+      "id": "HAZ-W8-002",
+      "storyId": "CO-06",
+      "title": "Duplicate charge to customer",
+      "category": "Financial",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "UNACCEPTABLE",
+      "description": "Customer charged twice for the same order",
+      "potentialCauses": [
+        "Retry logic without idempotency key",
+        "User double-clicks payment button",
+        "Network timeout causing retry"
+      ],
+      "affectedStories": ["CO-06"],
+      "mitigations": [
+        {
+          "id": "MIT-W8-002-A",
+          "action": "Use PayPlus idempotency key tied to order ID",
+          "owner": "be-dev",
+          "verificationMethod": "Unit test verifying same key used on retry",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-002-B",
+          "action": "Add database constraint: one payment per order",
+          "owner": "be-dev",
+          "verificationMethod": "Migration test for constraint",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-002-C",
+          "action": "Disable payment button after first click",
+          "owner": "fe-dev",
+          "verificationMethod": "E2E test for double-click prevention",
+          "status": "defined"
+        }
+      ],
+      "residualRisk": "Low",
+      "residualRationale": "Idempotency at API and database level prevents duplicates"
+    },
+    {
+      "id": "HAZ-W8-003",
+      "storyId": "CO-06",
+      "title": "Refund processed to wrong customer",
+      "category": "Financial",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "UNACCEPTABLE",
+      "description": "Admin initiates refund but it goes to wrong transaction/customer",
+      "potentialCauses": [
+        "Transaction ID mismatch in refund request",
+        "UI displays wrong order in refund modal",
+        "Race condition in multi-admin scenario"
+      ],
+      "affectedStories": ["CO-06"],
+      "mitigations": [
+        {
+          "id": "MIT-W8-003-A",
+          "action": "Require confirmation modal showing customer name and amount",
+          "owner": "fe-dev",
+          "verificationMethod": "E2E test for confirmation flow",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-003-B",
+          "action": "Verify transaction belongs to order before refund API call",
+          "owner": "be-dev",
+          "verificationMethod": "Unit test for transaction-order validation",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-003-C",
+          "action": "Create audit log for all refund operations",
+          "owner": "be-dev",
+          "verificationMethod": "Audit log inspection test",
+          "status": "defined"
+        }
+      ],
+      "residualRisk": "Low",
+      "residualRationale": "Multiple verification steps and audit trail"
+    },
+    {
+      "id": "HAZ-W8-004",
+      "storyId": "CO-06",
+      "title": "API credentials exposed",
+      "category": "Security",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "UNACCEPTABLE",
+      "description": "PayPlus API keys leaked through logs, code, or client bundle",
+      "potentialCauses": [
+        "Credentials logged in error messages",
+        "Credentials committed to git",
+        "Credentials included in client-side bundle"
+      ],
+      "affectedStories": ["CO-06"],
+      "mitigations": [
+        {
+          "id": "MIT-W8-004-A",
+          "action": "Use environment variables only, never hardcode",
+          "owner": "be-dev",
+          "verificationMethod": "Code review checklist item",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-004-B",
+          "action": "Add .env to .gitignore and use secret scanning",
+          "owner": "be-dev",
+          "verificationMethod": "GitHub secret scanning enabled",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-004-C",
+          "action": "Sanitize all logs to remove credentials patterns",
+          "owner": "be-dev",
+          "verificationMethod": "Log sanitization unit tests",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-004-D",
+          "action": "Implement credential rotation plan (quarterly)",
+          "owner": "cto",
+          "verificationMethod": "Documented rotation procedure",
+          "status": "defined"
+        }
+      ],
+      "residualRisk": "Low",
+      "residualRationale": "Multiple layers prevent credential exposure"
+    },
+    {
+      "id": "HAZ-W8-005",
+      "storyId": "UA-01",
+      "title": "User sees another user's orders",
+      "category": "Security",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "UNACCEPTABLE",
+      "description": "Authorization bypass allows viewing other users' order history",
+      "potentialCauses": [
+        "Missing RLS policy on orders table",
+        "API endpoint doesn't verify user_id",
+        "Session hijacking"
+      ],
+      "affectedStories": ["UA-01", "UA-02"],
+      "mitigations": [
+        {
+          "id": "MIT-W8-005-A",
+          "action": "Enforce RLS policy: orders.user_id = auth.uid()",
+          "owner": "be-dev",
+          "verificationMethod": "RLS policy test with different users",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-005-B",
+          "action": "API endpoint validates session user matches order owner",
+          "owner": "be-dev",
+          "verificationMethod": "API test attempting cross-user access",
+          "status": "defined"
+        }
+      ],
+      "residualRisk": "Low",
+      "residualRationale": "RLS at database level provides defense in depth"
+    },
+    {
+      "id": "HAZ-W8-006",
+      "storyId": "UA-02",
+      "title": "User accesses another user's order detail",
+      "category": "Security",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "UNACCEPTABLE",
+      "description": "Direct URL manipulation allows access to other orders",
+      "potentialCauses": [
+        "Order ID enumeration in URL",
+        "Missing authorization check on detail endpoint",
+        "Cached responses served to wrong user"
+      ],
+      "affectedStories": ["UA-02"],
+      "mitigations": [
+        {
+          "id": "MIT-W8-006-A",
+          "action": "Use UUID for order IDs (non-sequential)",
+          "owner": "be-dev",
+          "verificationMethod": "Schema verification",
+          "status": "existing"
+        },
+        {
+          "id": "MIT-W8-006-B",
+          "action": "Verify ownership in order detail API",
+          "owner": "be-dev",
+          "verificationMethod": "API test for unauthorized access",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-006-C",
+          "action": "Add Cache-Control: private header",
+          "owner": "be-dev",
+          "verificationMethod": "Response header test",
+          "status": "defined"
+        }
+      ],
+      "residualRisk": "Low",
+      "residualRationale": "UUID + auth check + cache headers prevent unauthorized access"
+    },
+    {
+      "id": "HAZ-W8-007",
+      "storyId": "UP-05",
+      "title": "Face data stored inappropriately",
+      "category": "Privacy",
+      "severity": "Catastrophic",
+      "severityLevel": 1,
+      "likelihood": "Remote",
+      "likelihoodLevel": "D",
+      "riskLevel": "UNACCEPTABLE",
+      "description": "Biometric face data stored beyond necessary scope, violating privacy laws",
+      "potentialCauses": [
+        "Face embeddings stored in database",
+        "Detection cache retains facial features",
+        "Third-party AI service stores face data"
+      ],
+      "affectedStories": ["UP-05"],
+      "mitigations": [
+        {
+          "id": "MIT-W8-007-A",
+          "action": "Only store bounding box coordinates, never facial embeddings",
+          "owner": "be-dev",
+          "verificationMethod": "Schema audit - no biometric fields",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-007-B",
+          "action": "Cache expires after 24 hours with automatic deletion",
+          "owner": "be-dev",
+          "verificationMethod": "Redis TTL verification test",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-007-C",
+          "action": "Use AI provider with data processing agreement (no retention)",
+          "owner": "cto",
+          "verificationMethod": "Vendor DPA on file",
+          "status": "defined"
+        },
+        {
+          "id": "MIT-W8-007-D",
+          "action": "Add privacy notice about face detection feature",
+          "owner": "pm",
+          "verificationMethod": "Privacy policy review",
+          "status": "defined"
+        }
+      ],
+      "residualRisk": "Low",
+      "residualRationale": "No biometric data stored, only geometric coordinates"
+    }
+  ],
+  "acceptableHazards": [
+    {
+      "id": "HAZ-W8-008",
+      "storyId": "AI-05",
+      "title": "GPU costs spike from high usage",
+      "category": "Financial",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Budget alerts and auto-scaling limits provide adequate protection",
+      "mitigation": "Budget alerts, auto-scaling limits, usage dashboard"
+    },
+    {
+      "id": "HAZ-W8-009",
+      "storyId": "AI-05",
+      "title": "Cache fills storage quota",
+      "category": "Performance",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "TTL expiration and LRU eviction prevent quota issues",
+      "mitigation": "TTL expiration, LRU eviction, storage monitoring"
+    },
+    {
+      "id": "HAZ-W8-010",
+      "storyId": "AI-05",
+      "title": "Queue backup during peak traffic",
+      "category": "Performance",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Auto-scaling and graceful degradation handle peak loads",
+      "mitigation": "Auto-scaling, queue depth alerts, graceful degradation"
+    },
+    {
+      "id": "HAZ-W8-011",
+      "storyId": "AUTH-02",
+      "title": "Guest loses access to order without account",
+      "category": "Security",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Multiple recovery paths available",
+      "mitigation": "Email confirmation, order lookup by email+number"
+    },
+    {
+      "id": "HAZ-W8-012",
+      "storyId": "AUTH-02",
+      "title": "Spam orders from disposable emails",
+      "category": "Technical",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Rate limiting and email validation reduce spam",
+      "mitigation": "Rate limiting by IP, email domain validation"
+    },
+    {
+      "id": "HAZ-W8-013",
+      "storyId": "AUTH-02",
+      "title": "Guest email typo prevents order access",
+      "category": "Security",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "UI confirmation step reduces typo likelihood",
+      "mitigation": "Email confirmation step, show email on confirmation screen"
+    },
+    {
+      "id": "HAZ-W8-014",
+      "storyId": "GF-04",
+      "title": "Price not added to total correctly",
+      "category": "Financial",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Unit tests verify price calculation",
+      "mitigation": "Unit tests for price calculation, E2E test for checkout"
+    },
+    {
+      "id": "HAZ-W8-015",
+      "storyId": "GF-04",
+      "title": "Wrapping selection lost during checkout",
+      "category": "Data",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Zustand persistence prevents data loss",
+      "mitigation": "Persist to Zustand with localStorage rehydration"
+    },
+    {
+      "id": "HAZ-W8-016",
+      "storyId": "UA-01",
+      "title": "Reorder adds out-of-stock items",
+      "category": "Technical",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Stock check and warning provide adequate UX",
+      "mitigation": "Check stock before adding to cart, show warning"
+    },
+    {
+      "id": "HAZ-W8-017",
+      "storyId": "UA-02",
+      "title": "Invoice download exposes sensitive data",
+      "category": "Privacy",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Server-side generation with auth check prevents exposure",
+      "mitigation": "Generate invoice server-side with auth check"
+    },
+    {
+      "id": "HAZ-W8-018",
+      "storyId": "UP-05",
+      "title": "Face not detected in valid portrait",
+      "category": "Technical",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Manual override allows user to adjust crop",
+      "mitigation": "Allow manual crop override, use high-quality detection model"
+    },
+    {
+      "id": "HAZ-W8-019",
+      "storyId": "UP-05",
+      "title": "High latency impacts user experience",
+      "category": "Performance",
+      "riskLevel": "ACCEPTABLE",
+      "rationale": "Loading state and skip option maintain usability",
+      "mitigation": "Show loading state, allow skip option, optimize preprocessing"
+    }
+  ],
+  "verificationPlan": {
+    "preImplementation": [
+      "Review hazard mitigations with team",
+      "Ensure test cases cover all mitigations",
+      "Verify vendor DPAs are in place"
+    ],
+    "duringImplementation": [
+      "Code review checklist includes hazard mitigations",
+      "Security-sensitive code requires second reviewer",
+      "Financial operations require audit logging"
+    ],
+    "postImplementation": [
+      "Run security test suite",
+      "Verify RLS policies with cross-user tests",
+      "Test payment idempotency with duplicate webhooks"
+    ]
+  }
+}
