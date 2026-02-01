@@ -7,7 +7,7 @@
   "priority": "high",
   "story_points": 3,
   "description": "Create API endpoints for user profile management including get, update, and avatar upload",
-  "status": "pending",
+  "status": "complete",
 
   "objective": {
     "as_a": "Footprint user",

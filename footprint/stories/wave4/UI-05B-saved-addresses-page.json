@@ -7,7 +7,7 @@
   "priority": "high",
   "story_points": 5,
   "description": "Create saved addresses management page with list view, add/edit/delete functionality, and set default address feature",
-  "status": "pending",
+  "status": "complete",
 
   "objective": {
     "as_a": "Footprint user",

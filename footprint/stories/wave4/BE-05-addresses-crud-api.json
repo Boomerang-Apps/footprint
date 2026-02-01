@@ -7,7 +7,7 @@
   "priority": "high",
   "story_points": 5,
   "description": "Create RESTful API endpoints for managing user saved addresses with full CRUD operations and default address functionality",
-  "status": "pending",
+  "status": "complete",
 
   "objective": {
     "as_a": "Footprint user",
