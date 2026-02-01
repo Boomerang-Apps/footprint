@@ -7,7 +7,7 @@
   "priority": "high",
   "story_points": 3,
   "description": "Create user profile settings page with form to view and edit profile information including name, phone, avatar, and language preference",
-  "status": "pending",
+  "status": "complete",
 
   "objective": {
     "as_a": "Footprint user",
