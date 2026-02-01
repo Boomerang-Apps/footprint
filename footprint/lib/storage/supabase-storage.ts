@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 /**
  * Storage folder types for organizing images
  */
-export type StorageFolder = 'uploads' | 'transformed' | 'print-ready' | 'thumbnails';
+export type StorageFolder = 'uploads' | 'transformed' | 'print-ready' | 'thumbnails' | 'bulk-downloads';
 
 /**
  * Result of Supabase storage upload

@@ -9,7 +9,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 /**
  * Storage folder types for organizing images
  */
-export type StorageFolder = 'uploads' | 'transformed' | 'print-ready' | 'thumbnails';
+export type StorageFolder = 'uploads' | 'transformed' | 'print-ready' | 'thumbnails' | 'bulk-downloads';
 
 /**
  * Error codes for R2 storage operations
