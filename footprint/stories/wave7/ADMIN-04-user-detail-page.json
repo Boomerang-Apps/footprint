@@ -1,5 +1,8 @@
 {
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
   "story_id": "ADMIN-04",
+  "type": "feature",
   "wave_number": 7,
   "title": "Admin User Detail Page",
   "domain": "frontend",
@@ -19,81 +22,97 @@
     {
       "id": "AC-001",
       "description": "Page displays user profile card with avatar, name, email, phone",
+      "ears_format": "WHEN admin navigates to /admin/users/{id} THEN display profile card with avatar, name, email, phone fields",
       "test_approach": "Mock useAdminUser hook, verify profile card rendered"
     },
     {
       "id": "AC-002",
       "description": "Page shows loading spinner while fetching user",
+      "ears_format": "WHEN page is loading user data THEN display loading spinner in center of content area",
       "test_approach": "Set isLoading=true in mock, verify spinner visible"
     },
     {
       "id": "AC-003",
       "description": "Page shows error state for non-existent user",
+      "ears_format": "WHEN user ID does not exist THEN display error message 'משתמש לא נמצא' with back button",
       "test_approach": "Mock 404 response, verify error message displayed"
     },
     {
       "id": "AC-004",
       "description": "Profile card shows registration date and account status",
+      "ears_format": "WHEN profile card renders THEN display 'הצטרף בתאריך: {date}' and status badge (active/inactive)",
       "test_approach": "Verify createdAt and status displayed in card"
     },
     {
       "id": "AC-005",
       "description": "Admin badge shown if user is admin",
+      "ears_format": "WHEN user has isAdmin=true THEN display purple 'מנהל' badge prominently on profile card",
       "test_approach": "Mock user with isAdmin=true, verify badge visible"
     },
     {
       "id": "AC-006",
       "description": "Stats section shows order count, total spent, last order date",
+      "ears_format": "WHEN page loads THEN display stats cards showing orderCount, totalSpent (₪), lastOrderDate",
       "test_approach": "Verify stats section displays correct values"
     },
     {
       "id": "AC-007",
       "description": "Order history table shows user's orders with status, date, total",
+      "ears_format": "WHEN user has orders THEN display table with order ID, status, date, total columns",
       "test_approach": "Mock orders array, verify table rendered"
     },
     {
       "id": "AC-008",
       "description": "Click order row navigates to order detail page",
+      "ears_format": "WHEN admin clicks order row THEN navigate to /admin/orders/{orderId}",
       "test_approach": "Click row, verify navigation to /admin/orders/[id]"
     },
     {
       "id": "AC-009",
       "description": "Addresses section shows user's saved addresses",
+      "ears_format": "WHEN user has saved addresses THEN display address cards with name, street, city, default badge",
       "test_approach": "Mock addresses array, verify addresses displayed"
     },
     {
       "id": "AC-010",
       "description": "Action buttons for Make Admin / Remove Admin",
+      "ears_format": "WHEN viewing non-admin user THEN show 'הפוך למנהל' button; WHEN viewing admin THEN show 'הסר הרשאות מנהל'",
       "test_approach": "Click button, verify role mutation called"
     },
     {
       "id": "AC-011",
       "description": "Action button for Deactivate / Reactivate account",
+      "ears_format": "WHEN viewing active user THEN show 'השבת חשבון' button; WHEN viewing inactive THEN show 'הפעל חשבון'",
       "test_approach": "Click button, verify status mutation called"
     },
     {
       "id": "AC-012",
       "description": "Confirmation modal before role or status changes",
+      "ears_format": "WHEN admin clicks action button THEN display confirmation modal with action description before proceeding",
       "test_approach": "Click action, verify confirmation modal appears"
     },
     {
       "id": "AC-013",
       "description": "Success/error toast after actions complete",
+      "ears_format": "WHEN action succeeds THEN show green success toast; WHEN action fails THEN show red error toast",
       "test_approach": "Complete action, verify appropriate toast shown"
     },
     {
       "id": "AC-014",
       "description": "Back button navigates to users list",
+      "ears_format": "WHEN admin clicks back button THEN navigate to /admin/users",
       "test_approach": "Click back, verify navigation to /admin/users"
     },
     {
       "id": "AC-015",
       "description": "Page is fully RTL with Hebrew labels",
+      "ears_format": "WHEN page renders THEN container has dir='rtl' and all labels display in Hebrew",
       "test_approach": "Verify dir='rtl' and Hebrew text for all labels"
     },
     {
       "id": "AC-016",
       "description": "Page is mobile-first responsive",
+      "ears_format": "WHEN viewport width < 768px THEN layout stacks vertically with full-width cards",
       "test_approach": "Verify responsive layout on different screen sizes"
     }
   ],
@@ -233,6 +252,33 @@
     }
   },
 
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "PII exposure to non-admin users",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Page wrapped in admin auth check, redirect non-admins to 403"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Accidental role/status change without confirmation",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Mandatory confirmation modal before any destructive action"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Viewing own user detail and accidentally self-demoting",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Disable self-action buttons, show warning if viewing own profile"
+      }
+    ],
+    "risk_level": "medium"
+  },
+
   "safety": {
     "stop_conditions": [
       "Any modification to authentication middleware",
@@ -248,6 +294,17 @@
   "dependencies": {
     "required_before": ["ADMIN-01", "ADMIN-02", "ADMIN-03"],
     "blocks": []
+  },
+
+  "traceability": {
+    "requirements": ["PRD-ADMIN-USER-MGMT"],
+    "epic": "ADMIN-USERS",
+    "related_stories": ["ADMIN-01", "ADMIN-02", "ADMIN-03"]
+  },
+
+  "metadata": {
+    "created_at": "2026-02-01T12:00:00Z",
+    "created_by": "claude-opus-4-5"
   },
 
   "estimated_tests": 25

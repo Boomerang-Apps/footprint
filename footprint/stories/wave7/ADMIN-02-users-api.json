@@ -1,5 +1,8 @@
 {
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
   "story_id": "ADMIN-02",
+  "type": "feature",
   "wave_number": 7,
   "title": "Admin Users API",
   "domain": "backend",
@@ -19,71 +22,86 @@
     {
       "id": "AC-001",
       "description": "GET /api/admin/users returns paginated list of all users",
+      "ears_format": "WHEN admin calls GET /api/admin/users THEN return paginated users array with total, page, limit, totalPages",
       "test_approach": "Mock admin auth and profiles, verify array response with pagination"
     },
     {
       "id": "AC-002",
       "description": "Endpoint requires admin role authentication",
+      "ears_format": "WHEN non-admin calls endpoint THEN return 403 Forbidden; WHEN unauthenticated THEN return 401 Unauthorized",
       "test_approach": "Test without auth (401), regular user (403), admin (200)"
     },
     {
       "id": "AC-003",
       "description": "Supports search by email or name query parameter",
+      "ears_format": "WHEN request includes ?search=john THEN return users where email or name contains 'john' (case-insensitive)",
       "test_approach": "Test with ?search=john, verify filtered results"
     },
     {
       "id": "AC-004",
       "description": "Supports role filter (all, admin, user)",
+      "ears_format": "WHEN request includes ?role=admin THEN return only users with isAdmin=true",
       "test_approach": "Test with ?role=admin, verify only admin users returned"
     },
     {
       "id": "AC-005",
       "description": "Supports date range filtering (registeredFrom, registeredTo)",
+      "ears_format": "WHEN request includes ?registeredFrom=2026-01-01&registeredTo=2026-01-31 THEN return users created within range",
       "test_approach": "Test with date range, verify users within range returned"
     },
     {
       "id": "AC-006",
       "description": "Supports sorting by created_at, name, order_count",
+      "ears_format": "WHEN request includes ?sortBy=order_count&sortOrder=desc THEN return users sorted by order count descending",
       "test_approach": "Test with sortBy and sortOrder params"
     },
     {
       "id": "AC-007",
       "description": "Supports pagination with page and limit parameters",
+      "ears_format": "WHEN request includes ?page=2&limit=20 THEN return users 21-40 with correct pagination metadata",
       "test_approach": "Test with page=2&limit=20, verify offset calculation"
     },
     {
       "id": "AC-008",
       "description": "GET /api/admin/users/[id] returns single user with full details",
+      "ears_format": "WHEN admin calls GET /api/admin/users/{uuid} THEN return complete user profile with orderCount, totalSpent, lastOrderDate",
       "test_approach": "Request specific user, verify all profile fields returned"
     },
     {
       "id": "AC-009",
       "description": "GET /api/admin/users/[id] returns 404 for non-existent user",
+      "ears_format": "WHEN admin requests non-existent user ID THEN return 404 with error message 'משתמש לא נמצא'",
       "test_approach": "Request invalid UUID, expect 404 response"
     },
     {
       "id": "AC-010",
       "description": "Response includes order_count from orders aggregation",
+      "ears_format": "WHEN fetching user data THEN include orderCount field with count of user's orders",
       "test_approach": "Mock user with orders, verify orderCount in response"
     },
     {
       "id": "AC-011",
       "description": "Response includes last_order_date from orders join",
+      "ears_format": "WHEN fetching user data THEN include lastOrderDate field with most recent order timestamp",
       "test_approach": "Mock user with orders, verify lastOrderDate in response"
     },
     {
       "id": "AC-012",
       "description": "Response uses camelCase (isAdmin not is_admin)",
+      "ears_format": "WHEN API returns user data THEN all field names use camelCase convention",
       "test_approach": "Verify response fields are camelCase"
     },
     {
       "id": "AC-013",
       "description": "GET /api/admin/users/stats returns user statistics",
+      "ears_format": "WHEN admin calls GET /api/admin/users/stats THEN return totalUsers, newThisWeek, newThisMonth, adminCount, activeUsers",
       "test_approach": "Verify totalUsers, newThisWeek, adminCount in response"
     },
     {
       "id": "AC-014",
       "description": "All endpoints apply rate limiting",
+      "ears_format": "WHEN request rate exceeds limit THEN return 429 Too Many Requests",
+      "threshold": "rate: 100/min",
       "test_approach": "Mock rate limiter, verify checkRateLimit called"
     }
   ],
@@ -113,6 +131,11 @@
     "database_tables": [
       "profiles",
       "orders"
+    ],
+    "api_endpoints": [
+      { "method": "GET", "path": "/api/admin/users", "description": "List users with pagination" },
+      { "method": "GET", "path": "/api/admin/users/:id", "description": "Get single user details" },
+      { "method": "GET", "path": "/api/admin/users/stats", "description": "Get user statistics" }
     ],
     "response_format": {
       "list": {
@@ -244,6 +267,33 @@
     }
   },
 
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "User PII exposure to unauthorized users",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Verify admin role via Supabase auth before returning any user data"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "SQL injection via search/filter parameters",
+        "severity": "critical",
+        "likelihood": "improbable",
+        "mitigation": "Use parameterized queries via Supabase client, validate input with Zod"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Performance degradation with large user datasets",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Enforce pagination limits (max 100), add database indexes on search fields"
+      }
+    ],
+    "risk_level": "medium"
+  },
+
   "safety": {
     "stop_conditions": [
       "Any modification to customer-facing profile endpoints",
@@ -261,6 +311,17 @@
   "dependencies": {
     "required_before": [],
     "blocks": ["ADMIN-01", "ADMIN-03", "ADMIN-04"]
+  },
+
+  "traceability": {
+    "requirements": ["PRD-ADMIN-USER-MGMT"],
+    "epic": "ADMIN-USERS",
+    "related_stories": ["ADMIN-01", "ADMIN-03", "ADMIN-04"]
+  },
+
+  "metadata": {
+    "created_at": "2026-02-01T12:00:00Z",
+    "created_by": "claude-opus-4-5"
   },
 
   "estimated_tests": 28

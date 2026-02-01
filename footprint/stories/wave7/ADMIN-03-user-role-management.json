@@ -1,5 +1,8 @@
 {
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
   "story_id": "ADMIN-03",
+  "type": "feature",
   "wave_number": 7,
   "title": "Admin User Role Management",
   "domain": "backend",
@@ -19,51 +22,62 @@
     {
       "id": "AC-001",
       "description": "PATCH /api/admin/users/[id]/role updates user admin status",
+      "ears_format": "WHEN admin calls PATCH /api/admin/users/{id}/role with {isAdmin: true} THEN update user's is_admin field in database",
       "test_approach": "Send isAdmin=true, verify database updated"
     },
     {
       "id": "AC-002",
       "description": "Endpoint requires admin role authentication",
+      "ears_format": "WHEN non-admin calls role endpoint THEN return 403; WHEN unauthenticated THEN return 401",
       "test_approach": "Test without auth (401), regular user (403), admin (200)"
     },
     {
       "id": "AC-003",
       "description": "Admin cannot demote themselves",
+      "ears_format": "WHEN admin attempts to set own isAdmin=false THEN return 400 with error 'לא ניתן להסיר הרשאות מעצמך'",
       "test_approach": "Try to set own isAdmin=false, expect 400 error"
     },
     {
       "id": "AC-004",
       "description": "Returns 404 for non-existent user",
+      "ears_format": "WHEN admin updates role for non-existent user ID THEN return 404 with error 'משתמש לא נמצא'",
       "test_approach": "Try to update invalid UUID, expect 404"
     },
     {
       "id": "AC-005",
       "description": "PATCH /api/admin/users/[id]/status updates account status",
+      "ears_format": "WHEN admin calls PATCH /api/admin/users/{id}/status with {status: 'inactive'} THEN update user status in database",
       "test_approach": "Send status='inactive', verify database updated"
     },
     {
       "id": "AC-006",
       "description": "Deactivating user logs them out of all sessions",
+      "ears_format": "WHEN user is deactivated THEN invalidate all active sessions via Supabase admin API",
       "test_approach": "Mock Supabase admin API, verify signOut called"
     },
     {
       "id": "AC-007",
       "description": "Admin cannot deactivate themselves",
+      "ears_format": "WHEN admin attempts to deactivate own account THEN return 400 with error 'לא ניתן להשבית את החשבון שלך'",
       "test_approach": "Try to deactivate own account, expect 400 error"
     },
     {
       "id": "AC-008",
       "description": "Status change is logged in audit table",
+      "ears_format": "WHEN user role or status changes THEN create entry in admin_audit_log with actor, target, action, timestamp",
       "test_approach": "Change status, verify audit log entry created"
     },
     {
       "id": "AC-009",
       "description": "Response includes updated user object",
+      "ears_format": "WHEN role/status update succeeds THEN return {success: true, user: UpdatedUserObject}",
       "test_approach": "Verify response contains updated user data"
     },
     {
       "id": "AC-010",
       "description": "All endpoints apply rate limiting",
+      "ears_format": "WHEN request rate exceeds limit THEN return 429 Too Many Requests",
+      "threshold": "rate: 20/min",
       "test_approach": "Mock rate limiter, verify checkRateLimit called"
     }
   ],
@@ -92,6 +106,10 @@
     "database_tables": [
       "profiles",
       "admin_audit_log"
+    ],
+    "api_endpoints": [
+      { "method": "PATCH", "path": "/api/admin/users/:id/role", "description": "Update user admin status" },
+      { "method": "PATCH", "path": "/api/admin/users/:id/status", "description": "Update user account status" }
     ],
     "response_format": {
       "role_update": {
@@ -185,6 +203,40 @@
     }
   },
 
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Unauthorized privilege escalation",
+        "severity": "catastrophic",
+        "likelihood": "remote",
+        "mitigation": "Verify current user is admin before any role change, double-check with Supabase RLS"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Admin locks themselves out",
+        "severity": "critical",
+        "likelihood": "occasional",
+        "mitigation": "Prevent self-demotion and self-deactivation with explicit checks"
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Session not properly invalidated on deactivation",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Use Supabase admin API to force sign out, verify in tests"
+      },
+      {
+        "id": "HAZ-004",
+        "description": "Audit trail missing for security-critical actions",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Mandatory audit log entry before returning success response"
+      }
+    ],
+    "risk_level": "high"
+  },
+
   "safety": {
     "stop_conditions": [
       "Any modification to authentication middleware",
@@ -202,6 +254,17 @@
   "dependencies": {
     "required_before": ["ADMIN-02"],
     "blocks": []
+  },
+
+  "traceability": {
+    "requirements": ["PRD-ADMIN-USER-MGMT", "SEC-ROLE-MGMT"],
+    "epic": "ADMIN-USERS",
+    "related_stories": ["ADMIN-01", "ADMIN-02", "ADMIN-04"]
+  },
+
+  "metadata": {
+    "created_at": "2026-02-01T12:00:00Z",
+    "created_by": "claude-opus-4-5"
   },
 
   "estimated_tests": 18

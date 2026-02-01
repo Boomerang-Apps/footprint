@@ -1,5 +1,8 @@
 {
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
   "story_id": "ADMIN-01",
+  "type": "feature",
   "wave_number": 7,
   "title": "Admin Users List Page",
   "domain": "frontend",
@@ -19,71 +22,86 @@
     {
       "id": "AC-001",
       "description": "Page displays paginated list of all users",
+      "ears_format": "WHEN admin navigates to /admin/users THEN paginated user list displays with default 20 users per page",
       "test_approach": "Mock useAdminUsers hook with users, verify table rendered with pagination"
     },
     {
       "id": "AC-002",
       "description": "Page shows loading spinner while fetching users",
+      "ears_format": "WHEN page is loading user data THEN display loading spinner in center of content area",
       "test_approach": "Set isLoading=true in mock, verify spinner visible"
     },
     {
       "id": "AC-003",
       "description": "Page shows empty state when no users match filters",
+      "ears_format": "WHEN search/filter returns zero results THEN display empty state with 'לא נמצאו משתמשים' message",
       "test_approach": "Mock empty users array, verify empty state message"
     },
     {
       "id": "AC-004",
       "description": "Each user row shows email, name, registration date, order count, role",
+      "ears_format": "WHEN user row renders THEN display email, name, createdAt date, orderCount, and admin badge if applicable",
       "test_approach": "Verify user row contains all required fields"
     },
     {
       "id": "AC-005",
       "description": "Admin users are visually distinguished with badge",
+      "ears_format": "WHEN user has isAdmin=true THEN display purple 'מנהל' badge next to name",
       "test_approach": "Mock user with isAdmin=true, verify admin badge displayed"
     },
     {
       "id": "AC-006",
       "description": "Search input filters users by email or name",
+      "ears_format": "WHEN admin types in search input THEN filter users matching email or name after 300ms debounce",
+      "threshold": "debounce: 300ms",
       "test_approach": "Type in search, verify API called with search param"
     },
     {
       "id": "AC-007",
       "description": "Filter tabs for All, Active, Admin users",
+      "ears_format": "WHEN admin clicks filter tab THEN update list to show only users matching selected role filter",
       "test_approach": "Click filter tab, verify API called with role filter"
     },
     {
       "id": "AC-008",
       "description": "Sort by registration date, order count, name",
+      "ears_format": "WHEN admin clicks sortable column header THEN sort list by that column, toggle direction on repeat click",
       "test_approach": "Click column header, verify sort order changes"
     },
     {
       "id": "AC-009",
       "description": "Click user row navigates to user detail page",
+      "ears_format": "WHEN admin clicks user row THEN navigate to /admin/users/[id] detail page",
       "test_approach": "Click row, verify navigation to /admin/users/[id]"
     },
     {
       "id": "AC-010",
       "description": "Quick action menu with View, Make Admin, Deactivate options",
+      "ears_format": "WHEN admin clicks action button on row THEN display dropdown with 'צפייה', 'הפוך למנהל', 'השבת' options",
       "test_approach": "Click action button, verify dropdown menu appears"
     },
     {
       "id": "AC-011",
       "description": "Stats cards show total users, new this week, admin count",
+      "ears_format": "WHEN page loads THEN display stats cards showing totalUsers, newThisWeek, adminCount values",
       "test_approach": "Verify stats cards rendered with correct values"
     },
     {
       "id": "AC-012",
       "description": "Page is fully RTL with Hebrew labels",
+      "ears_format": "WHEN page renders THEN container has dir='rtl' and all labels display in Hebrew",
       "test_approach": "Verify dir='rtl' and Hebrew text for all labels"
     },
     {
       "id": "AC-013",
       "description": "Page is mobile-first responsive",
+      "ears_format": "WHEN viewport width < 768px THEN table converts to card layout with stacked fields",
       "test_approach": "Verify responsive classes on container and table"
     },
     {
       "id": "AC-014",
       "description": "Pagination controls for page navigation",
+      "ears_format": "WHEN admin clicks pagination control THEN load corresponding page of results",
       "test_approach": "Click next page, verify API called with page param"
     }
   ],
@@ -209,6 +227,26 @@
     }
   },
 
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "User data exposure to non-admin users",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Verify admin role in useAdminUsers hook before fetching, API enforces admin check"
+      },
+      {
+        "id": "HAZ-002",
+        "description": "PII displayed without proper access control",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Page wrapped in admin auth check, redirect non-admins to 403"
+      }
+    ],
+    "risk_level": "medium"
+  },
+
   "safety": {
     "stop_conditions": [
       "Any modification to authentication middleware",
@@ -224,6 +262,17 @@
   "dependencies": {
     "required_before": ["ADMIN-02"],
     "blocks": ["ADMIN-04"]
+  },
+
+  "traceability": {
+    "requirements": ["PRD-ADMIN-USER-MGMT"],
+    "epic": "ADMIN-USERS",
+    "related_stories": ["ADMIN-02", "ADMIN-03", "ADMIN-04"]
+  },
+
+  "metadata": {
+    "created_at": "2026-02-01T12:00:00Z",
+    "created_by": "claude-opus-4-5"
   },
 
   "estimated_tests": 24
