@@ -1,27 +1,34 @@
 {
   "command": "/harden",
-  "timestamp": "2026-02-01T22:30:00Z",
+  "timestamp": "2026-02-01T22:45:00Z",
   "branch": "main",
-  "overallScore": 68,
-  "status": "BLOCKING_ISSUES",
+  "overallScore": 78,
+  "status": "WARNINGS_ONLY",
   "scores": {
-    "security": 45,
+    "security": 72,
     "codeQuality": 85,
     "testCoverage": 63,
     "production": 70
   },
-  "blocking": [
+  "blocking": [],
+  "resolved": [
     {
       "category": "security",
-      "issue": "Next.js 14.2.0 has critical vulnerability (CVE-2025-XXXX)",
-      "severity": "critical",
-      "fix": "pnpm update next@latest"
+      "issue": "Next.js 14.2.0 critical vulnerability",
+      "resolution": "Updated to Next.js 14.2.35 (patched)",
+      "timestamp": "2026-02-01T22:20:00Z"
     },
     {
       "category": "security",
-      "issue": "7 high severity vulnerabilities in dependencies",
-      "severity": "high",
-      "fix": "pnpm audit fix"
+      "issue": "glob CLI command injection (HIGH)",
+      "resolution": "Updated eslint-config-next to 15.1.0 (uses fast-glob)",
+      "timestamp": "2026-02-01T22:35:00Z"
+    },
+    {
+      "category": "security",
+      "issue": "fast-xml-parser RangeError DoS (HIGH)",
+      "resolution": "Added pnpm override for fast-xml-parser>=5.3.4",
+      "timestamp": "2026-02-01T22:35:00Z"
     }
   ],
   "warnings": [
