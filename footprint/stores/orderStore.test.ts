@@ -798,32 +798,34 @@ describe('Order Store', () => {
         }).toThrow('Invalid guest information');
       });
 
-      it('should throw error for empty first name', () => {
+      it('should allow empty first name (optional for initial checkout)', () => {
         const store = useOrderStore.getState();
-        const invalidInfo = {
+        const guestInfo = {
           ...validGuestInfo,
           firstName: '',
         };
 
-        expect(() => {
-          act(() => {
-            store.setGuestInfo(invalidInfo);
-          });
-        }).toThrow('Invalid guest information');
+        act(() => {
+          store.setGuestInfo(guestInfo);
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.guestInfo?.firstName).toBe('');
       });
 
-      it('should throw error for empty last name', () => {
+      it('should allow empty last name (optional for initial checkout)', () => {
         const store = useOrderStore.getState();
-        const invalidInfo = {
+        const guestInfo = {
           ...validGuestInfo,
           lastName: '',
         };
 
-        expect(() => {
-          act(() => {
-            store.setGuestInfo(invalidInfo);
-          });
-        }).toThrow('Invalid guest information');
+        act(() => {
+          store.setGuestInfo(guestInfo);
+        });
+
+        const state = useOrderStore.getState();
+        expect(state.guestInfo?.lastName).toBe('');
       });
 
       it('should throw error for invalid phone', () => {

@@ -24,6 +24,15 @@ vi.mock('next/navigation', () => ({
 // Mock zustand store
 vi.mock('@/stores/orderStore');
 
+// Mock Supabase client
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: { user: { id: 'test-user' } } } }),
+    },
+  }),
+}));
+
 // Mock next/image
 vi.mock('next/image', () => ({
   default: ({ src, alt, ...props }: { src: string; alt: string }) => (
@@ -72,6 +81,9 @@ describe('CheckoutPage', () => {
     hideGiftPrice: true,
     shippingAddress: null,
     _hasHydrated: true,
+    // Auth state - simulating authenticated user
+    isGuest: false,
+    guestInfo: null,
   };
 
   beforeEach(() => {
@@ -88,30 +100,39 @@ describe('CheckoutPage', () => {
   });
 
   describe('Page Structure', () => {
-    it('renders checkout page with form', () => {
+    it('renders checkout page with form', async () => {
       render(<CheckoutPage />);
       // Check that the main content is rendered
       expect(screen.getByRole('main')).toBeInTheDocument();
     });
 
-    it('renders contact info section', () => {
+    it('renders contact info section', async () => {
       render(<CheckoutPage />);
-      expect(screen.getByText('פרטי התקשרות')).toBeInTheDocument();
+      // Wait for auth check to complete
+      await waitFor(() => {
+        expect(screen.getByText('פרטי התקשרות')).toBeInTheDocument();
+      });
     });
 
-    it('renders shipping address section', () => {
+    it('renders shipping address section', async () => {
       render(<CheckoutPage />);
-      expect(screen.getByText('כתובת למשלוח')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('כתובת למשלוח')).toBeInTheDocument();
+      });
     });
 
-    it('renders order summary', () => {
+    it('renders order summary', async () => {
       render(<CheckoutPage />);
-      expect(screen.getByText('סיכום הזמנה')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('סיכום הזמנה')).toBeInTheDocument();
+      });
     });
 
-    it('renders payment button', () => {
+    it('renders payment button', async () => {
       render(<CheckoutPage />);
-      expect(screen.getByRole('button', { name: /לתשלום/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /לתשלום/i })).toBeInTheDocument();
+      });
     });
   });
 
@@ -119,7 +140,8 @@ describe('CheckoutPage', () => {
     it('does not call API when form is empty', async () => {
       render(<CheckoutPage />);
 
-      const submitButton = screen.getByRole('button', { name: /לתשלום/i });
+      // Wait for auth check and form to be visible
+      const submitButton = await screen.findByRole('button', { name: /לתשלום/i });
       fireEvent.click(submitButton);
 
       // Browser native validation prevents form submission
@@ -130,8 +152,11 @@ describe('CheckoutPage', () => {
     it('validates required fields before API call', async () => {
       render(<CheckoutPage />);
 
+      // Wait for auth check to complete and form to be visible
+      const nameInput = await screen.findByPlaceholderText(/ישראל ישראלי/i);
+
       // Fill only some fields
-      fireEvent.change(screen.getByPlaceholderText(/ישראל ישראלי/i), {
+      fireEvent.change(nameInput, {
         target: { value: 'Test User' },
       });
 
@@ -144,8 +169,10 @@ describe('CheckoutPage', () => {
   });
 
   describe('PayPlus Payment Integration', () => {
-    const fillValidForm = () => {
-      fireEvent.change(screen.getByPlaceholderText(/ישראל ישראלי/i), {
+    const fillValidForm = async () => {
+      // Wait for form to be visible
+      const nameInput = await screen.findByPlaceholderText(/ישראל ישראלי/i);
+      fireEvent.change(nameInput, {
         target: { value: 'Test User' },
       });
       fireEvent.change(screen.getByPlaceholderText(/email@example.com/i), {
@@ -172,7 +199,7 @@ describe('CheckoutPage', () => {
       });
 
       render(<CheckoutPage />);
-      fillValidForm();
+      await await fillValidForm();
 
       const submitButton = screen.getByRole('button', { name: /לתשלום/i });
 
@@ -198,7 +225,7 @@ describe('CheckoutPage', () => {
       });
 
       render(<CheckoutPage />);
-      fillValidForm();
+      await await fillValidForm();
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', { name: /לתשלום/i }));
@@ -233,7 +260,7 @@ describe('CheckoutPage', () => {
       });
 
       render(<CheckoutPage />);
-      fillValidForm();
+      await fillValidForm();
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', { name: /לתשלום/i }));
@@ -264,7 +291,7 @@ describe('CheckoutPage', () => {
       );
 
       render(<CheckoutPage />);
-      fillValidForm();
+      await fillValidForm();
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', { name: /לתשלום/i }));
@@ -287,7 +314,7 @@ describe('CheckoutPage', () => {
       );
 
       render(<CheckoutPage />);
-      fillValidForm();
+      await fillValidForm();
 
       const submitButton = screen.getByRole('button', { name: /לתשלום/i });
 
@@ -305,7 +332,7 @@ describe('CheckoutPage', () => {
       });
 
       render(<CheckoutPage />);
-      fillValidForm();
+      await fillValidForm();
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', { name: /לתשלום/i }));
@@ -320,7 +347,7 @@ describe('CheckoutPage', () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
       render(<CheckoutPage />);
-      fillValidForm();
+      await fillValidForm();
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', { name: /לתשלום/i }));
@@ -354,8 +381,9 @@ describe('CheckoutPage', () => {
 
       render(<CheckoutPage />);
 
-      // Fill form and retry
-      fireEvent.change(screen.getByPlaceholderText(/ישראל ישראלי/i), {
+      // Wait for form and fill and retry
+      const nameInput = await screen.findByPlaceholderText(/ישראל ישראלי/i);
+      fireEvent.change(nameInput, {
         target: { value: 'Test User' },
       });
       fireEvent.change(screen.getByPlaceholderText(/email@example.com/i), {
@@ -393,8 +421,9 @@ describe('CheckoutPage', () => {
 
       render(<CheckoutPage />);
 
-      // Fill form
-      fireEvent.change(screen.getByPlaceholderText(/ישראל ישראלי/i), {
+      // Wait for form and fill
+      const nameInput = await screen.findByPlaceholderText(/ישראל ישראלי/i);
+      fireEvent.change(nameInput, {
         target: { value: 'Test User' },
       });
       fireEvent.change(screen.getByPlaceholderText(/email@example.com/i), {
@@ -434,7 +463,9 @@ describe('CheckoutPage', () => {
 
       render(<CheckoutPage />);
 
-      fireEvent.change(screen.getByPlaceholderText(/ישראל ישראלי/i), {
+      // Wait for form
+      const nameInput = await screen.findByPlaceholderText(/ישראל ישראלי/i);
+      fireEvent.change(nameInput, {
         target: { value: 'Test User' },
       });
       fireEvent.change(screen.getByPlaceholderText(/email@example.com/i), {
@@ -466,10 +497,11 @@ describe('CheckoutPage', () => {
   });
 
   describe('Navigation', () => {
-    it('navigates back to customize when back button clicked', () => {
+    it('navigates back to customize when back button clicked', async () => {
       render(<CheckoutPage />);
 
-      const backButton = screen.getByRole('button', { name: /חזרה/i });
+      // Wait for form to load
+      const backButton = await screen.findByRole('button', { name: /חזרה/i });
       fireEvent.click(backButton);
 
       expect(mockSetStep).toHaveBeenCalledWith('customize');

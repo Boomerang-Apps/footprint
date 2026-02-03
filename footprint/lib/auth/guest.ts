@@ -7,14 +7,21 @@
 
 /**
  * Guest information for checkout without account
+ * Email is required for order confirmation.
+ * Other fields are collected during checkout flow.
  */
 export interface GuestInfo {
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
-  marketingConsent: boolean;
+  marketingConsent?: boolean;
 }
+
+/**
+ * Complete guest information required at order placement
+ */
+export interface CompleteGuestInfo extends Required<GuestInfo> {}
 
 /**
  * Validation result with errors
@@ -174,12 +181,50 @@ function validatePhone(phone: string | undefined, errors: string[]): boolean {
 }
 
 /**
- * Validates complete guest information
+ * Validates partial guest information (email only required)
+ * Used for initial guest checkout flow.
  *
  * @param info - Guest information to validate
  * @returns Validation result with errors
  */
 export function isValidGuestInfo(info: GuestInfo): GuestValidationResult {
+  const errors: string[] = [];
+
+  // Email validation (required)
+  const trimmedEmail = info.email.trim();
+  if (!trimmedEmail) {
+    errors.push('Email is required');
+  } else if (!isValidGuestEmail(trimmedEmail)) {
+    errors.push('Email format is invalid');
+  }
+
+  // First name validation (optional for initial flow)
+  if (info.firstName !== undefined && info.firstName.trim()) {
+    validateName(info.firstName, 'First name', errors);
+  }
+
+  // Last name validation (optional for initial flow)
+  if (info.lastName !== undefined && info.lastName.trim()) {
+    validateName(info.lastName, 'Last name', errors);
+  }
+
+  // Phone validation (optional)
+  validatePhone(info.phone, errors);
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
+ * Validates complete guest information required at order placement.
+ * All fields must be present and valid.
+ *
+ * @param info - Complete guest information to validate
+ * @returns Validation result with errors
+ */
+export function isValidCompleteGuestInfo(info: GuestInfo): GuestValidationResult {
   const errors: string[] = [];
 
   // Email validation
@@ -190,11 +235,19 @@ export function isValidGuestInfo(info: GuestInfo): GuestValidationResult {
     errors.push('Email format is invalid');
   }
 
-  // First name validation
-  validateName(info.firstName, 'First name', errors);
+  // First name validation (required)
+  if (!info.firstName || !info.firstName.trim()) {
+    errors.push('First name is required');
+  } else {
+    validateName(info.firstName, 'First name', errors);
+  }
 
-  // Last name validation
-  validateName(info.lastName, 'Last name', errors);
+  // Last name validation (required)
+  if (!info.lastName || !info.lastName.trim()) {
+    errors.push('Last name is required');
+  } else {
+    validateName(info.lastName, 'Last name', errors);
+  }
 
   // Phone validation (optional)
   validatePhone(info.phone, errors);

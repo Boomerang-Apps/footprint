@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { isValidGuestEmail, isValidGuestInfo, type GuestInfo } from './guest';
+import { isValidGuestEmail, isValidGuestInfo, isValidCompleteGuestInfo, type GuestInfo } from './guest';
 
 describe('Guest Validation', () => {
   describe('isValidGuestEmail', () => {
@@ -136,22 +136,33 @@ describe('Guest Validation', () => {
     });
 
     describe('First name validation', () => {
-      it('should reject empty first name', () => {
+      it('should accept empty first name in partial validation', () => {
         const guest: GuestInfo = {
           ...validGuest,
           firstName: '',
         };
+        // Partial validation (isValidGuestInfo) allows empty first name
         const result = isValidGuestInfo(guest);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should reject empty first name in complete validation', () => {
+        const guest: GuestInfo = {
+          ...validGuest,
+          firstName: '',
+        };
+        // Complete validation requires first name
+        const result = isValidCompleteGuestInfo(guest);
         expect(result.valid).toBe(false);
         expect(result.errors).toContain('First name is required');
       });
 
-      it('should reject whitespace-only first name', () => {
+      it('should reject whitespace-only first name in complete validation', () => {
         const guest: GuestInfo = {
           ...validGuest,
           firstName: '   ',
         };
-        const result = isValidGuestInfo(guest);
+        const result = isValidCompleteGuestInfo(guest);
         expect(result.valid).toBe(false);
         expect(result.errors).toContain('First name is required');
       });
@@ -225,22 +236,33 @@ describe('Guest Validation', () => {
     });
 
     describe('Last name validation', () => {
-      it('should reject empty last name', () => {
+      it('should accept empty last name in partial validation', () => {
         const guest: GuestInfo = {
           ...validGuest,
           lastName: '',
         };
+        // Partial validation (isValidGuestInfo) allows empty last name
         const result = isValidGuestInfo(guest);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should reject empty last name in complete validation', () => {
+        const guest: GuestInfo = {
+          ...validGuest,
+          lastName: '',
+        };
+        // Complete validation requires last name
+        const result = isValidCompleteGuestInfo(guest);
         expect(result.valid).toBe(false);
         expect(result.errors).toContain('Last name is required');
       });
 
-      it('should reject whitespace-only last name', () => {
+      it('should reject whitespace-only last name in complete validation', () => {
         const guest: GuestInfo = {
           ...validGuest,
           lastName: '   ',
         };
-        const result = isValidGuestInfo(guest);
+        const result = isValidCompleteGuestInfo(guest);
         expect(result.valid).toBe(false);
         expect(result.errors).toContain('Last name is required');
       });

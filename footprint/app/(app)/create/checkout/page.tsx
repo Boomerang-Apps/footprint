@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { ArrowRight, Check, Sparkles, CreditCard, MapPin, User, Phone, Mail, Building, Loader2, Gift, Heart, Cake, Baby, GraduationCap, Home, PartyPopper, HandHeart, Sparkle } from 'lucide-react';
 import type { GiftOccasion } from '@/stores/orderStore';
 import { useOrderStore } from '@/stores/orderStore';
+import { CheckoutAuthFlow } from '@/components/checkout/CheckoutAuthFlow';
+import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 
 // Generate a unique order ID
@@ -49,9 +51,13 @@ function CheckoutPageContent() {
     setShippingAddress,
     setStep,
     _hasHydrated,
+    isGuest,
+    guestInfo,
   } = useOrderStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [showAuthFlow, setShowAuthFlow] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -60,6 +66,50 @@ function CheckoutPageContent() {
     city: '',
     zipCode: '',
   });
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
+
+        // If not authenticated and not guest, show auth flow
+        if (!session && !isGuest) {
+          setShowAuthFlow(true);
+        }
+      } catch {
+        setIsAuthenticated(false);
+        if (!isGuest) {
+          setShowAuthFlow(true);
+        }
+      }
+    };
+
+    if (_hasHydrated) {
+      checkAuth();
+    }
+  }, [_hasHydrated, isGuest]);
+
+  // Pre-fill email from guest info
+  useEffect(() => {
+    if (guestInfo?.email && !formData.email) {
+      setFormData(prev => ({ ...prev, email: guestInfo.email }));
+    }
+  }, [guestInfo, formData.email]);
+
+  // Handle auth flow completion
+  const handleAuthComplete = useCallback(() => {
+    setShowAuthFlow(false);
+    // Re-check auth status
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+  }, []);
 
   // Redirect if no image (only after hydration)
   useEffect(() => {
@@ -168,6 +218,49 @@ function CheckoutPageContent() {
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-purple-600" />
           <p className="text-sm text-zinc-500">טוען...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Show loading state while checking auth
+  if (isAuthenticated === null) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-white" dir="rtl">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-purple-600" />
+          <p className="text-sm text-zinc-500">בודק התחברות...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Show auth flow if not authenticated and not guest
+  if (showAuthFlow) {
+    return (
+      <main className="min-h-screen bg-white" dir="rtl">
+        {/* Header */}
+        <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
+          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="w-10 h-10 flex items-center justify-center text-zinc-600 rounded-xl"
+              aria-label="חזרה"
+            >
+              <ArrowRight className="w-6 h-6" />
+            </button>
+
+            <h1 className="text-[17px] font-semibold text-zinc-900">התחברות</h1>
+
+            <div className="w-10" />
+          </div>
+        </header>
+
+        {/* Auth Flow Content */}
+        <div className="max-w-lg mx-auto px-4 py-12">
+          <CheckoutAuthFlow
+            onAuthComplete={handleAuthComplete}
+          />
         </div>
       </main>
     );

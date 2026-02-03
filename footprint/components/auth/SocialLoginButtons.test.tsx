@@ -214,4 +214,120 @@ describe('SocialLoginButtons', () => {
       expect(screen.getByRole('button', { name: /המשך עם apple/i })).toBeInTheDocument();
     });
   });
+
+  describe('Facebook and Instagram Providers', () => {
+    it('renders Facebook button when showFacebook is true', () => {
+      render(
+        <SocialLoginButtons
+          onGoogleClick={vi.fn()}
+          onFacebookClick={vi.fn()}
+          showFacebook={true}
+        />
+      );
+      expect(screen.getByRole('button', { name: /facebook/i })).toBeInTheDocument();
+      expect(screen.getByTestId('facebook-icon')).toBeInTheDocument();
+    });
+
+    it('renders Instagram button when showInstagram is true', () => {
+      render(
+        <SocialLoginButtons
+          onGoogleClick={vi.fn()}
+          onInstagramClick={vi.fn()}
+          showInstagram={true}
+        />
+      );
+      expect(screen.getByRole('button', { name: /instagram/i })).toBeInTheDocument();
+      expect(screen.getByTestId('instagram-icon')).toBeInTheDocument();
+    });
+
+    it('calls onFacebookClick when Facebook button is clicked', async () => {
+      const user = userEvent.setup();
+      const onFacebookClick = vi.fn();
+
+      render(
+        <SocialLoginButtons
+          onGoogleClick={vi.fn()}
+          onFacebookClick={onFacebookClick}
+          showFacebook={true}
+        />
+      );
+
+      await user.click(screen.getByRole('button', { name: /facebook/i }));
+      expect(onFacebookClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onInstagramClick when Instagram button is clicked', async () => {
+      const user = userEvent.setup();
+      const onInstagramClick = vi.fn();
+
+      render(
+        <SocialLoginButtons
+          onGoogleClick={vi.fn()}
+          onInstagramClick={onInstagramClick}
+          showInstagram={true}
+        />
+      );
+
+      await user.click(screen.getByRole('button', { name: /instagram/i }));
+      expect(onInstagramClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('disables Facebook and Instagram buttons when loading', () => {
+      render(
+        <SocialLoginButtons
+          onGoogleClick={vi.fn()}
+          onFacebookClick={vi.fn()}
+          onInstagramClick={vi.fn()}
+          showFacebook={true}
+          showInstagram={true}
+          facebookLoading={true}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /facebook/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /instagram/i })).toBeDisabled();
+    });
+  });
+
+  describe('Visibility Controls', () => {
+    it('hides Google button when showGoogle is false', () => {
+      render(
+        <SocialLoginButtons
+          onAppleClick={vi.fn()}
+          showGoogle={false}
+        />
+      );
+      expect(screen.queryByRole('button', { name: /google/i })).not.toBeInTheDocument();
+    });
+
+    it('hides Apple button when showApple is false', () => {
+      render(
+        <SocialLoginButtons
+          onGoogleClick={vi.fn()}
+          showApple={false}
+        />
+      );
+      expect(screen.queryByRole('button', { name: /apple/i })).not.toBeInTheDocument();
+    });
+
+    it('hides divider when showDivider is false', () => {
+      render(
+        <SocialLoginButtons
+          onGoogleClick={vi.fn()}
+          showDivider={false}
+        />
+      );
+      expect(screen.queryByText(/or/i)).not.toBeInTheDocument();
+    });
+
+    it('shows custom divider text', () => {
+      render(
+        <SocialLoginButtons
+          onGoogleClick={vi.fn()}
+          dividerText="או"
+        />
+      );
+      expect(screen.getByText('או')).toBeInTheDocument();
+    });
+  });
 });

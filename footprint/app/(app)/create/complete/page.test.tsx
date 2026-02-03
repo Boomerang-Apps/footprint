@@ -41,6 +41,23 @@ vi.mock('canvas-confetti', () => ({
   default: vi.fn(),
 }));
 
+// Mock PostPurchaseSignup component
+vi.mock('@/components/auth/PostPurchaseSignup', () => ({
+  PostPurchaseSignup: ({ email, orderId, onSignupComplete, onDismiss }: {
+    email: string;
+    orderId: string;
+    onSignupComplete: () => void;
+    onDismiss: () => void;
+  }) => (
+    <div data-testid="post-purchase-signup">
+      <p>{email}</p>
+      <p>{orderId}</p>
+      <button onClick={onSignupComplete}>Complete</button>
+      <button onClick={onDismiss}>Dismiss</button>
+    </div>
+  ),
+}));
+
 // Mock clipboard API
 Object.assign(navigator, {
   clipboard: {
@@ -519,6 +536,50 @@ describe('CompletePage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('error-message')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Post-Purchase Signup (AUTH-02)', () => {
+    const guestOrderData = {
+      ...mockOrderData,
+      isGuest: true,
+      guestInfo: {
+        email: 'guest@example.com',
+        firstName: 'גל',
+        lastName: 'כהן',
+      },
+    };
+
+    it('shows signup prompt for guest users', () => {
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(guestOrderData);
+      render(<CompletePage />);
+
+      expect(screen.getByTestId('signup-prompt-container')).toBeInTheDocument();
+    });
+
+    it('does not show signup prompt for logged-in users', () => {
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        ...mockOrderData,
+        isGuest: false,
+        guestInfo: null,
+      });
+      render(<CompletePage />);
+
+      expect(screen.queryByTestId('signup-prompt-container')).not.toBeInTheDocument();
+    });
+
+    it('displays guest email in signup form', () => {
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(guestOrderData);
+      render(<CompletePage />);
+
+      expect(screen.getByText('guest@example.com')).toBeInTheDocument();
+    });
+
+    it('uses guest email in confirmation message', () => {
+      (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(guestOrderData);
+      render(<CompletePage />);
+
+      expect(screen.getByText(/אישור נשלח למייל guest@example.com/)).toBeInTheDocument();
     });
   });
 });

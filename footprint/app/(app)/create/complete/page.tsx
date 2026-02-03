@@ -18,6 +18,7 @@ import {
 import { useOrderStore } from '@/stores/orderStore';
 import confetti from 'canvas-confetti';
 import toast from 'react-hot-toast';
+import { PostPurchaseSignup } from '@/components/auth/PostPurchaseSignup';
 
 interface OrderItem {
   name: string;
@@ -119,7 +120,13 @@ function CompletePageContent() {
     isGift,
     pricing,
     reset,
+    isGuest,
+    guestInfo,
   } = useOrderStore();
+
+  // Post-purchase signup state (AUTH-02)
+  const [showSignupPrompt, setShowSignupPrompt] = useState(true);
+  const [signupCompleted, setSignupCompleted] = useState(false);
 
   // API state
   const [orderData, setOrderData] = useState<OrderConfirmation | null>(null);
@@ -231,11 +238,25 @@ function CompletePageContent() {
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
   };
 
+  // Post-purchase signup handlers (AUTH-02)
+  const handleSignupComplete = useCallback(() => {
+    setSignupCompleted(true);
+    setShowSignupPrompt(false);
+    toast.success('החשבון נוצר בהצלחה!');
+  }, []);
+
+  const handleSignupDismiss = useCallback(() => {
+    setShowSignupPrompt(false);
+  }, []);
+
   const styleName = STYLE_NAMES[selectedStyle || 'pop_art'] || 'פופ ארט';
   const paperName = PAPER_NAMES[paperType || 'matte'] || 'Fine Art Matte';
   const frameName = FRAME_NAMES[frameType || 'none'] || 'ללא מסגרת';
   const displayImage = transformedImage || originalImage || '';
-  const customerEmail = emailFromParams || 'your@email.com';
+  const customerEmail = emailFromParams || guestInfo?.email || 'your@email.com';
+
+  // Determine if we should show the post-purchase signup (AUTH-02)
+  const shouldShowSignup = isGuest && showSignupPrompt && !signupCompleted && guestInfo?.email;
 
   // Loading state
   if (isLoading) {
@@ -461,6 +482,18 @@ function CompletePageContent() {
             </button>
           </div>
         </div>
+
+        {/* Post-Purchase Signup Prompt (AUTH-02) */}
+        {shouldShowSignup && (
+          <div data-testid="signup-prompt-container" className="mb-4">
+            <PostPurchaseSignup
+              email={guestInfo!.email}
+              orderId={orderNumber}
+              onSignupComplete={handleSignupComplete}
+              onDismiss={handleSignupDismiss}
+            />
+          </div>
+        )}
       </main>
 
       {/* Bottom CTA */}
