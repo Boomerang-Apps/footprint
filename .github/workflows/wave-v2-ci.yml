@@ -21,6 +21,10 @@ env:
   NODE_VERSION: "20.x"
   PNPM_VERSION: "10"
 
+defaults:
+  run:
+    working-directory: footprint
+
 jobs:
   # ==========================================================================
   # Gate 2: Build Verification
@@ -43,6 +47,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
+          cache-dependency-path: footprint/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -75,8 +80,8 @@ jobs:
         with:
           name: build-output
           path: |
-            .next/
-            .claude/signals/
+            footprint/.next/
+            footprint/.claude/signals/
 
   # ==========================================================================
   # Gate 3: Test Verification
@@ -100,6 +105,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
+          cache-dependency-path: footprint/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -138,7 +144,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/
+          path: footprint/coverage/
 
   # ==========================================================================
   # E2E Tests (Playwright)
@@ -163,6 +169,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
+          cache-dependency-path: footprint/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -180,7 +187,7 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: footprint/playwright-report/
           retention-days: 30
 
   # ==========================================================================
@@ -205,6 +212,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
+          cache-dependency-path: footprint/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -259,6 +267,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
+          cache-dependency-path: footprint/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
