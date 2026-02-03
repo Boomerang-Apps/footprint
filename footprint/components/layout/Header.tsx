@@ -7,8 +7,8 @@ import { Menu, X, Search, ShoppingCart, Zap, Truck, LogIn, UserPlus, User, Packa
 import { useProfile } from '@/hooks/useProfile';
 import { createClient } from '@/lib/supabase/client';
 
-// Default avatar image
-const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=user&backgroundColor=b6e3f4';
+// Default avatar image - real photo placeholder
+const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face';
 
 export function Header() {
   const router = useRouter();

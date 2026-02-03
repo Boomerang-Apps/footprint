@@ -425,8 +425,8 @@ export default function HomePage() {
           <div className="pt-8 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-center gap-6 text-[13px] text-zinc-500">
             <span>© 2025 פוטפרינט. כל הזכויות שמורות.</span>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-zinc-900 transition">תקנון</a>
-              <a href="#" className="hover:text-zinc-900 transition">פרטיות</a>
+              <Link href="/terms" className="hover:text-zinc-900 transition">תקנון</Link>
+              <Link href="/privacy" className="hover:text-zinc-900 transition">פרטיות</Link>
             </div>
           </div>
         </div>
