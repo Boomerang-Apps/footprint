@@ -33,3 +33,4 @@ footprint-app/
 footprint-worktrees/
 test-output/
 worktrees/
+.env.mcp
