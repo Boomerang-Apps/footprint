@@ -39,8 +39,8 @@ function createRequest(): NextRequest {
   );
 }
 
-// Mock params
-const mockParams = { id: 'addr-2' };
+// Mock params (Next.js 15: params is a Promise)
+const mockParams = Promise.resolve({ id: 'addr-2' });
 
 // Mock authenticated user
 const mockUser = {
@@ -232,7 +232,7 @@ describe('PATCH /api/addresses/[id]/default', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest();
-      const response = await PATCH(request, { params: { id: 'non-existent' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'non-existent' }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -264,7 +264,7 @@ describe('PATCH /api/addresses/[id]/default', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest();
-      const response = await PATCH(request, { params: { id: 'addr-other' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'addr-other' }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);

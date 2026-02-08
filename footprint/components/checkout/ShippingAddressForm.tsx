@@ -47,7 +47,7 @@ export default function ShippingAddressForm({
   onValidChange,
   disabled = false,
   className = '',
-}: ShippingAddressFormProps): JSX.Element {
+}: ShippingAddressFormProps): React.ReactElement {
   const { setShippingAddress } = useOrderStore();
 
   // Form state

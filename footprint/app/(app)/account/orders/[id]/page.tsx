@@ -1,9 +1,10 @@
 'use client';
 
+import { use } from 'react';
 import { OrderDetailView } from '@/components/account/OrderDetailView';
 
 interface OrderDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -15,5 +16,6 @@ interface OrderDetailPageProps {
 export default function OrderDetailPage({
   params,
 }: OrderDetailPageProps): React.ReactElement {
-  return <OrderDetailView orderId={params.id} />;
+  const { id } = use(params);
+  return <OrderDetailView orderId={id} />;
 }

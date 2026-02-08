@@ -31,7 +31,7 @@ export default function GiftMessage({
   onChange,
   disabled = false,
   className = '',
-}: GiftMessageProps): JSX.Element {
+}: GiftMessageProps): React.ReactElement {
   const { giftMessage, setGiftMessage } = useOrderStore();
 
   // Use prop value if provided, otherwise use store value

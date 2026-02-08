@@ -83,7 +83,7 @@ const STYLES: Style[] = [
 export default function StyleGallery({
   onStyleSelect,
   className = '',
-}: StyleGalleryProps): JSX.Element {
+}: StyleGalleryProps): React.ReactElement {
   const { selectedStyle, setSelectedStyle } = useOrderStore();
 
   const handleStyleClick = useCallback(

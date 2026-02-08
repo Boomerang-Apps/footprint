@@ -49,14 +49,14 @@ interface ErrorResponse {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<DownloadResponse | ErrorResponse>> {
   // Rate limiting: general limit for admin routes
   const rateLimited = await checkRateLimit('general', request);
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    const orderId = params.id;
+    const { id: orderId } = await params;
 
     // 1. Verify authentication
     const supabase = await createClient();

@@ -182,7 +182,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
       });
 
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(401);
@@ -199,7 +199,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
       });
 
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(403);
@@ -208,7 +208,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
 
     it('should allow admin users to proceed', async () => {
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
 
       expect(response.status).toBe(200);
     });
@@ -221,7 +221,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
   describe('Request Validation', () => {
     it('should return 400 for missing trackingNumber', async () => {
       const request = createRequest({ carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -230,7 +230,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
 
     it('should return 400 for missing carrier', async () => {
       const request = createRequest({ trackingNumber: 'RR123456789IL' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -239,7 +239,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
 
     it('should return 400 for invalid carrier code', async () => {
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'invalid' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -248,7 +248,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
 
     it('should return 400 for invalid tracking number format', async () => {
       const request = createRequest({ trackingNumber: 'INVALID', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -267,7 +267,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
       });
 
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'nonexistent' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'nonexistent' }) });
       const body = await response.json();
 
       expect(response.status).toBe(404);
@@ -282,7 +282,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
   describe('Successful Tracking Update', () => {
     it('should return updated order with tracking info', async () => {
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(200);
@@ -294,7 +294,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
 
     it('should include tracking URL in response', async () => {
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(body.order.trackingUrl).toContain('israelpost');
@@ -302,7 +302,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
 
     it('should include notification status in response', async () => {
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(body.notification).toBeDefined();
@@ -315,7 +315,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
         carrier: 'israel_post',
         note: 'Sent via express',
       });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
 
       expect(response.status).toBe(200);
     });
@@ -328,7 +328,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
   describe('Customer Notification', () => {
     it('should send tracking email on successful update', async () => {
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      await PATCH(request, { params: { id: 'order_123' } });
+      await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
 
       expect(mockSendTrackingEmail).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -348,7 +348,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
       });
 
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(200);
@@ -380,7 +380,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
       });
 
       const request = createRequest({ trackingNumber: 'RR123456789IL', carrier: 'israel_post' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(500);

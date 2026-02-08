@@ -53,7 +53,7 @@ const FRAMES: Frame[] = [
 export default function FrameSelector({
   onFrameChange,
   className = '',
-}: FrameSelectorProps): JSX.Element {
+}: FrameSelectorProps): React.ReactElement {
   const { frameType, setFrameType } = useOrderStore();
 
   const handleFrameClick = useCallback(

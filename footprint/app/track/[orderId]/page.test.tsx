@@ -161,7 +161,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display order number in header', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText('Order #12345678')).toBeInTheDocument();
@@ -169,7 +169,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display order status badge', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         const badge = screen.getByTestId('badge');
@@ -179,7 +179,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display order creation date', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText(/Ordered on/)).toBeInTheDocument();
@@ -188,7 +188,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should render OrderTimeline component with correct status', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         const timeline = screen.getByTestId('order-timeline');
@@ -198,7 +198,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display tracking information when available', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText('Shipping & Tracking')).toBeInTheDocument();
@@ -209,7 +209,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display order items correctly', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText('Order Items')).toBeInTheDocument();
@@ -222,7 +222,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display shipping address', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText('Shipping Address')).toBeInTheDocument();
@@ -235,7 +235,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display order summary with correct totals', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText('Order Summary')).toBeInTheDocument();
@@ -246,7 +246,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display customer support contact information', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText('Need Help with Your Order?')).toBeInTheDocument();
@@ -269,7 +269,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display gift information when order is a gift', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText('Gift Information')).toBeInTheDocument();
@@ -294,7 +294,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should not display tracking section when no tracking info available', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.queryByText('Shipping & Tracking')).not.toBeInTheDocument();
@@ -315,7 +315,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should display discount in order summary', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByText('₪20.00')).toBeInTheDocument(); // Discount amount
@@ -329,7 +329,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
       mockApiGet.mockRejectedValue(new Error('Order not found'));
 
       await expect(
-        OrderTrackingPage({ params: { orderId: 'nonexistent' } })
+        OrderTrackingPage({ params: Promise.resolve({ orderId: 'nonexistent' }) })
       ).rejects.toThrow('NEXT_NOT_FOUND');
 
       expect(mockNotFound).toHaveBeenCalled();
@@ -339,7 +339,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
       mockApiGet.mockResolvedValue(null as unknown as Order);
 
       await expect(
-        OrderTrackingPage({ params: { orderId: 'ord_12345678' } })
+        OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) })
       ).rejects.toThrow('NEXT_NOT_FOUND');
 
       expect(mockNotFound).toHaveBeenCalled();
@@ -348,7 +348,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     it('should fetch order with correct ID', async () => {
       mockApiGet.mockResolvedValue(mockOrder);
 
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(mockApiGet).toHaveBeenCalledWith('ord_12345678');
@@ -371,7 +371,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
         const testOrder = { ...mockOrder, status: orderStatus as any };
         mockApiGet.mockResolvedValue(testOrder);
 
-        render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+        render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
         await waitFor(() => {
           const timeline = screen.getByTestId('order-timeline');
@@ -387,7 +387,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should have responsive grid layout classes', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         const gridContainers = document.querySelectorAll('.grid.grid-cols-1.lg\\:grid-cols-2');
@@ -396,7 +396,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should have responsive flex layouts for buttons', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         const flexContainers = document.querySelectorAll('.flex.flex-col.sm\\:flex-row');
@@ -411,7 +411,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should have proper heading structure', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
@@ -420,7 +420,7 @@ describe.skip('OrderTrackingPage (Server Component)', () => {
     });
 
     it('should have external links with proper attributes', async () => {
-      render(await OrderTrackingPage({ params: { orderId: 'ord_12345678' } }));
+      render(await OrderTrackingPage({ params: Promise.resolve({ orderId: 'ord_12345678' }) }));
 
       await waitFor(() => {
         const trackingLink = screen.getByText('Track Package').closest('a');

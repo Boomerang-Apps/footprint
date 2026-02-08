@@ -48,7 +48,7 @@ const PAPERS: Paper[] = [
 export default function PaperSelector({
   onPaperChange,
   className = '',
-}: PaperSelectorProps): JSX.Element {
+}: PaperSelectorProps): React.ReactElement {
   const { paperType, setPaperType } = useOrderStore();
 
   const handlePaperClick = useCallback(

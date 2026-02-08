@@ -176,7 +176,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
       });
 
       const request = createRequest({ status: 'shipped' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(401);
@@ -193,7 +193,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
       });
 
       const request = createRequest({ status: 'shipped' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(403);
@@ -202,7 +202,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
 
     it('should allow admin users to proceed', async () => {
       const request = createRequest({ status: 'printing' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
 
       expect(response.status).toBe(200);
     });
@@ -215,7 +215,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
   describe('Request Validation', () => {
     it('should return 400 for missing status field', async () => {
       const request = createRequest({});
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -227,7 +227,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
         method: 'PATCH',
         body: 'not-json',
       });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -236,7 +236,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
 
     it('should return 400 for invalid status value', async () => {
       const request = createRequest({ status: 'invalid_status' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -255,7 +255,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
       });
 
       const request = createRequest({ status: 'shipped' });
-      const response = await PATCH(request, { params: { id: 'nonexistent' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'nonexistent' }) });
       const body = await response.json();
 
       expect(response.status).toBe(404);
@@ -270,7 +270,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
   describe('Status Transition Validation', () => {
     it('should return 400 for invalid transition processing -> shipped', async () => {
       const request = createRequest({ status: 'shipped' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -279,7 +279,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
 
     it('should allow valid transition processing -> printing', async () => {
       const request = createRequest({ status: 'printing' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
 
       expect(response.status).toBe(200);
     });
@@ -301,7 +301,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
       });
 
       const request = createRequest({ status: 'shipped' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -316,7 +316,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
   describe('Successful Update', () => {
     it('should return updated order with new status', async () => {
       const request = createRequest({ status: 'printing' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(200);
@@ -328,7 +328,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
 
     it('should include notification status in response', async () => {
       const request = createRequest({ status: 'printing' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(body.notification).toBeDefined();
@@ -340,7 +340,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
         status: 'printing',
         note: 'Started printing order',
       });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
 
       expect(response.status).toBe(200);
     });
@@ -353,7 +353,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
   describe('Customer Notification', () => {
     it('should send status update email on successful update', async () => {
       const request = createRequest({ status: 'printing' });
-      await PATCH(request, { params: { id: 'order_123' } });
+      await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
 
       expect(mockSendStatusUpdateEmail).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -372,7 +372,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
       });
 
       const request = createRequest({ status: 'printing' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(200);
@@ -406,7 +406,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
       });
 
       const request = createRequest({ status: 'printing' });
-      const response = await PATCH(request, { params: { id: 'order_123' } });
+      const response = await PATCH(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(500);

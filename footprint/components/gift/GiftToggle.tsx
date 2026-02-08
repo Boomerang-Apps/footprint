@@ -32,7 +32,7 @@ export default function GiftToggle({
   onGiftChange,
   onGiftWrapChange,
   className = '',
-}: GiftToggleProps): JSX.Element {
+}: GiftToggleProps): React.ReactElement {
   const { isGift, giftWrap, setIsGift, setGiftWrap } = useOrderStore();
 
   // Use prop values if provided, otherwise use store values

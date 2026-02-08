@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
+import { Suspense } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -19,11 +20,19 @@ const createQueryClient = () =>
     },
   });
 
-const renderWithQueryClient = (component: React.ReactElement) => {
+const renderWithQueryClient = async (component: React.ReactElement) => {
   const queryClient = createQueryClient();
-  return render(
-    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
-  );
+  let result: ReturnType<typeof render>;
+  await act(async () => {
+    result = render(
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={<div>Loading...</div>}>
+          {component}
+        </Suspense>
+      </QueryClientProvider>
+    );
+  });
+  return result!;
 };
 
 describe('OrderDetailPage', () => {
@@ -31,14 +40,14 @@ describe('OrderDetailPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders OrderDetailView component', () => {
-    renderWithQueryClient(<OrderDetailPage params={{ id: 'test-order-123' }} />);
+  it('renders OrderDetailView component', async () => {
+    await renderWithQueryClient(<OrderDetailPage params={Promise.resolve({ id: 'test-order-123' })} />);
 
     expect(screen.getByTestId('order-detail-view')).toBeInTheDocument();
   });
 
-  it('passes orderId to OrderDetailView', () => {
-    renderWithQueryClient(<OrderDetailPage params={{ id: 'test-order-123' }} />);
+  it('passes orderId to OrderDetailView', async () => {
+    await renderWithQueryClient(<OrderDetailPage params={Promise.resolve({ id: 'test-order-123' })} />);
 
     expect(screen.getByText(/test-order-123/)).toBeInTheDocument();
   });

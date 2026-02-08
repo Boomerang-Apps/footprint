@@ -29,15 +29,16 @@ import { Calendar, Package, Truck, MapPin, Gift, CreditCard, Phone, Mail } from 
 import Link from 'next/link';
 
 interface OrderTrackingPageProps {
-  params: {
+  params: Promise<{
     orderId: string;
-  };
+  }>;
 }
 
 // Generate metadata for SEO and sharing
 export async function generateMetadata({ params }: OrderTrackingPageProps): Promise<Metadata> {
+  const { orderId } = await params;
   return {
-    title: `Order Tracking - ${params.orderId} | Footprint`,
+    title: `Order Tracking - ${orderId} | Footprint`,
     description: 'Track your Footprint order status and delivery information.',
     robots: 'noindex', // Don't index tracking pages for privacy
   };
@@ -334,10 +335,11 @@ async function OrderTrackingContent({ orderId }: { orderId: string }) {
 }
 
 // Main page component with Suspense
-export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
+export default async function OrderTrackingPage({ params }: OrderTrackingPageProps) {
+  const { orderId } = await params;
   return (
     <Suspense fallback={<OrderTrackingLoading />}>
-      <OrderTrackingContent orderId={params.orderId} />
+      <OrderTrackingContent orderId={orderId} />
     </Suspense>
   );
 }

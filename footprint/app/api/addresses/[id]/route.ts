@@ -31,7 +31,7 @@ interface DeleteResponse {
   success: boolean;
 }
 
-type RouteParams = { params: { id: string } };
+type RouteParams = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/addresses/[id]
@@ -46,7 +46,7 @@ export async function GET(
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Authentication
     const supabase = await createClient();
@@ -107,7 +107,7 @@ export async function PUT(
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Authentication
     const supabase = await createClient();
@@ -221,7 +221,7 @@ export async function DELETE(
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Authentication
     const supabase = await createClient();

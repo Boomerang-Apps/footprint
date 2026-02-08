@@ -52,8 +52,8 @@ function createRequest(
   );
 }
 
-// Mock params
-const mockParams = { id: 'addr-1' };
+// Mock params (Next.js 15: params is a Promise)
+const mockParams = Promise.resolve({ id: 'addr-1' });
 
 // Mock authenticated user
 const mockUser = {
@@ -183,7 +183,7 @@ describe('GET /api/addresses/[id]', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest('GET');
-      const response = await GET(request, { params: { id: 'non-existent' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'non-existent' }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -215,7 +215,7 @@ describe('GET /api/addresses/[id]', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest('GET');
-      const response = await GET(request, { params: { id: 'addr-other' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'addr-other' }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -374,7 +374,7 @@ describe('PUT /api/addresses/[id]', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest('PUT', { name: 'Updated' });
-      const response = await PUT(request, { params: { id: 'non-existent' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'non-existent' }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -406,7 +406,7 @@ describe('PUT /api/addresses/[id]', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest('PUT', { name: 'Hacked' });
-      const response = await PUT(request, { params: { id: 'addr-other' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'addr-other' }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -475,7 +475,7 @@ describe('DELETE /api/addresses/[id]', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest('DELETE');
-      const response = await DELETE(request, { params: { id: 'addr-2' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'addr-2' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -582,7 +582,7 @@ describe('DELETE /api/addresses/[id]', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest('DELETE');
-      const response = await DELETE(request, { params: { id: 'non-existent' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'non-existent' }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -614,7 +614,7 @@ describe('DELETE /api/addresses/[id]', () => {
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
       const request = createRequest('DELETE');
-      const response = await DELETE(request, { params: { id: 'addr-other' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'addr-other' }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);

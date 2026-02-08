@@ -24,7 +24,7 @@ export interface DropZoneProps {
 export default function DropZone({
   onUploadComplete,
   className = '',
-}: DropZoneProps): JSX.Element {
+}: DropZoneProps): React.ReactElement {
   const { setOriginalImage } = useOrderStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);

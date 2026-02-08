@@ -24,7 +24,7 @@ export interface CameraRollUploadProps {
 export default function CameraRollUpload({
   onUploadComplete,
   className = '',
-}: CameraRollUploadProps): JSX.Element {
+}: CameraRollUploadProps): React.ReactElement {
   const { setOriginalImage, setStep } = useOrderStore();
   const inputRef = useRef<HTMLInputElement>(null);
 

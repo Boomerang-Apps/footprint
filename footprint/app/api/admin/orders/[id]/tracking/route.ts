@@ -68,14 +68,14 @@ interface ErrorResponse {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<TrackingResponse | ErrorResponse>> {
   // Rate limiting: general limit for admin routes
   const rateLimited = await checkRateLimit('general', request);
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    const orderId = params.id;
+    const { id: orderId } = await params;
 
     // 1. Verify authentication
     const supabase = await createClient();

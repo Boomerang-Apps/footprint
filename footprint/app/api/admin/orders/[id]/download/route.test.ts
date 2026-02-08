@@ -138,7 +138,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
       });
 
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(401);
@@ -155,7 +155,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
       });
 
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(403);
@@ -164,7 +164,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
 
     it('should allow admin users to proceed', async () => {
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
 
       expect(response.status).toBe(200);
     });
@@ -177,7 +177,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
   describe('Request Validation', () => {
     it('should return 400 for missing size parameter', async () => {
       const request = createRequest('order_123', '');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -186,7 +186,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
 
     it('should return 400 for invalid size parameter', async () => {
       const request = createRequest('order_123', 'A6');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);
@@ -197,7 +197,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
       const sizes = ['A5', 'A4', 'A3', 'A2'];
       for (const size of sizes) {
         const request = createRequest('order_123', size);
-        const response = await GET(request, { params: { id: 'order_123' } });
+        const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
         expect(response.status).toBe(200);
       }
     });
@@ -214,7 +214,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
       });
 
       const request = createRequest('nonexistent', 'A4');
-      const response = await GET(request, { params: { id: 'nonexistent' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'nonexistent' }) });
       const body = await response.json();
 
       expect(response.status).toBe(404);
@@ -229,7 +229,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
   describe('Successful Download', () => {
     it('should return download URL in response', async () => {
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(200);
@@ -239,7 +239,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
 
     it('should return file name in response', async () => {
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(body.fileName).toContain('order_123');
@@ -249,7 +249,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
 
     it('should return dimensions in response', async () => {
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(body.dimensions).toEqual({
@@ -261,7 +261,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
 
     it('should return expiration time in response', async () => {
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(body.expiresIn).toBe(3600);
@@ -277,7 +277,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
       mockGetOrCreatePrintFile.mockRejectedValue(new Error('R2 upload failed'));
 
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(500);
@@ -291,7 +291,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
       });
 
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(500);
@@ -314,7 +314,7 @@ describe('GET /api/admin/orders/[id]/download', () => {
       });
 
       const request = createRequest('order_123', 'A4');
-      const response = await GET(request, { params: { id: 'order_123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'order_123' }) });
       const body = await response.json();
 
       expect(response.status).toBe(400);

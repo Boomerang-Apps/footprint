@@ -26,7 +26,7 @@ export default function ImagePreview({
   onReplace,
   onRemove,
   className = '',
-}: ImagePreviewProps): JSX.Element {
+}: ImagePreviewProps): React.ReactElement {
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024 * 1024) {
       return `${(bytes / 1024).toFixed(1)} KB`;

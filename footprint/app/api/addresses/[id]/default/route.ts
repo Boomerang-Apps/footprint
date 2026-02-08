@@ -24,7 +24,7 @@ interface SetDefaultResponse {
   address: AddressResponse;
 }
 
-type RouteParams = { params: { id: string } };
+type RouteParams = { params: Promise<{ id: string }> };
 
 /**
  * PATCH /api/addresses/[id]/default
@@ -39,7 +39,7 @@ export async function PATCH(
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Authentication
     const supabase = await createClient();

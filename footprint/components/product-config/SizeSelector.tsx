@@ -53,7 +53,7 @@ const SIZES: Size[] = [
 export default function SizeSelector({
   onSizeChange,
   className = '',
-}: SizeSelectorProps): JSX.Element {
+}: SizeSelectorProps): React.ReactElement {
   const { size, setSize } = useOrderStore();
 
   const handleSizeClick = useCallback(
