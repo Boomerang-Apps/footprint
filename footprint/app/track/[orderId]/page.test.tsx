@@ -138,9 +138,15 @@ const mockOrder: Order = {
   updatedAt: new Date('2024-01-15T10:00:00Z'),
 };
 
-// Note: Primary order tracking implementation is at /app/(app)/order/[id]/OrderTrackingContent.tsx
-// with 31 passing tests. This server component version has testing challenges with Suspense.
-// Skipping these tests as the feature is fully delivered via the client-side route.
+// SKIPPED: This is a Next.js Server Component wrapped in Suspense.
+// render(await Page(...)) doesn't work because the page returns sync JSX (Suspense boundary)
+// while OrderTrackingContent inside is async. React test-utils can't resolve Suspense in jsdom.
+//
+// This functionality is fully covered by 31 passing tests in:
+//   app/(app)/order/[id]/OrderTrackingContent.tsx tests
+//
+// To re-enable: export OrderTrackingContent and test it directly, or use
+// React.renderToPipeableStream for server component testing.
 describe.skip('OrderTrackingPage (Server Component)', () => {
   const mockApiGet = vi.mocked(api.orders.get);
   const mockNotFound = vi.mocked(notFound);
