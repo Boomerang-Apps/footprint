@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { stories, sprints, features } from '@/data/dashboard/dev-progress';
 
 // Map our story status to database status
@@ -25,7 +26,25 @@ function mapSprintStatus(status: string): string {
   return statusMap[status] || 'planned';
 }
 
-export async function POST() {
+async function verifyAdmin(request: Request): Promise<NextResponse | null> {
+  const rateLimited = await checkRateLimit('strict', request);
+  if (rateLimited) return rateLimited;
+
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (user.user_metadata?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
+  }
+  return null;
+}
+
+export async function POST(request: Request) {
+  const authError = await verifyAdmin(request);
+  if (authError) return authError;
+
   try {
     const supabase = createAdminClient();
 
@@ -124,7 +143,10 @@ export async function POST() {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authError = await verifyAdmin(request);
+  if (authError) return authError;
+
   try {
     const supabase = createAdminClient();
 

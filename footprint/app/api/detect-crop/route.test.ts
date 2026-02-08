@@ -25,6 +25,11 @@ vi.mock('@/lib/storage/r2', () => ({
   isR2Url: vi.fn((url: string) => url.includes('r2.') || url.includes('footprint')),
 }));
 
+// Mock rate limiting to skip Upstash Redis in tests
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue(null),
+}));
+
 import { getSuggestedCrops, isValidAspectRatio } from '@/lib/image/faceDetection';
 import { getImageFromR2, isR2Url } from '@/lib/storage/r2';
 

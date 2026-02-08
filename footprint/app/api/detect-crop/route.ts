@@ -11,6 +11,7 @@
 import { NextResponse } from 'next/server';
 import { getSuggestedCrops, isValidAspectRatio } from '@/lib/image/faceDetection';
 import { getImageFromR2, isR2Url } from '@/lib/storage/r2';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * Request body for smart crop detection
@@ -95,6 +96,10 @@ function validateRequest(
  * }
  */
 export async function POST(request: Request): Promise<Response> {
+  // Rate limiting: 10 per minute (image processing)
+  const rateLimited = await checkRateLimit('transform', request);
+  if (rateLimited) return rateLimited;
+
   try {
     // Parse request body
     let body: unknown;

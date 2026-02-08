@@ -19,6 +19,11 @@ vi.mock('@/lib/email/resend', () => ({
   generateWhatsAppShareUrl: (...args: unknown[]) => mockGenerateWhatsAppShareUrl(...args),
 }));
 
+// Mock rate limiting to skip Upstash Redis in tests
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue(null),
+}));
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: () => ({
     auth: {

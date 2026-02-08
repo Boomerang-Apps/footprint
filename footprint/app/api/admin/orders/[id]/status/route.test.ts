@@ -23,6 +23,11 @@ vi.mock('@/lib/supabase/server', () => ({
   ),
 }));
 
+// Mock rate limiting to skip Upstash Redis in tests
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue(null),
+}));
+
 // Mock email sending - must be defined inline
 vi.mock('@/lib/email/resend', () => ({
   sendStatusUpdateEmail: vi.fn(),

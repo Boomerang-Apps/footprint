@@ -1,11 +1,30 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+async function verifyAdmin(): Promise<NextResponse | null> {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (user.user_metadata?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
+  }
+  return null;
+}
 
 /**
  * GET /api/orchestration
  * Fetches agent status and orchestration data from Supabase
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const rateLimited = await checkRateLimit('general', request);
+  if (rateLimited) return rateLimited;
+
+  const authError = await verifyAdmin();
+  if (authError) return authError;
+
   try {
     const supabase = createAdminClient();
 
@@ -59,6 +78,12 @@ export async function GET() {
  * Updates agent status
  */
 export async function POST(request: Request) {
+  const rateLimited = await checkRateLimit('general', request);
+  if (rateLimited) return rateLimited;
+
+  const authError = await verifyAdmin();
+  if (authError) return authError;
+
   try {
     const { agent, status, currentStory, lastAction } = await request.json();
 

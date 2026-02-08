@@ -9,6 +9,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createWalletPaymentIntent } from '@/lib/payments/stripe';
+import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 // Valid currency codes
 const VALID_CURRENCIES = ['ils', 'usd', 'eur'] as const;
@@ -40,7 +42,22 @@ interface CreateIntentRequest {
  * - 500: { error: string } - Server error
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // Rate limiting: 5 per minute (payment flow)
+  const rateLimited = await checkRateLimit('checkout', request);
+  if (rateLimited) return rateLimited;
+
   try {
+    // Verify authentication
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Please sign in to checkout' },
+        { status: 401 }
+      );
+    }
+
     // Parse request body
     let body: CreateIntentRequest;
     try {

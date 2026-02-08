@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 import {
   sendOrderConfirmationEmail,
   generateWhatsAppShareUrl,
@@ -97,6 +98,10 @@ export async function POST(
   request: Request,
   { params }: RouteParams
 ): Promise<NextResponse<ConfirmResponse | ErrorResponse>> {
+  // Rate limiting: 5 per minute (sends emails)
+  const rateLimited = await checkRateLimit('checkout', request);
+  if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
+
   try {
     const { id: orderId } = await params;
 
@@ -166,6 +171,9 @@ export async function GET(
   request: Request,
   { params }: RouteParams
 ): Promise<NextResponse<ConfirmDetailsResponse | ErrorResponse>> {
+  const rateLimited = await checkRateLimit('general', request);
+  if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
+
   try {
     const { id: orderId } = await params;
 

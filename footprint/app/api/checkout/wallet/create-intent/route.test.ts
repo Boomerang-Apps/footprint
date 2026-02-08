@@ -7,9 +7,32 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
+// Mock next/headers
+vi.mock('next/headers', () => ({
+  cookies: () => ({
+    get: () => undefined,
+    set: () => {},
+  }),
+}));
+
 // Mock the stripe module - must be at top level before imports
 vi.mock('@/lib/payments/stripe', () => ({
   createWalletPaymentIntent: vi.fn(),
+}));
+
+const mockGetUser = vi.fn();
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: () => ({
+    auth: {
+      getUser: () => mockGetUser(),
+    },
+  }),
+}));
+
+// Mock rate limiting to skip Upstash Redis in tests
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue(null),
 }));
 
 // Import after mocking
@@ -24,6 +47,11 @@ const mockCreateWalletPaymentIntent = createWalletPaymentIntent as ReturnType<
 describe('POST /api/checkout/wallet/create-intent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: authenticated user
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user123', email: 'test@example.com' } },
+      error: null,
+    });
   });
 
   afterEach(() => {
@@ -201,5 +229,24 @@ describe('POST /api/checkout/wallet/create-intent', () => {
 
     expect(response.status).toBe(400);
     expect(data.error).toBeDefined();
+  });
+
+  it('should return 401 for unauthenticated users', async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'Not authenticated' },
+    });
+
+    const request = createRequest({
+      orderId: 'order_123',
+      amount: 15000,
+      customerEmail: 'test@example.com',
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(data.error).toContain('Unauthorized');
   });
 });
