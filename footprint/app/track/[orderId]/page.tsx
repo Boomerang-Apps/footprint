@@ -16,6 +16,7 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { api } from '@/lib/api/client';
+import type { Order } from '@/types/order';
 import { OrderTimeline } from '@/components/ui/OrderTimeline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -86,12 +87,11 @@ function OrderTrackingLoading() {
 
 // Main tracking page component
 async function OrderTrackingContent({ orderId }: { orderId: string }) {
-  let order;
+  let order: Order;
 
   try {
     order = await api.orders.get(orderId);
-  } catch (error) {
-    console.error('Failed to fetch order:', error);
+  } catch {
     notFound();
   }
 
@@ -114,7 +114,7 @@ async function OrderTrackingContent({ orderId }: { orderId: string }) {
           </h1>
           <div className="flex items-center justify-center gap-2">
             <Badge variant={order.status === 'delivered' ? 'default' : 'secondary'}>
-              {getStatusLabel(order.status as any, 'en')}
+              {getStatusLabel(order.status, 'en')}
             </Badge>
             <span className="text-muted-foreground">•</span>
             <span className="text-sm text-muted-foreground">
@@ -133,7 +133,7 @@ async function OrderTrackingContent({ orderId }: { orderId: string }) {
           </CardHeader>
           <CardContent>
             <OrderTimeline
-              currentStatus={order.status as any}
+              currentStatus={order.status}
               layout="horizontal"
               className="py-4"
             />

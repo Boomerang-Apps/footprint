@@ -31,7 +31,7 @@ export default function DropZone({
   const validateFile = useCallback((file: File): UploadError | null => {
     // Check file type
     const validTypes = DEFAULT_UPLOAD_CONFIG.acceptedTypes;
-    if (!validTypes.includes(file.type as any)) {
+    if (!(validTypes as readonly string[]).includes(file.type)) {
       return {
         code: 'INVALID_TYPE',
         message: 'פורמט קובץ לא נתמך. אנא בחרו JPG, PNG או HEIC',
