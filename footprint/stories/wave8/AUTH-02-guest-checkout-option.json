@@ -10,7 +10,7 @@
   "priority": "high",
   "story_points": 8,
   "description": "Allow customers to complete purchases without creating an account, reducing friction in the checkout flow while offering optional account creation post-purchase",
-  "status": "in_progress",
+  "status": "completed",
   "objective": {
     "as_a": "first-time customer",
     "i_want": "to complete my purchase without creating an account",

@@ -1,0 +1,193 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Brand/Components" />
+
+# Component Inventory
+
+A complete reference of all UI components in the Footprint design system, organized by category. All components live in the `/components/` directory and are built with React 18, Tailwind CSS, and Radix UI primitives.
+
+---
+
+## Form Components
+
+Core input and interactive elements used throughout the application.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **Button** | `components/ui/Button` | Primary action trigger. Supports brand gradient, outline, ghost, and destructive variants. |
+| **Input** | `components/ui/Input` | Text input field with label, error state, and RTL support. |
+| **Checkbox** | `components/ui/Checkbox` | Toggle control built on Radix UI. Supports checked, unchecked, and indeterminate states. |
+| **Select** | `components/ui/Select` | Dropdown selection built on Radix UI. Supports search, multi-select, and grouped options. |
+| **Textarea** | `components/ui/textarea` | Multi-line text input. Auto-resizes and supports character count. |
+
+---
+
+## Layout Components
+
+Structural elements that compose page layouts and content sections.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **Header** | `components/layout/Header` | Site-wide navigation header with logo, nav links, cart icon, and user menu. RTL layout. |
+| **Card** | `components/ui/Card` | Content container with soft shadow and rounded corners. Supports header, body, and footer slots. |
+| **Tabs** | `components/ui/tabs` | Tab navigation built on Radix UI. Supports horizontal and vertical orientations. |
+| **Separator** | `components/ui/separator` | Visual divider line. Supports horizontal and vertical orientations. |
+| **Collapsible** | `components/ui/collapsible` | Expandable content section built on Radix UI. Animated open/close transition. |
+
+---
+
+## Feedback & Display Components
+
+Status indicators, progress trackers, and data display elements.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **Badge** | `components/ui/Badge` | Inline status label. Supports brand, success, warning, error, and neutral variants. |
+| **OrderStatusBadge** | `components/ui/OrderStatusBadge` | Specialized badge for order statuses (pending, processing, shipped, delivered, cancelled). |
+| **Progress** | `components/ui/progress` | Horizontal progress bar with brand gradient fill. Supports determinate and indeterminate modes. |
+| **StepProgress** | `components/ui/StepProgress` | Multi-step progress indicator for checkout and configuration flows. |
+| **StyleLoader** | `components/ui/StyleLoader` | Loading animation shown during AI style transfer processing. |
+| **PriceDisplay** | `components/ui/PriceDisplay` | Formatted price display with currency symbol, sale price, and original price strikethrough. |
+| **OrderTimeline** | `components/ui/OrderTimeline` | Vertical timeline showing order status history with timestamps. |
+
+---
+
+## Auth Components
+
+Authentication flows for login, social auth, guest checkout, and post-purchase account creation.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **LoginForm** | `components/auth/LoginForm` | Email/password login form with validation and error handling. Hebrew labels. |
+| **SocialLoginButtons** | `components/auth/SocialLoginButtons` | Google and Apple social login buttons. Styled to match brand. |
+| **GuestCheckoutForm** | `components/auth/GuestCheckoutForm` | Minimal form for guest users — collects email and name for order tracking. |
+| **PostPurchaseSignup** | `components/auth/PostPurchaseSignup` | Account creation prompt shown after successful guest checkout. |
+
+---
+
+## E-commerce Components
+
+Checkout flow, shipping, payment, and gift wrapping features.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **CheckoutAuthFlow** | `components/checkout/CheckoutAuthFlow` | Orchestrates the auth step in checkout — login, register, or continue as guest. |
+| **ShippingAddressForm** | `components/checkout/ShippingAddressForm` | Address form with Israeli address format, city autocomplete, and validation. |
+| **PaymentModal** | `components/checkout/PaymentModal` | Payment processing modal with credit card form and order summary. |
+| **GiftWrappingOption** | `components/checkout/GiftWrappingOption` | Toggle for adding gift wrapping to an order with preview image. |
+| **WrappingStyleSelector** | `components/checkout/WrappingStyleSelector` | Grid selector for choosing wrapping paper style and color. |
+
+---
+
+## Product Configuration Components
+
+Print customization controls for size, frame, and paper selection.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **SizeSelector** | `components/product-config/SizeSelector` | Visual size picker showing available print dimensions with aspect ratio preview. |
+| **FrameSelector** | `components/product-config/FrameSelector` | Frame style chooser with color swatches and material options (wood, metal, none). |
+| **PaperSelector** | `components/product-config/PaperSelector` | Paper type selector — matte, glossy, fine art, canvas — with texture preview. |
+
+---
+
+## Gift Components
+
+Gift-related features for personal messages and toggles.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **GiftToggle** | `components/gift/GiftToggle` | Switch to mark an order as a gift, revealing gift message and wrapping options. |
+| **GiftMessage** | `components/gift/GiftMessage` | Textarea for personalized gift message with character counter and Hebrew placeholder. |
+
+---
+
+## Style Picker Components
+
+AI style transfer gallery and selection interface.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **StyleGallery** | `components/style-picker/StyleGallery` | Grid of AI art styles with thumbnail previews. Supports filtering by category and search. |
+
+---
+
+## Guest Order Components
+
+Order lookup for non-authenticated users.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **GuestOrderLookup** | `components/orders/GuestOrderLookup` | Form to look up order status by order number and email. No login required. |
+
+---
+
+## Account Components
+
+User profile management, order history, and address book.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **ProfileForm** | `components/account/ProfileForm` | User profile editor with name, email, phone, and language preference fields. |
+| **AddressForm** | `components/account/AddressForm` | Full address editor for saved addresses. Israeli format with city autocomplete. |
+| **AvatarUpload** | `components/account/AvatarUpload` | Profile photo uploader with crop, resize, and preview. |
+| **OrderHistoryList** | `components/account/OrderHistoryList` | Paginated list of past orders with status badges, dates, and totals. |
+| **OrderDetailView** | `components/account/OrderDetailView` | Full order detail page showing items, status timeline, shipping info, and totals. |
+| **OrderTimeline** | `components/account/OrderTimeline` | Vertical timeline of order status changes with dates and descriptions. |
+| **AddressCard** | `components/account/AddressCard` | Compact address display card with edit and delete actions. |
+
+---
+
+## Admin Components
+
+Internal tools for order management and fulfillment.
+
+| Component | File | Description |
+|-----------|------|-------------|
+| **FulfillmentBoard** | `components/admin/FulfillmentBoard` | Kanban-style board for managing orders through fulfillment stages. |
+| **FulfillmentColumn** | `components/admin/FulfillmentColumn` | Single column in the fulfillment board representing a stage (e.g., Printing, Framing, Shipping). |
+| **OrderDetailPanel** | `components/admin/OrderDetailPanel` | Slide-out panel showing full order details for admin review and action. |
+| **BulkActionToolbar** | `components/admin/BulkActionToolbar` | Toolbar for batch operations on selected orders (update status, print labels, export). |
+| **OrderCard** | `components/admin/OrderCard` | Compact order card used in the fulfillment board with drag handle and status indicator. |
+
+---
+
+## Component Conventions
+
+### Naming
+
+- **Files:** PascalCase for components (`Button.tsx`), lowercase for Radix-based primitives (`tabs.tsx`)
+- **Exports:** Named exports matching the file name
+- **Props interfaces:** `I{ComponentName}Props` (e.g., `IButtonProps`)
+
+### Structure
+
+All components follow this pattern:
+
+```
+components/
+  ui/              # Reusable UI primitives
+  auth/            # Authentication flows
+  layout/          # Page structure
+  admin/           # Admin-only components
+  checkout/        # Checkout flow
+  product-config/  # Print customization
+  gift/            # Gift features
+  style-picker/    # AI style selection
+  orders/          # Order-related
+  account/         # User account
+```
+
+### RTL Support
+
+- All components render correctly in RTL mode
+- Use logical CSS properties (`margin-inline-start` over `margin-left`) where possible
+- Tailwind RTL utilities: `rtl:` prefix for direction-specific overrides
+- Test all components in both Hebrew (RTL) and English (LTR) modes
+
+### Accessibility
+
+- All interactive components have proper ARIA attributes
+- Keyboard navigation support via Radix UI primitives
+- Focus indicators use brand purple outline
+- Color contrast meets WCAG AA standards (minimum 4.5:1 for text)

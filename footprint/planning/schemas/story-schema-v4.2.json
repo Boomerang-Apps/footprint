@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "wave-v2-story-schema-v4.2",
   "title": "Wave V2 Story Schema V4.2",
-  "description": "Hybrid AI Story Schema merging V4 practical TDD excellence with V4.1 formal requirements. Backward compatible with V4 stories.",
+  "description": "Hybrid AI Story Schema merging V4 practical TDD excellence with V4.1 formal requirements. Includes design_source field for HTML mockup/Storybook source of truth. Backward compatible with V4 stories.",
   "type": "object",
   "required": [
     "story_id",
@@ -236,6 +236,38 @@
           "description": "State management approach (React Query, Zustand, etc.)"
         }
       }
+    },
+
+    "design_source": {
+      "type": "object",
+      "description": "Source of truth for UI implementation (REQUIRED for frontend stories)",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["html_mockup", "storybook", "figma", "none"],
+          "description": "Primary design source type"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to HTML mockup file, Storybook story, or Figma frame ID"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to design source (Storybook URL, Figma URL, etc.)"
+        },
+        "verified": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether design-verify has passed"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When design verification passed"
+        }
+      },
+      "required": ["type"]
     },
 
     "design_specs": {

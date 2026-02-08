@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>תקנון האתר | Footprint - הדפסת תמונות אמנותיות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: #fff; 
+      color: #1f2937;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .icon-sm { width: 14px; height: 14px; }
+    .icon-md { width: 18px; height: 18px; }
+    .icon-lg { width: 32px; height: 32px; }
+    .icon-filled { fill: currentColor; }
+    
+    /* Navigation */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      padding: 0 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; color: #1f2937; }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .nav-links { display: none; gap: 32px; }
+    .nav-links a { color: #6b7280; font-size: 14px; transition: color 0.2s; }
+    .nav-links a:hover { color: #1f2937; }
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #6b7280;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav-back:hover { color: #1f2937; background: #f3f4f6; }
+    
+    /* Page Header */
+    .page-header {
+      padding: 60px 16px 40px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(180deg, #faf5ff 0%, #fff 100%);
+    }
+    .page-header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .page-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.15));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: #8b5cf6;
+    }
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #1f2937;
+    }
+    .page-subtitle {
+      color: #6b7280;
+      font-size: 16px;
+    }
+    .last-updated {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      display: inline-block;
+      font-size: 13px;
+      color: #6b7280;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    /* Table of Contents */
+    .toc {
+      padding: 40px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+    .toc-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .toc-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .toc-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1f2937;
+    }
+    .toc-title .icon { color: #8b5cf6; }
+    .toc-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      color: #4b5563;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .toc-link:hover {
+      border-color: #d1d5db;
+      color: #1f2937;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .toc-num {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.15));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #8b5cf6;
+    }
+    
+    /* Content Sections */
+    .content {
+      padding: 40px 16px;
+    }
+    .content-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .section {
+      margin-bottom: 40px;
+      scroll-margin-top: 80px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .section-num {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .section p {
+      color: #4b5563;
+      margin-bottom: 16px;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    
+    .section ul, .section ol {
+      margin: 16px 0;
+      padding-right: 20px;
+    }
+    .section li {
+      color: #4b5563;
+      margin-bottom: 10px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    
+    .section h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 28px 0 14px;
+      color: #1f2937;
+    }
+    
+    /* Alert Boxes */
+    .alert {
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+    .alert-warning {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+    }
+    .alert-warning .alert-title { color: #b45309; }
+    .alert-danger {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+    }
+    .alert-danger .alert-title { color: #dc2626; }
+    .alert-success {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+    }
+    .alert-success .alert-title { color: #16a34a; }
+    .alert-info {
+      background: #faf5ff;
+      border: 1px solid #d8b4fe;
+    }
+    .alert-info .alert-title { color: #7c3aed; }
+    
+    .alert-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .alert p, .alert li {
+      color: #4b5563 !important;
+      font-size: 14px !important;
+      margin-bottom: 8px;
+    }
+    
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 400px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: right;
+      font-size: 14px;
+    }
+    th {
+      background: linear-gradient(135deg, #8b5cf6, #a855f7);
+      color: #fff;
+      font-weight: 600;
+    }
+    td {
+      background: #fff;
+      color: #4b5563;
+      border-top: 1px solid #e5e7eb;
+    }
+    tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+    
+    /* Info Card */
+    .info-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .info-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1f2937;
+    }
+    .info-card-title .icon { color: #8b5cf6; }
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label {
+      color: #6b7280;
+      font-size: 14px;
+      min-width: 100px;
+    }
+    .info-value {
+      color: #1f2937;
+      font-size: 14px;
+    }
+    .info-value a {
+      color: #8b5cf6;
+      text-decoration: underline;
+      text-decoration-color: rgba(139,92,246,0.3);
+      text-underline-offset: 2px;
+    }
+    .info-value a:hover { text-decoration-color: #8b5cf6; }
+    
+    /* Footer */
+    .footer {
+      background: #1f2937;
+      color: #fff;
+      padding: 48px 16px 24px;
+      margin-top: 60px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+    .footer-brand { max-width: 300px; }
+    .footer-brand .logo { margin-bottom: 16px; color: #fff; }
+    .footer-brand p { color: #9ca3af; font-size: 14px; line-height: 1.6; }
+    .footer-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+    .footer-links { display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a { color: #9ca3af; font-size: 14px; transition: color 0.2s; }
+    .footer-links a:hover { color: #fff; }
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid #374151;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      text-align: center;
+    }
+    .footer-copy { color: #9ca3af; font-size: 13px; }
+    .footer-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+    .footer-legal a { color: #9ca3af; font-size: 13px; transition: color 0.2s; }
+    .footer-legal a:hover { color: #fff; }
+    .footer-social { display: flex; gap: 12px; }
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      background: #374151;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      transition: all 0.2s;
+    }
+    .footer-social a:hover { background: #4b5563; color: #fff; }
+    
+    /* WhatsApp Button */
+    .whatsapp-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      width: 56px;
+      height: 56px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+      transition: all 0.3s;
+      z-index: 90;
+    }
+    .whatsapp-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 24px rgba(37,211,102,0.5);
+    }
+    
+    /* Responsive */
+    @media (min-width: 640px) {
+      .toc-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .nav-links { display: flex; }
+      .page-title { font-size: 40px; }
+      .toc-grid { grid-template-columns: repeat(3, 1fr); }
+      .footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+      .footer-bottom { flex-direction: row; justify-content: space-between; text-align: right; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </span>
+        Footprint
+      </a>
+      <nav class="nav-links">
+        <a href="/">ראשי</a>
+        <a href="/styles">סגנונות</a>
+        <a href="/pricing">מחירון</a>
+        <a href="/faq">שאלות נפוצות</a>
+      </nav>
+      <a href="/" class="nav-back">
+        <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        חזרה לאתר
+      </a>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div class="page-icon">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <h1 class="page-title">תקנון האתר</h1>
+      <p class="page-subtitle">תנאי שימוש באתר Footprint והזמנת שירותי הדפסה</p>
+      <div class="last-updated">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-left: 6px;"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        עדכון אחרון: פברואר 2025
+      </div>
+    </div>
+  </header>
+
+  <!-- Table of Contents -->
+  <section class="toc">
+    <div class="toc-inner">
+      <div class="toc-card">
+        <h2 class="toc-title">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+          תוכן עניינים
+        </h2>
+        <div class="toc-grid">
+          <a href="#general" class="toc-link"><span class="toc-num">1</span>כללי</a>
+          <a href="#definitions" class="toc-link"><span class="toc-num">2</span>הגדרות</a>
+          <a href="#eligibility" class="toc-link"><span class="toc-num">3</span>כשירות שימוש</a>
+          <a href="#services" class="toc-link"><span class="toc-num">4</span>השירותים</a>
+          <a href="#ordering" class="toc-link"><span class="toc-num">5</span>הזמנות ותשלום</a>
+          <a href="#cancellation" class="toc-link"><span class="toc-num">6</span>ביטול עסקה</a>
+          <a href="#shipping" class="toc-link"><span class="toc-num">7</span>משלוחים</a>
+          <a href="#copyright" class="toc-link"><span class="toc-num">8</span>זכויות יוצרים</a>
+          <a href="#liability" class="toc-link"><span class="toc-num">9</span>הגבלת אחריות</a>
+          <a href="#privacy" class="toc-link"><span class="toc-num">10</span>פרטיות</a>
+          <a href="#ip" class="toc-link"><span class="toc-num">11</span>קניין רוחני</a>
+          <a href="#jurisdiction" class="toc-link"><span class="toc-num">12</span>דין וסמכות</a>
+          <a href="#contact" class="toc-link"><span class="toc-num">13</span>יצירת קשר</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <main class="content">
+    <div class="content-inner">
+      
+      <!-- Section 1: General -->
+      <section id="general" class="section">
+        <div class="section-header">
+          <span class="section-num">1</span>
+          <h2 class="section-title">כללי</h2>
+        </div>
+        
+        <p>ברוכים הבאים לאתר <strong>footprint.co.il</strong> (להלן: "האתר"), המופעל על ידי <strong>בומרנג אפליקציות בע״מ</strong> (להלן: "החברה", "אנחנו", או "Footprint").</p>
+        
+        <div class="info-card">
+          <h3 class="info-card-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            פרטי החברה
+          </h3>
+          <div class="info-row">
+            <span class="info-label">שם החברה:</span>
+            <span class="info-value">בומרנג אפליקציות בע״מ</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">מותג:</span>
+            <span class="info-value">פוטפרינט - Footprint</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">כתובת:</span>
+            <span class="info-value">מעלה הנחל 115, רמות מנשה, מיקוד 19245, ת.ד. 340, ישראל</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">טלפון:</span>
+            <span class="info-value" dir="ltr">058-432-3001</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">דוא״ל:</span>
+            <span class="info-value"><a href="mailto:info@footprint.co.il">info@footprint.co.il</a></span>
+          </div>
+        </div>
+        
+        <p>תקנון זה מהווה הסכם מחייב בינך ("המשתמש", "הלקוח", "אתה") לבין החברה. השימוש באתר, לרבות גלישה, רכישה או כל פעולה אחרת, מהווה הסכמה מלאה לתנאי תקנון זה.</p>
+        
+        <p>אנו שומרים לעצמנו את הזכות לעדכן תקנון זה מעת לעת. שינויים מהותיים יפורסמו באתר, והמשך השימוש לאחר פרסום השינויים מהווה הסכמה לתנאים המעודכנים.</p>
+      </section>
+
+      <!-- Section 2: Definitions -->
+      <section id="definitions" class="section">
+        <div class="section-header">
+          <span class="section-num">2</span>
+          <h2 class="section-title">הגדרות</h2>
+        </div>
+        
+        <p>למונחים הבאים תהיה המשמעות המצוינת לצידם:</p>
+        
+        <ul>
+          <li><strong>"האתר"</strong> - אתר האינטרנט footprint.co.il על כל עמודיו ושירותיו</li>
+          <li><strong>"החברה"</strong> - בומרנג אפליקציות בע״מ, המפעילה את אתר Footprint</li>
+          <li><strong>"המשתמש"</strong> - כל אדם או גורם העושה שימוש באתר</li>
+          <li><strong>"השירותים"</strong> - שירותי עיבוד תמונות באמצעות AI והדפסתן על נייר אמנות</li>
+          <li><strong>"הזמנה"</strong> - רכישת מוצר או שירות באמצעות האתר</li>
+          <li><strong>"מוצר מותאם אישית"</strong> - הדפס שהוכן על בסיס תמונה שהועלתה על ידי הלקוח</li>
+          <li><strong>"עיבוד AI"</strong> - שינוי או עיצוב התמונה באמצעות בינה מלאכותית</li>
+        </ul>
+      </section>
+
+      <!-- Section 3: Eligibility -->
+      <section id="eligibility" class="section">
+        <div class="section-header">
+          <span class="section-num">3</span>
+          <h2 class="section-title">כשירות שימוש</h2>
+        </div>
+        
+        <p>השימוש באתר וביצוע רכישות מותר אך ורק למי שעומד בתנאים הבאים:</p>
+        
+        <ul>
+          <li>גיל 18 ומעלה</li>
+          <li>בעל כשרות משפטית לבצע פעולות משפטיות מחייבות</li>
+          <li>בעל כרטיס אשראי תקף הרשום על שמו או אמצעי תשלום מאושר אחר</li>
+          <li>מספק פרטים נכונים ומדויקים בעת ההרשמה וההזמנה</li>
+        </ul>
+        
+        <p>גופים משפטיים (חברות, עמותות וכו') רשאים לבצע הזמנות באמצעות נציג מורשה.</p>
+      </section>
+
+      <!-- Section 4: Services -->
+      <section id="services" class="section">
+        <div class="section-header">
+          <span class="section-num">4</span>
+          <h2 class="section-title">השירותים</h2>
+        </div>
+        
+        <p>Footprint מציעה שירותי הדפסת תמונות אמנותיות הכוללים:</p>
+        
+        <ul>
+          <li>עיבוד תמונות באמצעות טכנולוגיית AI ליצירת אפקטים אמנותיים</li>
+          <li>הדפסה על נייר Fine Art באיכות מוזיאלית</li>
+          <li>מגוון גדלים ופורמטים להתאמה אישית</li>
+          <li>משלוח עד הבית או נקודת איסוף</li>
+        </ul>
+        
+        <div class="alert alert-warning">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            שימו לב
+          </h4>
+          <p>כל מוצרי Footprint הם מוצרים מותאמים אישית שמיוצרים עבורכם לפי הזמנה. לאחר תחילת הייצור, לא ניתן לבטל את ההזמנה בהתאם לחוק הגנת הצרכן.</p>
+        </div>
+      </section>
+
+      <!-- Section 5: Ordering -->
+      <section id="ordering" class="section">
+        <div class="section-header">
+          <span class="section-num">5</span>
+          <h2 class="section-title">הזמנות ותשלום</h2>
+        </div>
+        
+        <h3>תהליך ההזמנה</h3>
+        <ol>
+          <li>העלאת תמונה מהמכשיר או הגלריה</li>
+          <li>בחירת סגנון עיבוד AI</li>
+          <li>בחירת גודל ופורמט ההדפסה</li>
+          <li>אישור התוצאה ומעבר לתשלום</li>
+          <li>מילוי פרטי משלוח ותשלום</li>
+          <li>קבלת אישור הזמנה במייל</li>
+        </ol>
+        
+        <h3>אמצעי תשלום</h3>
+        <p>אנו מקבלים את אמצעי התשלום הבאים:</p>
+        <ul>
+          <li>כרטיסי אשראי ישראליים (ויזה, מאסטרקארד, אמריקן אקספרס, דיינרס)</li>
+          <li>כרטיסי אשראי בינלאומיים</li>
+          <li>תשלום ב-Bit</li>
+          <li>PayPal</li>
+        </ul>
+        
+        <div class="alert alert-success">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            אבטחת תשלומים
+          </h4>
+          <p>כל התשלומים מעובדים דרך ספק סליקה מאובטח בתקן PCI-DSS. איננו שומרים פרטי כרטיס אשראי במערכותינו.</p>
+        </div>
+        
+        <h3>מחירים</h3>
+        <p>המחירים באתר כוללים מע"מ כחוק. מחירי המשלוח מוצגים בנפרד ונוספים לסכום ההזמנה בעת התשלום.</p>
+        
+        <p>אנו שומרים לעצמנו את הזכות לעדכן מחירים מעת לעת. מחיר ההזמנה הקובע הוא המחיר שהוצג בעת ביצוע ההזמנה.</p>
+      </section>
+
+      <!-- Section 6: Cancellation - CRITICAL -->
+      <section id="cancellation" class="section">
+        <div class="section-header">
+          <span class="section-num">6</span>
+          <h2 class="section-title">ביטול עסקה והחזרות</h2>
+        </div>
+        
+        <p>מדיניות הביטול שלנו נקבעה בהתאם להוראות <strong>חוק הגנת הצרכן, התשמ"א-1981</strong> ותקנותיו.</p>
+        
+        <div class="alert alert-success">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            חלון ביטול של 30 דקות
+          </h4>
+          <p>ניתן לבטל הזמנה <strong>תוך 30 דקות ממועד ביצועה</strong>, כל עוד לא החל הייצור. במקרה כזה, יינתן החזר מלא של סכום העסקה.</p>
+          <p>לביטול בחלון זה, ניתן לפנות אלינו בטלפון 058-432-3001 או במייל <a href="mailto:cancel@footprint.co.il" style="color: #16a34a;">cancel@footprint.co.il</a></p>
+        </div>
+        
+        <div class="alert alert-danger">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            מוצר מותאם אישית - פטור מביטול
+          </h4>
+          <p><strong>בהתאם לסעיף 14ג(ד)(4) לחוק הגנת הצרכן</strong>, מוצרים שיוצרו במיוחד עבור הלקוח (כגון הדפסים מותאמים אישית) <strong>אינם ניתנים לביטול</strong> לאחר שהחל תהליך הייצור.</p>
+          <p>מאחר שכל הדפס של Footprint נוצר באופן אישי על בסיס התמונה שהעליתם, לא ניתן לבטל הזמנה לאחר תחילת ההפקה.</p>
+        </div>
+        
+        <h3>מוצר פגום או שגוי</h3>
+        
+        <div class="alert alert-info">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            התחייבות לשביעות רצון
+          </h4>
+          <p>אם קיבלתם מוצר פגום, שבור, או שונה ממה שהוזמן - נשמח לתקן את המצב!</p>
+          <ul>
+            <li>יש לפנות אלינו תוך 14 יום מקבלת המוצר</li>
+            <li>יש לצרף תמונות של הפגם או הבעיה</li>
+            <li>נבחן את הפנייה ונציע פתרון: החלפה, הדפסה מחדש, או החזר כספי</li>
+          </ul>
+        </div>
+        
+        <h3>אוכלוסיות מוגנות</h3>
+        
+        <div class="alert alert-info">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            זכויות מיוחדות
+          </h4>
+          <p>בהתאם לחוק, לאוכלוסיות הבאות עומדות זכויות ביטול מורחבות (עד 4 חודשים מיום ביצוע העסקה) במקרה שהעסקה נעשתה בשיחה עם נציג:</p>
+          <ul>
+            <li>אזרחים ותיקים (גיל 65+)</li>
+            <li>עולים חדשים (עד 5 שנים בארץ)</li>
+            <li>אנשים עם מוגבלות</li>
+          </ul>
+          <p>יש לציין את השתייכותכם לאוכלוסייה המוגנת בעת הפנייה.</p>
+        </div>
+        
+        <h3>דרכי פנייה לביטול</h3>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>אמצעי</th>
+                <th>פרטי התקשרות</th>
+                <th>זמן מענה</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>טלפון</td>
+                <td dir="ltr">058-432-3001</td>
+                <td>מיידי בשעות פעילות</td>
+              </tr>
+              <tr>
+                <td>דוא״ל</td>
+                <td><a href="mailto:cancel@footprint.co.il" style="color: #8b5cf6;">cancel@footprint.co.il</a></td>
+                <td>עד 24 שעות</td>
+              </tr>
+              <tr>
+                <td>WhatsApp</td>
+                <td dir="ltr">058-432-3002</td>
+                <td>עד 4 שעות</td>
+              </tr>
+              <tr>
+                <td>טופס באתר</td>
+                <td>עמוד "צור קשר"</td>
+                <td>עד 24 שעות</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <h3>סיכום מדיניות הביטול</h3>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>מצב</th>
+                <th>זכאות לביטול</th>
+                <th>החזר</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>תוך 30 דקות, לפני תחילת ייצור</td>
+                <td>✅ כן</td>
+                <td>מלא</td>
+              </tr>
+              <tr>
+                <td>לאחר תחילת הייצור</td>
+                <td>❌ לא</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>מוצר פגום</td>
+                <td>✅ כן (14 יום)</td>
+                <td>החלפה/החזר</td>
+              </tr>
+              <tr>
+                <td>אוכלוסייה מוגנת*</td>
+                <td>✅ כן (4 חודשים)</td>
+                <td>מלא</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size: 13px; color: #6b7280; margin-top: 8px;">* בכפוף לתנאי החוק ולכך שהעסקה נעשתה בשיחה עם נציג</p>
+      </section>
+
+      <!-- Section 7: Shipping -->
+      <section id="shipping" class="section">
+        <div class="section-header">
+          <span class="section-num">7</span>
+          <h2 class="section-title">משלוחים</h2>
+        </div>
+        
+        <h3>זמני הפקה ומשלוח</h3>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>שירות</th>
+                <th>זמן הפקה</th>
+                <th>זמן משלוח</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>משלוח רגיל</td>
+                <td>1-2 ימי עסקים</td>
+                <td>3-5 ימי עסקים</td>
+              </tr>
+              <tr>
+                <td>משלוח מהיר</td>
+                <td>1 יום עסקים</td>
+                <td>1-2 ימי עסקים</td>
+              </tr>
+              <tr>
+                <td>נקודת איסוף</td>
+                <td>1-2 ימי עסקים</td>
+                <td>2-4 ימי עסקים</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="alert alert-warning">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            הערה לגבי זמני אספקה
+          </h4>
+          <p>הזמנים המצוינים הם הערכה בלבד. בתקופות עומס (חגים, אירועים מיוחדים) ייתכנו עיכובים. במקרה של עיכוב משמעותי, נעדכן אתכם בהקדם.</p>
+        </div>
+        
+        <h3>אזורי משלוח</h3>
+        <p>אנו משלחים לכל רחבי ישראל. משלוחים לאזורים מרוחקים עשויים להיות כרוכים בתוספת תשלום ו/או זמן אספקה ארוך יותר.</p>
+        
+        <h3>אחריות על המשלוח</h3>
+        <p>מרגע מסירת החבילה לחברת השליחויות, האחריות על המשלוח עוברת אליהם. עם זאת, אם נפגעה החבילה בדרך או לא הגיעה, נסייע לכם מול חברת השילוח.</p>
+      </section>
+
+      <!-- Section 8: Copyright -->
+      <section id="copyright" class="section">
+        <div class="section-header">
+          <span class="section-num">8</span>
+          <h2 class="section-title">זכויות יוצרים ותוכן</h2>
+        </div>
+        
+        <div class="alert alert-danger">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            הצהרת הלקוח
+          </h4>
+          <p>בהעלאת תמונה לאתר, הלקוח מצהיר ומתחייב כי:</p>
+          <ul>
+            <li>הוא בעל זכויות היוצרים בתמונה, או שיש לו אישור מפורש מבעל הזכויות</li>
+            <li>התמונה אינה פוגעת בזכויות של צדדים שלישיים</li>
+            <li>הוא רשאי לעשות שימוש מסחרי בתמונה</li>
+          </ul>
+        </div>
+        
+        <h3>שיפוי</h3>
+        <p>הלקוח מתחייב לשפות את החברה בגין כל תביעה, דרישה או נזק שייגרמו עקב הפרת זכויות יוצרים או זכויות צדדים שלישיים בקשר עם תוכן שהועלה על ידו.</p>
+        
+        <h3>תוכן אסור</h3>
+        <p>חל איסור מוחלט על העלאת תמונות הכוללות:</p>
+        <ul>
+          <li>תוכן פורנוגרפי או מיני</li>
+          <li>תוכן אלים או מפחיד</li>
+          <li>תוכן גזעני, מסית או פוגעני</li>
+          <li>תוכן המפר זכויות קניין רוחני</li>
+          <li>תוכן בלתי חוקי מכל סוג</li>
+        </ul>
+        <p>אנו שומרים לעצמנו את הזכות לסרב להדפיס כל תוכן שאיננו עומד בקריטריונים אלו, ולבטל הזמנות כאלה ללא החזר.</p>
+      </section>
+
+      <!-- Section 9: Liability -->
+      <section id="liability" class="section">
+        <div class="section-header">
+          <span class="section-num">9</span>
+          <h2 class="section-title">הגבלת אחריות</h2>
+        </div>
+        
+        <h3>הבדלי צבעים</h3>
+        <p>ייתכנו הבדלים קלים בין הצבעים המוצגים על המסך לבין התוצאה המודפסת. הבדלים אלו נובעים מהבדלי כיול מסכים ומאפייני הדפסה, ואינם מהווים עילה לביטול או החזר.</p>
+        
+        <h3>איכות תמונה</h3>
+        <p>איכות ההדפסה תלויה באיכות התמונה המקורית שהועלתה. אין באפשרותנו לשפר תמונות באיכות נמוכה מעבר לגבולות הטכנולוגיה. מומלץ להעלות תמונות ברזולוציה גבוהה ככל האפשר.</p>
+        
+        <h3>עיבוד AI</h3>
+        <p>עיבוד ה-AI הוא תהליך אוטומטי שתוצאותיו עשויות להשתנות. אנו מציגים תצוגה מקדימה של התוצאה לפני התשלום, ואישור ההזמנה מהווה הסכמה לתוצאה המוצגת.</p>
+        
+        <h3>הגבלת אחריות כללית</h3>
+        <p>אחריות החברה מוגבלת לסכום ששולם עבור ההזמנה הספציפית. בשום מקרה לא נהיה אחראים לנזקים עקיפים, תוצאתיים, או אובדן רווחים.</p>
+      </section>
+
+      <!-- Section 10: Privacy -->
+      <section id="privacy" class="section">
+        <div class="section-header">
+          <span class="section-num">10</span>
+          <h2 class="section-title">פרטיות</h2>
+        </div>
+        
+        <p>פרטיות המשתמשים חשובה לנו מאוד. המידע המלא על איסוף, שמירה ושימוש במידע מפורט ב<a href="/privacy" style="color: #8b5cf6; font-weight: 500;">מדיניות הפרטיות</a> שלנו, המהווה חלק בלתי נפרד מתקנון זה.</p>
+        
+        <p>בקצרה:</p>
+        <ul>
+          <li>אנו אוספים מידע הנדרש לביצוע ההזמנות והשירות</li>
+          <li>התמונות שמועלות נמחקות ממערכותינו תוך 30 יום מהשלמת ההזמנה</li>
+          <li>איננו מוכרים או משתפים מידע אישי עם צדדים שלישיים למטרות שיווק</li>
+          <li>אנו משתמשים באבטחה מתקדמת להגנה על המידע</li>
+        </ul>
+      </section>
+
+      <!-- Section 11: IP -->
+      <section id="ip" class="section">
+        <div class="section-header">
+          <span class="section-num">11</span>
+          <h2 class="section-title">קניין רוחני</h2>
+        </div>
+        
+        <p>כל הזכויות באתר, לרבות עיצוב, לוגו, קוד, תוכן, גרפיקה, ואלגוריתמי ה-AI, שייכות לחברה או לגורמים שהעניקו לה רישיון.</p>
+        
+        <p>אין להעתיק, להפיץ, לשכפל, או לעשות שימוש מסחרי בכל חלק מהאתר ללא אישור מפורש בכתב מהחברה.</p>
+        
+        <p>השם "Footprint" והלוגו הם סימני מסחר רשומים של בומרנג אפליקציות בע״מ.</p>
+      </section>
+
+      <!-- Section 12: Jurisdiction -->
+      <section id="jurisdiction" class="section">
+        <div class="section-header">
+          <span class="section-num">12</span>
+          <h2 class="section-title">דין חל וסמכות שיפוט</h2>
+        </div>
+        
+        <p>על תקנון זה ועל כל הנובע ממנו יחולו אך ורק דיני מדינת ישראל.</p>
+        
+        <p>סמכות השיפוט הבלעדית לדון בכל מחלוקת הנובעת מתקנון זה או מהשימוש באתר תהיה לבתי המשפט המוסמכים במחוז חיפה.</p>
+      </section>
+
+      <!-- Section 13: Contact -->
+      <section id="contact" class="section">
+        <div class="section-header">
+          <span class="section-num">13</span>
+          <h2 class="section-title">יצירת קשר</h2>
+        </div>
+        
+        <p>לכל שאלה, בקשה, או תלונה, ניתן לפנות אלינו באמצעים הבאים:</p>
+        
+        <div class="info-card">
+          <h3 class="info-card-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            פרטי התקשרות
+          </h3>
+          <div class="info-row">
+            <span class="info-label">שם החברה:</span>
+            <span class="info-value">בומרנג אפליקציות בע״מ</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">מותג:</span>
+            <span class="info-value">פוטפרינט - Footprint</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">כתובת:</span>
+            <span class="info-value">מעלה הנחל 115, רמות מנשה, מיקוד 19245, ת.ד. 340, ישראל</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">טלפון:</span>
+            <span class="info-value" dir="ltr">058-432-3001</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">WhatsApp:</span>
+            <span class="info-value" dir="ltr">058-432-3002</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">דוא״ל כללי:</span>
+            <span class="info-value"><a href="mailto:info@footprint.co.il">info@footprint.co.il</a></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">דוא״ל ביטולים:</span>
+            <span class="info-value"><a href="mailto:cancel@footprint.co.il">cancel@footprint.co.il</a></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">שעות פעילות:</span>
+            <span class="info-value">א'-ה': 09:00-18:00 | ו': 09:00-13:00</span>
+          </div>
+        </div>
+        
+        <p style="margin-top: 24px; color: #6b7280; font-size: 14px;">אנו מתחייבים להשיב לכל פנייה תוך 2 ימי עסקים.</p>
+      </section>
+      
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo">
+            <span class="logo-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </span>
+            Footprint
+          </a>
+          <p>הופכים רגעים לאמנות. הדפסות איכותיות בסגנון ייחודי עם טכנולוגיית AI מתקדמת.</p>
+          <p style="margin-top: 8px; font-size: 12px;">מבית בומרנג אפליקציות בע״מ</p>
+        </div>
+        <div>
+          <h4 class="footer-title">ניווט</h4>
+          <nav class="footer-links">
+            <a href="/">דף הבית</a>
+            <a href="/styles">סגנונות</a>
+            <a href="/pricing">מחירון</a>
+            <a href="/faq">שאלות נפוצות</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-title">שירות</h4>
+          <nav class="footer-links">
+            <a href="/contact">צור קשר</a>
+            <a href="/shipping">מידע משלוחים</a>
+            <a href="/track">מעקב הזמנה</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-title">מידע משפטי</h4>
+          <nav class="footer-links">
+            <a href="/terms">תקנון האתר</a>
+            <a href="/privacy">מדיניות פרטיות</a>
+            <a href="/accessibility">הצהרת נגישות</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2025 Footprint by בומרנג אפליקציות בע״מ. כל הזכויות שמורות.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          </a>
+          <a href="#" aria-label="Instagram">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01"/></svg>
+          </a>
+          <a href="#" aria-label="WhatsApp">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Float Button -->
+  <a href="https://wa.me/9720584323002" target="_blank" class="whatsapp-btn" aria-label="WhatsApp">
+    <svg class="icon icon-lg" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </a>
+
+</body>
+</html>

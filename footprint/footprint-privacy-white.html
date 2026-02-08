@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מדיניות פרטיות | Footprint - הדפסת תמונות אמנותיות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Heebo', system-ui, sans-serif; 
+      background: #fff; 
+      color: #1f2937;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; }
+    
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .icon-sm { width: 14px; height: 14px; }
+    .icon-md { width: 18px; height: 18px; }
+    .icon-lg { width: 32px; height: 32px; }
+    .icon-filled { fill: currentColor; }
+    
+    /* Navigation */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      padding: 0 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; color: #1f2937; }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .nav-links { display: none; gap: 32px; }
+    .nav-links a { color: #6b7280; font-size: 14px; transition: color 0.2s; }
+    .nav-links a:hover { color: #1f2937; }
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #6b7280;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav-back:hover { color: #1f2937; background: #f3f4f6; }
+    
+    /* Page Header */
+    .page-header {
+      padding: 60px 16px 40px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(180deg, #f0fdf4 0%, #fff 100%);
+    }
+    .page-header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .page-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.15));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: #16a34a;
+    }
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #1f2937;
+    }
+    .page-subtitle {
+      color: #6b7280;
+      font-size: 16px;
+    }
+    .last-updated {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      display: inline-block;
+      font-size: 13px;
+      color: #6b7280;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    /* Table of Contents */
+    .toc {
+      padding: 40px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+    .toc-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .toc-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .toc-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1f2937;
+    }
+    .toc-title .icon { color: #16a34a; }
+    .toc-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      color: #4b5563;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .toc-link:hover {
+      border-color: #d1d5db;
+      color: #1f2937;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .toc-num {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.15));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #16a34a;
+    }
+    
+    /* Content Sections */
+    .content {
+      padding: 40px 16px;
+    }
+    .content-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .section {
+      margin-bottom: 40px;
+      scroll-margin-top: 80px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .section-num {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .section p {
+      color: #4b5563;
+      margin-bottom: 16px;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    
+    .section ul, .section ol {
+      margin: 16px 0;
+      padding-right: 20px;
+    }
+    .section li {
+      color: #4b5563;
+      margin-bottom: 10px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    
+    .section h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 28px 0 14px;
+      color: #1f2937;
+    }
+    
+    /* Alert Boxes */
+    .alert {
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+    .alert-warning {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+    }
+    .alert-warning .alert-title { color: #b45309; }
+    .alert-danger {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+    }
+    .alert-danger .alert-title { color: #dc2626; }
+    .alert-success {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+    }
+    .alert-success .alert-title { color: #16a34a; }
+    .alert-info {
+      background: #faf5ff;
+      border: 1px solid #d8b4fe;
+    }
+    .alert-info .alert-title { color: #7c3aed; }
+    .alert-blue {
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+    }
+    .alert-blue .alert-title { color: #2563eb; }
+    
+    .alert-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .alert p, .alert li {
+      color: #4b5563 !important;
+      font-size: 14px !important;
+      margin-bottom: 8px;
+    }
+    
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 400px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: right;
+      font-size: 14px;
+    }
+    th {
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      color: #fff;
+      font-weight: 600;
+    }
+    td {
+      background: #fff;
+      color: #4b5563;
+      border-top: 1px solid #e5e7eb;
+    }
+    tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+    
+    /* Info Card */
+    .info-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .info-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1f2937;
+    }
+    .info-card-title .icon { color: #16a34a; }
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label {
+      color: #6b7280;
+      font-size: 14px;
+      min-width: 100px;
+    }
+    .info-value {
+      color: #1f2937;
+      font-size: 14px;
+    }
+    .info-value a {
+      color: #16a34a;
+      text-decoration: underline;
+      text-decoration-color: rgba(22,163,74,0.3);
+      text-underline-offset: 2px;
+    }
+    .info-value a:hover { text-decoration-color: #16a34a; }
+    
+    /* Data Card */
+    .data-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .data-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .data-card-title .icon { color: #16a34a; width: 20px; height: 20px; }
+    .data-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .data-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: #4b5563;
+    }
+    .data-item .icon { color: #22c55e; width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+    
+    /* Footer */
+    .footer {
+      background: #1f2937;
+      color: #fff;
+      padding: 48px 16px 24px;
+      margin-top: 60px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+    .footer-brand { max-width: 300px; }
+    .footer-brand .logo { margin-bottom: 16px; color: #fff; }
+    .footer-brand p { color: #9ca3af; font-size: 14px; line-height: 1.6; }
+    .footer-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+    .footer-links { display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a { color: #9ca3af; font-size: 14px; transition: color 0.2s; }
+    .footer-links a:hover { color: #fff; }
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid #374151;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      text-align: center;
+    }
+    .footer-copy { color: #9ca3af; font-size: 13px; }
+    .footer-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+    .footer-legal a { color: #9ca3af; font-size: 13px; transition: color 0.2s; }
+    .footer-legal a:hover { color: #fff; }
+    .footer-social { display: flex; gap: 12px; }
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      background: #374151;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      transition: all 0.2s;
+    }
+    .footer-social a:hover { background: #4b5563; color: #fff; }
+    
+    /* WhatsApp Button */
+    .whatsapp-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      width: 56px;
+      height: 56px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+      transition: all 0.3s;
+      z-index: 90;
+    }
+    .whatsapp-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 24px rgba(37,211,102,0.5);
+    }
+    
+    /* Responsive */
+    @media (min-width: 640px) {
+      .toc-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .nav-links { display: flex; }
+      .page-title { font-size: 40px; }
+      .toc-grid { grid-template-columns: repeat(3, 1fr); }
+      .footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+      .footer-bottom { flex-direction: row; justify-content: space-between; text-align: right; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </span>
+        Footprint
+      </a>
+      <nav class="nav-links">
+        <a href="/">ראשי</a>
+        <a href="/styles">סגנונות</a>
+        <a href="/pricing">מחירון</a>
+        <a href="/faq">שאלות נפוצות</a>
+      </nav>
+      <a href="/" class="nav-back">
+        <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        חזרה לאתר
+      </a>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div class="page-icon">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      </div>
+      <h1 class="page-title">מדיניות פרטיות</h1>
+      <p class="page-subtitle">כיצד אנו אוספים, משתמשים ומגנים על המידע שלכם</p>
+      <div class="last-updated">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-left: 6px;"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        עדכון אחרון: פברואר 2025
+      </div>
+    </div>
+  </header>
+
+  <!-- Table of Contents -->
+  <section class="toc">
+    <div class="toc-inner">
+      <div class="toc-card">
+        <h2 class="toc-title">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+          תוכן עניינים
+        </h2>
+        <div class="toc-grid">
+          <a href="#intro" class="toc-link"><span class="toc-num">1</span>מבוא</a>
+          <a href="#data-collected" class="toc-link"><span class="toc-num">2</span>מידע שאנו אוספים</a>
+          <a href="#data-use" class="toc-link"><span class="toc-num">3</span>שימוש במידע</a>
+          <a href="#data-sharing" class="toc-link"><span class="toc-num">4</span>שיתוף מידע</a>
+          <a href="#cookies" class="toc-link"><span class="toc-num">5</span>עוגיות (Cookies)</a>
+          <a href="#images" class="toc-link"><span class="toc-num">6</span>תמונות ועיבוד AI</a>
+          <a href="#security" class="toc-link"><span class="toc-num">7</span>אבטחת מידע</a>
+          <a href="#rights" class="toc-link"><span class="toc-num">8</span>זכויות המשתמש</a>
+          <a href="#retention" class="toc-link"><span class="toc-num">9</span>שמירת מידע</a>
+          <a href="#minors" class="toc-link"><span class="toc-num">10</span>קטינים</a>
+          <a href="#changes" class="toc-link"><span class="toc-num">11</span>שינויים במדיניות</a>
+          <a href="#contact" class="toc-link"><span class="toc-num">12</span>יצירת קשר</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <main class="content">
+    <div class="content-inner">
+      
+      <!-- Section 1: Introduction -->
+      <section id="intro" class="section">
+        <div class="section-header">
+          <span class="section-num">1</span>
+          <h2 class="section-title">מבוא</h2>
+        </div>
+        
+        <p><strong>בומרנג אפליקציות בע״מ</strong> (להלן: "החברה", "אנחנו") מפעילה את אתר <strong>footprint.co.il</strong> (להלן: "האתר" או "Footprint"). אנו מכבדים את פרטיותכם ומחויבים להגן על המידע האישי שלכם.</p>
+        
+        <p>מדיניות פרטיות זו מסבירה אילו סוגי מידע אנו אוספים, כיצד אנו משתמשים בו, עם מי אנו עשויים לשתף אותו, וכיצד אנו מגנים עליו. המדיניות חלה על כל השימוש באתר ובשירותים שלנו.</p>
+        
+        <div class="alert alert-success">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            המחויבות שלנו
+          </h4>
+          <p>פרטיותכם חשובה לנו. אנו מתחייבים:</p>
+          <ul>
+            <li>לאסוף רק מידע הכרחי לאספקת השירות</li>
+            <li>לא למכור את המידע שלכם לצדדים שלישיים</li>
+            <li>למחוק תמונות תוך 30 יום מהשלמת ההזמנה</li>
+            <li>להשתמש באבטחה מתקדמת להגנה על המידע</li>
+          </ul>
+        </div>
+        
+        <p>השימוש באתר מהווה הסכמה למדיניות פרטיות זו. אם אינכם מסכימים לתנאים המפורטים כאן, אנא הימנעו משימוש באתר.</p>
+      </section>
+
+      <!-- Section 2: Data Collected -->
+      <section id="data-collected" class="section">
+        <div class="section-header">
+          <span class="section-num">2</span>
+          <h2 class="section-title">מידע שאנו אוספים</h2>
+        </div>
+        
+        <p>אנו אוספים מספר סוגי מידע כדי לספק לכם את השירותים שלנו:</p>
+        
+        <h3>מידע שאתם מספקים לנו</h3>
+        
+        <div class="data-card">
+          <h4 class="data-card-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            פרטים אישיים
+          </h4>
+          <div class="data-list">
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>שם מלא</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>כתובת דואר אלקטרוני</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>מספר טלפון</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>כתובת למשלוח</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="data-card">
+          <h4 class="data-card-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            תמונות
+          </h4>
+          <div class="data-list">
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>תמונות שאתם מעלים לעיבוד והדפסה</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>תמונות מעובדות לאחר עיבוד AI</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="data-card">
+          <h4 class="data-card-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            פרטי תשלום
+          </h4>
+          <div class="data-list">
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>פרטי התשלום מעובדים ישירות על ידי ספק הסליקה המאובטח</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>אנחנו לא שומרים פרטי כרטיס אשראי מלאים במערכותינו</span>
+            </div>
+          </div>
+        </div>
+        
+        <h3>מידע שנאסף אוטומטית</h3>
+        
+        <div class="data-card">
+          <h4 class="data-card-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            מידע טכני
+          </h4>
+          <div class="data-list">
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>כתובת IP</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>סוג הדפדפן ומערכת ההפעלה</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>עמודים שנצפו ומשך השהייה</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>מקור ההפניה (Referrer)</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span>מזהה מכשיר</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Data Use -->
+      <section id="data-use" class="section">
+        <div class="section-header">
+          <span class="section-num">3</span>
+          <h2 class="section-title">שימוש במידע</h2>
+        </div>
+        
+        <p>אנו משתמשים במידע שנאסף למטרות הבאות:</p>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>מטרה</th>
+                <th>פירוט</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>אספקת השירות</strong></td>
+                <td>עיבוד תמונות, הפקת הדפסים, ביצוע משלוחים</td>
+              </tr>
+              <tr>
+                <td><strong>תקשורת</strong></td>
+                <td>אישורי הזמנה, עדכוני סטטוס, מענה לפניות</td>
+              </tr>
+              <tr>
+                <td><strong>שיפור השירות</strong></td>
+                <td>ניתוח שימוש באתר, שיפור חווית המשתמש</td>
+              </tr>
+              <tr>
+                <td><strong>אבטחה</strong></td>
+                <td>מניעת הונאות, הגנה על המערכות</td>
+              </tr>
+              <tr>
+                <td><strong>עמידה בחוק</strong></td>
+                <td>מילוי חובות משפטיות ורגולטוריות</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="alert alert-info">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            שיווק ופרסום
+          </h4>
+          <p>אנו עשויים לשלוח לכם עדכונים ומבצעים רק אם נתתם הסכמה מפורשת לכך. תוכלו להסיר את עצמכם מרשימת התפוצה בכל עת באמצעות קישור "הסרה" בתחתית כל דיוור.</p>
+        </div>
+      </section>
+
+      <!-- Section 4: Data Sharing -->
+      <section id="data-sharing" class="section">
+        <div class="section-header">
+          <span class="section-num">4</span>
+          <h2 class="section-title">שיתוף מידע עם צדדים שלישיים</h2>
+        </div>
+        
+        <div class="alert alert-success">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            אנחנו לא מוכרים את המידע שלכם
+          </h4>
+          <p>אנו מתחייבים שלא למכור, להשכיר או לסחור במידע האישי שלכם לצדדים שלישיים למטרות שיווק.</p>
+        </div>
+        
+        <p>אנו עשויים לשתף מידע עם הגורמים הבאים, אך ורק במידה הנדרשת לאספקת השירות:</p>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>גורם</th>
+                <th>מטרה</th>
+                <th>מידע משותף</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ספק סליקה</td>
+                <td>עיבוד תשלומים</td>
+                <td>פרטי תשלום (מאובטח PCI-DSS)</td>
+              </tr>
+              <tr>
+                <td>חברות שילוח</td>
+                <td>משלוח הזמנות</td>
+                <td>שם, כתובת, טלפון</td>
+              </tr>
+              <tr>
+                <td>ספקי AI</td>
+                <td>עיבוד תמונות</td>
+                <td>התמונה בלבד (ללא פרטים מזהים)</td>
+              </tr>
+              <tr>
+                <td>שירותי ענן</td>
+                <td>אחסון ועיבוד</td>
+                <td>מידע מוצפן</td>
+              </tr>
+              <tr>
+                <td>רשויות</td>
+                <td>עמידה בחוק</td>
+                <td>לפי דרישה חוקית בלבד</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <p>כל ספקי השירות שלנו מחויבים בהסכמי סודיות ואבטחת מידע.</p>
+      </section>
+
+      <!-- Section 5: Cookies -->
+      <section id="cookies" class="section">
+        <div class="section-header">
+          <span class="section-num">5</span>
+          <h2 class="section-title">עוגיות (Cookies)</h2>
+        </div>
+        
+        <p>האתר משתמש בעוגיות - קבצי טקסט קטנים הנשמרים במכשיר שלכם - לצורך שיפור חווית השימוש.</p>
+        
+        <h3>סוגי העוגיות בשימוש</h3>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>סוג</th>
+                <th>מטרה</th>
+                <th>משך</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>הכרחיות</strong></td>
+                <td>תפקוד בסיסי של האתר, עגלת קניות, התחברות</td>
+                <td>סשן / עד שנה</td>
+              </tr>
+              <tr>
+                <td><strong>ביצועים</strong></td>
+                <td>ניתוח שימוש באתר (Google Analytics)</td>
+                <td>עד שנתיים</td>
+              </tr>
+              <tr>
+                <td><strong>פונקציונליות</strong></td>
+                <td>זכירת העדפות (שפה, גודל תצוגה)</td>
+                <td>עד שנה</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="alert alert-blue">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            ניהול עוגיות
+          </h4>
+          <p>תוכלו לנהל את העדפות העוגיות שלכם דרך הגדרות הדפדפן. שימו לב שחסימת עוגיות מסוימות עלולה לפגוע בתפקוד האתר.</p>
+        </div>
+      </section>
+
+      <!-- Section 6: Images -->
+      <section id="images" class="section">
+        <div class="section-header">
+          <span class="section-num">6</span>
+          <h2 class="section-title">תמונות ועיבוד AI</h2>
+        </div>
+        
+        <p>התמונות שאתם מעלים הן חלק מרכזי בשירות שלנו. להלן הפירוט המלא על האופן שבו אנו מטפלים בהן:</p>
+        
+        <div class="alert alert-success">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            מחיקה אוטומטית
+          </h4>
+          <p>כל התמונות (המקוריות והמעובדות) נמחקות אוטומטית מהמערכות שלנו תוך <strong>30 יום</strong> מהשלמת ההזמנה.</p>
+        </div>
+        
+        <h3>תהליך העיבוד</h3>
+        <ol>
+          <li>התמונה שלכם מועלית לשרתים מאובטחים שלנו</li>
+          <li>התמונה נשלחת לספק ה-AI לעיבוד (ללא פרטים מזהים)</li>
+          <li>התמונה המעובדת נשמרת לצורך הדפסה</li>
+          <li>לאחר הדפסה ומשלוח - כל התמונות נמחקות</li>
+        </ol>
+        
+        <div class="alert alert-warning">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            חשוב לדעת
+          </h4>
+          <ul>
+            <li>אנו לא משתמשים בתמונות שלכם לאימון מודלים של AI</li>
+            <li>אנו לא משתפים את התמונות שלכם עם צדדים שלישיים (מלבד לצורך העיבוד)</li>
+            <li>התמונות מאוחסנות בצורה מוצפנת</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Section 7: Security -->
+      <section id="security" class="section">
+        <div class="section-header">
+          <span class="section-num">7</span>
+          <h2 class="section-title">אבטחת מידע</h2>
+        </div>
+        
+        <p>אנו משקיעים משאבים רבים בהגנה על המידע שלכם:</p>
+        
+        <div class="data-card">
+          <h4 class="data-card-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            אמצעי אבטחה
+          </h4>
+          <div class="data-list">
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span><strong>הצפנת SSL/TLS</strong> - כל התקשורת עם האתר מוצפנת</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span><strong>הצפנת מידע</strong> - נתונים רגישים מוצפנים גם באחסון</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span><strong>PCI-DSS</strong> - תשלומים מעובדים בתקן האבטחה הגבוה ביותר</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span><strong>גיבויים</strong> - גיבויים מוצפנים באופן קבוע</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span><strong>בקרת גישה</strong> - הרשאות מוגבלות לעובדים מורשים בלבד</span>
+            </div>
+            <div class="data-item">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span><strong>ניטור</strong> - מערכות ניטור אבטחה פעילות 24/7</span>
+            </div>
+          </div>
+        </div>
+        
+        <p>על אף מאמצינו, אין מערכת מחשוב שהיא חסינה לחלוטין. במקרה של אירוע אבטחה משמעותי, נודיע לכם ולרשויות הרלוונטיות בהתאם לחוק.</p>
+      </section>
+
+      <!-- Section 8: Rights -->
+      <section id="rights" class="section">
+        <div class="section-header">
+          <span class="section-num">8</span>
+          <h2 class="section-title">זכויות המשתמש</h2>
+        </div>
+        
+        <p>בהתאם לחוק הגנת הפרטיות ותקנות הגנת הפרטיות, עומדות לכם הזכויות הבאות:</p>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>זכות</th>
+                <th>הסבר</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>זכות העיון</strong></td>
+                <td>לקבל מידע על הנתונים שאנו שומרים עליכם</td>
+              </tr>
+              <tr>
+                <td><strong>זכות התיקון</strong></td>
+                <td>לבקש תיקון מידע שגוי או לא מדויק</td>
+              </tr>
+              <tr>
+                <td><strong>זכות המחיקה</strong></td>
+                <td>לבקש מחיקת המידע שלכם (בכפוף לחובות משפטיות)</td>
+              </tr>
+              <tr>
+                <td><strong>זכות ההתנגדות</strong></td>
+                <td>להתנגד לעיבוד מידע לצרכי שיווק</td>
+              </tr>
+              <tr>
+                <td><strong>זכות הניוד</strong></td>
+                <td>לקבל העתק של המידע בפורמט מובנה</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="alert alert-info">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            כיצד לממש את זכויותיכם
+          </h4>
+          <p>לכל בקשה הנוגעת לזכויותיכם, אנא פנו אלינו בדוא"ל <a href="mailto:privacy@footprint.co.il" style="color: #7c3aed;">privacy@footprint.co.il</a>. נשיב לפנייתכם תוך 30 יום.</p>
+        </div>
+      </section>
+
+      <!-- Section 9: Retention -->
+      <section id="retention" class="section">
+        <div class="section-header">
+          <span class="section-num">9</span>
+          <h2 class="section-title">תקופת שמירת מידע</h2>
+        </div>
+        
+        <p>אנו שומרים מידע למשך הזמן הנדרש למטרות שלשמן נאסף:</p>
+        
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>סוג מידע</th>
+                <th>תקופת שמירה</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>תמונות (מקור ומעובדות)</td>
+                <td>30 יום מהשלמת ההזמנה</td>
+              </tr>
+              <tr>
+                <td>פרטי הזמנה וחשבונית</td>
+                <td>7 שנים (חובה חוקית)</td>
+              </tr>
+              <tr>
+                <td>פרטי חשבון משתמש</td>
+                <td>כל עוד החשבון פעיל + שנה</td>
+              </tr>
+              <tr>
+                <td>תכתובות תמיכה</td>
+                <td>3 שנים</td>
+              </tr>
+              <tr>
+                <td>לוגים טכניים</td>
+                <td>90 יום</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <p>לאחר תום תקופת השמירה, המידע נמחק או מתבצע לו אנונימיזציה.</p>
+      </section>
+
+      <!-- Section 10: Minors -->
+      <section id="minors" class="section">
+        <div class="section-header">
+          <span class="section-num">10</span>
+          <h2 class="section-title">קטינים</h2>
+        </div>
+        
+        <p>השירותים שלנו אינם מיועדים לקטינים מתחת לגיל 18. אנו לא אוספים ביודעין מידע אישי מקטינים.</p>
+        
+        <div class="alert alert-danger">
+          <h4 class="alert-title">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            הורים ואפוטרופוסים
+          </h4>
+          <p>אם נודע לכם שקטין מסר לנו מידע אישי, אנא צרו איתנו קשר מיידית ונמחק את המידע.</p>
+        </div>
+      </section>
+
+      <!-- Section 11: Changes -->
+      <section id="changes" class="section">
+        <div class="section-header">
+          <span class="section-num">11</span>
+          <h2 class="section-title">שינויים במדיניות</h2>
+        </div>
+        
+        <p>אנו עשויים לעדכן מדיניות פרטיות זו מעת לעת. במקרה של שינויים מהותיים:</p>
+        
+        <ul>
+          <li>נפרסם הודעה בולטת באתר</li>
+          <li>נעדכן את תאריך "עדכון אחרון" בראש המסמך</li>
+          <li>במקרים משמעותיים - נשלח הודעה במייל ללקוחות רשומים</li>
+        </ul>
+        
+        <p>המשך השימוש באתר לאחר פרסום השינויים מהווה הסכמה למדיניות המעודכנת.</p>
+      </section>
+
+      <!-- Section 12: Contact -->
+      <section id="contact" class="section">
+        <div class="section-header">
+          <span class="section-num">12</span>
+          <h2 class="section-title">יצירת קשר</h2>
+        </div>
+        
+        <p>לכל שאלה, הערה או בקשה בנושא פרטיות, אנא פנו אלינו:</p>
+        
+        <div class="info-card">
+          <h3 class="info-card-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            פרטי התקשרות - פרטיות
+          </h3>
+          <div class="info-row">
+            <span class="info-label">שם החברה:</span>
+            <span class="info-value">בומרנג אפליקציות בע״מ</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">מותג:</span>
+            <span class="info-value">פוטפרינט - Footprint</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">כתובת:</span>
+            <span class="info-value">מעלה הנחל 115, רמות מנשה, מיקוד 19245, ת.ד. 340, ישראל</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">דוא״ל פרטיות:</span>
+            <span class="info-value"><a href="mailto:privacy@footprint.co.il">privacy@footprint.co.il</a></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">דוא״ל כללי:</span>
+            <span class="info-value"><a href="mailto:info@footprint.co.il">info@footprint.co.il</a></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">טלפון:</span>
+            <span class="info-value" dir="ltr">058-432-3001</span>
+          </div>
+        </div>
+        
+        <p style="margin-top: 24px; color: #6b7280; font-size: 14px;">אנו מתחייבים להשיב לכל פנייה בנושא פרטיות תוך 30 יום.</p>
+      </section>
+      
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo">
+            <span class="logo-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </span>
+            Footprint
+          </a>
+          <p>הופכים רגעים לאמנות. הדפסות איכותיות בסגנון ייחודי עם טכנולוגיית AI מתקדמת.</p>
+          <p style="margin-top: 8px; font-size: 12px;">מבית בומרנג אפליקציות בע״מ</p>
+        </div>
+        <div>
+          <h4 class="footer-title">ניווט</h4>
+          <nav class="footer-links">
+            <a href="/">דף הבית</a>
+            <a href="/styles">סגנונות</a>
+            <a href="/pricing">מחירון</a>
+            <a href="/faq">שאלות נפוצות</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-title">שירות</h4>
+          <nav class="footer-links">
+            <a href="/contact">צור קשר</a>
+            <a href="/shipping">מידע משלוחים</a>
+            <a href="/track">מעקב הזמנה</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-title">מידע משפטי</h4>
+          <nav class="footer-links">
+            <a href="/terms">תקנון האתר</a>
+            <a href="/privacy">מדיניות פרטיות</a>
+            <a href="/accessibility">הצהרת נגישות</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2025 Footprint by בומרנג אפליקציות בע״מ. כל הזכויות שמורות.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          </a>
+          <a href="#" aria-label="Instagram">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01"/></svg>
+          </a>
+          <a href="#" aria-label="WhatsApp">
+            <svg class="icon icon-md" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Float Button -->
+  <a href="https://wa.me/9720584323002" target="_blank" class="whatsapp-btn" aria-label="WhatsApp">
+    <svg class="icon icon-lg" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </a>
+
+</body>
+</html>

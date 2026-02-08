@@ -10,7 +10,7 @@
   "priority": "critical",
   "story_points": 13,
   "description": "Complete integration with PayPlus payment gateway for Israeli credit card processing, including recurring payments, refunds, and compliance with Israeli payment regulations",
-  "status": "backlog",
+  "status": "pending",
   "objective": {
     "as_a": "Israeli customer",
     "i_want": "to pay securely with my local credit card",

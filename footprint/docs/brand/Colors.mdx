@@ -1,0 +1,181 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Brand/Colors" />
+
+# Color System
+
+Footprint uses a vibrant yet refined color palette. The brand gradient (purple to pink) is the signature visual element, supported by accent colors and a clean neutral system for text, backgrounds, and borders.
+
+All colors are defined as CSS custom properties in `globals.css` and extended in `tailwind.config`.
+
+---
+
+## Brand Colors
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
+  <div>
+    <div style={{ width: '100%', height: '80px', borderRadius: '12px', background: '#8b5cf6' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Brand Purple</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--brand-purple</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#8b5cf6</div>
+  </div>
+  <div>
+    <div style={{ width: '100%', height: '80px', borderRadius: '12px', background: '#ec4899' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Brand Pink</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--brand-pink</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#ec4899</div>
+  </div>
+  <div>
+    <div style={{ width: '100%', height: '80px', borderRadius: '12px', background: '#22d3ee' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Brand Cyan</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--brand-cyan</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#22d3ee</div>
+  </div>
+  <div>
+    <div style={{ width: '100%', height: '80px', borderRadius: '12px', background: '#f59e0b' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Brand Orange</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--brand-orange</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#f59e0b</div>
+  </div>
+</div>
+
+## Brand Gradient
+
+The signature gradient flows from purple to pink (right to left, matching RTL direction).
+
+<div style={{ marginBottom: '32px' }}>
+  <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: 'linear-gradient(to left, #8b5cf6, #ec4899)' }} />
+  <div style={{ marginTop: '8px', fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>
+    linear-gradient(to left, #8b5cf6, #ec4899)
+  </div>
+  <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>
+    Tailwind: bg-gradient-brand
+  </div>
+</div>
+
+---
+
+## Text Colors
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+  <div>
+    <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: '#1a1a1a' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Text Primary</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--text-primary</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#1a1a1a</div>
+  </div>
+  <div>
+    <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: '#525252' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Text Secondary</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--text-secondary</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#525252</div>
+  </div>
+  <div>
+    <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: '#737373' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Text Muted</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--text-muted</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#737373</div>
+  </div>
+</div>
+
+---
+
+## Background Colors
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+  <div>
+    <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: '#ffffff', border: '1px solid #e5e5e5' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>BG White</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--bg-white</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#ffffff</div>
+  </div>
+  <div>
+    <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: '#fafafa', border: '1px solid #e5e5e5' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>BG Light</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--bg-light</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#fafafa</div>
+  </div>
+  <div>
+    <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: '#f5f5f5', border: '1px solid #e5e5e5' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>BG Soft</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--bg-soft</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#f5f5f5</div>
+  </div>
+</div>
+
+---
+
+## Border Colors
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '32px' }}>
+  <div>
+    <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: '#ffffff', border: '3px solid #e5e5e5' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Border Light</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--border-light</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#e5e5e5</div>
+  </div>
+  <div>
+    <div style={{ width: '100%', height: '60px', borderRadius: '12px', background: '#ffffff', border: '3px solid #ebebeb' }} />
+    <div style={{ marginTop: '8px', fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Border Soft</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--border-soft</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>#ebebeb</div>
+  </div>
+</div>
+
+---
+
+## Shadow Samples
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '32px' }}>
+  <div style={{
+    background: '#ffffff',
+    borderRadius: '12px',
+    padding: '24px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+    textAlign: 'center',
+  }}>
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Shadow SM</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#737373', marginTop: '4px' }}>--shadow-sm</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#737373' }}>0 1px 2px rgba(0,0,0,0.04)</div>
+  </div>
+  <div style={{
+    background: '#ffffff',
+    borderRadius: '12px',
+    padding: '24px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+    textAlign: 'center',
+  }}>
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Shadow MD</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#737373', marginTop: '4px' }}>--shadow-md</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#737373' }}>0 4px 12px rgba(0,0,0,0.06)</div>
+  </div>
+  <div style={{
+    background: '#ffffff',
+    borderRadius: '12px',
+    padding: '24px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+    textAlign: 'center',
+  }}>
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 500, color: '#1a1a1a' }}>Shadow LG</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#737373', marginTop: '4px' }}>--shadow-lg</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#737373' }}>0 8px 24px rgba(0,0,0,0.08)</div>
+  </div>
+</div>
+
+---
+
+## Usage Guidelines
+
+| Context | Color | Tailwind Class |
+|---------|-------|----------------|
+| Primary CTA buttons | Brand gradient | `bg-gradient-brand` |
+| Secondary buttons | Brand purple | `bg-brand-purple` |
+| Accent highlights | Brand pink | `text-brand-pink` |
+| Info / links | Brand cyan | `text-brand-cyan` |
+| Warnings / alerts | Brand orange | `text-brand-orange` |
+| Body text | Text primary | `text-text-primary` |
+| Captions / labels | Text secondary | `text-text-secondary` |
+| Placeholders | Text muted | `text-text-muted` |
+| Page background | BG white | `bg-light-bg` |
+| Section background | BG light | `bg-light-soft` |
+| Card background | BG soft | `bg-light-muted` |

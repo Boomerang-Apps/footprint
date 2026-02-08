@@ -10,7 +10,7 @@
   "priority": "medium",
   "story_points": 8,
   "description": "Implement AI-powered face detection to automatically suggest optimal crop positions for portrait photos, ensuring faces are properly centered and framed in the final print",
-  "status": "in_progress",
+  "status": "completed",
   "objective": {
     "as_a": "customer uploading a portrait photo",
     "i_want": "the system to automatically detect faces and suggest optimal cropping",

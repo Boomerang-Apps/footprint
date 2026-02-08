@@ -10,7 +10,7 @@
   "priority": "medium",
   "story_points": 8,
   "description": "Optimize AI style transformation pipeline for sub-3-second generation time, implementing caching, queue management, and progressive loading for better user experience",
-  "status": "backlog",
+  "status": "pending",
   "objective": {
     "as_a": "customer previewing art styles",
     "i_want": "to see style transformations quickly",

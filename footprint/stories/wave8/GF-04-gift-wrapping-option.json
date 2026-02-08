@@ -10,7 +10,7 @@
   "priority": "medium",
   "story_points": 5,
   "description": "Allow customers to add premium gift wrapping to their orders during checkout, with visual preview and pricing",
-  "status": "in_progress",
+  "status": "completed",
   "objective": {
     "as_a": "customer purchasing a gift",
     "i_want": "to add beautiful gift wrapping to my order",

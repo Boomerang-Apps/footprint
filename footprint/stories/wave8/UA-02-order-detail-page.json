@@ -10,7 +10,7 @@
   "priority": "high",
   "story_points": 5,
   "description": "Create detailed order view page showing complete order information including items, shipping details, payment summary, and delivery timeline",
-  "status": "backlog",
+  "status": "completed",
   "objective": {
     "as_a": "customer",
     "i_want": "to view complete details of my order",

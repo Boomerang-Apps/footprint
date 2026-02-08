@@ -1,0 +1,228 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Brand/Spacing" />
+
+# Spacing & Shape
+
+Footprint uses generous border radii, soft shadows, and consistent spacing to create a warm, approachable interface. All values are defined as CSS custom properties and extended in the Tailwind config.
+
+---
+
+## Border Radius
+
+Rounded corners are a key part of the Footprint aesthetic. We use four radius values that scale from subtle to very rounded.
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '32px' }}>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{
+      width: '100%',
+      height: '80px',
+      background: 'linear-gradient(to left, #8b5cf6, #ec4899)',
+      borderRadius: '8px',
+      marginBottom: '12px',
+    }} />
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 600, color: '#1a1a1a' }}>SM</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--radius-sm</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>8px</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{
+      width: '100%',
+      height: '80px',
+      background: 'linear-gradient(to left, #8b5cf6, #ec4899)',
+      borderRadius: '12px',
+      marginBottom: '12px',
+    }} />
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 600, color: '#1a1a1a' }}>MD</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--radius-md</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>12px</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{
+      width: '100%',
+      height: '80px',
+      background: 'linear-gradient(to left, #8b5cf6, #ec4899)',
+      borderRadius: '16px',
+      marginBottom: '12px',
+    }} />
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 600, color: '#1a1a1a' }}>LG</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--radius-lg</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>16px</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{
+      width: '100%',
+      height: '80px',
+      background: 'linear-gradient(to left, #8b5cf6, #ec4899)',
+      borderRadius: '24px',
+      marginBottom: '12px',
+    }} />
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '14px', fontWeight: 600, color: '#1a1a1a' }}>XL</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>--radius-xl</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373' }}>24px</div>
+  </div>
+</div>
+
+### Radius Usage
+
+| Element | Radius | Variable |
+|---------|--------|----------|
+| Buttons, inputs, badges | SM (8px) | `--radius-sm` |
+| Cards, dropdowns, modals | MD (12px) | `--radius-md` |
+| Image containers, panels | LG (16px) | `--radius-lg` |
+| Hero sections, feature cards | XL (24px) | `--radius-xl` |
+
+---
+
+## Shadows
+
+Soft, subtle shadows reinforce the light, airy feel of the Footprint brand. The brand shadows add a colored glow for interactive elements.
+
+### Neutral Shadows
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '32px' }}>
+  <div style={{
+    background: '#ffffff',
+    borderRadius: '12px',
+    padding: '32px 24px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+    textAlign: 'center',
+  }}>
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '16px', fontWeight: 600, color: '#1a1a1a', marginBottom: '8px' }}>Soft SM</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#737373' }}>shadow-soft-sm</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#737373', marginTop: '4px' }}>0 1px 2px rgba(0,0,0,0.04)</div>
+  </div>
+  <div style={{
+    background: '#ffffff',
+    borderRadius: '12px',
+    padding: '32px 24px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+    textAlign: 'center',
+  }}>
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '16px', fontWeight: 600, color: '#1a1a1a', marginBottom: '8px' }}>Soft MD</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#737373' }}>shadow-soft-md</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#737373', marginTop: '4px' }}>0 4px 12px rgba(0,0,0,0.06)</div>
+  </div>
+  <div style={{
+    background: '#ffffff',
+    borderRadius: '12px',
+    padding: '32px 24px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+    textAlign: 'center',
+  }}>
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '16px', fontWeight: 600, color: '#1a1a1a', marginBottom: '8px' }}>Soft LG</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#737373' }}>shadow-soft-lg</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#737373', marginTop: '4px' }}>0 8px 24px rgba(0,0,0,0.08)</div>
+  </div>
+</div>
+
+### Brand Shadows
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginBottom: '32px' }}>
+  <div style={{
+    background: 'linear-gradient(to left, #8b5cf6, #ec4899)',
+    borderRadius: '12px',
+    padding: '32px 24px',
+    boxShadow: '0 4px 16px rgba(139,92,246,0.3)',
+    textAlign: 'center',
+    color: '#ffffff',
+  }}>
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>Brand</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '11px', opacity: 0.85 }}>shadow-brand</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '10px', opacity: 0.75, marginTop: '4px' }}>0 4px 16px rgba(139,92,246,0.3)</div>
+  </div>
+  <div style={{
+    background: 'linear-gradient(to left, #8b5cf6, #ec4899)',
+    borderRadius: '12px',
+    padding: '32px 24px',
+    boxShadow: '0 8px 32px rgba(139,92,246,0.4)',
+    textAlign: 'center',
+    color: '#ffffff',
+  }}>
+    <div style={{ fontFamily: 'Heebo, system-ui, sans-serif', fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>Brand LG</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '11px', opacity: 0.85 }}>shadow-brand-lg</div>
+    <div style={{ fontFamily: 'monospace', fontSize: '10px', opacity: 0.75, marginTop: '4px' }}>0 8px 32px rgba(139,92,246,0.4)</div>
+  </div>
+</div>
+
+### Shadow Usage
+
+| Context | Shadow | Class |
+|---------|--------|-------|
+| Resting cards, inputs | Soft SM | `shadow-soft-sm` |
+| Hovered cards, dropdowns | Soft MD | `shadow-soft-md` |
+| Modals, elevated panels | Soft LG | `shadow-soft-lg` |
+| Brand CTA buttons | Brand | `shadow-brand` |
+| Hero CTA, featured elements | Brand LG | `shadow-brand-lg` |
+
+---
+
+## Spacing Scale
+
+Footprint follows Tailwind's default 4px base spacing scale. Below are the most commonly used values.
+
+<div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+  {[
+    { name: '1', px: '4px', tw: 'p-1' },
+    { name: '2', px: '8px', tw: 'p-2' },
+    { name: '3', px: '12px', tw: 'p-3' },
+    { name: '4', px: '16px', tw: 'p-4' },
+    { name: '5', px: '20px', tw: 'p-5' },
+    { name: '6', px: '24px', tw: 'p-6' },
+    { name: '8', px: '32px', tw: 'p-8' },
+    { name: '10', px: '40px', tw: 'p-10' },
+    { name: '12', px: '48px', tw: 'p-12' },
+    { name: '16', px: '64px', tw: 'p-16' },
+  ].map((s) => (
+    <div key={s.name} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#737373', minWidth: '48px', textAlign: 'right' }}>{s.px}</div>
+      <div style={{
+        height: '24px',
+        width: s.px,
+        background: 'linear-gradient(to left, #8b5cf6, #ec4899)',
+        borderRadius: '4px',
+        minWidth: '4px',
+      }} />
+      <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#525252' }}>{s.tw}</div>
+    </div>
+  ))}
+</div>
+
+### Spacing Guidelines
+
+| Context | Recommended Spacing |
+|---------|-------------------|
+| Inline element gap | 4-8px (`gap-1` to `gap-2`) |
+| Form field gap | 12-16px (`gap-3` to `gap-4`) |
+| Card internal padding | 16-24px (`p-4` to `p-6`) |
+| Section padding | 32-48px (`py-8` to `py-12`) |
+| Page section gap | 48-64px (`gap-12` to `gap-16`) |
+| Content max-width | 1280px (`max-w-7xl`) |
+
+---
+
+## Animations
+
+Footprint includes two custom animations for subtle motion effects.
+
+| Animation | Class | Duration | Usage |
+|-----------|-------|----------|-------|
+| Spin Slow | `animate-spin-slow` | 3s linear infinite | Loading spinners, decorative rotation |
+| Bounce Gentle | `animate-bounce-gentle` | 2s ease-in-out infinite | Attention indicators, scroll hints |
+
+---
+
+## CSS Custom Properties Reference
+
+```css
+/* Border Radius */
+--radius-sm: 8px;
+--radius-md: 12px;
+--radius-lg: 16px;
+--radius-xl: 24px;
+
+/* Shadows */
+--shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+--shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+--shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+```

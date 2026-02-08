@@ -1,0 +1,6 @@
+ignoredBuiltDependencies:
+  - '@sentry/cli'
+  - aws-sdk
+  - esbuild
+  - sharp
+  - unrs-resolver

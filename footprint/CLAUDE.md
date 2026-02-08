@@ -1,129 +1,136 @@
-# WAVE V2 - Claude Code Instructions
+# CLAUDE.md
 
-## MANDATORY: Pre-Flight Validation
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**BEFORE ANY WORK**, you MUST run:
-
-```bash
-cd /Volumes/SSD-01/Projects/WAVE/orchestrator
-python3 scripts/preflight_lock.py --audit
-python3 scripts/preflight_lock.py --check
-```
-
-If the lock check fails, run:
-```bash
-python3 scripts/preflight_lock.py --validate --lock
-```
-
-**DO NOT PROCEED** if validation fails. Fix errors first.
-
----
-
-## Architecture Compliance
-
-All work MUST follow `/orchestrator/docs/WAVE-V2-IMPLEMENTATION-GUIDE.md`
-
-### Critical Rules
-
-1. **NEVER skip pre-flight validation**
-2. **NEVER implement features without first auditing existing code**
-3. **ALWAYS map checklist terms to codebase before assuming "missing"**
-4. **ALWAYS use ChatAnthropic API (not CLI flags)**
-5. **ALWAYS check WAVE_PRINCIPLES for safety (not "DO-178C" literal search)**
-
-### Term Mapping (Memorize This)
-
-| Checklist Term | Codebase Implementation |
-|---------------|-------------------------|
-| DO-178C probes | `WAVE_PRINCIPLES` in `constitutional.py` |
-| Autonomous flag | NOT NEEDED (API is autonomous) |
-| E-Stop | `EmergencyStop` in `emergency_stop.py` |
-| Domain isolation | `SUPPORTED_DOMAINS` in `domain_router.py` |
-| Budget enforcement | `BudgetTracker` in `budget.py` |
-| Constitutional AI | `ConstitutionalChecker` in `constitutional.py` |
-
----
-
-## 10-Step Launch Sequence
-
-Steps 0-9 are SEQUENTIAL. NO SKIPPING.
-
-| Step | ID | Purpose |
-|------|-----|---------|
-| 0 | mockup-design | HTML prototypes |
-| 1 | project-overview | PRD & Stories |
-| 2 | execution-plan | Wave assignment |
-| 3 | system-config | API keys |
-| 4 | infrastructure | Services check |
-| 5 | compliance-safety | Safety guardrails |
-| 6 | rlm-protocol | Learning system |
-| 7 | notifications | Slack alerts |
-| 8 | build-qa | Docker + tests |
-| 9 | agent-dispatch | LAUNCH |
-
----
-
-## Safety Systems
-
-### Emergency Stop
-- File: `.claude/EMERGENCY-STOP`
-- Redis: `wave:emergency` channel
-- Check with: `EmergencyStop().check()`
-
-### WAVE_PRINCIPLES (DO-178C Equivalent)
-- P001: No Destructive Commands
-- P002: No Secret Exposure
-- P003: Stay In Scope
-- P004: Validate Inputs
-- P005: Respect Budgets
-- P006: Escalate Uncertainty
-
----
-
-## Before ANY Implementation Task
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  MANDATORY PRE-IMPLEMENTATION CHECKLIST                     │
-├─────────────────────────────────────────────────────────────┤
-│  [ ] 1. Run preflight_lock.py --audit                       │
-│  [ ] 2. Run preflight_lock.py --check                       │
-│  [ ] 3. Grep for related functionality (multiple patterns)  │
-│  [ ] 4. Search for alternative naming conventions           │
-│  [ ] 5. Map checklist terms to codebase terms               │
-│  [ ] 6. Confirm "missing" status with file reads            │
-│  [ ] 7. Document what EXISTS before planning what's MISSING │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**NEVER create duplicate implementations. ALWAYS audit first.**
-
----
-
-## Key File Locations
-
-```
-/orchestrator/
-├── scripts/preflight_lock.py     # RUN THIS FIRST
-├── src/safety/                   # Safety systems
-├── src/agents/                   # Domain agents
-├── src/domains/                  # Domain isolation
-└── docs/WAVE-V2-IMPLEMENTATION-GUIDE.md  # Full reference
-```
-
----
-
-## Validation Commands
+## Build & Development Commands
 
 ```bash
-# Audit checklist terms
-python3 scripts/preflight_lock.py --audit
+pnpm dev              # Start Next.js dev server at localhost:3000
+pnpm build            # Production build
+pnpm lint             # ESLint
+pnpm type-check       # TypeScript check (tsc --noEmit)
 
-# Check if locked
-python3 scripts/preflight_lock.py --check
+# Testing
+pnpm test             # Run Vitest in watch mode
+pnpm test:run         # Single test run
+pnpm test:coverage    # Coverage report
+pnpm test -- path/to/file.test.ts  # Run specific test file
 
-# Full validation + lock
-python3 scripts/preflight_lock.py --validate --lock
+# E2E (start dev server first)
+pnpm test:e2e         # Playwright tests
+pnpm test:e2e:ui      # Playwright interactive mode
+
+# Storybook
+pnpm storybook        # Component playground at localhost:6006
 ```
 
-**If ANY check fails, STOP and fix before proceeding.**
+## Architecture Overview
+
+**Footprint** is a Hebrew RTL photo-to-art e-commerce app. Users upload photos, apply AI style transformations (via Replicate), customize print options, and checkout.
+
+### Route Groups (App Router)
+- `app/(marketing)/` - Public landing pages
+- `app/(app)/` - Protected user flows (create order, account)
+- `app/(auth)/` - Login/signup
+- `app/admin/`, `app/cockpit/` - Admin dashboards
+- `app/track/` - Order tracking (public)
+- `app/api/` - API routes
+
+### Order Creation Flow
+Multi-step wizard with state persisted in Zustand:
+1. **Upload** (`/create`) - Photo upload via dropzone
+2. **Style** (`/create/style`) - AI style selection, triggers Replicate transformation
+3. **Tweak** (`/create/tweak`) - Brightness, contrast, crop adjustments
+4. **Customize** (`/create/customize`) - Size, paper, frame, gift options
+5. **Checkout** (`/create/checkout`) - Payment via Stripe/PayPlus
+6. **Complete** (`/create/complete`) - Confirmation
+
+### State Management
+- **Zustand** (`stores/orderStore.ts`) - Order wizard state, persisted to localStorage
+- **TanStack Query** - Server state for orders, profiles, addresses (hooks in `hooks/`)
+
+### API Abstraction Layer
+`lib/api/client.ts` exports unified `api` object backed by:
+- `mock.ts` - Development (set `NEXT_PUBLIC_USE_MOCK=true`)
+- `supabase-client.ts` - Production (calls Next.js API routes → Supabase)
+
+```typescript
+import { api } from '@/lib/api/client';
+await api.orders.list();
+await api.auth.login({ email, password });
+```
+
+### Key Library Modules
+| Path | Purpose |
+|------|---------|
+| `lib/ai/` | Replicate integration, style configs |
+| `lib/pricing/` | Price calculator, discounts, shipping |
+| `lib/payments/` | Stripe & PayPlus processors |
+| `lib/storage/` | Cloudflare R2 file storage |
+| `lib/supabase/` | DB client (client.ts for browser, server.ts for API routes) |
+| `lib/fulfillment/` | Order status transitions, bulk operations |
+| `lib/shipping/` | Israel Post integration, tracking |
+
+## Code Patterns
+
+### TypeScript Path Alias
+Use `@/` for imports from project root:
+```typescript
+import { Button } from '@/components/ui/Button';
+import { useOrderStore } from '@/stores/orderStore';
+```
+
+### Component Conventions
+- Server Components by default
+- Add `'use client'` only when needed (hooks, interactivity)
+- UI primitives in `components/ui/` (Button, Card, Input, etc.)
+- Feature components colocated: `components/checkout/`, `components/upload/`, etc.
+
+### RTL/Hebrew Support
+Root layout sets `dir="rtl"` and `lang="he"`. Use Tailwind logical properties:
+- `start/end` instead of `left/right`
+- `ms-`/`me-` instead of `ml-`/`mr-`
+- `ps-`/`pe-` instead of `pl-`/`pr-`
+
+### Testing Patterns
+- Unit tests: `*.test.ts` colocated with source
+- Vitest + jsdom for component/hook tests
+- Testing Library for React components
+- Coverage targets: `lib/`, `stores/`, `data/`, `app/api/`
+
+## Environment Variables
+
+```env
+# Development mode
+NEXT_PUBLIC_USE_MOCK=true
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# AI
+REPLICATE_API_TOKEN=
+
+# Payments
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+PAYPLUS_API_KEY=
+PAYPLUS_SECRET_KEY=
+
+# Storage
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET_NAME=
+R2_ACCOUNT_ID=
+```
+
+## WAVE V2 Workflow (if active)
+
+When working under WAVE V2 orchestration, follow gates sequentially:
+- Gate 0-1: Pre-flight, self-review
+- Gate 2-3: Build passes, tests pass
+- Gate 4-5: QA/PM acceptance
+- Gate 6-7: Architecture review, merge approval
+
+Signal files in `.claude/signals/`. Run `/commands` for available slash commands.
