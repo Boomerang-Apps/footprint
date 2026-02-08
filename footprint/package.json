@@ -28,7 +28,6 @@
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.1",
     "archiver": "^7.0.1",
-    "aws-sdk": "^2.1575.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.0",
     "lucide-react": "^0.356.0",
@@ -86,11 +85,11 @@
       "esbuild",
       "@aws-sdk/client-s3",
       "@sentry/cli",
-      "aws-sdk",
       "unrs-resolver"
     ],
     "overrides": {
-      "fast-xml-parser": ">=5.3.4"
+      "fast-xml-parser": ">=5.3.4",
+      "@isaacs/brace-expansion": ">=5.0.1"
     }
   }
 }
