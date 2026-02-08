@@ -935,4 +935,727 @@ describe('Order Store', () => {
       });
     });
   });
+
+  // =========================================================================
+  // Navigation Tests
+  // =========================================================================
+
+  describe('Navigation', () => {
+    it('should start at upload step', () => {
+      expect(useOrderStore.getState().currentStep).toBe('upload');
+    });
+
+    it('should set step directly', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setStep('customize');
+      });
+
+      expect(useOrderStore.getState().currentStep).toBe('customize');
+    });
+
+    it('should advance to next step', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.nextStep();
+      });
+
+      expect(useOrderStore.getState().currentStep).toBe('style');
+    });
+
+    it('should advance through all steps in order', () => {
+      const store = useOrderStore.getState();
+      const expectedOrder = ['upload', 'style', 'tweak', 'customize', 'checkout', 'complete'];
+
+      for (let i = 0; i < expectedOrder.length; i++) {
+        expect(useOrderStore.getState().currentStep).toBe(expectedOrder[i]);
+        if (i < expectedOrder.length - 1) {
+          act(() => {
+            store.nextStep();
+          });
+        }
+      }
+    });
+
+    it('should not advance past complete step', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setStep('complete');
+      });
+
+      act(() => {
+        store.nextStep();
+      });
+
+      expect(useOrderStore.getState().currentStep).toBe('complete');
+    });
+
+    it('should go to previous step', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setStep('customize');
+      });
+
+      act(() => {
+        store.prevStep();
+      });
+
+      expect(useOrderStore.getState().currentStep).toBe('tweak');
+    });
+
+    it('should not go before upload step', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.prevStep();
+      });
+
+      expect(useOrderStore.getState().currentStep).toBe('upload');
+    });
+  });
+
+  // =========================================================================
+  // Image Management Tests
+  // =========================================================================
+
+  describe('Image Management', () => {
+    it('should set original image URL', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setOriginalImage('https://example.com/photo.jpg');
+      });
+
+      expect(useOrderStore.getState().originalImage).toBe('https://example.com/photo.jpg');
+    });
+
+    it('should clear transformed image when new original is set', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTransformedImage('https://example.com/transformed.jpg');
+      });
+
+      act(() => {
+        store.setOriginalImage('https://example.com/new-photo.jpg');
+      });
+
+      expect(useOrderStore.getState().transformedImage).toBeNull();
+    });
+
+    it('should set and clear transformed image', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTransformedImage('https://example.com/transformed.jpg');
+      });
+
+      expect(useOrderStore.getState().transformedImage).toBe('https://example.com/transformed.jpg');
+
+      act(() => {
+        store.setTransformedImage(null);
+      });
+
+      expect(useOrderStore.getState().transformedImage).toBeNull();
+    });
+
+    it('should track transforming state', () => {
+      const store = useOrderStore.getState();
+
+      expect(useOrderStore.getState().isTransforming).toBe(false);
+
+      act(() => {
+        store.setIsTransforming(true);
+      });
+
+      expect(useOrderStore.getState().isTransforming).toBe(true);
+
+      act(() => {
+        store.setIsTransforming(false);
+      });
+
+      expect(useOrderStore.getState().isTransforming).toBe(false);
+    });
+  });
+
+  // =========================================================================
+  // Style Selection Tests
+  // =========================================================================
+
+  describe('Style Selection', () => {
+    it('should default to original style', () => {
+      expect(useOrderStore.getState().selectedStyle).toBe('original');
+    });
+
+    it('should set selected style', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setSelectedStyle('watercolor');
+      });
+
+      expect(useOrderStore.getState().selectedStyle).toBe('watercolor');
+    });
+  });
+
+  // =========================================================================
+  // Saved Versions Tests
+  // =========================================================================
+
+  describe('Saved Versions', () => {
+    it('should start with empty saved versions', () => {
+      expect(useOrderStore.getState().savedVersions).toEqual([]);
+    });
+
+    it('should add a saved version', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTransformedImage('https://example.com/v1.jpg');
+        store.setSelectedStyle('watercolor');
+      });
+
+      let result: boolean = false;
+      act(() => {
+        result = store.addSavedVersion();
+      });
+
+      expect(result).toBe(true);
+      expect(useOrderStore.getState().savedVersions).toHaveLength(1);
+      expect(useOrderStore.getState().savedVersions[0].imageUrl).toBe('https://example.com/v1.jpg');
+      expect(useOrderStore.getState().savedVersions[0].style).toBe('watercolor');
+    });
+
+    it('should not add version without transformed image', () => {
+      const store = useOrderStore.getState();
+
+      let result: boolean = true;
+      act(() => {
+        result = store.addSavedVersion();
+      });
+
+      expect(result).toBe(false);
+      expect(useOrderStore.getState().savedVersions).toHaveLength(0);
+    });
+
+    it('should not exceed max 10 versions', () => {
+      const store = useOrderStore.getState();
+
+      // Add 10 versions
+      for (let i = 0; i < 10; i++) {
+        act(() => {
+          store.setTransformedImage(`https://example.com/v${i}.jpg`);
+        });
+        act(() => {
+          store.addSavedVersion();
+        });
+      }
+
+      expect(useOrderStore.getState().savedVersions).toHaveLength(10);
+
+      // 11th should fail
+      act(() => {
+        store.setTransformedImage('https://example.com/v11.jpg');
+      });
+      let result: boolean = true;
+      act(() => {
+        result = store.addSavedVersion();
+      });
+
+      expect(result).toBe(false);
+      expect(useOrderStore.getState().savedVersions).toHaveLength(10);
+    });
+
+    it('should remove a saved version by id', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTransformedImage('https://example.com/v1.jpg');
+      });
+      act(() => {
+        store.addSavedVersion();
+      });
+
+      const versionId = useOrderStore.getState().savedVersions[0].id;
+
+      act(() => {
+        store.removeSavedVersion(versionId);
+      });
+
+      expect(useOrderStore.getState().savedVersions).toHaveLength(0);
+    });
+
+    it('should clear all saved versions', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTransformedImage('https://example.com/v1.jpg');
+      });
+      act(() => {
+        store.addSavedVersion();
+      });
+      act(() => {
+        store.setTransformedImage('https://example.com/v2.jpg');
+      });
+      act(() => {
+        store.addSavedVersion();
+      });
+
+      act(() => {
+        store.clearSavedVersions();
+      });
+
+      expect(useOrderStore.getState().savedVersions).toHaveLength(0);
+    });
+
+    it('should select a saved version and apply its state', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTransformedImage('https://example.com/v1.jpg');
+        store.setSelectedStyle('watercolor');
+      });
+      act(() => {
+        store.addSavedVersion();
+      });
+
+      // Change current state
+      act(() => {
+        store.setTransformedImage('https://example.com/v2.jpg');
+        store.setSelectedStyle('oil_painting');
+      });
+
+      const versionId = useOrderStore.getState().savedVersions[0].id;
+
+      act(() => {
+        store.selectSavedVersion(versionId);
+      });
+
+      expect(useOrderStore.getState().transformedImage).toBe('https://example.com/v1.jpg');
+      expect(useOrderStore.getState().selectedStyle).toBe('watercolor');
+    });
+
+    it('should do nothing when selecting non-existent version', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTransformedImage('https://example.com/current.jpg');
+      });
+
+      act(() => {
+        store.selectSavedVersion('non-existent-id');
+      });
+
+      expect(useOrderStore.getState().transformedImage).toBe('https://example.com/current.jpg');
+    });
+  });
+
+  // =========================================================================
+  // Tweak Settings Tests
+  // =========================================================================
+
+  describe('Tweak Settings', () => {
+    it('should have default tweak settings', () => {
+      const state = useOrderStore.getState();
+      expect(state.tweakSettings).toEqual({
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+        rotation: 0,
+        cropArea: null,
+        backgroundRemoved: false,
+        colorFilter: 'none',
+      });
+    });
+
+    it('should partially update tweak settings', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTweakSettings({ brightness: 50, contrast: -20 });
+      });
+
+      const state = useOrderStore.getState();
+      expect(state.tweakSettings.brightness).toBe(50);
+      expect(state.tweakSettings.contrast).toBe(-20);
+      expect(state.tweakSettings.saturation).toBe(0); // Unchanged
+    });
+
+    it('should set crop area', () => {
+      const store = useOrderStore.getState();
+      const cropArea = { x: 10, y: 20, width: 100, height: 200 };
+
+      act(() => {
+        store.setTweakSettings({ cropArea });
+      });
+
+      expect(useOrderStore.getState().tweakSettings.cropArea).toEqual(cropArea);
+    });
+
+    it('should set color filter', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTweakSettings({ colorFilter: 'vintage' });
+      });
+
+      expect(useOrderStore.getState().tweakSettings.colorFilter).toBe('vintage');
+    });
+
+    it('should reset tweak settings to defaults', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setTweakSettings({ brightness: 50, contrast: -20, rotation: 90 });
+      });
+
+      act(() => {
+        store.resetTweakSettings();
+      });
+
+      expect(useOrderStore.getState().tweakSettings).toEqual({
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+        rotation: 0,
+        cropArea: null,
+        backgroundRemoved: false,
+        colorFilter: 'none',
+      });
+    });
+  });
+
+  // =========================================================================
+  // Product Configuration Tests
+  // =========================================================================
+
+  describe('Product Configuration', () => {
+    it('should default to A4 size', () => {
+      expect(useOrderStore.getState().size).toBe('A4');
+    });
+
+    it('should set size', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setSize('A3');
+      });
+
+      expect(useOrderStore.getState().size).toBe('A3');
+    });
+
+    it('should default to matte paper', () => {
+      expect(useOrderStore.getState().paperType).toBe('matte');
+    });
+
+    it('should set paper type', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setPaperType('glossy');
+      });
+
+      expect(useOrderStore.getState().paperType).toBe('glossy');
+    });
+
+    it('should default to no frame', () => {
+      expect(useOrderStore.getState().frameType).toBe('none');
+    });
+
+    it('should set frame type', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setFrameType('black');
+      });
+
+      expect(useOrderStore.getState().frameType).toBe('black');
+    });
+
+    it('should default to no passepartout', () => {
+      expect(useOrderStore.getState().hasPassepartout).toBe(false);
+    });
+
+    it('should set passepartout', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setHasPassepartout(true);
+      });
+
+      expect(useOrderStore.getState().hasPassepartout).toBe(true);
+    });
+  });
+
+  // =========================================================================
+  // Gift Options Tests
+  // =========================================================================
+
+  describe('Gift Options', () => {
+    it('should default to not a gift', () => {
+      const state = useOrderStore.getState();
+      expect(state.isGift).toBe(false);
+      expect(state.giftOccasion).toBeNull();
+      expect(state.giftMessage).toBe('');
+      expect(state.giftWrap).toBe(false);
+      expect(state.wrappingStyle).toBeNull();
+      expect(state.hideGiftPrice).toBe(true);
+    });
+
+    it('should set gift mode', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setIsGift(true);
+      });
+
+      expect(useOrderStore.getState().isGift).toBe(true);
+    });
+
+    it('should set gift occasion', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setGiftOccasion('birthday');
+      });
+
+      expect(useOrderStore.getState().giftOccasion).toBe('birthday');
+    });
+
+    it('should set gift message', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setGiftMessage('Happy Birthday!');
+      });
+
+      expect(useOrderStore.getState().giftMessage).toBe('Happy Birthday!');
+    });
+
+    it('should set gift wrap and default to classic wrapping style', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setGiftWrap(true);
+      });
+
+      expect(useOrderStore.getState().giftWrap).toBe(true);
+      expect(useOrderStore.getState().wrappingStyle).toBe('classic');
+    });
+
+    it('should clear wrapping style when disabling gift wrap', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setGiftWrap(true);
+      });
+
+      act(() => {
+        store.setGiftWrap(false);
+      });
+
+      expect(useOrderStore.getState().giftWrap).toBe(false);
+      expect(useOrderStore.getState().wrappingStyle).toBeNull();
+    });
+
+    it('should set wrapping style', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setWrappingStyle('festive');
+      });
+
+      expect(useOrderStore.getState().wrappingStyle).toBe('festive');
+    });
+
+    it('should set hide gift price', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setHideGiftPrice(false);
+      });
+
+      expect(useOrderStore.getState().hideGiftPrice).toBe(false);
+    });
+
+    it('should return wrapping price when gift wrap enabled', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setGiftWrap(true);
+      });
+
+      expect(store.getWrappingPrice()).toBe(15); // GIFT_WRAPPING_PRICE
+    });
+
+    it('should return 0 wrapping price when gift wrap disabled', () => {
+      const store = useOrderStore.getState();
+      expect(store.getWrappingPrice()).toBe(0);
+    });
+  });
+
+  // =========================================================================
+  // Address Tests
+  // =========================================================================
+
+  describe('Addresses', () => {
+    const mockAddress = {
+      street: 'Rothschild 1',
+      city: 'Tel Aviv',
+      postalCode: '1234567',
+      country: 'Israel',
+    };
+
+    it('should default to null addresses', () => {
+      const state = useOrderStore.getState();
+      expect(state.shippingAddress).toBeNull();
+      expect(state.billingAddress).toBeNull();
+    });
+
+    it('should default to using same address', () => {
+      expect(useOrderStore.getState().useSameAddress).toBe(true);
+    });
+
+    it('should set shipping address', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setShippingAddress(mockAddress as any);
+      });
+
+      expect(useOrderStore.getState().shippingAddress).toEqual(mockAddress);
+    });
+
+    it('should set billing address', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setBillingAddress(mockAddress as any);
+      });
+
+      expect(useOrderStore.getState().billingAddress).toEqual(mockAddress);
+    });
+
+    it('should toggle same address flag', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setUseSameAddress(false);
+      });
+
+      expect(useOrderStore.getState().useSameAddress).toBe(false);
+    });
+  });
+
+  // =========================================================================
+  // Recipient Tests
+  // =========================================================================
+
+  describe('Recipient', () => {
+    it('should default to no recipient', () => {
+      const state = useOrderStore.getState();
+      expect(state.recipientAddress).toBeNull();
+      expect(state.recipientName).toBe('');
+      expect(state.useRecipientAddress).toBe(false);
+    });
+
+    it('should set recipient name', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setRecipientName('Jane Doe');
+      });
+
+      expect(useOrderStore.getState().recipientName).toBe('Jane Doe');
+    });
+
+    it('should set use recipient address flag', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setUseRecipientAddress(true);
+      });
+
+      expect(useOrderStore.getState().useRecipientAddress).toBe(true);
+    });
+
+    it('should set recipient address', () => {
+      const store = useOrderStore.getState();
+      const address = { street: 'Dizengoff 100', city: 'Tel Aviv', postalCode: '6789012', country: 'Israel' };
+
+      act(() => {
+        store.setRecipientAddress(address as any);
+      });
+
+      expect(useOrderStore.getState().recipientAddress).toEqual(address);
+    });
+  });
+
+  // =========================================================================
+  // Order ID Tests
+  // =========================================================================
+
+  describe('Order ID', () => {
+    it('should default to null order ID', () => {
+      expect(useOrderStore.getState().orderId).toBeNull();
+    });
+
+    it('should set order ID', () => {
+      const store = useOrderStore.getState();
+
+      act(() => {
+        store.setOrderId('order_abc123');
+      });
+
+      expect(useOrderStore.getState().orderId).toBe('order_abc123');
+    });
+  });
+
+  // =========================================================================
+  // Full Reset Tests
+  // =========================================================================
+
+  describe('Full Reset', () => {
+    it('should reset all state to initial values', () => {
+      const store = useOrderStore.getState();
+
+      // Modify many fields
+      act(() => {
+        store.setStep('checkout');
+        store.setOriginalImage('https://example.com/photo.jpg');
+        store.setTransformedImage('https://example.com/transformed.jpg');
+        store.setSelectedStyle('watercolor');
+        store.setSize('A3');
+        store.setPaperType('canvas');
+        store.setFrameType('oak');
+        store.setHasPassepartout(true);
+        store.setIsGift(true);
+        store.setGiftMessage('Hello');
+        store.setGiftWrap(true);
+        store.setOrderId('order_123');
+      });
+
+      act(() => {
+        store.reset();
+      });
+
+      const state = useOrderStore.getState();
+      expect(state.currentStep).toBe('upload');
+      expect(state.originalImage).toBeNull();
+      expect(state.transformedImage).toBeNull();
+      expect(state.selectedStyle).toBe('original');
+      expect(state.size).toBe('A4');
+      expect(state.paperType).toBe('matte');
+      expect(state.frameType).toBe('none');
+      expect(state.hasPassepartout).toBe(false);
+      expect(state.isGift).toBe(false);
+      expect(state.giftMessage).toBe('');
+      expect(state.giftWrap).toBe(false);
+      expect(state.orderId).toBeNull();
+    });
+  });
 });

@@ -11,6 +11,7 @@ import type {
   Style, Size, Paper, Frame, ProductConfig, PriceBreakdown
 } from '@/types';
 import { demoOrders } from '@/data/demo/orders';
+import { logger } from '@/lib/logger';
 
 // Simulated delay for realistic UX testing
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -101,7 +102,7 @@ export const mockClient: ApiClient = {
 
     async resetPassword(email) {
       await delay(500);
-      console.log(`[Mock] Password reset email sent to ${email}`);
+      logger.info('Mock: password reset email sent', { email });
     },
   },
 

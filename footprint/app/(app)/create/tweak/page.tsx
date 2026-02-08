@@ -16,6 +16,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useOrderStore, type TweakSettings } from '@/stores/orderStore';
+import { logger } from '@/lib/logger';
 
 const STEPS = [
   { id: 'upload', label: 'העלאה' },
@@ -175,7 +176,7 @@ export default function TweakPage() {
       // Reset tweak settings after regeneration
       resetTweakSettings();
     } catch (error) {
-      console.error('Regeneration failed:', error);
+      logger.error('Regeneration failed', error);
     } finally {
       setIsRegenerating(false);
       setIsTransforming(false);

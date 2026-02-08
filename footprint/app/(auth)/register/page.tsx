@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { logger } from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -55,12 +56,12 @@ export default function RegisterPage() {
       });
 
       if (signUpError) {
-        console.error('Signup error:', signUpError);
+        logger.error('Signup failed', signUpError);
         setError(signUpError.message);
         return;
       }
 
-      console.log('Signup response:', data);
+      logger.info('Signup successful');
 
       if (data.user) {
         // Check if email confirmation is required
@@ -79,7 +80,7 @@ export default function RegisterPage() {
         router.push('/');
       }
     } catch (err) {
-      console.error('Unexpected error:', err);
+      logger.error('Registration unexpected error', err);
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);

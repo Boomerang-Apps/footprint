@@ -15,6 +15,7 @@ import { OrderDetailPanel } from '@/components/admin/OrderDetailPanel';
 import { type OrderCardOrder } from '@/components/admin/OrderCard';
 import { type FulfillmentStatus } from '@/lib/fulfillment/status-transitions';
 import { bulkUpdateStatus } from '@/lib/fulfillment/bulk-operations';
+import { logger } from '@/lib/logger';
 
 export default function FulfillmentPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,17 +69,17 @@ export default function FulfillmentPage() {
 
   const handleBulkDownload = useCallback((orderIds: string[]) => {
     // TODO: Implement bulk download (BE-08)
-    console.log('Download print files for orders:', orderIds);
+    logger.debug('Download print files for orders', { orderIds });
   }, []);
 
   const handlePrint = useCallback((orderId: string) => {
     // TODO: Implement print functionality
-    console.log('Print order:', orderId);
+    logger.debug('Print order', { orderId });
   }, []);
 
   const handleDownloadPrintFiles = useCallback((orderId: string) => {
     // TODO: Implement single order download
-    console.log('Download print files for order:', orderId);
+    logger.debug('Download print files for order', { orderId });
   }, []);
 
   return (

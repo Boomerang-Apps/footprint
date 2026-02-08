@@ -40,6 +40,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/Input';
+import { logger } from '@/lib/logger';
 import {
   dashboardConfig,
   stories as initialStories,
@@ -1080,7 +1081,7 @@ export default function DevDashboard() {
         setAgentStatuses(data.statuses);
       }
     } catch (error) {
-      console.error('Failed to fetch agent statuses:', error);
+      logger.error('Failed to fetch agent statuses', error);
     } finally {
       setIsLoadingAgents(false);
     }
@@ -1098,7 +1099,7 @@ export default function DevDashboard() {
         setLastSyncTime(new Date());
       }
     } catch (error) {
-      console.error('Failed to fetch stories from DB:', error);
+      logger.error('Failed to fetch stories from DB', error);
       setDbConnected(false);
     } finally {
       setIsSyncingDB(false);
@@ -1115,7 +1116,7 @@ export default function DevDashboard() {
         setDbConnected(true);
       }
     } catch (error) {
-      console.error('Failed to fetch orchestration:', error);
+      logger.error('Failed to fetch orchestration', error);
     }
   }, []);
 
@@ -1129,7 +1130,7 @@ export default function DevDashboard() {
       });
       fetchOrchestration();
     } catch (error) {
-      console.error('Failed to update agent:', error);
+      logger.error('Failed to update agent', error);
     }
   }, [fetchOrchestration]);
 

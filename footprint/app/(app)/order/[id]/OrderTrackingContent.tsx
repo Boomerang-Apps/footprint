@@ -20,6 +20,7 @@ import { OrderTimeline } from '@/components/ui/OrderTimeline'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { logger } from '@/lib/logger'
 
 // Types based on the API response structure
 interface OrderDetailItem {
@@ -111,7 +112,7 @@ export function OrderTrackingContent() {
         const orderData: OrderDetailResponse = await response.json()
         setOrder(orderData)
       } catch (err) {
-        console.error('Error fetching order:', err)
+        logger.error('Error fetching order', err)
         setError('שגיאת רשת. נסה שנית מאוחר יותר')
       } finally {
         setLoading(false)
@@ -143,7 +144,7 @@ export function OrderTrackingContent() {
       const orderData: OrderDetailResponse = await response.json()
       setOrder(orderData)
     } catch (err) {
-      console.error('Error fetching order:', err)
+      logger.error('Error fetching order', err)
       setError('שגיאת רשת. נסה שנית מאוחר יותר')
     } finally {
       setLoading(false)

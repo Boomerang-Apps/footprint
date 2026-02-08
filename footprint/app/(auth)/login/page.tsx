@@ -6,6 +6,7 @@ import { LoginForm, type LoginFormData } from '@/components/auth/LoginForm';
 import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { createClient } from '@/lib/supabase/client';
+import { logger } from '@/lib/logger';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,35 +18,32 @@ export default function LoginPage() {
   const handleSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError(undefined);
-    console.log('Login attempt:', data.email);
+    logger.debug('Login attempt', { email: data.email });
 
     try {
       const supabase = createClient();
-      console.log('Supabase client created, calling signInWithPassword...');
 
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
-      console.log('Auth response:', { authData, authError });
-
       if (authError) {
-        console.error('Auth error:', authError);
+        logger.error('Login failed', authError);
         setError(authError.message);
         return;
       }
 
       if (authData.session) {
-        console.log('Login successful, redirecting...');
+        logger.info('Login successful, redirecting');
         router.push('/');
         router.refresh();
       } else {
-        console.log('No session returned');
+        logger.warn('Login: no session returned');
         setError('Login failed. Please try again.');
       }
     } catch (err) {
-      console.error('Unexpected error:', err);
+      logger.error('Login unexpected error', err);
       setError('Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);

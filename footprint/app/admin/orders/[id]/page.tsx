@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useAdminOrder, useUpdateOrderStatus } from '@/hooks/useAdminOrder';
 import { type FulfillmentStatus } from '@/lib/fulfillment/status-transitions';
+import { logger } from '@/lib/logger';
 
 const STATUS_LABELS: Record<FulfillmentStatus, string> = {
   pending: 'ממתין',
@@ -95,7 +96,7 @@ export default function AdminOrderDetailPage() {
     try {
       await updateStatus.mutateAsync({ orderId, status: newStatus });
     } catch (error) {
-      console.error('Failed to update status:', error);
+      logger.error('Failed to update order status', error);
     }
   };
 
