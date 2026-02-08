@@ -9,6 +9,10 @@ export interface UseOrderHistoryOptions {
   userId?: string;
   /** Filter orders by status */
   statusFilter?: OrderStatus | 'all';
+  /** Current page number (1-indexed) */
+  page?: number;
+  /** Number of orders per page */
+  pageSize?: number;
   /** Enable/disable the query */
   enabled?: boolean;
 }
@@ -18,7 +22,17 @@ export interface OrderHistoryData {
   totalOrders: number;
   totalSpent: number;
   inTransitCount: number;
+  /** Total number of pages */
+  totalPages: number;
+  /** Current page number */
+  currentPage: number;
+  /** Whether there are more pages */
+  hasNextPage: boolean;
+  /** Whether there are previous pages */
+  hasPrevPage: boolean;
 }
+
+const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * Hook to fetch and manage order history data
@@ -27,6 +41,8 @@ export interface OrderHistoryData {
 export function useOrderHistory({
   userId,
   statusFilter = 'all',
+  page = 1,
+  pageSize = DEFAULT_PAGE_SIZE,
   enabled = true,
 }: UseOrderHistoryOptions = {}) {
   const {
@@ -36,20 +52,37 @@ export function useOrderHistory({
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['orderHistory', userId, statusFilter],
+    queryKey: ['orderHistory', userId, statusFilter, page, pageSize],
     queryFn: async () => {
       // Fetch orders from API
       const allOrders = await api.orders.list(userId);
 
       // Filter orders by status if specified
+      // Group related statuses: "processing" includes pending, paid, processing, printing
+      const statusGroups: Record<string, OrderStatus[]> = {
+        processing: ['pending', 'paid', 'processing', 'printing'],
+        shipped: ['shipped'],
+        delivered: ['delivered'],
+      };
       const filteredOrders = statusFilter === 'all'
         ? allOrders
-        : allOrders.filter(order => order.status === statusFilter);
+        : allOrders.filter(order => {
+            const group = statusGroups[statusFilter];
+            return group ? group.includes(order.status) : order.status === statusFilter;
+          });
 
       // Sort orders by creation date (newest first)
       const sortedOrders = filteredOrders.sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
+
+      // Calculate pagination
+      const totalFilteredOrders = sortedOrders.length;
+      const totalPages = Math.ceil(totalFilteredOrders / pageSize);
+      const currentPage = Math.min(Math.max(1, page), totalPages || 1);
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedOrders = sortedOrders.slice(startIndex, endIndex);
 
       // Calculate statistics from all orders (not filtered)
       const totalOrders = allOrders.length;
@@ -59,10 +92,14 @@ export function useOrderHistory({
       ).length;
 
       return {
-        orders: sortedOrders,
+        orders: paginatedOrders,
         totalOrders,
         totalSpent,
         inTransitCount,
+        totalPages,
+        currentPage,
+        hasNextPage: currentPage < totalPages,
+        hasPrevPage: currentPage > 1,
       } as OrderHistoryData;
     },
     enabled,
@@ -76,6 +113,10 @@ export function useOrderHistory({
       totalOrders: 0,
       totalSpent: 0,
       inTransitCount: 0,
+      totalPages: 0,
+      currentPage: 1,
+      hasNextPage: false,
+      hasPrevPage: false,
     },
     error,
     isLoading,

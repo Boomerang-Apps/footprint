@@ -181,7 +181,7 @@ export function GuestOrderLookup({
 
           {/* Total */}
           <div className="px-4 py-3 bg-zinc-50 flex justify-between items-center">
-            <span className="text-sm font-medium text-zinc-700">סה"כ</span>
+            <span className="text-sm font-medium text-zinc-700">סה״כ</span>
             <span className="text-lg font-bold text-zinc-900">₪{orderResult.total}</span>
           </div>
 

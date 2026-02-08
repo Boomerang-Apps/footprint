@@ -25,6 +25,11 @@ vi.mock('@/lib/supabase/server', () => ({
   }),
 }));
 
+// Mock rate limiting to skip Upstash Redis in tests
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue(null),
+}));
+
 // Mock environment variables
 const mockEnv = {
   PAYPLUS_API_KEY: 'test_api_key',

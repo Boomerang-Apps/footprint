@@ -12,6 +12,17 @@ export type OrderStatus =
   | 'delivered'
   | 'cancelled';
 
+/**
+ * Gift wrapping style options
+ * @story GF-04
+ */
+export type WrappingStyle = 'classic' | 'festive' | 'minimalist';
+
+/**
+ * Gift wrapping price in ILS
+ */
+export const GIFT_WRAPPING_PRICE = 15;
+
 // Re-export Address from user.ts for convenience
 export type { Address };
 
@@ -46,6 +57,7 @@ export interface Order {
   isGift: boolean;
   giftMessage: string | null;
   giftWrap: boolean;
+  wrappingStyle: WrappingStyle | null;
 
   // Scheduled Delivery (GF-05)
   scheduledDeliveryDate: string | null;
@@ -74,6 +86,7 @@ export interface CreateOrderInput {
   isGift: boolean;
   giftMessage?: string;
   giftWrap?: boolean;
+  wrappingStyle?: WrappingStyle;
   scheduledDeliveryDate?: string;
   shippingAddress: Address;
   billingAddress?: Address;

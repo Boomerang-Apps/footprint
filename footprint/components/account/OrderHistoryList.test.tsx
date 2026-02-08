@@ -160,6 +160,8 @@ describe('OrderHistoryList', () => {
       await waitFor(() => {
         expect(mockUseOrderHistory).toHaveBeenCalledWith({
           statusFilter: 'delivered',
+          page: 1,
+          pageSize: 10,
         });
       });
     });
@@ -179,7 +181,7 @@ describe('OrderHistoryList', () => {
       const firstOrderCard = screen.getAllByTestId('order-card')[0];
       fireEvent.click(firstOrderCard);
 
-      expect(mockPush).toHaveBeenCalledWith('/order/demo_order_001');
+      expect(mockPush).toHaveBeenCalledWith('/account/orders/demo_order_001');
     });
   });
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ChevronRight,
+  ChevronLeft,
   ShoppingBag,
   AlertCircle,
   RotateCcw,
@@ -14,8 +15,9 @@ import {
 import { OrderCard } from './OrderCard';
 import { Button } from '@/components/ui/Button';
 import { useOrderHistory } from '@/hooks/useOrderHistory';
+import { useOrderStore } from '@/stores/orderStore';
 import { cn } from '@/lib/utils';
-import type { OrderStatus } from '@/types';
+import type { Order, OrderStatus } from '@/types';
 
 const filterTabs = [
   { id: 'all', label: 'הכל' },
@@ -28,11 +30,13 @@ type FilterStatus = 'all' | OrderStatus;
 
 /**
  * OrderHistoryList - Complete order history page component
- * Displays user's orders with filtering, statistics, and navigation
+ * Displays user's orders with filtering, statistics, pagination, and navigation
  */
 export function OrderHistoryList(): React.ReactElement {
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<FilterStatus>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const orderStore = useOrderStore();
 
   const {
     data,
@@ -42,10 +46,12 @@ export function OrderHistoryList(): React.ReactElement {
     refetch,
   } = useOrderHistory({
     statusFilter: activeFilter,
+    page: currentPage,
+    pageSize: 10,
   });
 
   const handleOrderClick = (order: { id: string }) => {
-    router.push(`/order/${order.id}`);
+    router.push(`/account/orders/${order.id}`);
   };
 
   const handleBackClick = () => {
@@ -54,6 +60,59 @@ export function OrderHistoryList(): React.ReactElement {
 
   const handleCreateClick = () => {
     router.push('/create');
+  };
+
+  const handleReorder = (order: Order) => {
+    // Get the first item to set up the order (single-item flow)
+    const primaryItem = order.items?.[0];
+    if (!primaryItem) return;
+
+    // Reset store and set up new order with previous item details
+    orderStore.reset();
+    orderStore.setOriginalImage(primaryItem.originalImageUrl);
+    if (primaryItem.transformedImageUrl) {
+      orderStore.setTransformedImage(primaryItem.transformedImageUrl);
+    }
+    orderStore.setSelectedStyle(primaryItem.style);
+    orderStore.setSize(primaryItem.size);
+    orderStore.setPaperType(primaryItem.paperType);
+    orderStore.setFrameType(primaryItem.frameType);
+
+    // Copy gift settings if it was a gift order
+    if (order.isGift) {
+      orderStore.setIsGift(true);
+      if (order.giftMessage) {
+        orderStore.setGiftMessage(order.giftMessage);
+      }
+    }
+
+    // Navigate to customize step to review before checkout
+    orderStore.setStep('customize');
+    router.push('/create/customize');
+  };
+
+  const handleTrackShipment = (order: Order) => {
+    if (!order.trackingNumber) return;
+
+    // Use carrier-specific tracking URL, or default to Israel Post
+    const trackingUrl = order.carrier === 'fedex'
+      ? `https://www.fedex.com/fedextrack/?trknbr=${order.trackingNumber}`
+      : order.carrier === 'dhl'
+        ? `https://www.dhl.com/il-en/home/tracking.html?tracking-id=${order.trackingNumber}`
+        : `https://israelpost.co.il/itemtrace?itemcode=${order.trackingNumber}`;
+
+    window.open(trackingUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleFilterChange = (filter: FilterStatus) => {
+    setActiveFilter(filter);
+    setCurrentPage(1); // Reset to first page on filter change
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    // Scroll to top of list
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -112,7 +171,7 @@ export function OrderHistoryList(): React.ReactElement {
           {filterTabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveFilter(tab.id as FilterStatus)}
+              onClick={() => handleFilterChange(tab.id as FilterStatus)}
               className={cn(
                 'px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-all whitespace-nowrap',
                 activeFilter === tab.id
@@ -180,15 +239,69 @@ export function OrderHistoryList(): React.ReactElement {
 
         {/* Orders List */}
         {!isLoading && !isError && data.orders.length > 0 && (
-          <div className="space-y-3 sm:space-y-4">
-            {data.orders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                onClick={handleOrderClick}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3 sm:space-y-4">
+              {data.orders.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onClick={handleOrderClick}
+                  onReorder={handleReorder}
+                  onTrackShipment={handleTrackShipment}
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {data.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6 sm:mt-8">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!data.hasPrevPage}
+                  className={cn(
+                    'flex items-center justify-center w-10 h-10 rounded-xl border transition-colors',
+                    data.hasPrevPage
+                      ? 'border-gray-200 text-gray-600 hover:bg-gray-100'
+                      : 'border-gray-100 text-gray-300 cursor-not-allowed'
+                  )}
+                  aria-label="עמוד קודם"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={cn(
+                        'w-10 h-10 rounded-xl text-sm font-medium transition-colors',
+                        pageNum === currentPage
+                          ? 'bg-purple-600 text-white'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      )}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!data.hasNextPage}
+                  className={cn(
+                    'flex items-center justify-center w-10 h-10 rounded-xl border transition-colors',
+                    data.hasNextPage
+                      ? 'border-gray-200 text-gray-600 hover:bg-gray-100'
+                      : 'border-gray-100 text-gray-300 cursor-not-allowed'
+                  )}
+                  aria-label="עמוד הבא"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
 

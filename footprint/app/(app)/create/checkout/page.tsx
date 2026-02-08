@@ -7,7 +7,10 @@ import { ArrowRight, Check, Sparkles, CreditCard, MapPin, User, Phone, Mail, Bui
 import type { GiftOccasion } from '@/stores/orderStore';
 import { useOrderStore } from '@/stores/orderStore';
 import { CheckoutAuthFlow } from '@/components/checkout/CheckoutAuthFlow';
+import { GiftWrappingOption } from '@/components/checkout/GiftWrappingOption';
+import { GIFT_WRAPPING_PRICE } from '@/types/order';
 import { createClient } from '@/lib/supabase/client';
+import { api } from '@/lib/api/client';
 import toast from 'react-hot-toast';
 
 // Generate a unique order ID
@@ -47,9 +50,14 @@ function CheckoutPageContent() {
     setGiftMessage,
     hideGiftPrice,
     setHideGiftPrice,
+    giftWrap,
+    wrappingStyle,
+    transformedImage,
+    scheduledDeliveryDate,
     shippingAddress,
     setShippingAddress,
     setStep,
+    setOrderId,
     _hasHydrated,
     isGuest,
     guestInfo,
@@ -139,12 +147,13 @@ function CheckoutPageContent() {
     const basePrice = sizes[size] || 129;
     const paperMod = paperMods[paperType] || 0;
     const framePrice = framePrices[frameType] || 0;
-    const subtotal = basePrice + paperMod + framePrice;
+    const wrappingCost = giftWrap ? GIFT_WRAPPING_PRICE : 0;
+    const subtotal = basePrice + paperMod + framePrice + wrappingCost;
     const shipping = subtotal >= 299 ? 0 : 29;
     const total = subtotal + shipping;
 
     return total * 100; // Convert to agorot
-  }, [size, paperType, frameType]);
+  }, [size, paperType, frameType, giftWrap]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,13 +176,40 @@ function CheckoutPageContent() {
       country: 'ישראל',
     });
 
-    // Sandbox mode - skip payment and go directly to success
+    // Sandbox mode - create order via API but skip payment
     const isSandbox = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
     if (isSandbox) {
-      // Simulate a short delay for UX
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const orderId = generateOrderId();
-      router.push(`/create/complete?orderId=${orderId}&sandbox=true&email=${encodeURIComponent(formData.email)}`);
+      try {
+        const order = await api.orders.create({
+          items: [{
+            originalImageUrl: originalImage || '',
+            transformedImageUrl: transformedImage || undefined,
+            style: selectedStyle,
+            size,
+            paperType,
+            frameType,
+          }],
+          isGift,
+          giftMessage: giftMessage || undefined,
+          giftWrap,
+          wrappingStyle: wrappingStyle || undefined,
+          scheduledDeliveryDate: scheduledDeliveryDate || undefined,
+          shippingAddress: {
+            name: formData.fullName,
+            phone: formData.phone,
+            street: formData.street,
+            city: formData.city,
+            postalCode: formData.zipCode,
+            country: 'ישראל',
+          },
+        });
+        setOrderId(order.id);
+        router.push(`/create/complete?orderId=${order.id}&sandbox=true&email=${encodeURIComponent(formData.email)}`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'שגיאה ביצירת ההזמנה';
+        toast.error(message);
+        setIsProcessing(false);
+      }
       return;
     }
 
@@ -274,7 +310,8 @@ function CheckoutPageContent() {
   const basePrice = sizes[size] || 129;
   const paperMod = paperMods[paperType] || 0;
   const framePrice = framePrices[frameType] || 0;
-  const subtotal = basePrice + paperMod + framePrice;
+  const wrappingPrice = giftWrap ? GIFT_WRAPPING_PRICE : 0;
+  const subtotal = basePrice + paperMod + framePrice + wrappingPrice;
   const shipping = subtotal >= 299 ? 0 : 29;
   const total = subtotal + shipping;
 
@@ -357,6 +394,7 @@ function CheckoutPageContent() {
                       <div>נייר: {paperType === 'matte' ? 'מט' : paperType === 'glossy' ? 'מבריק' : 'קנבס'}</div>
                       {frameType !== 'none' && <div>מסגרת: {frameType === 'black' ? 'שחור' : frameType === 'white' ? 'לבן' : 'אלון'}</div>}
                       {isGift && <div className="text-brand-purple">מתנה</div>}
+                      {giftWrap && <div className="text-pink-600">עטיפת מתנה</div>}
                     </div>
                   </div>
                 </div>
@@ -379,6 +417,12 @@ function CheckoutPageContent() {
                     <div className="flex justify-between">
                       <span className="text-zinc-500">מסגרת</span>
                       <span className="text-zinc-900">₪{framePrice}</span>
+                    </div>
+                  )}
+                  {wrappingPrice > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">עטיפת מתנה</span>
+                      <span className="text-zinc-900">₪{wrappingPrice}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
@@ -585,6 +629,9 @@ function CheckoutPageContent() {
                   </div>
                 )}
               </section>
+
+              {/* Gift Wrapping Option */}
+              <GiftWrappingOption />
 
               {/* Payment Note */}
               <section className="p-4 bg-amber-50 border border-amber-200 rounded-xl">

@@ -7,7 +7,8 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { StyleType, SizeType, PaperType, FrameType, Address, PriceBreakdown } from '@/types';
+import type { StyleType, SizeType, PaperType, FrameType, Address, PriceBreakdown, WrappingStyle } from '@/types';
+import { GIFT_WRAPPING_PRICE } from '@/types/order';
 import { applyDiscount, type ApplyDiscountResult } from '@/lib/pricing/discounts';
 import {
   getMinDeliveryDate as getMinDate,
@@ -94,6 +95,7 @@ interface OrderState {
   giftOccasion: GiftOccasion;
   giftMessage: string;
   giftWrap: boolean;
+  wrappingStyle: WrappingStyle | null;
   hideGiftPrice: boolean;
 
   // Addresses
@@ -160,7 +162,9 @@ interface OrderActions {
   setGiftOccasion: (occasion: GiftOccasion) => void;
   setGiftMessage: (message: string) => void;
   setGiftWrap: (value: boolean) => void;
+  setWrappingStyle: (style: WrappingStyle | null) => void;
   setHideGiftPrice: (value: boolean) => void;
+  getWrappingPrice: () => number;
   
   // Addresses
   setShippingAddress: (address: Address) => void;
@@ -225,6 +229,7 @@ const initialState: OrderState = {
   giftOccasion: null,
   giftMessage: '',
   giftWrap: false,
+  wrappingStyle: null,
   hideGiftPrice: true,
   shippingAddress: null,
   billingAddress: null,
@@ -358,8 +363,17 @@ export const useOrderStore = create<OrderState & OrderActions>()(
       setIsGift: (value) => set({ isGift: value }),
       setGiftOccasion: (occasion) => set({ giftOccasion: occasion }),
       setGiftMessage: (message) => set({ giftMessage: message }),
-      setGiftWrap: (value) => set({ giftWrap: value }),
+      setGiftWrap: (value) => set({
+        giftWrap: value,
+        // Set default wrapping style when enabling, clear when disabling
+        wrappingStyle: value ? 'classic' : null,
+      }),
+      setWrappingStyle: (style) => set({ wrappingStyle: style }),
       setHideGiftPrice: (value) => set({ hideGiftPrice: value }),
+      getWrappingPrice: () => {
+        const state = get();
+        return state.giftWrap ? GIFT_WRAPPING_PRICE : 0;
+      },
 
       // Addresses
       setShippingAddress: (address) => set({ shippingAddress: address }),
@@ -520,6 +534,7 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         giftOccasion: state.giftOccasion,
         giftMessage: state.giftMessage,
         giftWrap: state.giftWrap,
+        wrappingStyle: state.wrappingStyle,
         hideGiftPrice: state.hideGiftPrice,
         currentStep: state.currentStep,
         // Recipient (for gift orders)

@@ -119,6 +119,7 @@ export const supabaseClient: ApiClient = {
         isGift: false,
         giftMessage: null,
         giftWrap: false,
+        wrappingStyle: null,
         scheduledDeliveryDate: null,
         shippingAddress: { name: '', street: '', city: '', postalCode: '', country: '' },
         billingAddress: { name: '', street: '', city: '', postalCode: '', country: '' },

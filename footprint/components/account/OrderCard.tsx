@@ -13,6 +13,10 @@ export interface OrderCardProps {
   order: Order;
   /** Click handler for navigation */
   onClick?: (order: Order) => void;
+  /** Handler for reorder action */
+  onReorder?: (order: Order) => void;
+  /** Handler for track shipment action */
+  onTrackShipment?: (order: Order) => void;
   /** Additional CSS classes */
   className?: string;
 }
@@ -67,6 +71,8 @@ const formatOrderNumber = (orderId: string): string => {
 export function OrderCard({
   order,
   onClick,
+  onReorder,
+  onTrackShipment,
   className,
 }: OrderCardProps): React.ReactElement {
   const primaryItem = order.items?.[0];
@@ -187,10 +193,17 @@ export function OrderCard({
 
           {/* Action Button */}
           <button
+            data-testid="order-action-button"
             className="flex items-center gap-1 text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
-              handleClick();
+              if (order.status === 'shipped' && order.trackingNumber) {
+                onTrackShipment?.(order);
+              } else if (order.status === 'delivered') {
+                onReorder?.(order);
+              } else {
+                handleClick();
+              }
             }}
           >
             {getActionText(order.status)}

@@ -6,17 +6,18 @@
  */
 
 import type { ApiClient } from './types';
-import type { 
+import type {
   User, Order, OrderStatus, CreateOrderInput,
-  Style, Size, Paper, Frame, ProductConfig, PriceBreakdown 
+  Style, Size, Paper, Frame, ProductConfig, PriceBreakdown
 } from '@/types';
+import { demoOrders } from '@/data/demo/orders';
 
 // Simulated delay for realistic UX testing
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Mock data stores
+// Mock data stores - seeded with demo orders so order history works on page refresh
 let mockUser: User | null = null;
-const mockOrders: Order[] = [];
+const mockOrders: Order[] = [...demoOrders];
 
 // ============================================
 // MOCK DATA
@@ -131,6 +132,7 @@ export const mockClient: ApiClient = {
         isGift: input.isGift,
         giftMessage: input.giftMessage || null,
         giftWrap: input.giftWrap || false,
+        wrappingStyle: input.wrappingStyle || null,
         scheduledDeliveryDate: input.scheduledDeliveryDate || null,
         shippingAddress: input.shippingAddress,
         billingAddress: input.billingAddress || input.shippingAddress,

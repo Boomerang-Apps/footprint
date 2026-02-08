@@ -150,7 +150,7 @@ describe('Order History Integration', () => {
     const orderCard = screen.getByTestId('order-card');
     fireEvent.click(orderCard);
 
-    expect(mockPush).toHaveBeenCalledWith('/order/demo_order_001');
+    expect(mockPush).toHaveBeenCalledWith('/account/orders/demo_order_001');
   });
 
   it('shows proper RTL layout', async () => {
