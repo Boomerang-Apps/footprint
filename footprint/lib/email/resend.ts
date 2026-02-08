@@ -70,11 +70,17 @@ export interface NewOrderNotificationParams {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
+  userId?: string;
   items: NewOrderNotificationItem[];
+  subtotal: number;
+  shipping: number;
   total: number;
   shippingAddress: ShippingAddress;
+  paymentProvider?: string;
   isGift: boolean;
   giftMessage?: string;
+  createdAt?: string;
 }
 
 export interface EmailResult {
@@ -605,34 +611,89 @@ export async function sendTrackingNotificationEmail(
 const OWNER_EMAIL = 'orders@footprint.co.il';
 
 /**
+ * Formats a payment provider name for display.
+ */
+function formatPaymentProvider(provider?: string): string {
+  if (!provider) return 'לא צוין';
+  const providers: Record<string, string> = {
+    payplus: 'PayPlus',
+    stripe: 'Stripe',
+  };
+  return providers[provider] || provider;
+}
+
+/**
+ * Formats an ISO date string for Hebrew display.
+ */
+function formatDateHebrew(isoDate?: string): string {
+  if (!isoDate) return '';
+  try {
+    const d = new Date(isoDate);
+    return d.toLocaleDateString('he-IL', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return isoDate;
+  }
+}
+
+/**
  * Generates HTML email template for internal new-order notification.
- * Hebrew, RTL, shows transformed image inline.
+ * Hebrew, RTL, professional layout with phone, account status, download links,
+ * and price breakdown.
  */
 function generateNewOrderNotificationHtml(params: NewOrderNotificationParams): string {
-  const { orderNumber, customerName, customerEmail, items, total, shippingAddress, isGift, giftMessage } = params;
+  const {
+    orderNumber, customerName, customerEmail, customerPhone,
+    userId, items, subtotal, shipping, total, shippingAddress,
+    paymentProvider, isGift, giftMessage, createdAt,
+  } = params;
+
+  const accountBadge = userId
+    ? '<span style="display: inline-block; background: #dbeafe; color: #1d4ed8; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">לקוח רשום</span>'
+    : '<span style="display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">אורח</span>';
+
+  const phoneRow = customerPhone
+    ? `<tr>
+        <td style="padding: 4px 0; color: #737373; width: 80px;">טלפון:</td>
+        <td style="padding: 4px 0;">${customerPhone}</td>
+      </tr>`
+    : '';
+
+  const timestampHtml = createdAt
+    ? `<p style="margin: 4px 0 0; color: #737373; font-size: 14px;">${formatDateHebrew(createdAt)}</p>`
+    : '';
+
+  // First item image as customer section thumbnail
+  const firstImageUrl = items.find(i => i.imageUrl)?.imageUrl;
 
   const itemsHtml = items
     .map(
-      (item) => `
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee;">
-            ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: block; margin-bottom: 8px;" />` : ''}
-            <strong>${item.name}</strong>
-          </td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center; vertical-align: top;">${item.quantity}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top;">₪${item.price.toFixed(2)}</td>
-        </tr>
-        ${item.style || item.size || item.paper || item.frame ? `
-        <tr>
-          <td colspan="3" style="padding: 4px 12px 12px; border-bottom: 1px solid #ddd; color: #666; font-size: 13px;">
-            ${item.style ? `סגנון: ${item.style}` : ''}
-            ${item.size ? ` | גודל: ${item.size}` : ''}
-            ${item.paper ? ` | נייר: ${item.paper}` : ''}
-            ${item.frame ? ` | מסגרת: ${item.frame}` : ''}
-          </td>
-        </tr>
-        ` : ''}
-      `
+      (item) => {
+        const specs = [
+          item.style ? `סגנון: ${item.style}` : '',
+          item.size ? `גודל: ${item.size}` : '',
+          item.paper ? `נייר: ${item.paper}` : '',
+          item.frame ? `מסגרת: ${item.frame}` : '',
+        ].filter(Boolean).join(' | ');
+
+        const downloadLink = item.imageUrl
+          ? `<a href="${item.imageUrl}" target="_blank" style="display: inline-block; margin-top: 8px; color: #8b5cf6; font-size: 13px; text-decoration: none;">📥 הורד תמונה</a>`
+          : '';
+
+        return `
+        <div style="background: #f5f5f5; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+          ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}" style="max-width: 100%; max-height: 300px; border-radius: 8px; display: block; margin-bottom: 8px;" />` : ''}
+          ${downloadLink}
+          <p style="margin: 8px 0 4px; font-weight: bold; font-size: 15px; color: #1a1a1a;">${item.name}</p>
+          ${specs ? `<p style="margin: 0 0 4px; color: #737373; font-size: 13px;">${specs}</p>` : ''}
+          <p style="margin: 0; color: #525252; font-size: 14px;">כמות: ${item.quantity} | מחיר: ₪${item.price.toFixed(2)}</p>
+        </div>`;
+      }
     )
     .join('');
 
@@ -653,60 +714,95 @@ function generateNewOrderNotificationHtml(params: NewOrderNotificationParams): s
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>הזמנה חדשה - ${orderNumber}</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; direction: rtl;">
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px; direction: rtl; background: #fafafa;">
 
-  <div style="text-align: center; margin-bottom: 30px;">
-    <h1 style="color: #2563eb; margin: 0;">Footprint</h1>
-    <p style="color: #666; margin: 5px 0;">הזמנה חדשה התקבלה!</p>
+  <!-- Header -->
+  <div style="text-align: center; margin-bottom: 24px; padding: 28px 24px 20px; background: #1a1a1a; border-radius: 12px;">
+    <img src="https://www.footprint.co.il/footprint-logo-white-v2.svg" alt="Footprint" width="72" height="72" style="display: block; margin: 0 auto 12px;" />
+    <p style="color: #a3a3a3; margin: 0 0 16px; font-size: 14px;">הזמנה חדשה התקבלה!</p>
+    <div style="height: 3px; background: linear-gradient(to left, #8b5cf6, #ec4899); border-radius: 2px; width: 80px; margin: 0 auto;"></div>
   </div>
 
-  <div style="background: #ecfdf5; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #10b981;">
-    <h2 style="margin: 0 0 16px 0; color: #065f46;">הזמנה חדשה #${orderNumber}</h2>
+  <!-- Order badge -->
+  <div style="background: #f5f3ff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #c4b5fd;">
+    <h2 style="margin: 0; color: #5b21b6; font-size: 20px;">הזמנה #${orderNumber}</h2>
+    ${timestampHtml}
+  </div>
+
+  <!-- Customer details -->
+  <div style="background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e5e5;">
+    <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 16px;">👤 פרטי לקוח</h3>
+    <table style="width: 100%;" cellpadding="0" cellspacing="0">
+      <tr>
+        ${firstImageUrl ? `<td style="width: 120px; vertical-align: top; padding-left: 16px;">
+          <img src="${firstImageUrl}" alt="תצוגה מקדימה" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; display: block;" />
+        </td>` : ''}
+        <td style="vertical-align: top;">
+          <table style="width: 100%;">
+            <tr>
+              <td style="padding: 4px 0; color: #737373; width: 80px;">שם:</td>
+              <td style="padding: 4px 0; font-weight: bold;">${customerName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #737373;">אימייל:</td>
+              <td style="padding: 4px 0;">${customerEmail}</td>
+            </tr>
+            ${phoneRow}
+            <tr>
+              <td style="padding: 4px 0; color: #737373;">חשבון:</td>
+              <td style="padding: 4px 0;">${accountBadge}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Items -->
+  <div style="margin-bottom: 24px;">
+    <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 16px;">🖼️ פריטים</h3>
+    ${itemsHtml}
+  </div>
+
+  <!-- Price breakdown -->
+  <div style="background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e5e5;">
+    <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 16px;">💰 סיכום מחירים</h3>
     <table style="width: 100%;">
       <tr>
-        <td style="padding: 4px 0; color: #666;">לקוח:</td>
-        <td style="padding: 4px 0; font-weight: bold;">${customerName}</td>
+        <td style="padding: 6px 0; color: #737373;">סכום ביניים:</td>
+        <td style="padding: 6px 0; text-align: left; color: #525252;">₪${subtotal.toFixed(2)}</td>
       </tr>
       <tr>
-        <td style="padding: 4px 0; color: #666;">אימייל:</td>
-        <td style="padding: 4px 0;">${customerEmail}</td>
+        <td style="padding: 6px 0; color: #737373;">משלוח:</td>
+        <td style="padding: 6px 0; text-align: left; color: #525252;">₪${shipping.toFixed(2)}</td>
+      </tr>
+      <tr style="border-top: 2px solid #e5e5e5;">
+        <td style="padding: 10px 0 6px; font-weight: bold; font-size: 18px;">סה"כ:</td>
+        <td style="padding: 10px 0 6px; text-align: left; font-weight: bold; font-size: 18px; color: #8b5cf6;">₪${total.toFixed(2)}</td>
       </tr>
       <tr>
-        <td style="padding: 4px 0; color: #666;">סה"כ:</td>
-        <td style="padding: 4px 0; font-weight: bold; font-size: 18px; color: #2563eb;">₪${total.toFixed(2)}</td>
+        <td style="padding: 4px 0; color: #737373;">תשלום:</td>
+        <td style="padding: 4px 0; text-align: left; color: #525252;">${formatPaymentProvider(paymentProvider)}</td>
       </tr>
     </table>
   </div>
 
-  ${giftHtml}
-
-  <div style="margin-bottom: 24px;">
-    <h3 style="margin: 0 0 16px 0; color: #1e293b;">פריטים</h3>
-    <table style="width: 100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background: #f1f5f9;">
-          <th style="padding: 12px; text-align: right;">פריט</th>
-          <th style="padding: 12px; text-align: center;">כמות</th>
-          <th style="padding: 12px; text-align: left;">מחיר</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${itemsHtml}
-      </tbody>
-    </table>
-  </div>
-
-  <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-    <h3 style="margin: 0 0 16px 0; color: #1e293b;">כתובת למשלוח</h3>
-    <p style="margin: 0;">
+  <!-- Shipping address -->
+  <div style="background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e5e5;">
+    <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 16px;">📦 כתובת למשלוח</h3>
+    <p style="margin: 0; color: #525252;">
       ${shippingAddress.street}<br>
       ${shippingAddress.city}, ${shippingAddress.postalCode}<br>
       ${shippingAddress.country}
     </p>
   </div>
 
-  <div style="text-align: center; padding: 24px; border-top: 1px solid #eee; color: #666; font-size: 14px;">
-    <p style="margin: 0;">© ${new Date().getFullYear()} Footprint</p>
+  ${giftHtml}
+
+  <!-- Footer -->
+  <div style="text-align: center; padding: 20px 0 0;">
+    <div style="height: 2px; background: linear-gradient(to left, #8b5cf6, #ec4899); border-radius: 1px; margin-bottom: 16px;"></div>
+    <p style="margin: 0; color: #a3a3a3; font-size: 13px;">&copy; ${new Date().getFullYear()} Footprint | www.footprint.co.il</p>
   </div>
 
 </body>
