@@ -72,7 +72,7 @@ export function GuestOrderLookup({
     if (error) setError(null);
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = useCallback((): boolean => {
     const trimmedOrderNumber = orderNumber.trim();
     const trimmedEmail = email.trim();
 
@@ -92,7 +92,7 @@ export function GuestOrderLookup({
     }
 
     return true;
-  };
+  }, [orderNumber, email]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -132,7 +132,7 @@ export function GuestOrderLookup({
         setIsLoading(false);
       }
     },
-    [orderNumber, email, onOrderFound]
+    [orderNumber, email, onOrderFound, validateForm]
   );
 
   const handleNewSearch = () => {

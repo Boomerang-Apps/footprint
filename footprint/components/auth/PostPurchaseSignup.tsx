@@ -60,7 +60,7 @@ export function PostPurchaseSignup({
     if (error) setError(null);
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = useCallback((): boolean => {
     if (password.length < MIN_PASSWORD_LENGTH) {
       setError(`הסיסמה חייבת להכיל לפחות ${MIN_PASSWORD_LENGTH} תווים`);
       return false;
@@ -72,7 +72,7 @@ export function PostPurchaseSignup({
     }
 
     return true;
-  };
+  }, [password, confirmPassword]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -121,7 +121,7 @@ export function PostPurchaseSignup({
         setIsLoading(false);
       }
     },
-    [email, password, confirmPassword, orderId, onSignupComplete]
+    [email, password, orderId, onSignupComplete, validateForm]
   );
 
   // Success state
