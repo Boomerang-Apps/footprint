@@ -9,6 +9,7 @@ import {
   ALLOWED_MIME_TYPES,
 } from '@/lib/image/optimize';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 /**
  * Request body for presigned URL mode
@@ -66,7 +67,7 @@ export async function POST(request: Request): Promise<Response> {
       }
     } catch (authError) {
       // Allow anonymous uploads if auth fails
-      console.log('Auth check failed, using anonymous upload:', authError);
+      logger.debug('Auth check failed, using anonymous upload', authError);
     }
 
     const contentType = request.headers.get('content-type') || '';
@@ -86,7 +87,7 @@ export async function POST(request: Request): Promise<Response> {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Upload error:', error);
+    logger.error('Upload error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -148,7 +149,7 @@ async function handlePresignedMode(
       expiresIn: result.expiresIn,
     });
   } catch (error) {
-    console.error('Presigned URL error:', error);
+    logger.error('Presigned URL error', error);
     return NextResponse.json(
       { error: 'Failed to generate upload URL' },
       { status: 500 }
@@ -237,7 +238,7 @@ async function handleDirectMode(
       size: result.size,
     });
   } catch (error) {
-    console.error('Direct upload error:', error);
+    logger.error('Direct upload error', error);
     return NextResponse.json(
       { error: 'Failed to upload file' },
       { status: 500 }

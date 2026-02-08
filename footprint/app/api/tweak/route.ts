@@ -26,6 +26,7 @@ import {
   base64ToDataUri,
 } from '@/lib/ai/nano-banana';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface TweakRequest {
   imageUrl: string;
@@ -90,7 +91,7 @@ export async function POST(
         userId = user.id;
       }
     } catch (authError) {
-      console.log('Auth check failed, using anonymous:', authError);
+      logger.debug('Auth check failed, using anonymous', authError);
     }
 
     // 2. Parse and validate request body
@@ -132,7 +133,7 @@ export async function POST(
     // 3. Check if Google AI API key is configured
     const googleApiKey = process.env.GOOGLE_AI_API_KEY;
     if (!googleApiKey) {
-      console.error('GOOGLE_AI_API_KEY not configured');
+      logger.error('GOOGLE_AI_API_KEY not configured');
       return NextResponse.json(
         { error: 'AI service not configured' },
         { status: 503 }
@@ -147,7 +148,7 @@ export async function POST(
       imageBase64 = result.base64;
       mimeType = result.mimeType;
     } catch (error) {
-      console.error('Failed to fetch image:', error);
+      logger.error('Failed to fetch image', error);
       return NextResponse.json(
         { error: 'Failed to fetch image' },
         { status: 400 }
@@ -191,7 +192,7 @@ Important:
         outputBase64 = geminiResult.imageBase64;
         outputMimeType = geminiResult.mimeType;
       } catch (geminiError) {
-        console.error('Gemini edit error:', geminiError);
+        logger.error('Gemini edit error', geminiError);
         return NextResponse.json(
           {
             error: geminiError instanceof Error ? geminiError.message : 'Failed to apply edit',
@@ -217,7 +218,7 @@ Important:
         'transformed'
       );
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error', error);
       return NextResponse.json(
         {
           error: 'Failed to save edited image',
@@ -235,7 +236,7 @@ Important:
       processingTime,
     });
   } catch (error) {
-    console.error('Unexpected error in tweak route:', error);
+    logger.error('Unexpected error in tweak route', error);
     return NextResponse.json(
       { error: 'An unexpected error occurred' },
       { status: 500 }
@@ -297,7 +298,7 @@ async function callGeminiWithPrompt(
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => '');
-    console.error(`Gemini API error: HTTP ${response.status}`, errorText);
+    logger.error(`Gemini API error: HTTP ${response.status}`, errorText);
     throw new Error(`Gemini API error: HTTP ${response.status}`);
   }
 

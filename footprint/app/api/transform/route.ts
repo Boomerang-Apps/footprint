@@ -44,6 +44,7 @@ import {
 } from '@/lib/ai/style-references';
 import { loadReferenceImages, type ReferenceImage } from '@/lib/ai/nano-banana';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface TransformRequest {
   imageUrl: string;
@@ -112,7 +113,7 @@ export async function POST(
         userId = userId;
       }
     } catch (authError) {
-      console.log('Auth check failed, using anonymous transform:', authError);
+      logger.debug('Auth check failed, using anonymous transform', authError);
     }
 
     // 2. Parse and validate request body
@@ -206,7 +207,7 @@ export async function POST(
       transformationId = record.id;
       await startTransformation(transformationId);
     } catch (error) {
-      console.error('Failed to create transformation record:', error);
+      logger.error('Failed to create transformation record', error);
       // Continue without tracking if DB fails
     }
 
@@ -217,9 +218,9 @@ export async function POST(
         const refPaths = getStyleReferences(style);
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         referenceImages = await loadReferenceImages(refPaths, baseUrl);
-        console.log(`Loaded ${referenceImages.length} reference images for style: ${style}`);
+        logger.info(`Loaded ${referenceImages.length} reference images for style: ${style}`);
       } catch (refError) {
-        console.warn('Failed to load reference images:', refError);
+        logger.warn('Failed to load reference images', refError);
         // Continue without references
       }
     }
@@ -229,14 +230,14 @@ export async function POST(
     try {
       result = await transformImage(imageUrl, style, { provider, referenceImages });
     } catch (error) {
-      console.error('AI transformation error:', error);
+      logger.error('AI transformation error', error);
 
       // Record failure
       if (transformationId) {
         await failTransformation(transformationId, {
           errorMessage: error instanceof Error ? error.message : 'Unknown error',
           processingTimeMs: Date.now() - startTime,
-        }).catch(console.error);
+        }).catch((err: unknown) => logger.error('Failed to record transformation failure', err));
       }
 
       return NextResponse.json(
@@ -278,14 +279,14 @@ export async function POST(
         'transformed'
       );
     } catch (error) {
-      console.error('R2 upload error:', error);
+      logger.error('R2 upload error', error);
 
       // Record failure
       if (transformationId) {
         await failTransformation(transformationId, {
           errorMessage: error instanceof Error ? error.message : 'Upload failed',
           processingTimeMs: Date.now() - startTime,
-        }).catch(console.error);
+        }).catch((err: unknown) => logger.error('Failed to record transformation failure', err));
       }
 
       return NextResponse.json(
@@ -309,7 +310,7 @@ export async function POST(
           processingTimeMs: processingTime,
         });
       } catch (error) {
-        console.error('Failed to complete transformation record:', error);
+        logger.error('Failed to complete transformation record', error);
       }
     }
 
@@ -323,14 +324,14 @@ export async function POST(
       transformationId: transformationId || 'unknown',
     });
   } catch (error) {
-    console.error('Unexpected error in transform route:', error);
+    logger.error('Unexpected error in transform route', error);
 
     // Record failure
     if (transformationId) {
       await failTransformation(transformationId, {
         errorMessage: error instanceof Error ? error.message : 'Unexpected error',
         processingTimeMs: Date.now() - startTime,
-      }).catch(console.error);
+      }).catch((err: unknown) => logger.error('Failed to record transformation failure', err));
     }
 
     return NextResponse.json(

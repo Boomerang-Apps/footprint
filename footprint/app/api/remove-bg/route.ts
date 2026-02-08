@@ -19,6 +19,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { uploadToSupabase } from '@/lib/storage/supabase-storage';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface RemoveBgRequest {
   imageUrl: string;
@@ -66,7 +67,7 @@ export async function POST(
         userId = user.id;
       }
     } catch (authError) {
-      console.log('Auth check failed, using anonymous:', authError);
+      logger.debug('Auth check failed, using anonymous', authError);
     }
 
     // 2. Parse and validate request body
@@ -101,7 +102,7 @@ export async function POST(
     // 3. Check if Replicate API token is configured
     const replicateToken = process.env.REPLICATE_API_TOKEN;
     if (!replicateToken) {
-      console.error('REPLICATE_API_TOKEN not configured');
+      logger.error('REPLICATE_API_TOKEN not configured');
       return NextResponse.json(
         { error: 'Background removal service not configured' },
         { status: 503 }
@@ -129,7 +130,7 @@ export async function POST(
 
       if (!createResponse.ok) {
         const error = await createResponse.json();
-        console.error('Replicate create prediction error:', error);
+        logger.error('Replicate create prediction error', error);
         throw new Error(error.detail || 'Failed to start background removal');
       }
 
@@ -167,7 +168,7 @@ export async function POST(
 
       outputUrl = result.output;
     } catch (error) {
-      console.error('Background removal error:', error);
+      logger.error('Background removal error', error);
       return NextResponse.json(
         {
           error: error instanceof Error ? error.message : 'Background removal failed',
@@ -197,7 +198,7 @@ export async function POST(
         'transformed'
       );
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error', error);
       return NextResponse.json(
         {
           error: 'Failed to save processed image',
@@ -215,7 +216,7 @@ export async function POST(
       processingTime,
     });
   } catch (error) {
-    console.error('Unexpected error in remove-bg route:', error);
+    logger.error('Unexpected error in remove-bg route', error);
     return NextResponse.json(
       { error: 'An unexpected error occurred' },
       { status: 500 }

@@ -16,6 +16,7 @@ import {
   type CreateOrderParams,
 } from '@/lib/orders/create';
 import type Stripe from 'stripe';
+import { logger } from '@/lib/logger';
 
 // Define the structure of a PaymentIntent with order metadata
 interface PaymentIntentWithMetadata {
@@ -70,7 +71,7 @@ function parseOrderMetadata(
       giftMessage: metadata.giftMessage,
     };
   } catch (error) {
-    console.error('Failed to parse order metadata:', error);
+    logger.error('Failed to parse order metadata', error);
     return null;
   }
 }
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     event = await validateStripeWebhook(body, signature);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Webhook validation failed:', message);
+    logger.error('Webhook validation failed', { message });
     return NextResponse.json(
       { error: `Webhook signature verification failed: ${message}` },
       { status: 400 }
@@ -123,15 +124,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   switch (event.type) {
     case 'payment_intent.succeeded': {
       // Payment successful - create order in database
-      console.log(`Payment succeeded: ${paymentIntent.id}`);
+      logger.info(`Payment succeeded: ${paymentIntent.id}`);
 
       const orderParams = parseOrderMetadata(paymentIntent);
 
       if (!orderParams) {
-        console.warn(
-          'Payment succeeded but missing order metadata:',
-          paymentIntent.id
-        );
+        logger.warn('Payment succeeded but missing order metadata', { paymentIntentId: paymentIntent.id });
         return NextResponse.json({
           received: true,
           status: 'succeeded',
@@ -145,9 +143,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         // Create order in database
         const orderResult = await createOrder(orderParams);
 
-        console.log(
-          `Order created: ${orderResult.orderNumber} (${orderResult.orderId})`
-        );
+        logger.info(`Order created: ${orderResult.orderNumber} (${orderResult.orderId})`);
 
         // Trigger confirmation email (fire and forget)
         triggerConfirmationEmail(orderResult.orderId);
@@ -162,7 +158,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         });
       } catch (error) {
         // Log error but still return 200 to acknowledge webhook
-        console.error('Failed to create order:', error);
+        logger.error('Failed to create order', error);
         return NextResponse.json({
           received: true,
           status: 'succeeded',
@@ -175,10 +171,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     case 'payment_intent.payment_failed': {
       // Payment failed - log for debugging
-      console.log(
-        `Payment failed: ${paymentIntent.id}`,
-        paymentIntent.last_payment_error?.message
-      );
+      logger.info(`Payment failed: ${paymentIntent.id}`, { error: paymentIntent.last_payment_error?.message });
       return NextResponse.json({
         received: true,
         status: 'failed',
@@ -188,7 +181,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     case 'payment_intent.canceled': {
       // Payment canceled - log for debugging
-      console.log(`Payment canceled: ${paymentIntent.id}`);
+      logger.info(`Payment canceled: ${paymentIntent.id}`);
       return NextResponse.json({
         received: true,
         status: 'canceled',
@@ -198,7 +191,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     default:
       // Acknowledge unhandled event types
-      console.log(`Unhandled event type: ${event.type}`);
+      logger.info(`Unhandled event type: ${event.type}`);
       return NextResponse.json({
         received: true,
         handled: false,

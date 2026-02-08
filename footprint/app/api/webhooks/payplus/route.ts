@@ -22,6 +22,7 @@ import {
   triggerNewOrderNotification,
   type CreateOrderParams,
 } from '@/lib/orders/create';
+import { logger } from '@/lib/logger';
 
 /**
  * PayPlus webhook payload structure
@@ -111,7 +112,7 @@ function parseOrderData(
       giftMessage: orderData.giftMessage,
     };
   } catch (error) {
-    console.error('Failed to parse PayPlus order data:', error);
+    logger.error('Failed to parse PayPlus order data', error);
     return null;
   }
 }
@@ -123,7 +124,7 @@ export async function POST(
     // 1. Get secret key
     const secretKey = process.env.PAYPLUS_SECRET_KEY;
     if (!secretKey) {
-      console.error('PAYPLUS_SECRET_KEY is not configured');
+      logger.error('PAYPLUS_SECRET_KEY is not configured');
       return NextResponse.json(
         { error: 'Webhook secret not configured' },
         { status: 500 }
@@ -154,7 +155,7 @@ export async function POST(
     // 5. Verify webhook signature
     const isValid = validateWebhook(body, hash, secretKey);
     if (!isValid) {
-      console.error('Webhook signature verification failed');
+      logger.error('Webhook signature verification failed');
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 400 }
@@ -169,15 +170,12 @@ export async function POST(
 
     if (isSuccess) {
       // Payment successful - create order
-      console.log(`Payment succeeded: ${payload.transaction_uid}`);
+      logger.info(`Payment succeeded: ${payload.transaction_uid}`);
 
       const orderParams = parseOrderData(payload);
 
       if (!orderParams) {
-        console.warn(
-          'Payment succeeded but missing order data:',
-          payload.transaction_uid
-        );
+        logger.warn('Payment succeeded but missing order data', { transactionUid: payload.transaction_uid });
         return NextResponse.json({
           received: true,
           orderCreated: false,
@@ -189,9 +187,7 @@ export async function POST(
         // Create order in database
         const orderResult = await createOrder(orderParams);
 
-        console.log(
-          `Order created: ${orderResult.orderNumber} (${orderResult.orderId})`
-        );
+        logger.info(`Order created: ${orderResult.orderNumber} (${orderResult.orderId})`);
 
         // Trigger confirmation email (fire and forget)
         triggerConfirmationEmail(orderResult.orderId);
@@ -207,7 +203,7 @@ export async function POST(
         });
       } catch (error) {
         // Log error but still return 200 to acknowledge webhook
-        console.error('Failed to create order:', error);
+        logger.error('Failed to create order', error);
         return NextResponse.json({
           received: true,
           orderCreated: false,
@@ -216,9 +212,7 @@ export async function POST(
       }
     } else {
       // Payment failed - log for debugging
-      console.log(
-        `Payment failed: ${payload.transaction_uid} (status: ${payload.status_code})`
-      );
+      logger.info(`Payment failed: ${payload.transaction_uid} (status: ${payload.status_code})`);
       return NextResponse.json({
         received: true,
         orderCreated: false,
@@ -226,7 +220,7 @@ export async function POST(
       });
     }
   } catch (error) {
-    console.error('Webhook handler error:', error);
+    logger.error('Webhook handler error', error);
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }
