@@ -40,6 +40,7 @@ const mockOrder: Order = {
   isGift: false,
   giftMessage: null,
   giftWrap: false,
+  wrappingStyle: null,
   scheduledDeliveryDate: null,
   shippingAddress: {
     name: 'John Doe',
