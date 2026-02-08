@@ -38,6 +38,7 @@ import {
 } from '@/lib/orders/tracking';
 import { sendTrackingNotificationEmail } from '@/lib/email/resend';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface TrackingRequest {
   trackingNumber: string;
@@ -178,7 +179,7 @@ export async function PATCH(
       .single();
 
     if (updateError || !updatedOrder) {
-      console.error('Failed to update order:', updateError);
+      logger.error('Failed to update order', updateError);
       return NextResponse.json(
         { error: 'Failed to update order tracking' },
         { status: 500 }
@@ -208,7 +209,7 @@ export async function PATCH(
         error: emailResult.error,
       };
     } catch (emailError) {
-      console.error('Failed to send tracking email:', emailError);
+      logger.error('Failed to send tracking email', emailError);
       notificationResult = {
         sent: false,
         to: order.customer_email,
@@ -229,7 +230,7 @@ export async function PATCH(
       notification: notificationResult,
     });
   } catch (error) {
-    console.error('Tracking update error:', error);
+    logger.error('Tracking update error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface UserStatsResponse {
   totalUsers: number;
@@ -68,7 +69,7 @@ export async function GET(
     const { data: stats, error: queryError } = await supabase.rpc('get_admin_user_stats');
 
     if (queryError) {
-      console.error('Admin user stats query error:', queryError);
+      logger.error('Admin user stats query error', queryError);
       return NextResponse.json(
         { error: 'Failed to fetch user stats' },
         { status: 500 }
@@ -119,7 +120,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Admin user stats error:', error);
+    logger.error('Admin user stats error', error);
     return NextResponse.json(
       { error: 'Failed to fetch user stats' },
       { status: 500 }

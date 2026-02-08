@@ -29,6 +29,7 @@ import {
   PrintSize,
 } from '@/lib/orders/printFile';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface DownloadResponse {
   success: boolean;
@@ -147,7 +148,7 @@ export async function GET(
       expiresIn: printFile.expiresIn,
     });
   } catch (error) {
-    console.error('Print file download error:', error);
+    logger.error('Print file download error', error);
     return NextResponse.json(
       { error: 'Failed to generate print file' },
       { status: 500 }

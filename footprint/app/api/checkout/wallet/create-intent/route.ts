@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createWalletPaymentIntent } from '@/lib/payments/stripe';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 // Valid currency codes
 const VALID_CURRENCIES = ['ils', 'usd', 'eur'] as const;
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Failed to create wallet payment intent:', error);
+    logger.error('Failed to create wallet payment intent', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       { error: `Failed to create payment intent: ${message}` },

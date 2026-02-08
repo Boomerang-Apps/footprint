@@ -26,6 +26,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 // Valid status values
 const VALID_STATUSES = ['active', 'inactive', 'suspended'];
@@ -129,7 +130,7 @@ export async function PATCH(
         );
       }
 
-      console.error('Status update error:', updateError);
+      logger.error('Status update error', updateError);
       return NextResponse.json(
         { error: 'Failed to update user status' },
         { status: 500 }
@@ -150,7 +151,7 @@ export async function PATCH(
         await adminClient.auth.admin.signOut(targetUserId, 'global');
       } catch (signOutError) {
         // Log but don't fail the request
-        console.error('Failed to invalidate user sessions:', signOutError);
+        logger.error('Failed to invalidate user sessions', signOutError);
       }
     }
 
@@ -175,7 +176,7 @@ export async function PATCH(
     });
 
   } catch (error) {
-    console.error('Status update error:', error);
+    logger.error('Status update error', error);
     return NextResponse.json(
       { error: 'Failed to update user status' },
       { status: 500 }

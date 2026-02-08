@@ -6,6 +6,7 @@
  */
 
 import { createAdminClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // Types
@@ -208,7 +209,7 @@ export async function createOrder(
     .single();
 
   if (error || !data) {
-    console.error('Failed to create order:', error);
+    logger.error('Failed to create order', error);
     throw new Error(`Failed to create order: ${error?.message || 'Unknown error'}`);
   }
 
@@ -259,7 +260,7 @@ export async function createOrder(
     .insert(itemRows);
 
   if (itemsError) {
-    console.error('Failed to insert order items:', itemsError);
+    logger.error('Failed to insert order items', itemsError);
     // Order header was created — don't throw, just log
   }
 
@@ -293,13 +294,13 @@ export async function triggerConfirmationEmail(orderId: string): Promise<void> {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error(
-        `Failed to send confirmation email for order ${orderId}:`,
+      logger.error(
+        `Failed to send confirmation email for order ${orderId}`,
         errorData.error || response.statusText
       );
     }
   } catch (error) {
-    console.error(`Error triggering confirmation email for order ${orderId}:`, error);
+    logger.error(`Error triggering confirmation email for order ${orderId}`, error);
   }
 }
 
@@ -326,12 +327,12 @@ export async function triggerNewOrderNotification(orderId: string): Promise<void
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error(
-        `Failed to send order notification for order ${orderId}:`,
+      logger.error(
+        `Failed to send order notification for order ${orderId}`,
         errorData.error || response.statusText
       );
     }
   } catch (error) {
-    console.error(`Error triggering order notification for order ${orderId}:`, error);
+    logger.error(`Error triggering order notification for order ${orderId}`, error);
   }
 }

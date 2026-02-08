@@ -28,6 +28,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import type { OrderStatus } from '@/types/order';
+import { logger } from '@/lib/logger';
 
 // Valid order statuses
 const VALID_STATUSES: OrderStatus[] = [
@@ -193,7 +194,7 @@ export async function GET(
     const { data: orders, error: queryError, count } = await query;
 
     if (queryError) {
-      console.error('Admin orders query error:', queryError);
+      logger.error('Admin orders query error', queryError);
       return NextResponse.json(
         { error: 'Failed to fetch orders' },
         { status: 500 }
@@ -227,7 +228,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Admin orders error:', error);
+    logger.error('Admin orders error', error);
     return NextResponse.json(
       { error: 'Failed to fetch orders' },
       { status: 500 }

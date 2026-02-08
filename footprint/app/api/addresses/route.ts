@@ -15,6 +15,7 @@ import {
   DbAddress,
   AddressResponse,
 } from '@/lib/validation/address';
+import { logger } from '@/lib/logger';
 
 interface ErrorResponse {
   error: string;
@@ -63,7 +64,7 @@ export async function GET(
       .order('is_default', { ascending: false });
 
     if (dbError) {
-      console.error('Database error fetching addresses:', dbError);
+      logger.error('Database error fetching addresses', dbError);
       return NextResponse.json(
         { error: 'Failed to fetch addresses' },
         { status: 500 }
@@ -77,7 +78,7 @@ export async function GET(
 
     return NextResponse.json({ addresses: responseAddresses });
   } catch (error) {
-    console.error('GET /api/addresses error:', error);
+    logger.error('GET /api/addresses error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -164,7 +165,7 @@ export async function POST(
       .single();
 
     if (insertError || !newAddress) {
-      console.error('Database error creating address:', insertError);
+      logger.error('Database error creating address', insertError);
       return NextResponse.json(
         { error: 'Failed to create address' },
         { status: 500 }
@@ -179,7 +180,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error('POST /api/addresses error:', error);
+    logger.error('POST /api/addresses error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

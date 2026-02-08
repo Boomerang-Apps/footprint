@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { sendNewOrderNotificationEmail } from '@/lib/email/resend';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // Types matching actual Supabase schema
@@ -147,7 +148,7 @@ export async function POST(
     });
 
     if (!emailResult.success) {
-      console.error('Failed to send order notification email:', emailResult.error);
+      logger.error('Failed to send order notification email', emailResult.error);
       return NextResponse.json(
         { error: `Failed to send notification: ${emailResult.error}` },
         { status: 500 }
@@ -159,7 +160,7 @@ export async function POST(
       emailId: emailResult.emailId,
     });
   } catch (error) {
-    console.error('Notify route error:', error);
+    logger.error('Notify route error', error);
     return NextResponse.json(
       { error: 'Failed to send notification' },
       { status: 500 }

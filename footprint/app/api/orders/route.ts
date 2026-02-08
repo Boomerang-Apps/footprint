@@ -10,6 +10,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { generateTrackingUrl } from '@/lib/orders/tracking';
 import { getStatusLabel } from '@/lib/orders/status';
 import type { OrderStatus } from '@/types/order';
+import { logger } from '@/lib/logger';
 
 interface OrderItemSummary {
   id: string;
@@ -139,7 +140,7 @@ export async function GET(
     const { data: orders, error: queryError } = await query;
 
     if (queryError) {
-      console.error('Orders query error:', queryError);
+      logger.error('Orders query error', queryError);
       return NextResponse.json(
         { error: 'Failed to fetch orders' },
         { status: 500 }
@@ -199,7 +200,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Orders list error:', error);
+    logger.error('Orders list error', error);
     return NextResponse.json(
       { error: 'Failed to fetch orders' },
       { status: 500 }

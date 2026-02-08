@@ -27,6 +27,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 // Valid role filters
 const VALID_ROLES = ['all', 'admin', 'user'];
@@ -185,7 +186,7 @@ export async function GET(
     const { data: users, error: queryError, count } = await query;
 
     if (queryError) {
-      console.error('Admin users query error:', queryError);
+      logger.error('Admin users query error', queryError);
       return NextResponse.json(
         { error: 'Failed to fetch users' },
         { status: 500 }
@@ -221,7 +222,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Admin users error:', error);
+    logger.error('Admin users error', error);
     return NextResponse.json(
       { error: 'Failed to fetch users' },
       { status: 500 }

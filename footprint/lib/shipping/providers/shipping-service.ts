@@ -18,6 +18,7 @@ import {
   ShippingProviderError,
 } from './types';
 import { IsraelPostProvider } from './israel-post';
+import { logger } from '@/lib/logger';
 
 /**
  * Shipping service for managing multiple carriers
@@ -199,7 +200,7 @@ export class ShippingService {
           results.push(...rates);
         } catch (error) {
           // Log but don't fail if one provider errors
-          console.error(`Failed to get rates from ${provider.name}:`, error);
+          logger.error(`Failed to get rates from ${provider.name}`, error);
         }
       })
     );

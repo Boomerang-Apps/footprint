@@ -7,6 +7,7 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { logger } from '@/lib/logger';
 
 // Initialize Redis client (uses UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN env vars)
 const redis = new Redis({
@@ -138,7 +139,7 @@ export async function checkRateLimit(
 ): Promise<NextResponse | null> {
   // Skip rate limiting if Upstash is not configured (development)
   if (!isUpstashConfigured) {
-    console.warn('Rate limiting skipped: Upstash not configured');
+    logger.debug('Rate limiting skipped: Upstash not configured');
     return null;
   }
 
@@ -148,14 +149,14 @@ export async function checkRateLimit(
     const { success, reset } = await limiter.limit(id);
 
     if (!success) {
-      console.log(`Rate limit exceeded for ${type}: ${id}`);
+      logger.warn(`Rate limit exceeded for ${type}: ${id}`);
       return rateLimitResponse(reset);
     }
 
     return null;
   } catch (error) {
     // If rate limiting fails, log and allow the request
-    console.error('Rate limiting error:', error);
+    logger.error('Rate limiting error', error);
     return null;
   }
 }

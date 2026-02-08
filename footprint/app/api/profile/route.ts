@@ -15,6 +15,7 @@ import {
   DbProfile,
   ProfileResponse,
 } from '@/lib/validation/profile';
+import { logger } from '@/lib/logger';
 
 interface ErrorResponse {
   error: string;
@@ -59,7 +60,7 @@ export async function GET(
       .single();
 
     if (dbError) {
-      console.error('Database error fetching profile:', dbError);
+      logger.error('Database error fetching profile', dbError);
       return NextResponse.json(
         { error: 'Failed to fetch profile' },
         { status: 500 }
@@ -69,7 +70,7 @@ export async function GET(
     // Convert to camelCase response
     return NextResponse.json(toProfileResponse(profile as DbProfile));
   } catch (error) {
-    console.error('GET /api/profile error:', error);
+    logger.error('GET /api/profile error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -149,7 +150,7 @@ export async function PUT(
       .single();
 
     if (dbError) {
-      console.error('Database error updating profile:', dbError);
+      logger.error('Database error updating profile', dbError);
       return NextResponse.json(
         { error: 'Failed to update profile' },
         { status: 500 }
@@ -161,7 +162,7 @@ export async function PUT(
       profile: toProfileResponse(profile as DbProfile),
     });
   } catch (error) {
-    console.error('PUT /api/profile error:', error);
+    logger.error('PUT /api/profile error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

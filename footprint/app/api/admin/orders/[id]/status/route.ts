@@ -34,6 +34,7 @@ import {
 } from '@/lib/orders/status';
 import { sendStatusUpdateEmail } from '@/lib/email/resend';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 // Valid order statuses
 const VALID_STATUSES: OrderStatus[] = [
@@ -178,7 +179,7 @@ export async function PATCH(
       .single();
 
     if (updateError || !updatedOrder) {
-      console.error('Failed to update order:', updateError);
+      logger.error('Failed to update order', updateError);
       return NextResponse.json(
         { error: 'Failed to update order status' },
         { status: 500 }
@@ -207,7 +208,7 @@ export async function PATCH(
         error: emailResult.error,
       };
     } catch (emailError) {
-      console.error('Failed to send status update email:', emailError);
+      logger.error('Failed to send status update email', emailError);
       notificationResult = {
         sent: false,
         to: order.customer_email,
@@ -226,7 +227,7 @@ export async function PATCH(
       notification: notificationResult,
     });
   } catch (error) {
-    console.error('Status update error:', error);
+    logger.error('Status update error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

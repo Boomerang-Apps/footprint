@@ -18,6 +18,7 @@ import type {
   ImageAnalysisError,
   FaceDetectionOptions,
 } from '@/types/image';
+import { logger } from '@/lib/logger';
 
 /**
  * Request body for face detection
@@ -272,7 +273,7 @@ export async function POST(
         );
       }
 
-      console.error('Face detection error:', error);
+      logger.error('Face detection error', error);
       return NextResponse.json(
         {
           error: 'Face detection failed',
@@ -298,21 +299,20 @@ export async function POST(
         );
         response.cropSuggestion = cropResult;
       } catch (error) {
-        console.error('Crop calculation error:', error);
+        logger.error('Crop calculation error', error);
         // Don't fail the request, just skip crop suggestion
       }
     }
 
     // Log performance metrics
     const totalTime = Date.now() - startTime;
-    console.log(
-      `Face detection completed: ${faceDetectionResult.faces.length} faces, ` +
-        `${faceDetectionResult.processingTimeMs}ms detection, ${totalTime}ms total`
+    logger.info(
+      `Face detection completed: ${faceDetectionResult.faces.length} faces, ${faceDetectionResult.processingTimeMs}ms detection, ${totalTime}ms total`
     );
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Face detection API error:', error);
+    logger.error('Face detection API error', error);
 
     return NextResponse.json(
       {

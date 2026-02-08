@@ -13,6 +13,7 @@ import {
   DbAddress,
   AddressResponse,
 } from '@/lib/validation/address';
+import { logger } from '@/lib/logger';
 
 interface ErrorResponse {
   error: string;
@@ -91,7 +92,7 @@ export async function PATCH(
       .single();
 
     if (updateError || !updatedAddress) {
-      console.error('Database error setting default address:', updateError);
+      logger.error('Database error setting default address', updateError);
       return NextResponse.json(
         { error: 'Failed to set default address' },
         { status: 500 }
@@ -103,7 +104,7 @@ export async function PATCH(
       address: toAddressResponse(updatedAddress as DbAddress),
     });
   } catch (error) {
-    console.error('PATCH /api/addresses/[id]/default error:', error);
+    logger.error('PATCH /api/addresses/[id]/default error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 async function verifyAdmin(): Promise<NextResponse | null> {
   const supabase = await createClient();
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
       .order('id');
 
     if (error) {
-      console.error('Error fetching stories:', error);
+      logger.error('Error fetching stories', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ stories });
   } catch (error) {
-    console.error('Stories API error:', error);
+    logger.error('Stories API error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -88,13 +89,13 @@ export async function PATCH(request: Request) {
       .eq('id', id);
 
     if (error) {
-      console.error('Error updating story:', error);
+      logger.error('Error updating story', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Stories PATCH error:', error);
+    logger.error('Stories PATCH error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

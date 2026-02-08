@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 import { getDefaultShippingService } from '@/lib/shipping/providers/shipping-service';
 import { type CarrierCode } from '@/lib/shipping/tracking';
 
@@ -161,7 +162,7 @@ export async function POST(
     });
 
     if (insertError) {
-      console.error('Failed to store shipment:', insertError);
+      logger.error('Failed to store shipment', insertError);
       // Don't fail - shipment was created with carrier
     }
 
@@ -187,7 +188,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error('Shipment creation error:', error);
+    logger.error('Shipment creation error', error);
     return NextResponse.json(
       { error: 'Failed to create shipment' },
       { status: 500 }
@@ -248,7 +249,7 @@ export async function GET(
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('Failed to fetch shipments:', error);
+      logger.error('Failed to fetch shipments', error);
       return NextResponse.json(
         { error: 'Failed to fetch shipments' },
         { status: 500 }
@@ -264,7 +265,7 @@ export async function GET(
       totalPages: Math.ceil((count || 0) / limit),
     });
   } catch (error) {
-    console.error('Shipments fetch error:', error);
+    logger.error('Shipments fetch error', error);
     return NextResponse.json(
       { error: 'Failed to fetch shipments' },
       { status: 500 }

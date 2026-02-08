@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { stories, sprints, features } from '@/data/dashboard/dev-progress';
+import { logger } from '@/lib/logger';
 
 // Map our story status to database status
 function mapStatus(status: string): string {
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       .upsert(sprintData, { onConflict: 'id' });
 
     if (sprintError) {
-      console.error('Sprint sync error:', sprintError);
+      logger.error('Sprint sync error', sprintError);
     }
 
     // Get sprint ID mapping (sprint index to DB id)
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
       .select();
 
     if (storyError) {
-      console.error('Story sync error:', storyError);
+      logger.error('Story sync error', storyError);
       return NextResponse.json(
         { error: 'Failed to sync stories', details: storyError.message },
         { status: 500 }
@@ -135,7 +136,7 @@ export async function POST(request: Request) {
       syncedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Sync error:', error);
+    logger.error('Sync error', error);
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },
       { status: 500 }
@@ -182,7 +183,7 @@ export async function GET(request: Request) {
       fetchedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Fetch error:', error);
+    logger.error('Fetch error', error);
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },
       { status: 500 }

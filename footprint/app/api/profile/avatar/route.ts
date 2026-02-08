@@ -15,6 +15,7 @@ import {
   ALLOWED_AVATAR_TYPES,
   MAX_AVATAR_SIZE,
 } from '@/lib/validation/profile';
+import { logger } from '@/lib/logger';
 
 interface SuccessResponse {
   avatarUrl: string;
@@ -125,7 +126,7 @@ export async function POST(
       .eq('id', user.id);
 
     if (dbError) {
-      console.error('Database error updating avatar:', dbError);
+      logger.error('Database error updating avatar', dbError);
       return NextResponse.json(
         { error: 'Failed to update profile with new avatar' },
         { status: 500 }
@@ -136,7 +137,7 @@ export async function POST(
       avatarUrl: uploadResult.publicUrl,
     });
   } catch (error) {
-    console.error('POST /api/profile/avatar error:', error);
+    logger.error('POST /api/profile/avatar error', error);
     return NextResponse.json(
       { error: 'Failed to upload avatar' },
       { status: 500 }

@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 /**
  * Admin verification result
@@ -73,7 +74,7 @@ export async function verifyAdmin(): Promise<AdminAuthResult> {
     if (ADMIN_EMAIL_ALLOWLIST && user.email) {
       const normalizedEmail = user.email.toLowerCase();
       if (!ADMIN_EMAIL_ALLOWLIST.includes(normalizedEmail)) {
-        console.warn(`Admin access denied for email not in allowlist: ${user.email}`);
+        logger.warn(`Admin access denied for email not in allowlist: ${user.email}`);
         return {
           isAuthorized: false,
           error: NextResponse.json(
@@ -94,7 +95,7 @@ export async function verifyAdmin(): Promise<AdminAuthResult> {
       },
     };
   } catch (error) {
-    console.error('Admin verification error:', error);
+    logger.error('Admin verification error', error);
     return {
       isAuthorized: false,
       error: NextResponse.json(

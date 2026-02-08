@@ -25,6 +25,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface RoleUpdateRequest {
   isAdmin: boolean;
@@ -125,7 +126,7 @@ export async function PATCH(
         );
       }
 
-      console.error('Role update error:', updateError);
+      logger.error('Role update error', updateError);
       return NextResponse.json(
         { error: 'Failed to update user role' },
         { status: 500 }
@@ -160,7 +161,7 @@ export async function PATCH(
     });
 
   } catch (error) {
-    console.error('Role update error:', error);
+    logger.error('Role update error', error);
     return NextResponse.json(
       { error: 'Failed to update user role' },
       { status: 500 }

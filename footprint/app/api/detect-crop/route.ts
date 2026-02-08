@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server';
 import { getSuggestedCrops, isValidAspectRatio } from '@/lib/image/faceDetection';
 import { getImageFromR2, isR2Url } from '@/lib/storage/r2';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 /**
  * Request body for smart crop detection
@@ -157,7 +158,7 @@ export async function POST(request: Request): Promise<Response> {
       crops: result.crops,
     });
   } catch (error) {
-    console.error('Smart crop detection error:', error);
+    logger.error('Smart crop detection error', error);
 
     return NextResponse.json(
       {

@@ -30,6 +30,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 import { FULFILLMENT_STATUSES, type FulfillmentStatus } from '@/lib/fulfillment/status-transitions';
 
 interface FulfillmentOrder {
@@ -181,7 +182,7 @@ export async function GET(
     const { data: orders, error: queryError, count } = await query;
 
     if (queryError) {
-      console.error('Fulfillment orders query error:', queryError);
+      logger.error('Fulfillment orders query error', queryError);
       return NextResponse.json(
         { error: 'שגיאת מערכת' },
         { status: 500 }
@@ -271,7 +272,7 @@ export async function GET(
       totalPages,
     });
   } catch (error) {
-    console.error('Fulfillment orders error:', error);
+    logger.error('Fulfillment orders error', error);
     return NextResponse.json(
       { error: 'שגיאת מערכת' },
       { status: 500 }

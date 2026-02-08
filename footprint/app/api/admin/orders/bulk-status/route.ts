@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 import {
   isValidFulfillmentStatus,
   validateBatchTransitions,
@@ -131,7 +132,7 @@ export async function POST(
       .in('id', body.orderIds);
 
     if (fetchError) {
-      console.error('Bulk status fetch error:', fetchError);
+      logger.error('Bulk status fetch error', fetchError);
       return NextResponse.json(
         { error: 'שגיאת מערכת' },
         { status: 500 }
@@ -170,7 +171,7 @@ export async function POST(
         .in('id', validOrderIds);
 
       if (updateError) {
-        console.error('Bulk status update error:', updateError);
+        logger.error('Bulk status update error', updateError);
         return NextResponse.json(
           { error: 'שגיאת מערכת בעדכון הזמנות' },
           { status: 500 }
@@ -210,7 +211,7 @@ export async function POST(
       errors,
     });
   } catch (error) {
-    console.error('Bulk status error:', error);
+    logger.error('Bulk status error', error);
     return NextResponse.json(
       { error: 'שגיאת מערכת' },
       { status: 500 }

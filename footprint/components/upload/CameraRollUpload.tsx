@@ -14,6 +14,7 @@ import { Upload } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import toast from 'react-hot-toast';
 import { DEFAULT_UPLOAD_CONFIG, type UploadError } from '@/types/upload';
+import { logger } from '@/lib/logger';
 
 export interface CameraRollUploadProps {
   onUploadComplete?: (file: File, preview: string) => void;
@@ -79,7 +80,7 @@ export default function CameraRollUpload({
         onUploadComplete?.(file, previewUrl);
       } catch (err) {
         toast.error('שגיאה בהעלאת התמונה. אנא נסו שוב');
-        console.error('Upload error:', err);
+        logger.error('Upload error', err);
       }
     },
     [validateFile, setOriginalImage, onUploadComplete]

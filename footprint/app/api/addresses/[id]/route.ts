@@ -16,6 +16,7 @@ import {
   DbAddress,
   AddressResponse,
 } from '@/lib/validation/address';
+import { logger } from '@/lib/logger';
 
 interface ErrorResponse {
   error: string;
@@ -85,7 +86,7 @@ export async function GET(
 
     return NextResponse.json(toAddressResponse(address as DbAddress));
   } catch (error) {
-    console.error('GET /api/addresses/[id] error:', error);
+    logger.error('GET /api/addresses/[id] error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -187,7 +188,7 @@ export async function PUT(
       .single();
 
     if (updateError || !updatedAddress) {
-      console.error('Database error updating address:', updateError);
+      logger.error('Database error updating address', updateError);
       return NextResponse.json(
         { error: 'Failed to update address' },
         { status: 500 }
@@ -199,7 +200,7 @@ export async function PUT(
       address: toAddressResponse(updatedAddress as DbAddress),
     });
   } catch (error) {
-    console.error('PUT /api/addresses/[id] error:', error);
+    logger.error('PUT /api/addresses/[id] error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -280,7 +281,7 @@ export async function DELETE(
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Database error deleting address:', deleteError);
+      logger.error('Database error deleting address', deleteError);
       return NextResponse.json(
         { error: 'Failed to delete address' },
         { status: 500 }
@@ -289,7 +290,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('DELETE /api/addresses/[id] error:', error);
+    logger.error('DELETE /api/addresses/[id] error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

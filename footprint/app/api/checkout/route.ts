@@ -29,6 +29,7 @@ import {
   triggerConfirmationEmail,
   triggerNewOrderNotification,
 } from '@/lib/orders/create';
+import { logger } from '@/lib/logger';
 
 interface CheckoutOrderItem {
   name: string;
@@ -146,7 +147,7 @@ export async function POST(
 
     if (!payPlusConfigured) {
       // Test mode: create order directly without payment gateway
-      console.log('[checkout] PayPlus not configured — using test mode');
+      logger.debug('[checkout] PayPlus not configured — using test mode');
 
       const email = customerEmail || user?.email || '';
       const orderResult = await createOrder({
@@ -210,7 +211,7 @@ export async function POST(
       paymentUrl: paymentLink.paymentUrl,
     });
   } catch (error) {
-    console.error('Checkout error:', error);
+    logger.error('Checkout error', error);
     return NextResponse.json(
       { error: 'Failed to create payment link' },
       { status: 500 }

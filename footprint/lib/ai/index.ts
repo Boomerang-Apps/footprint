@@ -23,6 +23,7 @@ import {
   STYLE_PROMPTS,
   isValidStyle,
 } from './replicate';
+import { logger } from '@/lib/logger';
 
 // Re-export common types and utilities
 export type { StyleType };
@@ -109,11 +110,11 @@ export async function transformImage(
     try {
       return await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries, options.referenceImages);
     } catch (error) {
-      console.error('Nano Banana failed:', error);
+      logger.error('Nano Banana failed', error);
 
       // Fall back to Replicate if configured
       if (isReplicateConfigured()) {
-        console.log('Falling back to Replicate...');
+        logger.info('Falling back to Replicate...');
         return await transformWithReplicateProvider(input, style, startTime, options.maxRetries);
       }
       throw error;
@@ -125,11 +126,11 @@ export async function transformImage(
     try {
       return await transformWithReplicateProvider(input, style, startTime, options.maxRetries);
     } catch (error) {
-      console.error('Replicate failed:', error);
+      logger.error('Replicate failed', error);
 
       // Fall back to Nano Banana if configured
       if (isNanoBananaConfigured()) {
-        console.log('Falling back to Nano Banana...');
+        logger.info('Falling back to Nano Banana...');
         return await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries, options.referenceImages);
       }
       throw error;

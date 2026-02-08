@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -80,7 +81,7 @@ export async function GET(
       .single();
 
     if (orderError) {
-      console.error('Failed to fetch order:', orderError);
+      logger.error('Failed to fetch order', orderError);
       if (orderError.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Order not found' },
@@ -113,7 +114,7 @@ export async function GET(
       .eq('order_id', orderId);
 
     if (itemsError) {
-      console.error('Failed to fetch order items:', itemsError);
+      logger.error('Failed to fetch order items', itemsError);
     }
 
     // Fetch shipments
@@ -131,7 +132,7 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (shipmentsError) {
-      console.error('Failed to fetch shipments:', shipmentsError);
+      logger.error('Failed to fetch shipments', shipmentsError);
     }
 
     // Build response
@@ -186,7 +187,7 @@ export async function GET(
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Order fetch error:', error);
+    logger.error('Order fetch error', error);
     return NextResponse.json(
       { error: 'Failed to fetch order' },
       { status: 500 }

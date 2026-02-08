@@ -8,6 +8,8 @@
  * @acceptance-criteria AC-011
  */
 
+import { logger } from '@/lib/logger';
+
 export interface GuestCheckoutEventData {
   email?: string;
   orderId?: string;
@@ -34,7 +36,7 @@ export function trackGuestCheckoutStarted(data: GuestCheckoutEventData = {}): vo
 
   // Log to console in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Guest checkout started:', event);
+    logger.debug('[Analytics] Guest checkout started', event);
   }
 
   // Send to analytics (Google Analytics, Mixpanel, etc.)
@@ -63,7 +65,7 @@ export function trackGuestEmailSubmitted(data: GuestCheckoutEventData): void {
   };
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Guest email submitted:', event);
+    logger.debug('[Analytics] Guest email submitted', event);
   }
 
   if (typeof window !== 'undefined' && 'gtag' in window) {
@@ -90,7 +92,7 @@ export function trackGuestCheckoutCompleted(data: GuestCheckoutEventData): void 
   };
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Guest checkout completed:', event);
+    logger.debug('[Analytics] Guest checkout completed', event);
   }
 
   if (typeof window !== 'undefined' && 'gtag' in window) {
@@ -119,7 +121,7 @@ export function trackGuestConversion(data: ConversionEventData): void {
   };
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Guest conversion:', event);
+    logger.debug('[Analytics] Guest conversion', event);
   }
 
   if (typeof window !== 'undefined' && 'gtag' in window) {
@@ -146,7 +148,7 @@ export function trackSignupPromptShown(data: GuestCheckoutEventData = {}): void 
   };
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Signup prompt shown:', event);
+    logger.debug('[Analytics] Signup prompt shown', event);
   }
 
   if (typeof window !== 'undefined' && 'gtag' in window) {
@@ -173,7 +175,7 @@ export function trackSignupPromptDismissed(data: GuestCheckoutEventData = {}): v
   };
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Signup prompt dismissed:', event);
+    logger.debug('[Analytics] Signup prompt dismissed', event);
   }
 
   if (typeof window !== 'undefined' && 'gtag' in window) {

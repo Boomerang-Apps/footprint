@@ -24,6 +24,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 import {
   isValidFulfillmentStatus,
   isValidFulfillmentTransition,
@@ -121,7 +122,7 @@ export async function PATCH(
     if (fetchError || !order) {
       // Check for actual database/connection errors (have error code)
       if (fetchError?.code) {
-        console.error('Fulfillment status fetch error:', fetchError);
+        logger.error('Fulfillment status fetch error', fetchError);
         return NextResponse.json(
           { error: 'שגיאת מערכת' },
           { status: 500 }
@@ -160,7 +161,7 @@ export async function PATCH(
       .single();
 
     if (updateError || !updatedOrder) {
-      console.error('Fulfillment status update error:', updateError);
+      logger.error('Fulfillment status update error', updateError);
       return NextResponse.json(
         { error: 'שגיאת מערכת בעדכון הזמנה' },
         { status: 500 }
@@ -187,7 +188,7 @@ export async function PATCH(
       },
     });
   } catch (error) {
-    console.error('Fulfillment status error:', error);
+    logger.error('Fulfillment status error', error);
     return NextResponse.json(
       { error: 'שגיאת מערכת' },
       { status: 500 }

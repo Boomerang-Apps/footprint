@@ -27,6 +27,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface Address {
   id: string;
@@ -155,7 +156,7 @@ export async function GET(
         );
       }
 
-      console.error('Admin user query error:', queryError);
+      logger.error('Admin user query error', queryError);
       return NextResponse.json(
         { error: 'Failed to fetch user' },
         { status: 500 }
@@ -208,7 +209,7 @@ export async function GET(
     return NextResponse.json(transformedUser);
 
   } catch (error) {
-    console.error('Admin user error:', error);
+    logger.error('Admin user error', error);
     return NextResponse.json(
       { error: 'Failed to fetch user' },
       { status: 500 }

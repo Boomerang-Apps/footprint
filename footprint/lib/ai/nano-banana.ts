@@ -16,6 +16,7 @@ import {
   getStyleReferencePrompt,
   hasStyleReferences,
 } from './style-references';
+import { logger } from '@/lib/logger';
 
 /**
  * Nano Banana model configuration
@@ -195,7 +196,7 @@ export async function transformWithNanoBanana(
   });
 
   if (hasRefs) {
-    console.log(`Nano Banana: Using ${referenceImages.length} reference images for style: ${style}`);
+    logger.info(`Nano Banana: Using ${referenceImages.length} reference images for style: ${style}`);
   }
 
   const requestBody = {
@@ -233,7 +234,7 @@ export async function transformWithNanoBanana(
   };
 
   const url = `${API_BASE_URL}/models/${NANO_BANANA_MODEL}:generateContent`;
-  console.log(`Nano Banana: Calling model ${NANO_BANANA_MODEL}`);
+  logger.info(`Nano Banana: Calling model ${NANO_BANANA_MODEL}`);
 
   const response = await fetch(url, {
     method: 'POST',
@@ -246,7 +247,7 @@ export async function transformWithNanoBanana(
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => '');
-    console.error(`Nano Banana API error: HTTP ${response.status}`, errorText);
+    logger.error(`Nano Banana API error: HTTP ${response.status}`, errorText);
 
     let errorMessage = `HTTP ${response.status}`;
     try {
@@ -338,7 +339,7 @@ export async function transformWithNanoBananaRetry(
       if (attempt < maxRetries) {
         // Exponential backoff: 1s, 2s, 4s
         const backoffMs = 1000 * Math.pow(2, attempt - 1);
-        console.log(
+        logger.warn(
           `Nano Banana attempt ${attempt} failed, retrying in ${backoffMs}ms...`
         );
         await delay(backoffMs);
@@ -395,7 +396,7 @@ export async function loadReferenceImages(
 
       const response = await fetch(fullUrl);
       if (!response.ok) {
-        console.warn(`Failed to load reference image: ${fullUrl}`);
+        logger.warn(`Failed to load reference image: ${fullUrl}`);
         continue;
       }
 
@@ -408,7 +409,7 @@ export async function loadReferenceImages(
         mimeType: contentType,
       });
     } catch (error) {
-      console.warn(`Error loading reference image ${url}:`, error);
+      logger.warn(`Error loading reference image ${url}`, error);
     }
   }
 

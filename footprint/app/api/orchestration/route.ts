@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 async function verifyAdmin(): Promise<NextResponse | null> {
   const supabase = await createClient();
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
       .order('agent');
 
     if (agentsError) {
-      console.error('Error fetching agents:', agentsError);
+      logger.error('Error fetching agents', agentsError);
       return NextResponse.json({ error: agentsError.message }, { status: 500 });
     }
 
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
       .order('id');
 
     if (sprintsError) {
-      console.error('Error fetching sprints:', sprintsError);
+      logger.error('Error fetching sprints', sprintsError);
       return NextResponse.json({ error: sprintsError.message }, { status: 500 });
     }
 
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
       .order('id');
 
     if (epicsError) {
-      console.error('Error fetching epics:', epicsError);
+      logger.error('Error fetching epics', epicsError);
       return NextResponse.json({ error: epicsError.message }, { status: 500 });
     }
 
@@ -68,7 +69,7 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Orchestration API error:', error);
+    logger.error('Orchestration API error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -107,13 +108,13 @@ export async function POST(request: Request) {
       });
 
     if (error) {
-      console.error('Error updating agent status:', error);
+      logger.error('Error updating agent status', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Orchestration POST error:', error);
+    logger.error('Orchestration POST error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

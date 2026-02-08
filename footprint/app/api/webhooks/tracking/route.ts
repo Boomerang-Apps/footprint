@@ -12,6 +12,7 @@ import crypto from 'crypto';
 import { createClient } from '@/lib/supabase/server';
 import { mapIsraelPostStatus } from '@/lib/shipping/providers/israel-post';
 import { type TrackingStatus } from '@/lib/shipping/providers/types';
+import { logger } from '@/lib/logger';
 
 interface WebhookPayload {
   trackingNumber: string;
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const secret = process.env[secretEnvKey];
 
     if (!secret) {
-      console.error(`Missing webhook secret for provider: ${provider}`);
+      logger.error('Missing webhook secret for provider', { provider });
       return NextResponse.json(
         { error: 'Webhook configuration error' },
         { status: 500 }
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .single();
 
     if (fetchError) {
-      console.error('Failed to fetch shipment:', fetchError);
+      logger.error('Failed to fetch shipment', fetchError);
       return NextResponse.json(
         { error: 'Database error' },
         { status: 500 }
@@ -169,7 +170,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .eq('id', shipment.id);
 
     if (updateError) {
-      console.error('Failed to update shipment:', updateError);
+      logger.error('Failed to update shipment', updateError);
       return NextResponse.json(
         { error: 'Failed to update shipment' },
         { status: 500 }
@@ -188,7 +189,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         .eq('id', shipment.order_id);
 
       if (orderUpdateError) {
-        console.error('Failed to update order status:', orderUpdateError);
+        logger.error('Failed to update order status', orderUpdateError);
         // Don't fail the webhook - shipment was updated
       }
     }
@@ -201,7 +202,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       eventCount: updatedEvents.length,
     });
   } catch (error) {
-    console.error('Tracking webhook error:', error);
+    logger.error('Tracking webhook error', error);
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

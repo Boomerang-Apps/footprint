@@ -16,6 +16,7 @@ import {
   sendOrderConfirmationEmail,
   generateWhatsAppShareUrl,
 } from '@/lib/email/resend';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // Types matching actual Supabase schema
@@ -171,7 +172,7 @@ export async function POST(
     });
 
     if (!emailResult.success) {
-      console.error('Failed to send confirmation email:', emailResult.error);
+      logger.error('Failed to send confirmation email', emailResult.error);
       return NextResponse.json(
         { error: `Failed to send email: ${emailResult.error}` },
         { status: 500 }
@@ -183,7 +184,7 @@ export async function POST(
       emailId: emailResult.emailId,
     });
   } catch (error) {
-    console.error('Confirmation error:', error);
+    logger.error('Confirmation error', error);
     return NextResponse.json(
       { error: 'Failed to send confirmation' },
       { status: 500 }
@@ -259,7 +260,7 @@ export async function GET(
       whatsappUrl,
     });
   } catch (error) {
-    console.error('Get confirmation error:', error);
+    logger.error('Get confirmation error', error);
     return NextResponse.json(
       { error: 'Failed to get confirmation details' },
       { status: 500 }

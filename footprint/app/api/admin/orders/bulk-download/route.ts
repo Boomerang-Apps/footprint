@@ -25,6 +25,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 import { uploadToR2, getDownloadUrl } from '@/lib/storage/r2';
 import { getOrCreatePrintFile, isValidPrintSize, PrintSize } from '@/lib/orders/printFile';
 import { createZipArchive, generateZipFileName } from '@/lib/fulfillment/zip-archive';
@@ -138,7 +139,7 @@ export async function POST(
       .in('id', orderIds);
 
     if (fetchError) {
-      console.error('Failed to fetch orders:', fetchError);
+      logger.error('Failed to fetch orders', fetchError);
       return NextResponse.json(
         { error: 'Failed to fetch orders from database' },
         { status: 500 }
@@ -207,7 +208,7 @@ export async function POST(
           buffer: printFileBuffer,
         });
       } catch (error) {
-        console.error(`Failed to process order ${order.id}:`, error);
+        logger.error(`Failed to process order ${order.id}`, error);
         failed.push(order.id);
       }
     }
@@ -248,7 +249,7 @@ export async function POST(
       failed,
     });
   } catch (error) {
-    console.error('Bulk download error:', error);
+    logger.error('Bulk download error', error);
     return NextResponse.json(
       { error: 'Failed to create bulk download' },
       { status: 500 }
