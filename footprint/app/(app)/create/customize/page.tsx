@@ -45,9 +45,11 @@ export default function CustomizePage() {
     size,
     paperType,
     frameType,
+    hasPassepartout,
     setSize,
     setPaperType,
     setFrameType,
+    setHasPassepartout,
     setStep,
     _hasHydrated,
   } = useOrderStore();
@@ -153,6 +155,8 @@ export default function CustomizePage() {
               frameType={frameType}
               paperType={paperType}
               onFrameChange={setFrameType}
+              hasPassepartout={hasPassepartout}
+              onPassepartoutChange={setHasPassepartout}
             />
           </div>
         </div>
