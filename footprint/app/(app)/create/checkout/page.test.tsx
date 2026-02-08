@@ -241,15 +241,8 @@ describe('CheckoutPage', () => {
       });
     });
 
-    it('redirects to PayPlus payment URL on success', async () => {
+    it('shows PayPlus payment modal on success', async () => {
       const paymentUrl = 'https://payments.payplus.co.il/test-checkout';
-
-      // Mock window.location.href
-      const originalLocation = window.location;
-      Object.defineProperty(window, 'location', {
-        value: { ...originalLocation, href: '' },
-        writable: true,
-      });
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -267,13 +260,11 @@ describe('CheckoutPage', () => {
       });
 
       await waitFor(() => {
-        expect(window.location.href).toBe(paymentUrl);
-      });
-
-      // Restore
-      Object.defineProperty(window, 'location', {
-        value: originalLocation,
-        writable: true,
+        // Modal should appear with the PayPlus iframe
+        const dialog = screen.getByRole('dialog');
+        expect(dialog).toBeInTheDocument();
+        const iframe = screen.getByTitle('PayPlus תשלום מאובטח');
+        expect(iframe).toHaveAttribute('src', paymentUrl);
       });
     });
 

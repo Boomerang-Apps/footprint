@@ -19,6 +19,7 @@ import { validateWebhook } from '@/lib/payments/payplus';
 import {
   createOrder,
   triggerConfirmationEmail,
+  triggerNewOrderNotification,
   type CreateOrderParams,
 } from '@/lib/orders/create';
 
@@ -93,6 +94,7 @@ function parseOrderData(
       userId: orderData.userId,
       customerName,
       customerEmail,
+      customerPhone: payload.customer_phone,
       items: orderData.items,
       subtotal: orderData.subtotal || 0,
       shipping: orderData.shipping || 0,
@@ -193,6 +195,9 @@ export async function POST(
 
         // Trigger confirmation email (fire and forget)
         triggerConfirmationEmail(orderResult.orderId);
+
+        // Trigger notification to shop owner (fire and forget)
+        triggerNewOrderNotification(orderResult.orderId);
 
         return NextResponse.json({
           received: true,

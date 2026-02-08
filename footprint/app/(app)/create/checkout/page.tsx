@@ -3,11 +3,12 @@
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowRight, Check, Sparkles, CreditCard, MapPin, User, Phone, Mail, Building, Loader2, Gift, Heart, Cake, Baby, GraduationCap, Home, PartyPopper, HandHeart, Sparkle } from 'lucide-react';
+import { ArrowRight, Check, Sparkles, MapPin, User, Phone, Mail, Building, Loader2, Gift, Heart, Cake, Baby, GraduationCap, Home, PartyPopper, HandHeart, Sparkle } from 'lucide-react';
 import type { GiftOccasion } from '@/stores/orderStore';
 import { useOrderStore } from '@/stores/orderStore';
 import { CheckoutAuthFlow } from '@/components/checkout/CheckoutAuthFlow';
 import { GiftWrappingOption } from '@/components/checkout/GiftWrappingOption';
+import { PaymentModal } from '@/components/checkout/PaymentModal';
 import { GIFT_WRAPPING_PRICE } from '@/types/order';
 import { createClient } from '@/lib/supabase/client';
 import { api } from '@/lib/api/client';
@@ -61,11 +62,15 @@ function CheckoutPageContent() {
     _hasHydrated,
     isGuest,
     guestInfo,
+    hasPassepartout,
   } = useOrderStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [showAuthFlow, setShowAuthFlow] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [sandboxOrderContext, setSandboxOrderContext] = useState<{ orderId: string; email: string } | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -176,35 +181,56 @@ function CheckoutPageContent() {
       country: 'ישראל',
     });
 
-    // Sandbox mode - create order via API but skip payment
+    // Sandbox mode - create order via real API (DB + emails), skip payment modal
     const isSandbox = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
     if (isSandbox) {
       try {
-        const order = await api.orders.create({
-          items: [{
-            originalImageUrl: originalImage || '',
-            transformedImageUrl: transformedImage || undefined,
-            style: selectedStyle,
-            size,
-            paperType,
-            frameType,
-          }],
-          isGift,
-          giftMessage: giftMessage || undefined,
-          giftWrap,
-          wrappingStyle: wrappingStyle || undefined,
-          scheduledDeliveryDate: scheduledDeliveryDate || undefined,
-          shippingAddress: {
-            name: formData.fullName,
-            phone: formData.phone,
-            street: formData.street,
-            city: formData.city,
-            postalCode: formData.zipCode,
-            country: 'ישראל',
-          },
+        const paperLabel = paperType === 'matte' ? 'Matte' : paperType === 'glossy' ? 'Glossy' : 'Canvas';
+        const frameLabel = frameType === 'none' ? 'ללא' : frameType === 'black' ? 'Black' : frameType === 'white' ? 'White' : 'Oak';
+        const styleName = selectedStyle || 'Custom';
+
+        const response = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: generateOrderId(),
+            amount: calculateTotalInAgorot(),
+            customerName: formData.fullName,
+            customerEmail: formData.email,
+            customerPhone: formData.phone,
+            items: [{
+              name: `הדפסת ${styleName} - ${size}`,
+              quantity: 1,
+              price: total,
+              imageUrl: transformedImage || originalImage || '',
+              style: styleName,
+              size,
+              paper: paperLabel,
+              frame: frameLabel,
+            }],
+            subtotal,
+            shipping,
+            total,
+            shippingAddress: {
+              street: formData.street,
+              city: formData.city,
+              postalCode: formData.zipCode || '',
+              country: 'ישראל',
+            },
+            isGift,
+            giftMessage: giftMessage || undefined,
+            hasPassepartout,
+          }),
         });
-        setOrderId(order.id);
-        router.push(`/create/complete?orderId=${order.id}&sandbox=true&email=${encodeURIComponent(formData.email)}`);
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'שגיאה ביצירת ההזמנה');
+
+        // Skip PaymentModal — redirect directly to complete page
+        const orderId = data.orderId || '';
+        const orderNumber = data.orderNumber || '';
+        setOrderId(orderId);
+        router.push(`/create/complete?orderId=${orderId}&orderNumber=${orderNumber}&sandbox=true&email=${encodeURIComponent(formData.email)}`);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'שגיאה ביצירת ההזמנה';
         toast.error(message);
@@ -214,6 +240,11 @@ function CheckoutPageContent() {
     }
 
     try {
+      // Build item data for order
+      const paperLabel = paperType === 'matte' ? 'Matte' : paperType === 'glossy' ? 'Glossy' : 'Canvas';
+      const frameLabel = frameType === 'none' ? 'ללא' : frameType === 'black' ? 'Black' : frameType === 'white' ? 'White' : 'Oak';
+      const styleName = selectedStyle || 'Custom';
+
       // Call PayPlus API to create payment link
       const response = await fetch('/api/checkout', {
         method: 'POST',
@@ -224,6 +255,28 @@ function CheckoutPageContent() {
           customerName: formData.fullName,
           customerEmail: formData.email,
           customerPhone: formData.phone,
+          items: [{
+            name: `הדפסת ${styleName} - ${size}`,
+            quantity: 1,
+            price: total,
+            imageUrl: transformedImage || originalImage || '',
+            style: styleName,
+            size,
+            paper: paperLabel,
+            frame: frameLabel,
+          }],
+          subtotal,
+          shipping,
+          total,
+          shippingAddress: {
+            street: formData.street,
+            city: formData.city,
+            postalCode: formData.zipCode || '',
+            country: 'ישראל',
+          },
+          isGift,
+          giftMessage: giftMessage || undefined,
+          hasPassepartout,
         }),
       });
 
@@ -233,8 +286,9 @@ function CheckoutPageContent() {
         throw new Error(data.error || 'שגיאה ביצירת התשלום');
       }
 
-      // Redirect to PayPlus payment page
-      window.location.href = data.paymentUrl;
+      // Show PayPlus payment in embedded modal
+      setPaymentUrl(data.paymentUrl);
+      setShowPaymentModal(true);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'שגיאה ביצירת התשלום';
       toast.error(message);
@@ -246,6 +300,31 @@ function CheckoutPageContent() {
     setStep('customize');
     router.push('/create/customize');
   };
+
+  const handlePaymentSuccess = useCallback((pageRequestUid: string, orderId?: string, orderNumber?: string) => {
+    setShowPaymentModal(false);
+    if (sandboxOrderContext) {
+      router.push(`/create/complete?orderId=${sandboxOrderContext.orderId}&sandbox=true&email=${encodeURIComponent(sandboxOrderContext.email)}`);
+    } else {
+      const params = new URLSearchParams({ page_request_uid: pageRequestUid });
+      if (orderId) params.set('orderId', orderId);
+      if (orderNumber) params.set('orderNumber', orderNumber);
+      router.push(`/create/complete?${params.toString()}`);
+    }
+  }, [router, sandboxOrderContext]);
+
+  const handlePaymentFailure = useCallback((error: string) => {
+    setShowPaymentModal(false);
+    setPaymentUrl(null);
+    setIsProcessing(false);
+    toast.error(error);
+  }, []);
+
+  const handlePaymentClose = useCallback(() => {
+    setShowPaymentModal(false);
+    setPaymentUrl(null);
+    setIsProcessing(false);
+  }, []);
 
   // Show loading state while hydrating or if no image
   if (!_hasHydrated || !originalImage) {
@@ -633,20 +712,6 @@ function CheckoutPageContent() {
               {/* Gift Wrapping Option */}
               <GiftWrappingOption />
 
-              {/* Payment Note */}
-              <section className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                <div className="flex items-start gap-3">
-                  <CreditCard className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-amber-800 text-sm">תשלום מאובטח</h4>
-                    <p className="text-sm text-amber-700 mt-1">
-                      התשלום יבוצע דרך PayPlus - פלטפורמת תשלומים מאובטחת בישראל.
-                      אנו מקבלים כרטיסי אשראי ישראליים ובינלאומיים.
-                    </p>
-                  </div>
-                </div>
-              </section>
-
               <p className="text-xs text-zinc-500 text-center">
                 בלחיצה על כפתור התשלום אתם מאשרים את <a href="#" className="underline">התקנון</a> ו<a href="#" className="underline">מדיניות הפרטיות</a>
               </p>
@@ -685,6 +750,16 @@ function CheckoutPageContent() {
           </button>
         </div>
       </div>
+
+      {/* PayPlus Payment Modal */}
+      {showPaymentModal && paymentUrl && (
+        <PaymentModal
+          paymentUrl={paymentUrl}
+          onSuccess={handlePaymentSuccess}
+          onFailure={handlePaymentFailure}
+          onClose={handlePaymentClose}
+        />
+      )}
     </main>
   );
 }

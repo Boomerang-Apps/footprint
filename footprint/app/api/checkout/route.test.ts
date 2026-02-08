@@ -120,8 +120,8 @@ describe('POST /api/checkout', () => {
 
       expect(mockCreatePaymentLink).toHaveBeenCalledWith(
         expect.objectContaining({
-          successUrl: expect.stringContaining('/create/complete'),
-          failureUrl: expect.stringContaining('/create/checkout'),
+          successUrl: expect.stringContaining('/payment/iframe-callback?status=success'),
+          failureUrl: expect.stringContaining('/payment/iframe-callback?status=failure'),
           callbackUrl: expect.stringContaining('/api/webhooks/payplus'),
         })
       );

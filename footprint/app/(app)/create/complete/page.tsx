@@ -68,6 +68,22 @@ const FRAME_NAMES: Record<string, string> = {
   oak: 'מסגרת אלון',
 };
 
+// Frame border colors for visual representation
+const FRAME_COLORS: Record<string, string> = {
+  black: '#1a1a1a',
+  white: '#ffffff',
+  oak: '#b8860b',
+};
+
+function getFrameStyle(frame: string | undefined): React.CSSProperties {
+  const color = FRAME_COLORS[frame || ''];
+  if (!color) return {};
+  return {
+    border: `4px solid ${color}`,
+    ...(frame === 'white' ? { boxShadow: '0 0 0 1px #e5e5e5' } : {}),
+  };
+}
+
 interface TimelineStep {
   label: string;
   status: 'completed' | 'active' | 'pending';
@@ -106,6 +122,7 @@ function CompletePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams?.get('orderId');
+  const orderNumberFromParams = searchParams?.get('orderNumber');
   const isSandbox = searchParams?.get('sandbox') === 'true';
   const emailFromParams = searchParams?.get('email');
 
@@ -122,6 +139,7 @@ function CompletePageContent() {
     reset,
     isGuest,
     guestInfo,
+    hasPassepartout,
   } = useOrderStore();
 
   // Post-purchase signup state (AUTH-02)
@@ -164,9 +182,29 @@ function CompletePageContent() {
     fetchOrder();
   }, [orderId, isSandbox]);
 
+  // Compute total from store values when no API/pricing data
+  const computedTotal = (() => {
+    const sizes: Record<string, number> = { A5: 89, A4: 129, A3: 179, A2: 249 };
+    const paperMods: Record<string, number> = { matte: 0, glossy: 20, canvas: 50 };
+    const framePrices: Record<string, number> = { none: 0, black: 79, white: 79, oak: 99 };
+    const base = sizes[size] || 129;
+    const paper = paperMods[paperType || 'matte'] || 0;
+    const frame = framePrices[frameType || 'none'] || 0;
+    const sub = base + paper + frame;
+    return sub + (sub >= 299 ? 0 : 29);
+  })();
+
+  // Generate fallback order number only on client to avoid hydration mismatch
+  const [fallbackOrderNumber, setFallbackOrderNumber] = useState('');
+  useEffect(() => {
+    if (!orderData?.orderNumber && !orderNumberFromParams) {
+      setFallbackOrderNumber(formatOrderId());
+    }
+  }, [orderData?.orderNumber, orderNumberFromParams]);
+
   // Use API data or fallback to generated/store data
-  const orderNumber = orderData?.orderNumber || formatOrderId();
-  const orderTotal = orderData?.total || pricing?.total || 209;
+  const orderNumber = orderData?.orderNumber || orderNumberFromParams || fallbackOrderNumber;
+  const orderTotal = orderData?.total || pricing?.total || computedTotal;
   const whatsappUrlFromApi = orderData?.whatsappUrl;
   const estimatedDelivery = getEstimatedDelivery();
 
@@ -363,14 +401,21 @@ function CompletePageContent() {
           <div className="p-4 flex gap-3.5">
             <div
               data-testid="order-thumb"
-              className="w-16 h-16 rounded-[10px] overflow-hidden flex-shrink-0 bg-zinc-100"
+              className="overflow-hidden flex-shrink-0 bg-zinc-100"
+              style={{
+                borderRadius: frameType && frameType !== 'none' ? '2px' : '10px',
+                ...getFrameStyle(frameType),
+                ...(hasPassepartout && frameType && frameType !== 'none' ? { padding: '4px', background: 'white' } : {}),
+                width: hasPassepartout && frameType && frameType !== 'none' ? '76px' : '68px',
+                height: hasPassepartout && frameType && frameType !== 'none' ? '104px' : '96px',
+              }}
             >
               {displayImage && (
                 <Image
                   src={displayImage}
                   alt="התמונה"
-                  width={64}
-                  height={64}
+                  width={68}
+                  height={96}
                   className="w-full h-full object-cover"
                 />
               )}
@@ -380,7 +425,7 @@ function CompletePageContent() {
                 פורטרט בסגנון {styleName}
               </div>
               <div data-testid="order-specs" className="text-xs text-zinc-500 leading-relaxed">
-                {size} • {paperName} • {frameName}
+                {size} • {paperName} • {frameName}{hasPassepartout && frameType !== 'none' ? ' • פספרטו' : ''}
               </div>
               <div data-testid="order-price" className="text-base font-bold text-zinc-900 mt-1.5">
                 ₪{orderTotal}

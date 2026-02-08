@@ -28,6 +28,7 @@ export interface CreatePaymentParams {
   successUrl: string;
   failureUrl: string;
   callbackUrl: string;
+  moreInfo?: string; // JSON-serialized order data for webhook callback
 }
 
 export interface PaymentLinkResult {
@@ -117,7 +118,7 @@ export async function createPaymentLink(
     refURL_failure: params.failureUrl,
     refURL_callback: params.callbackUrl,
     send_failure_callback: true,
-    more_info: params.orderId,
+    more_info: params.moreInfo || params.orderId,
   };
 
   // Make API request
