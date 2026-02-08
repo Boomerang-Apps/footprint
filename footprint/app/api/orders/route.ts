@@ -67,14 +67,14 @@ export async function GET(
       return rateLimitResult as NextResponse<ErrorResponse>;
     }
 
-    // 2. Authentication check
+    // 2. Authentication check (optional in test mode)
     const supabase = await createClient();
     const {
       data: { user },
-      error: authError,
     } = await supabase.auth.getUser();
 
-    if (authError || !user) {
+    const isTestMode = !process.env.PAYPLUS_PAYMENT_PAGE_UID;
+    if (!isTestMode && !user) {
       return NextResponse.json(
         { error: 'Unauthorized - Please sign in' },
         { status: 401 }
@@ -123,8 +123,12 @@ export async function GET(
           frame_type
         )
       `)
-      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
+
+    // Filter by user_id only if authenticated (test mode may have guest orders)
+    if (user) {
+      query = query.eq('user_id', user.id);
+    }
 
     // Apply status filter if provided
     if (statusFilter) {

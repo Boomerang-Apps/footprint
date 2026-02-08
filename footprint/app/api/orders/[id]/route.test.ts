@@ -120,6 +120,9 @@ describe('GET /api/orders/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    // Simulate production mode so auth/ownership checks are enforced
+    process.env.PAYPLUS_PAYMENT_PAGE_UID = 'test-uid';
+
     // Setup default mocks
     vi.mocked(checkRateLimit).mockResolvedValue(null);
     vi.mocked(generateTrackingUrl).mockReturnValue('https://israelpost.co.il/itemtrace?itemcode=RR123456789IL');

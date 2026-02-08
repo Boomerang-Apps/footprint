@@ -19,10 +19,10 @@ import {
 
 // Mock Supabase client
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(),
+  createAdminClient: vi.fn(),
 }));
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 
 // Helper to create valid order params
 function createValidOrderParams(
@@ -106,7 +106,7 @@ describe('Order Creation Service', () => {
         data: null,
         error: null,
       });
-      vi.mocked(createClient).mockResolvedValue(mockSupabase.client as never);
+      vi.mocked(createAdminClient).mockReturnValue(mockSupabase.client as never);
 
       const orderNumber = await generateOrderNumber(new Date('2025-12-26'));
 
@@ -121,7 +121,7 @@ describe('Order Creation Service', () => {
         data: { order_number: 'FP-20251226-0005' },
         error: null,
       });
-      vi.mocked(createClient).mockResolvedValue(mockSupabase.client as never);
+      vi.mocked(createAdminClient).mockReturnValue(mockSupabase.client as never);
 
       const orderNumber = await generateOrderNumber(new Date('2025-12-26'));
 
@@ -134,7 +134,7 @@ describe('Order Creation Service', () => {
         data: null,
         error: { code: 'PGRST116' }, // No rows found
       });
-      vi.mocked(createClient).mockResolvedValue(mockSupabase.client as never);
+      vi.mocked(createAdminClient).mockReturnValue(mockSupabase.client as never);
 
       const orderNumber = await generateOrderNumber(new Date('2025-12-26'));
 
@@ -147,7 +147,7 @@ describe('Order Creation Service', () => {
         data: { order_number: 'FP-20251226-0099' },
         error: null,
       });
-      vi.mocked(createClient).mockResolvedValue(mockSupabase.client as never);
+      vi.mocked(createAdminClient).mockReturnValue(mockSupabase.client as never);
 
       const orderNumber = await generateOrderNumber(new Date('2025-12-26'));
 
@@ -178,7 +178,7 @@ describe('Order Creation Service', () => {
         error: null,
       });
 
-      vi.mocked(createClient).mockResolvedValue(mockSupabase.client as never);
+      vi.mocked(createAdminClient).mockReturnValue(mockSupabase.client as never);
 
       const result = await createOrder(params);
 
@@ -226,7 +226,7 @@ describe('Order Creation Service', () => {
         error: null,
       });
 
-      vi.mocked(createClient).mockResolvedValue(mockSupabase.client as never);
+      vi.mocked(createAdminClient).mockReturnValue(mockSupabase.client as never);
 
       const result = await createOrder(params);
 
@@ -259,7 +259,7 @@ describe('Order Creation Service', () => {
         error: null,
       });
 
-      vi.mocked(createClient).mockResolvedValue(mockSupabase.client as never);
+      vi.mocked(createAdminClient).mockReturnValue(mockSupabase.client as never);
 
       const result = await createOrder(params);
 
@@ -289,7 +289,7 @@ describe('Order Creation Service', () => {
         error: { message: 'Database connection failed' },
       });
 
-      vi.mocked(createClient).mockResolvedValue(mockSupabase.client as never);
+      vi.mocked(createAdminClient).mockReturnValue(mockSupabase.client as never);
 
       await expect(createOrder(params)).rejects.toThrow('Failed to create order');
     });

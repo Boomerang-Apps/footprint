@@ -89,6 +89,7 @@ interface OrderState {
   size: SizeType;
   paperType: PaperType;
   frameType: FrameType;
+  hasPassepartout: boolean;
   
   // Gift options
   isGift: boolean;
@@ -156,6 +157,7 @@ interface OrderActions {
   setSize: (size: SizeType) => void;
   setPaperType: (paper: PaperType) => void;
   setFrameType: (frame: FrameType) => void;
+  setHasPassepartout: (value: boolean) => void;
   
   // Gift
   setIsGift: (value: boolean) => void;
@@ -225,6 +227,7 @@ const initialState: OrderState = {
   size: 'A4',
   paperType: 'matte',
   frameType: 'none',
+  hasPassepartout: false,
   isGift: false,
   giftOccasion: null,
   giftMessage: '',
@@ -358,6 +361,7 @@ export const useOrderStore = create<OrderState & OrderActions>()(
       setSize: (size) => set({ size }),
       setPaperType: (paper) => set({ paperType: paper }),
       setFrameType: (frame) => set({ frameType: frame }),
+      setHasPassepartout: (value) => set({ hasPassepartout: value }),
 
       // Gift
       setIsGift: (value) => set({ isGift: value }),
@@ -530,6 +534,7 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         size: state.size,
         paperType: state.paperType,
         frameType: state.frameType,
+        hasPassepartout: state.hasPassepartout,
         isGift: state.isGift,
         giftOccasion: state.giftOccasion,
         giftMessage: state.giftMessage,

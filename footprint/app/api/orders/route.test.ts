@@ -34,6 +34,17 @@ function createRequest(url: string = 'http://localhost:3000/api/orders'): NextRe
   return new NextRequest(new Request(url));
 }
 
+// Helper to create a chainable Supabase query mock
+function createChainableMock(data: any, error: any = null) {
+  const mock: any = {
+    eq: vi.fn(() => mock),
+    order: vi.fn(() => mock),
+    select: vi.fn(() => mock),
+    then: (resolve: any) => resolve({ data, error }),
+  };
+  return mock;
+}
+
 // Mock authenticated user
 const mockUser = {
   id: 'user-123',
@@ -67,6 +78,9 @@ const mockOrders = [
 describe('GET /api/orders', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Simulate production mode so auth checks are enforced
+    process.env.PAYPLUS_PAYMENT_PAGE_UID = 'test-uid';
 
     // Setup default mocks
     vi.mocked(checkRateLimit).mockResolvedValue(null);
@@ -127,16 +141,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn().mockResolvedValue({
-                data: mockOrders,
-                error: null,
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => createChainableMock(mockOrders)),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -175,16 +180,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn().mockResolvedValue({
-                data: [],
-                error: null,
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => createChainableMock([])),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -218,16 +214,6 @@ describe('GET /api/orders', () => {
     });
 
     it('should accept valid status filter values', async () => {
-      // Create a chainable mock that supports .eq() after .order()
-      const createChainableMock = (data: any) => {
-        const mock: any = {
-          eq: vi.fn(() => mock),
-          order: vi.fn(() => mock),
-          then: (resolve: any) => resolve({ data, error: null }),
-        };
-        return mock;
-      };
-
       const mockSupabaseClient = {
         auth: {
           getUser: vi.fn().mockResolvedValue({
@@ -235,9 +221,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => createChainableMock([mockOrders[0]])),
-        })),
+        from: vi.fn(() => createChainableMock([mockOrders[0]])),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -261,16 +245,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn().mockResolvedValue({
-                data: mockOrders,
-                error: null,
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => createChainableMock(mockOrders)),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -307,16 +282,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn().mockResolvedValue({
-                data: [mockOrders[0]], // Order with tracking
-                error: null,
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => createChainableMock([mockOrders[0]])),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -339,16 +305,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn().mockResolvedValue({
-                data: [mockOrders[1]], // Order without tracking
-                error: null,
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => createChainableMock([mockOrders[1]])),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -370,16 +327,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn().mockResolvedValue({
-                data: [],
-                error: null,
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => createChainableMock([])),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -396,6 +344,7 @@ describe('GET /api/orders', () => {
 
   describe('Filtering and Sorting', () => {
     it('should filter by status parameter', async () => {
+      const chainMock = createChainableMock([mockOrders[0]]);
       const mockSupabaseClient = {
         auth: {
           getUser: vi.fn().mockResolvedValue({
@@ -403,18 +352,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn(() => ({
-                eq: vi.fn().mockResolvedValue({
-                  data: [mockOrders[0]], // Only shipped order
-                  error: null,
-                }),
-              })),
-            })),
-          })),
-        })),
+        from: vi.fn(() => chainMock),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -429,6 +367,7 @@ describe('GET /api/orders', () => {
     });
 
     it('should sort by createdAt descending', async () => {
+      const chainMock = createChainableMock(mockOrders);
       const mockSupabaseClient = {
         auth: {
           getUser: vi.fn().mockResolvedValue({
@@ -436,22 +375,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn((field, options) => {
-                expect(field).toBe('created_at');
-                expect(options).toEqual({ ascending: false });
-                return {
-                  mockResolvedValue: vi.fn().mockResolvedValue({
-                    data: mockOrders,
-                    error: null,
-                  }),
-                };
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => chainMock),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -460,6 +384,8 @@ describe('GET /api/orders', () => {
       const response = await GET(request);
 
       expect(response.status).toBe(200);
+      // Verify order was called with correct params
+      expect(chainMock.order).toHaveBeenCalledWith('created_at', { ascending: false });
     });
   });
 
@@ -472,16 +398,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn().mockResolvedValue({
-                data: null,
-                error: { message: 'Database connection failed' },
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => createChainableMock(null, { message: 'Database connection failed' })),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
@@ -502,16 +419,7 @@ describe('GET /api/orders', () => {
             error: null,
           }),
         },
-        from: vi.fn(() => ({
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn().mockResolvedValue({
-                data: null, // Null data but no error
-                error: null,
-              }),
-            })),
-          })),
-        })),
+        from: vi.fn(() => createChainableMock(null)),
       };
 
       vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);

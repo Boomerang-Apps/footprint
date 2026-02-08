@@ -58,6 +58,7 @@ export interface Order {
   giftMessage: string | null;
   giftWrap: boolean;
   wrappingStyle: WrappingStyle | null;
+  hasPassepartout?: boolean;
 
   // Scheduled Delivery (GF-05)
   scheduledDeliveryDate: string | null;
