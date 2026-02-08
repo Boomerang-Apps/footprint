@@ -31,11 +31,15 @@ export interface OrderConfirmationParams {
   to: string;
   customerName: string;
   orderNumber: string;
-  items: OrderItem[];
+  items: NewOrderNotificationItem[];
   subtotal: number;
   shipping: number;
   total: number;
   shippingAddress: ShippingAddress;
+  customerPhone?: string;
+  isGift?: boolean;
+  giftMessage?: string;
+  createdAt?: string;
 }
 
 export interface StatusUpdateParams {
@@ -64,6 +68,7 @@ export interface NewOrderNotificationItem {
   size?: string;
   paper?: string;
   frame?: string;
+  hasPassepartout?: boolean;
 }
 
 export interface NewOrderNotificationParams {
@@ -95,6 +100,80 @@ export interface EmailResult {
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const DEFAULT_FROM_EMAIL = 'noreply@updates.footprint.co.il';
+
+// Hebrew translation maps for item specs
+const STYLE_NAMES_HE: Record<string, string> = {
+  pop_art: 'פופ ארט',
+  watercolor: 'צבעי מים',
+  line_art: 'ציור קווי',
+  oil_painting: 'ציור שמן',
+  romantic: 'רומנטי',
+  comic_book: 'קומיקס',
+  comic: 'קומיקס',
+  vintage: 'וינטג׳',
+  original: 'מקורי',
+};
+
+const PAPER_NAMES_HE: Record<string, string> = {
+  matte: 'נייר פיין ארט מט',
+  glossy: 'נייר צילום מבריק',
+  canvas: 'קנבס',
+};
+
+const FRAME_NAMES_HE: Record<string, string> = {
+  none: 'ללא מסגרת',
+  black: 'שחורה',
+  white: 'לבנה',
+  oak: 'אלון',
+};
+
+function translateSpec(value: string | undefined, map: Record<string, string>): string {
+  if (!value) return '';
+  const lower = value.toLowerCase().replace(/\s+/g, '_');
+  return map[lower] || map[value] || value;
+}
+
+// Frame border colors for visual preview in emails
+const FRAME_BORDER_COLORS: Record<string, string> = {
+  none: '',
+  black: '#1a1a1a',
+  white: '#ffffff',
+  oak: '#b8860b',
+};
+
+function getFrameImageStyle(frame: string | undefined): string {
+  if (!frame || frame === 'none') {
+    return 'max-width: 100%; max-height: 300px; border-radius: 8px; display: block; margin: 0 auto 8px;';
+  }
+  const color = FRAME_BORDER_COLORS[frame.toLowerCase()] || '';
+  if (!color) {
+    return 'max-width: 100%; max-height: 300px; border-radius: 8px; display: block; margin: 0 auto 8px;';
+  }
+  // White frame needs an outer shadow to be visible on white/light backgrounds
+  const shadow = frame.toLowerCase() === 'white' ? 'box-shadow: 0 0 0 1px #e5e5e5;' : '';
+  return `max-width: 100%; max-height: 300px; display: block; margin: 0 auto 8px; border: 8px solid ${color}; ${shadow}`;
+}
+
+/**
+ * Generates the complete image HTML for an email item, including
+ * passepartout (white mat border) when applicable.
+ */
+function getFrameImageHtml(item: NewOrderNotificationItem): string {
+  if (!item.imageUrl) return '';
+  const frame = item.frame;
+  const hasFrame = frame && frame !== 'none';
+  const color = hasFrame ? (FRAME_BORDER_COLORS[frame.toLowerCase()] || '') : '';
+
+  if (item.hasPassepartout && hasFrame && color) {
+    // Passepartout + frame: outer frame border → white padding → image
+    const shadow = frame.toLowerCase() === 'white' ? 'box-shadow: 0 0 0 1px #e5e5e5;' : '';
+    return `<div style="text-align: center;"><div style="display: inline-block; border: 8px solid ${color}; background: white; padding: 12px; ${shadow}"><img src="${item.imageUrl}" alt="${item.name}" style="max-width: 100%; max-height: 276px; display: block;" /></div></div>`;
+  }
+
+  // Default: use inline style (no passepartout)
+  const imgStyle = getFrameImageStyle(frame);
+  return `<div style="text-align: center;"><img src="${item.imageUrl}" alt="${item.name}" style="${imgStyle}" /></div>`;
+}
 
 /**
  * Gets Resend configuration from environment variables.
@@ -132,96 +211,164 @@ export function generateOrderNumber(): string {
 // ============================================================================
 
 /**
- * Generates HTML email template for order confirmation.
+ * Generates branded HTML email template for customer order confirmation.
+ * Hebrew RTL, Footprint brand styling matching the shop owner notification.
  */
 function generateOrderConfirmationHtml(params: OrderConfirmationParams): string {
-  const { customerName, orderNumber, items, subtotal, shipping, total, shippingAddress } = params;
+  const {
+    customerName, orderNumber, items, subtotal, shipping, total,
+    shippingAddress, isGift, giftMessage, createdAt,
+  } = params;
+
+  const timestampHtml = createdAt
+    ? `<p style="margin: 4px 0 0; color: #737373; font-size: 14px;">${formatDateHebrew(createdAt)}</p>`
+    : '';
 
   const itemsHtml = items
     .map(
-      (item) => `
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.name}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">₪${item.price.toFixed(2)}</td>
-        </tr>
-      `
+      (item) => {
+        const styleName = translateSpec(item.style, STYLE_NAMES_HE);
+        const paperName = translateSpec(item.paper, PAPER_NAMES_HE);
+        const frameName = translateSpec(item.frame, FRAME_NAMES_HE);
+        const specs = [
+          styleName ? `סגנון: ${styleName}` : '',
+          item.size ? `גודל: ${item.size}` : '',
+          paperName ? `נייר: ${paperName}` : '',
+          frameName && item.frame !== 'none' ? `מסגרת: ${frameName}` : '',
+          item.hasPassepartout ? 'פספרטו' : '',
+        ].filter(Boolean).join(' | ');
+
+        const imageHtml = getFrameImageHtml(item);
+
+        return `
+        <div style="background: #f5f5f5; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+          ${imageHtml}
+          <p style="margin: 8px 0 4px; font-weight: bold; font-size: 15px; color: #1a1a1a; text-align: center;">${styleName && item.size ? `${styleName} - ${item.size}` : item.name}</p>
+          ${specs ? `<p style="margin: 0 0 4px; color: #737373; font-size: 13px; text-align: center;">${specs}</p>` : ''}
+          <p style="margin: 0; color: #525252; font-size: 14px; text-align: center;">כמות: ${item.quantity} | מחיר: ₪${item.price.toFixed(2)}</p>
+        </div>`;
+      }
     )
     .join('');
 
+  const giftHtml = isGift
+    ? `
+    <div style="background: #fef3c7; border-radius: 12px; padding: 16px; margin-bottom: 24px; border: 1px solid #f59e0b;">
+      <h3 style="margin: 0 0 8px 0; color: #92400e;">🎁 הזמנת מתנה</h3>
+      ${giftMessage ? `<p style="margin: 0; color: #78350f;">"${giftMessage}"</p>` : '<p style="margin: 0; color: #78350f;">ללא הודעה</p>'}
+    </div>
+    `
+    : '';
+
   return `
 <!DOCTYPE html>
-<html>
+<html dir="rtl" lang="he">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Confirmation - ${orderNumber}</title>
+  <title>אישור הזמנה - ${orderNumber}</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px; direction: rtl; background: #fafafa;">
 
-  <div style="text-align: center; margin-bottom: 30px;">
-    <h1 style="color: #2563eb; margin: 0;">Footprint</h1>
-    <p style="color: #666; margin: 5px 0;">AI-Powered Photo Printing Studio</p>
+  <!-- Header -->
+  <div style="text-align: center; margin-bottom: 24px; padding: 28px 24px 20px; background: #1a1a1a; border-radius: 12px;">
+    <img src="https://www.footprint.co.il/footprint-logo-white-v2.svg" alt="Footprint" width="72" height="72" style="display: block; margin: 0 auto 12px;" />
+    <p style="color: #a3a3a3; margin: 0 0 16px; font-size: 14px;">תודה על ההזמנה!</p>
+    <div style="height: 3px; background: linear-gradient(to left, #8b5cf6, #ec4899); border-radius: 2px; width: 80px; margin: 0 auto;"></div>
   </div>
 
-  <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-    <h2 style="margin: 0 0 16px 0; color: #1e293b;">Order Confirmed! 🎉</h2>
-    <p style="margin: 0;">Hi ${customerName},</p>
-    <p>Thank you for your order! We're excited to create your custom art print.</p>
-    <p style="font-size: 18px; font-weight: bold; color: #2563eb;">Order #${orderNumber}</p>
+  <!-- Greeting -->
+  <div style="background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e5e5;">
+    <p style="margin: 0 0 8px; font-size: 16px;">שלום ${customerName},</p>
+    <p style="margin: 0; color: #525252;">ההזמנה שלך התקבלה בהצלחה! אנחנו כבר מתחילים להכין את היצירה שלך.</p>
   </div>
 
+  <!-- Order badge -->
+  <div style="background: #f5f3ff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #c4b5fd;">
+    <h2 style="margin: 0; color: #5b21b6; font-size: 20px;">הזמנה #${orderNumber}</h2>
+    ${timestampHtml}
+  </div>
+
+  <!-- Items -->
   <div style="margin-bottom: 24px;">
-    <h3 style="margin: 0 0 16px 0; color: #1e293b;">Order Details</h3>
-    <table style="width: 100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background: #f1f5f9;">
-          <th style="padding: 12px; text-align: left;">Item</th>
-          <th style="padding: 12px; text-align: center;">Qty</th>
-          <th style="padding: 12px; text-align: right;">Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${itemsHtml}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="2" style="padding: 12px; text-align: right;">Subtotal:</td>
-          <td style="padding: 12px; text-align: right;">₪${subtotal.toFixed(2)}</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="padding: 12px; text-align: right;">Shipping:</td>
-          <td style="padding: 12px; text-align: right;">₪${shipping.toFixed(2)}</td>
-        </tr>
-        <tr style="font-weight: bold; font-size: 18px;">
-          <td colspan="2" style="padding: 12px; text-align: right;">Total:</td>
-          <td style="padding: 12px; text-align: right; color: #2563eb;">₪${total.toFixed(2)}</td>
-        </tr>
-      </tfoot>
+    <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 16px;">🖼️ הפריטים שלך</h3>
+    ${itemsHtml}
+  </div>
+
+  <!-- Price breakdown -->
+  <div style="background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e5e5;">
+    <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 16px;">💰 סיכום מחירים</h3>
+    <table style="width: 100%;">
+      <tr>
+        <td style="padding: 6px 0; color: #737373;">סכום ביניים:</td>
+        <td style="padding: 6px 0; text-align: left; color: #525252;">₪${subtotal.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 0; color: #737373;">משלוח:</td>
+        <td style="padding: 6px 0; text-align: left; color: #525252;">₪${shipping.toFixed(2)}</td>
+      </tr>
+      <tr style="border-top: 2px solid #e5e5e5;">
+        <td style="padding: 10px 0 6px; font-weight: bold; font-size: 18px;">סה"כ:</td>
+        <td style="padding: 10px 0 6px; text-align: left; font-weight: bold; font-size: 18px; color: #8b5cf6;">₪${total.toFixed(2)}</td>
+      </tr>
     </table>
   </div>
 
-  <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-    <h3 style="margin: 0 0 16px 0; color: #1e293b;">Shipping Address</h3>
-    <p style="margin: 0;">
+  <!-- Shipping address -->
+  <div style="background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e5e5;">
+    <h3 style="margin: 0 0 12px 0; color: #1a1a1a; font-size: 16px;">📦 כתובת למשלוח</h3>
+    <p style="margin: 0; color: #525252;">
       ${shippingAddress.street}<br>
       ${shippingAddress.city}, ${shippingAddress.postalCode}<br>
       ${shippingAddress.country}
     </p>
   </div>
 
-  <div style="margin-bottom: 24px;">
-    <h3 style="margin: 0 0 16px 0; color: #1e293b;">What's Next?</h3>
-    <ol style="margin: 0; padding-left: 20px;">
-      <li>We'll start creating your custom art print</li>
-      <li>You'll receive a shipping confirmation with tracking</li>
-      <li>Your print will arrive within 5-7 business days</li>
-    </ol>
+  ${giftHtml}
+
+  <!-- Order Progress Stepper -->
+  <div style="background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e5e5;">
+    <h3 style="margin: 0 0 16px 0; color: #1a1a1a; font-size: 16px;">📍 מעקב הזמנה</h3>
+    <table width="100%" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+      <tr>
+        <!-- Step 1: Received (active) -->
+        <td width="25%" style="text-align: center; vertical-align: top;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #8b5cf6; margin: 0 auto 6px; line-height: 36px; color: #ffffff; font-size: 16px;">✓</div>
+          <p style="margin: 0; font-size: 12px; font-weight: bold; color: #8b5cf6;">התקבלה</p>
+        </td>
+        <!-- Step 2: Processing -->
+        <td width="25%" style="text-align: center; vertical-align: top;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #e9d5ff; margin: 0 auto 6px; line-height: 36px; color: #7c3aed; font-size: 14px;">⚙</div>
+          <p style="margin: 0; font-size: 12px; color: #a3a3a3;">בעיבוד</p>
+        </td>
+        <!-- Step 3: Printing -->
+        <td width="25%" style="text-align: center; vertical-align: top;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #f3f4f6; margin: 0 auto 6px; line-height: 36px; color: #a3a3a3; font-size: 14px;">🖨</div>
+          <p style="margin: 0; font-size: 12px; color: #a3a3a3;">בהדפסה</p>
+        </td>
+        <!-- Step 4: Shipped -->
+        <td width="25%" style="text-align: center; vertical-align: top;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #f3f4f6; margin: 0 auto 6px; line-height: 36px; color: #a3a3a3; font-size: 14px;">📦</div>
+          <p style="margin: 0; font-size: 12px; color: #a3a3a3;">נשלח</p>
+        </td>
+      </tr>
+      <!-- Progress bar row -->
+      <tr>
+        <td colspan="4" style="padding: 0 40px;">
+          <div style="height: 4px; background: #f3f4f6; border-radius: 2px; margin-top: -30px; position: relative;">
+            <div style="height: 4px; background: linear-gradient(to left, #e9d5ff, #8b5cf6); border-radius: 2px; width: 15%;"></div>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <p style="margin: 16px 0 0; color: #737373; font-size: 13px; text-align: center;">נעדכן אותך בכל שלב! צפי להגעה: 5-7 ימי עסקים</p>
   </div>
 
-  <div style="text-align: center; padding: 24px; border-top: 1px solid #eee; color: #666; font-size: 14px;">
-    <p>Questions? Reply to this email or contact us at support@footprint.co.il</p>
-    <p style="margin: 0;">© ${new Date().getFullYear()} Footprint. All rights reserved.</p>
+  <!-- Footer -->
+  <div style="text-align: center; padding: 20px 0 0;">
+    <div style="height: 2px; background: linear-gradient(to left, #8b5cf6, #ec4899); border-radius: 1px; margin-bottom: 16px;"></div>
+    <p style="margin: 0 0 8px; color: #737373; font-size: 13px;">שאלות? השב/י למייל זה או צור/צרי קשר ב-support@footprint.co.il</p>
+    <p style="margin: 0; color: #a3a3a3; font-size: 13px;">&copy; ${new Date().getFullYear()} Footprint | www.footprint.co.il</p>
   </div>
 
 </body>
@@ -246,9 +393,9 @@ export async function sendOrderConfirmationEmail(
     const config = getResendConfig();
 
     const emailBody = {
-      from: config.fromEmail,
+      from: `Footprint <${config.fromEmail}>`,
       to: params.to,
-      subject: `Order Confirmed! Your Footprint Order ${params.orderNumber}`,
+      subject: `אישור הזמנה - Footprint #${params.orderNumber}`,
       html: generateOrderConfirmationHtml(params),
     };
 
@@ -674,22 +821,28 @@ function generateNewOrderNotificationHtml(params: NewOrderNotificationParams): s
   const itemsHtml = items
     .map(
       (item) => {
+        const styleName = translateSpec(item.style, STYLE_NAMES_HE);
+        const paperName = translateSpec(item.paper, PAPER_NAMES_HE);
+        const frameName = translateSpec(item.frame, FRAME_NAMES_HE);
         const specs = [
-          item.style ? `סגנון: ${item.style}` : '',
+          styleName ? `סגנון: ${styleName}` : '',
           item.size ? `גודל: ${item.size}` : '',
-          item.paper ? `נייר: ${item.paper}` : '',
-          item.frame ? `מסגרת: ${item.frame}` : '',
+          paperName ? `נייר: ${paperName}` : '',
+          frameName && item.frame !== 'none' ? `מסגרת: ${frameName}` : '',
+          item.hasPassepartout ? 'פספרטו' : '',
         ].filter(Boolean).join(' | ');
 
         const downloadLink = item.imageUrl
           ? `<a href="${item.imageUrl}" target="_blank" style="display: inline-block; margin-top: 8px; color: #8b5cf6; font-size: 13px; text-decoration: none;">📥 הורד תמונה</a>`
           : '';
 
+        const imageHtml = getFrameImageHtml(item);
+
         return `
         <div style="background: #f5f5f5; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-          ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}" style="max-width: 100%; max-height: 300px; border-radius: 8px; display: block; margin-bottom: 8px;" />` : ''}
+          ${imageHtml}
           ${downloadLink}
-          <p style="margin: 8px 0 4px; font-weight: bold; font-size: 15px; color: #1a1a1a;">${item.name}</p>
+          <p style="margin: 8px 0 4px; font-weight: bold; font-size: 15px; color: #1a1a1a;">${styleName && item.size ? `${styleName} - ${item.size}` : item.name}</p>
           ${specs ? `<p style="margin: 0 0 4px; color: #737373; font-size: 13px;">${specs}</p>` : ''}
           <p style="margin: 0; color: #525252; font-size: 14px;">כמות: ${item.quantity} | מחיר: ₪${item.price.toFixed(2)}</p>
         </div>`;
