@@ -7,10 +7,12 @@ global.fetch = mockFetch;
 // Import after mocking
 import {
   sendOrderConfirmationEmail,
+  sendNewOrderNotificationEmail,
   generateWhatsAppShareUrl,
   generateOrderNumber,
   getResendConfig,
   type OrderConfirmationParams,
+  type NewOrderNotificationParams,
 } from './resend';
 
 describe('Email Service', () => {
@@ -42,7 +44,7 @@ describe('Email Service', () => {
       vi.stubEnv('EMAIL_FROM', '');
       const config = getResendConfig();
 
-      expect(config.fromEmail).toBe('noreply@footprint.co.il');
+      expect(config.fromEmail).toBe('noreply@updates.footprint.co.il');
     });
   });
 
@@ -187,6 +189,148 @@ describe('Email Service', () => {
       const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
       expect(callBody.html).toContain('Pop Art Print - A4');
       expect(callBody.html).toContain('Watercolor Print - A3');
+    });
+  });
+
+  describe('sendNewOrderNotificationEmail', () => {
+    const validNotificationParams: NewOrderNotificationParams = {
+      orderNumber: 'FP-20231223-ABC123',
+      customerName: 'John Doe',
+      customerEmail: 'john@example.com',
+      items: [
+        {
+          name: 'Pop Art Print - A4',
+          quantity: 1,
+          price: 158,
+          imageUrl: 'https://cdn.footprint.co.il/transformed/abc123.jpg',
+          style: 'Pop Art',
+          size: 'A4',
+          paper: 'Glossy',
+          frame: 'Black',
+        },
+      ],
+      total: 183,
+      shippingAddress: {
+        street: '123 Main St',
+        city: 'Tel Aviv',
+        postalCode: '12345',
+        country: 'Israel',
+      },
+      isGift: false,
+    };
+
+    it('should send notification to orders@footprint.co.il', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'email_notify_123' }),
+      });
+
+      const result = await sendNewOrderNotificationEmail(validNotificationParams);
+
+      expect(result.success).toBe(true);
+      expect(result.emailId).toBe('email_notify_123');
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(callBody.to).toBe('orders@footprint.co.il');
+    });
+
+    it('should include image URL in HTML body', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'email_123' }),
+      });
+
+      await sendNewOrderNotificationEmail(validNotificationParams);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(callBody.html).toContain('https://cdn.footprint.co.il/transformed/abc123.jpg');
+      expect(callBody.html).toContain('<img');
+    });
+
+    it('should include order details in email', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'email_123' }),
+      });
+
+      await sendNewOrderNotificationEmail(validNotificationParams);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(callBody.html).toContain('FP-20231223-ABC123');
+      expect(callBody.html).toContain('John Doe');
+      expect(callBody.html).toContain('john@example.com');
+      expect(callBody.html).toContain('183.00');
+      expect(callBody.html).toContain('Tel Aviv');
+    });
+
+    it('should include Hebrew subject with order number and customer name', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'email_123' }),
+      });
+
+      await sendNewOrderNotificationEmail(validNotificationParams);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(callBody.subject).toContain('הזמנה חדשה!');
+      expect(callBody.subject).toContain('FP-20231223-ABC123');
+      expect(callBody.subject).toContain('John Doe');
+    });
+
+    it('should include item customization details', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'email_123' }),
+      });
+
+      await sendNewOrderNotificationEmail(validNotificationParams);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(callBody.html).toContain('Pop Art');
+      expect(callBody.html).toContain('A4');
+      expect(callBody.html).toContain('Glossy');
+      expect(callBody.html).toContain('Black');
+    });
+
+    it('should show gift info when isGift is true', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'email_123' }),
+      });
+
+      const giftParams: NewOrderNotificationParams = {
+        ...validNotificationParams,
+        isGift: true,
+        giftMessage: 'Happy birthday!',
+      };
+
+      await sendNewOrderNotificationEmail(giftParams);
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(callBody.html).toContain('הזמנת מתנה');
+      expect(callBody.html).toContain('Happy birthday!');
+    });
+
+    it('should handle API error gracefully', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ message: 'Internal server error' }),
+      });
+
+      const result = await sendNewOrderNotificationEmail(validNotificationParams);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Internal server error');
+    });
+
+    it('should handle network error gracefully', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Connection refused'));
+
+      const result = await sendNewOrderNotificationEmail(validNotificationParams);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Connection refused');
     });
   });
 

@@ -55,6 +55,28 @@ export interface TrackingNotificationParams {
   trackingUrl: string | null;
 }
 
+export interface NewOrderNotificationItem {
+  name: string;
+  quantity: number;
+  price: number;
+  imageUrl?: string;
+  style?: string;
+  size?: string;
+  paper?: string;
+  frame?: string;
+}
+
+export interface NewOrderNotificationParams {
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  items: NewOrderNotificationItem[];
+  total: number;
+  shippingAddress: ShippingAddress;
+  isGift: boolean;
+  giftMessage?: string;
+}
+
 export interface EmailResult {
   success: boolean;
   emailId?: string;
@@ -66,7 +88,7 @@ export interface EmailResult {
 // ============================================================================
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
-const DEFAULT_FROM_EMAIL = 'noreply@footprint.co.il';
+const DEFAULT_FROM_EMAIL = 'noreply@updates.footprint.co.il';
 
 /**
  * Gets Resend configuration from environment variables.
@@ -542,6 +564,175 @@ export async function sendTrackingNotificationEmail(
       to: params.to,
       subject,
       html: generateTrackingNotificationHtml(params),
+    };
+
+    const response = await fetch(RESEND_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify(emailBody),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = (errorData as { message?: string }).message || `HTTP ${response.status}`;
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      emailId: (data as { id: string }).id,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      error: message,
+    };
+  }
+}
+
+// ============================================================================
+// New Order Notification Email (Internal - to shop owner)
+// ============================================================================
+
+const OWNER_EMAIL = 'orders@footprint.co.il';
+
+/**
+ * Generates HTML email template for internal new-order notification.
+ * Hebrew, RTL, shows transformed image inline.
+ */
+function generateNewOrderNotificationHtml(params: NewOrderNotificationParams): string {
+  const { orderNumber, customerName, customerEmail, items, total, shippingAddress, isGift, giftMessage } = params;
+
+  const itemsHtml = items
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">
+            ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: block; margin-bottom: 8px;" />` : ''}
+            <strong>${item.name}</strong>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center; vertical-align: top;">${item.quantity}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top;">₪${item.price.toFixed(2)}</td>
+        </tr>
+        ${item.style || item.size || item.paper || item.frame ? `
+        <tr>
+          <td colspan="3" style="padding: 4px 12px 12px; border-bottom: 1px solid #ddd; color: #666; font-size: 13px;">
+            ${item.style ? `סגנון: ${item.style}` : ''}
+            ${item.size ? ` | גודל: ${item.size}` : ''}
+            ${item.paper ? ` | נייר: ${item.paper}` : ''}
+            ${item.frame ? ` | מסגרת: ${item.frame}` : ''}
+          </td>
+        </tr>
+        ` : ''}
+      `
+    )
+    .join('');
+
+  const giftHtml = isGift
+    ? `
+    <div style="background: #fef3c7; border-radius: 12px; padding: 16px; margin-bottom: 24px; border: 1px solid #f59e0b;">
+      <h3 style="margin: 0 0 8px 0; color: #92400e;">🎁 הזמנת מתנה</h3>
+      ${giftMessage ? `<p style="margin: 0; color: #78350f;">"${giftMessage}"</p>` : '<p style="margin: 0; color: #78350f;">ללא הודעה</p>'}
+    </div>
+    `
+    : '';
+
+  return `
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>הזמנה חדשה - ${orderNumber}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; direction: rtl;">
+
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #2563eb; margin: 0;">Footprint</h1>
+    <p style="color: #666; margin: 5px 0;">הזמנה חדשה התקבלה!</p>
+  </div>
+
+  <div style="background: #ecfdf5; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #10b981;">
+    <h2 style="margin: 0 0 16px 0; color: #065f46;">הזמנה חדשה #${orderNumber}</h2>
+    <table style="width: 100%;">
+      <tr>
+        <td style="padding: 4px 0; color: #666;">לקוח:</td>
+        <td style="padding: 4px 0; font-weight: bold;">${customerName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #666;">אימייל:</td>
+        <td style="padding: 4px 0;">${customerEmail}</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #666;">סה"כ:</td>
+        <td style="padding: 4px 0; font-weight: bold; font-size: 18px; color: #2563eb;">₪${total.toFixed(2)}</td>
+      </tr>
+    </table>
+  </div>
+
+  ${giftHtml}
+
+  <div style="margin-bottom: 24px;">
+    <h3 style="margin: 0 0 16px 0; color: #1e293b;">פריטים</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #f1f5f9;">
+          <th style="padding: 12px; text-align: right;">פריט</th>
+          <th style="padding: 12px; text-align: center;">כמות</th>
+          <th style="padding: 12px; text-align: left;">מחיר</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+    <h3 style="margin: 0 0 16px 0; color: #1e293b;">כתובת למשלוח</h3>
+    <p style="margin: 0;">
+      ${shippingAddress.street}<br>
+      ${shippingAddress.city}, ${shippingAddress.postalCode}<br>
+      ${shippingAddress.country}
+    </p>
+  </div>
+
+  <div style="text-align: center; padding: 24px; border-top: 1px solid #eee; color: #666; font-size: 14px;">
+    <p style="margin: 0;">© ${new Date().getFullYear()} Footprint</p>
+  </div>
+
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Sends a new order notification email to the shop owner.
+ *
+ * @param params - New order notification parameters
+ * @returns Email result with success status and email ID
+ */
+export async function sendNewOrderNotificationEmail(
+  params: NewOrderNotificationParams
+): Promise<EmailResult> {
+  try {
+    const config = getResendConfig();
+
+    const subject = `הזמנה חדשה! ${params.orderNumber} - ${params.customerName}`;
+
+    const emailBody = {
+      from: config.fromEmail,
+      to: OWNER_EMAIL,
+      subject,
+      html: generateNewOrderNotificationHtml(params),
     };
 
     const response = await fetch(RESEND_API_URL, {
