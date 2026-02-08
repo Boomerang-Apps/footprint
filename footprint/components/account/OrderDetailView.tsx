@@ -346,6 +346,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
                 key={item.id || index}
                 item={item}
                 onImageClick={handleImageClick}
+                hasPassepartout={order.hasPassepartout}
               />
             ))}
           </CardContent>
@@ -514,24 +515,55 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
 interface OrderItemCardProps {
   item: OrderItem;
   onImageClick: (url: string) => void;
+  hasPassepartout?: boolean;
 }
 
-function OrderItemCard({ item, onImageClick }: OrderItemCardProps): React.ReactElement {
+// Frame border colors for visual representation
+const FRAME_COLORS: Record<string, string> = {
+  black: '#1a1a1a',
+  white: '#ffffff',
+  oak: '#b8860b',
+};
+
+function getFrameStyle(frameType: string | undefined): React.CSSProperties {
+  const color = FRAME_COLORS[frameType || ''];
+  if (!color) return {};
+  return {
+    border: `4px solid ${color}`,
+    ...(frameType === 'white' ? { boxShadow: '0 0 0 1px #e5e5e5' } : {}),
+  };
+}
+
+function OrderItemCard({ item, onImageClick, hasPassepartout }: OrderItemCardProps): React.ReactElement {
   const imageUrl = item.transformedImageUrl || item.originalImageUrl;
+  const hasFrame = item.frameType && item.frameType !== 'none';
+  const frameStyle = getFrameStyle(item.frameType);
+  const showPassepartout = hasPassepartout && hasFrame;
 
   return (
     <div className="flex gap-4 p-3 bg-gray-50 rounded-xl">
       <button
         onClick={() => onImageClick(imageUrl)}
-        className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-xl"
+        className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-purple-500 rounded"
       >
-        <Image
-          src={imageUrl}
-          alt={styleTranslations[item.style] || item.style}
-          width={80}
-          height={80}
-          className="w-20 h-20 object-cover rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
-        />
+        <div
+          className="overflow-hidden bg-gray-100"
+          style={{
+            borderRadius: hasFrame ? '2px' : '12px',
+            ...frameStyle,
+            ...(showPassepartout ? { padding: '4px', background: 'white' } : {}),
+            width: showPassepartout ? '88px' : '80px',
+            height: showPassepartout ? '121px' : '113px',
+          }}
+        >
+          <Image
+            src={imageUrl}
+            alt={styleTranslations[item.style] || item.style}
+            width={80}
+            height={113}
+            className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+          />
+        </div>
       </button>
       <div className="flex-1 min-w-0">
         <h4 className="text-sm font-semibold text-gray-900">
@@ -541,7 +573,7 @@ function OrderItemCard({ item, onImageClick }: OrderItemCardProps): React.ReactE
           {item.size} • {paperTranslations[item.paperType] || item.paperType}
         </p>
         <p className="text-xs text-gray-500">
-          {frameTranslations[item.frameType] || item.frameType}
+          {frameTranslations[item.frameType] || item.frameType}{showPassepartout ? ' • פספרטו' : ''}
         </p>
         <div className="mt-2">
           <PriceDisplay amount={item.price} size="sm" locale="he" />
