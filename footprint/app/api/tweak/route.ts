@@ -164,25 +164,26 @@ export async function POST(
     let outputBase64: string;
     let outputMimeType: string;
 
-    if (isBackgroundRemoval) {
+    if (isBackgroundRemoval && isRemoveBgConfigured()) {
       // Use Remove.bg API for background removal
-      if (!isRemoveBgConfigured()) {
-        return NextResponse.json(
-          { error: 'Background removal service not configured. Please add REMOVEBG_API_KEY to environment.' },
-          { status: 503 }
-        );
-      }
-
       try {
         logger.info('Using Remove.bg for background removal');
         outputBase64 = await removeBackground(imageUrl);
         outputMimeType = 'image/png'; // Remove.bg always returns PNG with transparency
       } catch (error) {
+        // Remove.bg failed (e.g., can't identify foreground in artistic images)
         logger.error('Remove.bg error', error);
+
+        const errorMessage = error instanceof Error ? error.message : 'Failed to remove background';
+        const userMessage = errorMessage.includes('Could not identify foreground')
+          ? 'לא ניתן לזהות את הנושא בתמונה. הסרת רקע עובדת הכי טוב עם נושאים ברורים ורקע פשוט. נסו תמונה אחרת.'
+          : 'שגיאה בהסרת הרקע. אנא נסו שוב מאוחר יותר.';
+
         return NextResponse.json(
           {
-            error: error instanceof Error ? error.message : 'Failed to remove background',
+            error: userMessage,
             code: 'REMOVEBG_FAILED',
+            details: errorMessage
           },
           { status: 500 }
         );

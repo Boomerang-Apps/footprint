@@ -95,7 +95,6 @@ export default function TweakPage() {
   const [activeTab, setActiveTab] = useState<ToolTab>('color');
   const [isApplyingPrompt, setIsApplyingPrompt] = useState(false);
   const [promptError, setPromptError] = useState<string | null>(null);
-  const [customPrompt, setCustomPrompt] = useState('');
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -202,39 +201,6 @@ export default function TweakPage() {
       setIsTransforming(false);
     }
   }, [originalImage, selectedStyle, isRegenerating, setTransformedImage, setIsTransforming, resetTweakSettings]);
-
-  // Apply custom prompt via nano-banana
-  const handleApplyPrompt = useCallback(async () => {
-    if (!transformedImage || isApplyingPrompt || !customPrompt.trim()) return;
-
-    setIsApplyingPrompt(true);
-    setPromptError(null);
-
-    try {
-      const response = await fetch('/api/tweak', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageUrl: transformedImage,
-          prompt: customPrompt.trim(),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to apply prompt');
-      }
-
-      setTransformedImage(data.imageUrl);
-      setCustomPrompt(''); // Clear prompt after success
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'שגיאה בעריכת התמונה';
-      setPromptError(message);
-    } finally {
-      setIsApplyingPrompt(false);
-    }
-  }, [transformedImage, isApplyingPrompt, customPrompt, setTransformedImage]);
 
   // Handle quick action button clicks
   const handleQuickAction = useCallback(async (action: QuickAction) => {
@@ -549,7 +515,7 @@ export default function TweakPage() {
 
             {/* AI Edit Panel */}
             {activeTab === 'ai' && (
-              <div className="py-2 space-y-2">
+              <div className="py-2">
                 {/* Quick Action Buttons */}
                 <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
                   {QUICK_ACTIONS.map((action) => (
@@ -571,42 +537,6 @@ export default function TweakPage() {
                     </button>
                   ))}
                 </div>
-
-                {/* Custom Prompt Textarea */}
-                <textarea
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="תארו את השינוי הרצוי... לדוגמה: הסר את הרקע, שנה את הרקע לשקיעה, הוסף אפקט עשן"
-                  className="w-full h-20 px-3 py-2 text-sm border border-zinc-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  dir="rtl"
-                />
-                <button
-                  onClick={handleApplyPrompt}
-                  disabled={isApplyingPrompt || !customPrompt.trim()}
-                  className={`
-                    w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition
-                    ${isApplyingPrompt
-                      ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                      : !customPrompt.trim()
-                        ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90'}
-                  `}
-                >
-                  {isApplyingPrompt ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>מעבד...</span>
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="w-4 h-4" />
-                      <span>החל שינוי</span>
-                    </>
-                  )}
-                </button>
-                {promptError && (
-                  <p className="text-xs text-red-500 text-center">{promptError}</p>
-                )}
               </div>
             )}
           </div>
