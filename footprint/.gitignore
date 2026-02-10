@@ -28,3 +28,10 @@ __pycache__/
 storybook-static
 storybook-static
 *.bak
+
+# Screenshots and documentation images
+*.png
+!public/**/*.png
+
+# Playwright MCP
+.playwright-mcp/
