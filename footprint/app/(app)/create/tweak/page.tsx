@@ -14,6 +14,11 @@ import {
   Check,
   Loader2,
   AlertCircle,
+  X,
+  ImagePlus,
+  Zap,
+  User,
+  Maximize,
 } from 'lucide-react';
 import { useOrderStore, type TweakSettings } from '@/stores/orderStore';
 import { logger } from '@/lib/logger';
@@ -41,6 +46,21 @@ const COLOR_FILTERS: ColorFilter[] = [
   { id: 'cool', name: 'Cool', nameHe: 'קר', style: 'hue-rotate(20deg) saturate(0.9)' },
   { id: 'vintage', name: 'Vintage', nameHe: 'וינטג׳', style: 'sepia(0.5) contrast(1.1) brightness(0.95)' },
   { id: 'bw', name: 'B&W', nameHe: 'שחור-לבן', style: 'grayscale(1)' },
+];
+
+interface QuickAction {
+  id: string;
+  label: string;
+  icon: typeof X;
+  prompt: string;
+}
+
+const QUICK_ACTIONS: QuickAction[] = [
+  { id: 'remove-bg', label: 'הסר רקע', icon: X, prompt: 'Remove the background completely and make it transparent or white' },
+  { id: 'change-bg', label: 'שנה רקע', icon: ImagePlus, prompt: 'Change the background to a beautiful scenic sunset landscape' },
+  { id: 'enhance', label: 'שפר', icon: Zap, prompt: 'Enhance the image quality, improve sharpness, colors and lighting while keeping the artistic style' },
+  { id: 'face-fix', label: 'תקן פנים', icon: User, prompt: 'Fix and enhance the faces in the image, make them more detailed and natural looking' },
+  { id: 'upscale', label: 'הגדל', icon: Maximize, prompt: 'Upscale and enhance the image resolution, add more detail and clarity' },
 ];
 
 // Fun facts and tips to show during loading
@@ -215,6 +235,38 @@ export default function TweakPage() {
       setIsApplyingPrompt(false);
     }
   }, [transformedImage, isApplyingPrompt, customPrompt, setTransformedImage]);
+
+  // Handle quick action button clicks
+  const handleQuickAction = useCallback(async (action: QuickAction) => {
+    if (!transformedImage || isApplyingPrompt) return;
+
+    setIsApplyingPrompt(true);
+    setPromptError(null);
+
+    try {
+      const response = await fetch('/api/tweak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: transformedImage,
+          prompt: action.prompt,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to apply edit');
+      }
+
+      setTransformedImage(data.imageUrl);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'שגיאה בעריכת התמונה';
+      setPromptError(message);
+    } finally {
+      setIsApplyingPrompt(false);
+    }
+  }, [transformedImage, isApplyingPrompt, setTransformedImage]);
 
   // Reset all tweaks
   const handleReset = useCallback(() => {
@@ -497,7 +549,30 @@ export default function TweakPage() {
 
             {/* AI Edit Panel */}
             {activeTab === 'ai' && (
-              <div className="py-2 space-y-3">
+              <div className="py-2 space-y-2">
+                {/* Quick Action Buttons */}
+                <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+                  {QUICK_ACTIONS.map((action) => (
+                    <button
+                      key={action.id}
+                      onClick={() => handleQuickAction(action)}
+                      disabled={isApplyingPrompt}
+                      className="flex flex-col items-center gap-1.5 flex-shrink-0 group"
+                    >
+                      <div className={`
+                        w-14 h-14 rounded-2xl flex items-center justify-center transition
+                        ${isApplyingPrompt
+                          ? 'bg-zinc-100 text-zinc-300'
+                          : 'bg-zinc-100 text-zinc-600 group-hover:bg-purple-100 group-hover:text-purple-600 group-active:scale-95'}
+                      `}>
+                        <action.icon className="w-6 h-6" />
+                      </div>
+                      <span className="text-[11px] font-medium text-zinc-600 whitespace-nowrap">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Prompt Textarea */}
                 <textarea
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
