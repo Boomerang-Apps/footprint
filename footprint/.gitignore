@@ -27,3 +27,4 @@ __pycache__/
 *storybook.log
 storybook-static
 storybook-static
+*.bak
