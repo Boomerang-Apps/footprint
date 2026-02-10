@@ -165,34 +165,28 @@ export async function POST(
     let outputMimeType: string;
 
     if (isBackgroundRemoval && isRemoveBgConfigured()) {
-      // Try Remove.bg API first for background removal
+      // Use Remove.bg API for background removal
       try {
         logger.info('Using Remove.bg for background removal');
         outputBase64 = await removeBackground(imageUrl);
         outputMimeType = 'image/png'; // Remove.bg always returns PNG with transparency
       } catch (error) {
         // Remove.bg failed (e.g., can't identify foreground in artistic images)
-        // Fall back to Gemini for background removal
-        logger.warn('Remove.bg failed, falling back to Gemini', error);
+        logger.error('Remove.bg error', error);
 
-        const fallbackPrompt = `Remove the background completely and make it transparent or white. Important: Carefully identify the main subject and remove everything else in the background.`;
+        const errorMessage = error instanceof Error ? error.message : 'Failed to remove background';
+        const userMessage = errorMessage.includes('Could not identify foreground')
+          ? 'לא ניתן לזהות את הנושא בתמונה. הסרת רקע עובדת הכי טוב עם נושאים ברורים ורקע פשוט. נסו תמונה אחרת.'
+          : 'שגיאה בהסרת הרקע. אנא נסו שוב מאוחר יותר.';
 
-        const editResult = await nanoBanana({
-          imageBase64,
-          mimeType,
-          prompt: fallbackPrompt,
-        });
-
-        if (!editResult.success || !editResult.base64) {
-          logger.error('Gemini fallback failed', editResult.error);
-          return NextResponse.json(
-            { error: editResult.error || 'Failed to remove background' },
-            { status: 500 }
-          );
-        }
-
-        outputBase64 = editResult.base64;
-        outputMimeType = editResult.mimeType || 'image/png';
+        return NextResponse.json(
+          {
+            error: userMessage,
+            code: 'REMOVEBG_FAILED',
+            details: errorMessage
+          },
+          { status: 500 }
+        );
       }
     } else {
       // Use Gemini for other AI edits (enhance, change background, etc.)
