@@ -12,6 +12,9 @@ import fs from 'fs';
  * These tests verify page accessibility and basic structure.
  */
 
+// Skip API tests that require Supabase when env vars aren't set
+const hasSupabase = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
 // Test fixture paths
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 const TEST_IMAGE_PATH = path.join(FIXTURES_DIR, 'test-image.jpg');
@@ -176,6 +179,7 @@ test.describe('User Flow E2E', () => {
     });
 
     test('checkout API requires authentication', async ({ page }) => {
+      test.skip(!hasSupabase, 'Requires Supabase env vars');
       const response = await page.request.post('/api/checkout', {
         headers: { 'Content-Type': 'application/json' },
         data: { items: [] }
@@ -204,6 +208,7 @@ test.describe('User Flow E2E', () => {
     });
 
     test('invalid API request does not crash server', async ({ page }) => {
+      test.skip(!hasSupabase, 'Requires Supabase env vars');
       const response = await page.request.post('/api/checkout', {
         headers: { 'Content-Type': 'application/json' },
         data: { invalid: 'data' }
@@ -216,6 +221,7 @@ test.describe('User Flow E2E', () => {
 
   test.describe('Security', () => {
     test('webhook endpoint rejects unsigned requests', async ({ page }) => {
+      test.skip(!hasSupabase, 'Requires Supabase env vars');
       const response = await page.request.post('/api/webhooks/payplus', {
         headers: { 'Content-Type': 'application/json' },
         data: { fake: 'webhook' }
@@ -227,6 +233,7 @@ test.describe('User Flow E2E', () => {
     });
 
     test('admin API requires authentication', async ({ page }) => {
+      test.skip(!hasSupabase, 'Requires Supabase env vars');
       const response = await page.request.get('/api/admin/orders');
 
       // Should return 401 or 403, not 200 or 500
