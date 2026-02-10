@@ -49,7 +49,7 @@ const mockOrder: Order = {
     postalCode: '6100001',
     country: 'Israel',
   },
-  stripePaymentIntentId: null,
+  paymentTransactionId: null,
   paidAt: new Date('2024-12-20T09:00:00'),
   trackingNumber: 'IL123456789',
   carrier: 'Israel Post',

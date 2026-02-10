@@ -21,12 +21,6 @@ importers:
       '@sentry/nextjs':
         specifier: ^10.37.0
         version: 10.38.0(@opentelemetry/context-async-hooks@2.5.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.5.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.5.0(@opentelemetry/api@1.9.0))(next@15.5.12(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.104.1(esbuild@0.27.2))
-      '@stripe/react-stripe-js':
-        specifier: ^2.5.0
-        version: 2.9.0(@stripe/stripe-js@3.5.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@stripe/stripe-js':
-        specifier: ^3.0.0
-        version: 3.5.0
       '@supabase/ssr':
         specifier: ^0.8.0
         version: 0.8.0(@supabase/supabase-js@2.93.3)
@@ -78,9 +72,6 @@ importers:
       smartcrop-sharp:
         specifier: ^2.0.8
         version: 2.0.8(sharp@0.34.5)
-      stripe:
-        specifier: ^14.21.0
-        version: 14.25.0
       tailwind-merge:
         specifier: ^2.2.0
         version: 2.6.1
@@ -1835,17 +1826,6 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
-
-  '@stripe/react-stripe-js@2.9.0':
-    resolution: {integrity: sha512-+/j2g6qKAKuWSurhgRMfdlIdKM+nVVJCy/wl0US2Ccodlqx0WqfIIBhUkeONkCG+V/b+bZzcj4QVa3E/rXtT4Q==}
-    peerDependencies:
-      '@stripe/stripe-js': ^1.44.1 || ^2.0.0 || ^3.0.0 || ^4.0.0
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-
-  '@stripe/stripe-js@3.5.0':
-    resolution: {integrity: sha512-pKS3wZnJoL1iTyGBXAvCwduNNeghJHY6QSRSNNvpYnrrQrLZ6Owsazjyynu0e0ObRgks0i7Rv+pe2M7/MBTZpQ==}
-    engines: {node: '>=12.16'}
 
   '@supabase/auth-js@2.93.3':
     resolution: {integrity: sha512-JdnkHZPKexVGSNONtu89RHU4bxz3X9kxx+f5ZnR5osoCIX+vs/MckwWRPZEybAEvlJXt5xjomDb3IB876QCxWQ==}
@@ -3964,10 +3944,6 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
-  qs@6.14.1:
-    resolution: {integrity: sha512-4EK3+xJl8Ts67nLYNwqw/dsFVnCf+qR7RgXSK9jEEm9unao3njwMDdmsdvoKBKHzxd7tCYz5e5M+SnMjdtXGQQ==}
-    engines: {node: '>=0.6'}
-
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
@@ -4297,10 +4273,6 @@ packages:
   strip-json-comments@3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
-
-  stripe@14.25.0:
-    resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
-    engines: {node: '>=12.*'}
 
   strnum@2.1.2:
     resolution: {integrity: sha512-l63NF9y/cLROq/yqKXSLtcMeeyOfnSQlfMSlzFt/K73oIaD8DGaQWd7Z34X9GPiKqP5rbSh84Hl4bOlLcjiSrQ==}
@@ -6849,15 +6821,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@stripe/react-stripe-js@2.9.0(@stripe/stripe-js@3.5.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      '@stripe/stripe-js': 3.5.0
-      prop-types: 15.8.1
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-
-  '@stripe/stripe-js@3.5.0': {}
-
   '@supabase/auth-js@2.93.3':
     dependencies:
       tslib: 2.8.1
@@ -9200,10 +9163,6 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  qs@6.14.1:
-    dependencies:
-      side-channel: 1.1.0
-
   queue-microtask@1.2.3: {}
 
   randombytes@2.1.0:
@@ -9680,11 +9639,6 @@ snapshots:
   strip-indent@4.1.1: {}
 
   strip-json-comments@3.1.1: {}
-
-  stripe@14.25.0:
-    dependencies:
-      '@types/node': 20.19.30
-      qs: 6.14.1
 
   strnum@2.1.2: {}
 

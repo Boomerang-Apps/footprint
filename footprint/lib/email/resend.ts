@@ -764,7 +764,6 @@ function formatPaymentProvider(provider?: string): string {
   if (!provider) return 'לא צוין';
   const providers: Record<string, string> = {
     payplus: 'PayPlus',
-    stripe: 'Stripe',
   };
   return providers[provider] || provider;
 }

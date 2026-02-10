@@ -123,7 +123,7 @@ export const supabaseClient: ApiClient = {
         scheduledDeliveryDate: null,
         shippingAddress: { name: '', street: '', city: '', postalCode: '', country: '' },
         billingAddress: { name: '', street: '', city: '', postalCode: '', country: '' },
-        stripePaymentIntentId: null,
+        paymentTransactionId: null,
         paidAt: null,
         shippedAt: null,
         deliveredAt: null,

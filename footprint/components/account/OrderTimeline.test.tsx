@@ -20,7 +20,7 @@ const createMockOrder = (overrides: Partial<Order> = {}): Order => ({
   scheduledDeliveryDate: null,
   shippingAddress: { name: 'Test', street: 'Test St', city: 'Tel Aviv', postalCode: '12345', country: 'Israel' },
   billingAddress: { name: 'Test', street: 'Test St', city: 'Tel Aviv', postalCode: '12345', country: 'Israel' },
-  stripePaymentIntentId: null,
+  paymentTransactionId: null,
   paidAt: new Date('2024-12-20T10:00:00'),
   trackingNumber: null,
   carrier: null,

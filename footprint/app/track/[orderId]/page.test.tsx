@@ -128,7 +128,7 @@ const mockOrder: Order = {
     postalCode: '12345',
     country: 'Israel',
   },
-  stripePaymentIntentId: 'pi_123456789',
+  paymentTransactionId: 'pi_123456789',
   paidAt: new Date('2024-01-10T11:00:00Z'),
   trackingNumber: 'RR123456789IL',
   carrier: 'israel_post',

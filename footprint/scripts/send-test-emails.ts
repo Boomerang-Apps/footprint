@@ -75,7 +75,7 @@ function formatDateHebrew(isoDate: string): string {
 
 function formatPaymentProvider(provider?: string): string {
   if (!provider) return 'לא צוין';
-  const providers: Record<string, string> = { payplus: 'PayPlus', stripe: 'Stripe' };
+  const providers: Record<string, string> = { payplus: 'PayPlus' };
   return providers[provider] || provider;
 }
 

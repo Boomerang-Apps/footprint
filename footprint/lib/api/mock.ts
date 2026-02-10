@@ -137,7 +137,7 @@ export const mockClient: ApiClient = {
         scheduledDeliveryDate: input.scheduledDeliveryDate || null,
         shippingAddress: input.shippingAddress,
         billingAddress: input.billingAddress || input.shippingAddress,
-        stripePaymentIntentId: null,
+        paymentTransactionId: null,
         paidAt: null,
         trackingNumber: null,
         carrier: null,

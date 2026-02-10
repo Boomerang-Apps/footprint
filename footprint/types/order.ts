@@ -68,7 +68,7 @@ export interface Order {
   billingAddress: Address;
   
   // Payment
-  stripePaymentIntentId: string | null;
+  paymentTransactionId: string | null;
   paidAt: Date | null;
   
   // Shipping

@@ -53,8 +53,8 @@ function createValidOrderParams(
       postalCode: '6100000',
       country: 'Israel',
     },
-    paymentProvider: 'stripe',
-    paymentTransactionId: 'pi_test_123',
+    paymentProvider: 'payplus',
+    paymentTransactionId: 'pp_test_123',
     ...overrides,
   };
 }

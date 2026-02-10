@@ -49,7 +49,7 @@ export interface CreateOrderParams {
   shipping: number;
   total: number;
   shippingAddress: ShippingAddress;
-  paymentProvider: 'stripe' | 'payplus';
+  paymentProvider: 'payplus';
   paymentTransactionId: string;
   isGift?: boolean;
   giftMessage?: string;
