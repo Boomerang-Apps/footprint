@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Loader2, RectangleVertical, RectangleHorizontal } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import RoomPreview from '@/components/mockup/RoomPreview';
-import type { SizeType, PaperType, FrameType } from '@/types';
+import type { SizeType, PaperType, FrameType, OrientationType } from '@/types';
 
 // Prices matching mockup 03-customize.html
 const sizes: { id: SizeType; name: string; dimensions: string; price: number; popular?: boolean }[] = [
@@ -45,10 +45,12 @@ export default function CustomizePage() {
     size,
     paperType,
     frameType,
+    orientation,
     hasPassepartout,
     setSize,
     setPaperType,
     setFrameType,
+    setOrientation,
     setHasPassepartout,
     setStep,
     _hasHydrated,
@@ -163,6 +165,41 @@ export default function CustomizePage() {
 
         {/* Options Section */}
         <div className="p-5 space-y-6">
+          {/* Orientation Toggle */}
+          <section>
+            <h2 className="text-base font-semibold text-zinc-900 mb-3">כיוון</h2>
+            <div className="inline-flex rounded-lg border border-zinc-200 bg-white p-1">
+              <button
+                onClick={() => setOrientation('portrait')}
+                aria-label="לאורך (Portrait)"
+                className={`
+                  flex items-center gap-2 px-3 py-2 rounded-md transition-all
+                  ${orientation === 'portrait'
+                    ? 'bg-violet-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:text-zinc-900'
+                  }
+                `}
+              >
+                <RectangleVertical className="w-5 h-5" />
+                <span className="text-sm font-medium">לאורך</span>
+              </button>
+              <button
+                onClick={() => setOrientation('landscape')}
+                aria-label="לרוחב (Landscape)"
+                className={`
+                  flex items-center gap-2 px-3 py-2 rounded-md transition-all
+                  ${orientation === 'landscape'
+                    ? 'bg-violet-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:text-zinc-900'
+                  }
+                `}
+              >
+                <RectangleHorizontal className="w-5 h-5" />
+                <span className="text-sm font-medium">לרוחב</span>
+              </button>
+            </div>
+          </section>
+
           {/* Size Selection */}
           <section>
             <h2 className="text-base font-semibold text-zinc-900 mb-3">גודל הדפסה</h2>

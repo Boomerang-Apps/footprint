@@ -59,6 +59,15 @@ export interface Frame {
   popular?: boolean;
 }
 
+// Orientation Types
+export type OrientationType = 'portrait' | 'landscape';
+
+export interface Orientation {
+  id: OrientationType;
+  name: string;
+  nameHe: string;
+}
+
 // Product Configuration
 export interface ProductConfig {
   style: StyleType;
