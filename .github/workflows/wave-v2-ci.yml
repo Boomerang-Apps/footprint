@@ -2,9 +2,9 @@ name: Wave V2 CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop, "feature/**"]
+    branches: [main, production, preview, development, "feature/**"]
   pull_request:
-    branches: [main, develop]
+    branches: [main, production, preview, development]
   workflow_dispatch:
     inputs:
       story_id:
