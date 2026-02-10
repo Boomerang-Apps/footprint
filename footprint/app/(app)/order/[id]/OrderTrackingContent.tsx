@@ -199,9 +199,11 @@ export function OrderTrackingContent() {
               חזרה להזמנות
             </Link>
             <Link href="/" className="flex-shrink-0">
-              <img
+              <Image
               src="/footprint-logo-black-v2.svg"
               alt="פוטפרינט"
+              width={78}
+              height={48}
               className="h-12 w-auto"
             />
             </Link>
@@ -234,9 +236,11 @@ export function OrderTrackingContent() {
               חזרה להזמנות
             </Link>
             <Link href="/" className="flex-shrink-0">
-              <img
+              <Image
               src="/footprint-logo-black-v2.svg"
               alt="פוטפרינט"
+              width={78}
+              height={48}
               className="h-12 w-auto"
             />
             </Link>
@@ -281,9 +285,11 @@ export function OrderTrackingContent() {
             חזרה להזמנות
           </Link>
           <Link href="/" className="flex-shrink-0">
-            <img
+            <Image
               src="/footprint-logo-black-v2.svg"
               alt="פוטפרינט"
+              width={78}
+              height={48}
               className="h-12 w-auto"
             />
           </Link>

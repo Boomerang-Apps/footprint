@@ -81,13 +81,13 @@ export function Header() {
                   <div className="hidden lg:block relative">
                     <button
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
-                      className="w-11 h-11 rounded-full overflow-hidden hover:ring-2 hover:ring-brand-purple/50 transition"
+                      className="relative w-11 h-11 rounded-full overflow-hidden hover:ring-2 hover:ring-brand-purple/50 transition"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={profile.avatarUrl || DEFAULT_AVATAR}
                         alt={profile.name || profile.email}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </button>
 
