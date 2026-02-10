@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { X, Maximize2 } from 'lucide-react';
-import type { SizeType, FrameType, PaperType } from '@/types';
+import type { SizeType, FrameType, PaperType, OrientationType } from '@/types';
 
 interface RoomPreviewProps {
   imageUrl: string;
   size: SizeType;
   frameType: FrameType;
   paperType?: PaperType;
+  orientation?: OrientationType;
   onFrameChange?: (frame: FrameType) => void;
   hasPassepartout?: boolean;
   onPassepartoutChange?: (value: boolean) => void;
@@ -60,6 +61,7 @@ export default function RoomPreview({
   size,
   frameType,
   paperType = 'matte',
+  orientation = 'portrait',
   onFrameChange,
   hasPassepartout = false,
   onPassepartoutChange,
@@ -82,7 +84,10 @@ export default function RoomPreview({
     setMounted(true);
   }, []);
 
-  const scale = sizeScales[size];
+  const baseScale = sizeScales[size];
+  const scale = orientation === 'landscape'
+    ? { width: baseScale.height, height: baseScale.width }
+    : baseScale;
   const frame = frameInfo[frameType];
   const paper = paperInfo[paperType];
   const hasFrame = frameType !== 'none';
@@ -111,9 +116,10 @@ export default function RoomPreview({
   // No mat = image fills frame edge-to-edge (full bleed)
   // With mat = white border between frame and image with thin bevel line
   const ArtworkFrame = ({ isLarge = false }: { isLarge?: boolean }) => {
-    // For fullscreen, use viewport-based sizing
-    const artWidth = isLarge ? 'min(80vw, 500px)' : `${scale.width}px`;
-    const artHeight = isLarge ? 'min(60vh, 700px)' : `${scale.height}px`;
+    // For fullscreen, scale up proportionally maintaining the aspect ratio
+    const largeScale = 2.5;
+    const artWidth = isLarge ? `${scale.width * largeScale}px` : `${scale.width}px`;
+    const artHeight = isLarge ? `${scale.height * largeScale}px` : `${scale.height}px`;
 
     // Frame width proportional to size
     const frameWidth = hasFrame
@@ -135,6 +141,8 @@ export default function RoomPreview({
         style={{
           width: artWidth,
           height: artHeight,
+          maxWidth: isLarge ? '85vw' : undefined,
+          maxHeight: isLarge ? '65vh' : undefined,
           padding: `${frameWidth}px`,
           backgroundColor: hasFrame ? frame.color : 'transparent',
           border: frameType === 'white' ? '1px solid #d4d4d4' : undefined,
@@ -168,7 +176,7 @@ export default function RoomPreview({
                 src={imageUrl}
                 alt="Your artwork"
                 fill
-                className={isLarge ? 'object-contain' : 'object-cover'}
+                className="object-cover"
                 sizes={isLarge ? '80vw' : '200px'}
                 priority
               />

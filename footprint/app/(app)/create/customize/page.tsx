@@ -156,6 +156,7 @@ export default function CustomizePage() {
               size={size}
               frameType={frameType}
               paperType={paperType}
+              orientation={orientation}
               onFrameChange={setFrameType}
               hasPassepartout={hasPassepartout}
               onPassepartoutChange={setHasPassepartout}
@@ -166,43 +167,44 @@ export default function CustomizePage() {
         {/* Options Section */}
         <div className="p-5 space-y-6">
           {/* Orientation Toggle */}
-          <section role="group" aria-labelledby="orientation-label">
-            <h2 id="orientation-label" className="text-base font-semibold text-zinc-900 mb-3">כיוון</h2>
-            <div className="inline-flex rounded-lg border border-zinc-200 bg-white p-1" role="radiogroup" aria-labelledby="orientation-label">
-              <button
-                onClick={() => setOrientation('portrait')}
-                role="radio"
-                aria-checked={orientation === 'portrait'}
-                aria-label="לאורך (Portrait)"
-                className={`
-                  flex items-center gap-2 px-3 py-2 rounded-md transition-all
-                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
-                  ${orientation === 'portrait'
-                    ? 'bg-violet-500 text-white shadow-sm'
-                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
-                  }
-                `}
-              >
-                <RectangleVertical className="w-5 h-5" />
-                <span className="text-sm font-medium">לאורך</span>
-              </button>
-              <button
-                onClick={() => setOrientation('landscape')}
-                role="radio"
-                aria-checked={orientation === 'landscape'}
-                aria-label="לרוחב (Landscape)"
-                className={`
-                  flex items-center gap-2 px-3 py-2 rounded-md transition-all
-                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
-                  ${orientation === 'landscape'
-                    ? 'bg-violet-500 text-white shadow-sm'
-                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
-                  }
-                `}
-              >
-                <RectangleHorizontal className="w-5 h-5" />
-                <span className="text-sm font-medium">לרוחב</span>
-              </button>
+          <section role="group" aria-label="כיוון">
+            <div className="flex justify-center">
+              <div className="inline-flex rounded-full bg-zinc-100 p-1" role="radiogroup" aria-label="כיוון">
+                <button
+                  onClick={() => setOrientation('portrait')}
+                  role="radio"
+                  aria-checked={orientation === 'portrait'}
+                  aria-label="לאורך (Portrait)"
+                  className={`
+                    flex items-center gap-2 px-5 py-2 rounded-full transition-all
+                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
+                    ${orientation === 'portrait'
+                      ? 'bg-white text-violet-600 shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-700'
+                    }
+                  `}
+                >
+                  <span className="text-sm font-medium">לאורך</span>
+                  <RectangleVertical className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setOrientation('landscape')}
+                  role="radio"
+                  aria-checked={orientation === 'landscape'}
+                  aria-label="לרוחב (Landscape)"
+                  className={`
+                    flex items-center gap-2 px-5 py-2 rounded-full transition-all
+                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
+                    ${orientation === 'landscape'
+                      ? 'bg-white text-violet-600 shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-700'
+                    }
+                  `}
+                >
+                  <span className="text-sm font-medium">לרוחב</span>
+                  <RectangleHorizontal className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </section>
 
