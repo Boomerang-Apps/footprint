@@ -166,17 +166,20 @@ export default function CustomizePage() {
         {/* Options Section */}
         <div className="p-5 space-y-6">
           {/* Orientation Toggle */}
-          <section>
-            <h2 className="text-base font-semibold text-zinc-900 mb-3">כיוון</h2>
-            <div className="inline-flex rounded-lg border border-zinc-200 bg-white p-1">
+          <section role="group" aria-labelledby="orientation-label">
+            <h2 id="orientation-label" className="text-base font-semibold text-zinc-900 mb-3">כיוון</h2>
+            <div className="inline-flex rounded-lg border border-zinc-200 bg-white p-1" role="radiogroup" aria-labelledby="orientation-label">
               <button
                 onClick={() => setOrientation('portrait')}
+                role="radio"
+                aria-checked={orientation === 'portrait'}
                 aria-label="לאורך (Portrait)"
                 className={`
                   flex items-center gap-2 px-3 py-2 rounded-md transition-all
+                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
                   ${orientation === 'portrait'
                     ? 'bg-violet-500 text-white shadow-sm'
-                    : 'text-zinc-600 hover:text-zinc-900'
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
                   }
                 `}
               >
@@ -185,12 +188,15 @@ export default function CustomizePage() {
               </button>
               <button
                 onClick={() => setOrientation('landscape')}
+                role="radio"
+                aria-checked={orientation === 'landscape'}
                 aria-label="לרוחב (Landscape)"
                 className={`
                   flex items-center gap-2 px-3 py-2 rounded-md transition-all
+                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
                   ${orientation === 'landscape'
                     ? 'bg-violet-500 text-white shadow-sm'
-                    : 'text-zinc-600 hover:text-zinc-900'
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
                   }
                 `}
               >

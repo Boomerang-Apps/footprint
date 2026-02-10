@@ -364,6 +364,10 @@ export const useOrderStore = create<OrderState & OrderActions>()(
       setSize: (size) => set({ size }),
       setPaperType: (paper) => set({ paperType: paper }),
       setFrameType: (frame) => set({ frameType: frame }),
+      /**
+       * Set the print orientation (portrait or landscape)
+       * @param orientation - The desired orientation ('portrait' or 'landscape')
+       */
       setOrientation: (orientation) => set({ orientation }),
       setHasPassepartout: (value) => set({ hasPassepartout: value }),
 
@@ -538,6 +542,7 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         size: state.size,
         paperType: state.paperType,
         frameType: state.frameType,
+        orientation: state.orientation,
         hasPassepartout: state.hasPassepartout,
         isGift: state.isGift,
         giftOccasion: state.giftOccasion,
