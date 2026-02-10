@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import {
   ArrowRight,
   Mail,
@@ -194,13 +195,14 @@ export default function AdminUserDetailPage() {
             {/* Avatar */}
             <div
               data-testid="user-avatar"
-              className="w-20 h-20 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 font-bold text-2xl flex-shrink-0"
+              className="relative w-20 h-20 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 font-bold text-2xl flex-shrink-0"
             >
               {user.avatarUrl ? (
-                <img
+                <Image
                   src={user.avatarUrl}
                   alt=""
-                  className="w-full h-full rounded-full object-cover"
+                  fill
+                  className="rounded-full object-cover"
                 />
               ) : (
                 getInitials(user.name, user.email)

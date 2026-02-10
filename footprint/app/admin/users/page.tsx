@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Search,
   RefreshCw,
@@ -410,12 +411,13 @@ function UserRow({
       {/* User Info */}
       <div className="flex items-center gap-3 flex-1 min-w-0" onClick={onClick}>
         {/* Avatar */}
-        <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-10 lg:h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 font-semibold text-sm flex-shrink-0">
+        <div className="relative w-10 h-10 sm:w-11 sm:h-11 lg:w-10 lg:h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 font-semibold text-sm flex-shrink-0">
           {user.avatarUrl ? (
-            <img
+            <Image
               src={user.avatarUrl}
               alt=""
-              className="w-full h-full rounded-full object-cover"
+              fill
+              className="rounded-full object-cover"
             />
           ) : (
             getInitials(user.name, user.email)

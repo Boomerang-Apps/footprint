@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Sparkles, Star, Shield, Award, ArrowLeft, Play, Upload, Palette, Package, Heart, Users, Brush, Camera, Pen, Gift, Phone, Mail, Instagram, Facebook, MessageCircle, Truck } from 'lucide-react';
 import { Header } from '@/components/layout';
 
@@ -347,9 +348,11 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10 text-center lg:text-right">
             {/* Brand */}
             <div className="flex flex-col items-center lg:items-start">
-              <img
+              <Image
                 src="/footprint-logo-black-v2.svg"
                 alt="פוטפרינט"
+                width={120}
+                height={73}
                 className="h-[73px] w-auto mb-4"
               />
               <div className="text-[29px] font-bold text-zinc-900 mb-3">פוטפרינט</div>

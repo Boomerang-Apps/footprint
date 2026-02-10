@@ -11,6 +11,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import Image from 'next/image';
 import { Sparkles } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import type { StyleType, Style } from '@/types';
@@ -118,11 +119,11 @@ export default function StyleGallery({
         >
           {/* Thumbnail */}
           <div className="aspect-square bg-zinc-100 relative">
-            {/* eslint-disable-next-line @next/next/no-img-element -- Placeholder thumbnails */}
-            <img
+            <Image
               src={style.thumbnailUrl}
               alt={`${style.nameHe} סגנון`}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
               onError={(e) => {
                 // Fallback for missing thumbnails
                 const target = e.target as HTMLImageElement;
