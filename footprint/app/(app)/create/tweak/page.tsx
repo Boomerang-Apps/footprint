@@ -14,6 +14,11 @@ import {
   Check,
   Loader2,
   AlertCircle,
+  X,
+  ImagePlus,
+  Zap,
+  User,
+  Maximize,
 } from 'lucide-react';
 import { useOrderStore, type TweakSettings } from '@/stores/orderStore';
 import { logger } from '@/lib/logger';
@@ -42,6 +47,27 @@ const COLOR_FILTERS: ColorFilter[] = [
   { id: 'vintage', name: 'Vintage', nameHe: 'וינטג׳', style: 'sepia(0.5) contrast(1.1) brightness(0.95)' },
   { id: 'bw', name: 'B&W', nameHe: 'שחור-לבן', style: 'grayscale(1)' },
 ];
+
+interface QuickAction {
+  id: string;
+  label: string;
+  icon: typeof X;
+  prompt: string;
+}
+
+const QUICK_ACTIONS: QuickAction[] = [
+  { id: 'remove-bg', label: 'הסר רקע', icon: X, prompt: 'Remove the background completely and make it transparent or white' },
+  { id: 'change-bg', label: 'שנה רקע', icon: ImagePlus, prompt: 'Change the background to a beautiful scenic sunset landscape' },
+  { id: 'enhance', label: 'שפר', icon: Zap, prompt: 'Enhance the image quality, improve sharpness, colors and lighting while keeping the artistic style' },
+  { id: 'face-fix', label: 'תקן פנים', icon: User, prompt: 'Fix and enhance the faces in the image, make them more detailed and natural looking' },
+  { id: 'upscale', label: 'הגדל', icon: Maximize, prompt: 'Upscale and enhance the image resolution, add more detail and clarity' },
+];
+
+/**
+ * Artistic styles where Remove.bg cannot identify foreground subjects
+ * Background removal works best with original, untransformed photographs
+ */
+const ARTISTIC_STYLES = ['watercolor', 'line_art', 'line_art_watercolor', 'oil_painting', 'avatar_cartoon', 'pop_art', 'vintage', 'romantic'];
 
 // Fun facts and tips to show during loading
 const LOADING_MESSAGES = [
@@ -75,7 +101,6 @@ export default function TweakPage() {
   const [activeTab, setActiveTab] = useState<ToolTab>('color');
   const [isApplyingPrompt, setIsApplyingPrompt] = useState(false);
   const [promptError, setPromptError] = useState<string | null>(null);
-  const [customPrompt, setCustomPrompt] = useState('');
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -183,9 +208,9 @@ export default function TweakPage() {
     }
   }, [originalImage, selectedStyle, isRegenerating, setTransformedImage, setIsTransforming, resetTweakSettings]);
 
-  // Apply custom prompt via nano-banana
-  const handleApplyPrompt = useCallback(async () => {
-    if (!transformedImage || isApplyingPrompt || !customPrompt.trim()) return;
+  // Apply AI edit with a given prompt string
+  const applyAiEdit = useCallback(async (prompt: string) => {
+    if (!transformedImage || isApplyingPrompt) return;
 
     setIsApplyingPrompt(true);
     setPromptError(null);
@@ -196,7 +221,7 @@ export default function TweakPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: transformedImage,
-          prompt: customPrompt.trim(),
+          prompt,
         }),
       });
 
@@ -207,14 +232,18 @@ export default function TweakPage() {
       }
 
       setTransformedImage(data.imageUrl);
-      setCustomPrompt(''); // Clear prompt after success
     } catch (error) {
       const message = error instanceof Error ? error.message : 'שגיאה בעריכת התמונה';
       setPromptError(message);
     } finally {
       setIsApplyingPrompt(false);
     }
-  }, [transformedImage, isApplyingPrompt, customPrompt, setTransformedImage]);
+  }, [transformedImage, isApplyingPrompt, setTransformedImage]);
+
+  // Handle quick action button click
+  const handleQuickAction = useCallback((action: QuickAction) => {
+    applyAiEdit(action.prompt);
+  }, [applyAiEdit]);
 
   // Reset all tweaks
   const handleReset = useCallback(() => {
@@ -495,40 +524,38 @@ export default function TweakPage() {
               </div>
             )}
 
-            {/* AI Edit Panel */}
+            {/* AI Edit Panel - Quick Actions */}
             {activeTab === 'ai' && (
-              <div className="py-2 space-y-3">
-                <textarea
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="תארו את השינוי הרצוי... לדוגמה: הסר את הרקע, שנה את הרקע לשקיעה, הוסף אפקט עשן"
-                  className="w-full h-20 px-3 py-2 text-sm border border-zinc-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  dir="rtl"
-                />
-                <button
-                  onClick={handleApplyPrompt}
-                  disabled={isApplyingPrompt || !customPrompt.trim()}
-                  className={`
-                    w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition
-                    ${isApplyingPrompt
-                      ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                      : !customPrompt.trim()
-                        ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90'}
-                  `}
-                >
-                  {isApplyingPrompt ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>מעבד...</span>
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="w-4 h-4" />
-                      <span>החל שינוי</span>
-                    </>
-                  )}
-                </button>
+              <div className="py-2 space-y-2">
+                <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+                  {QUICK_ACTIONS
+                    .filter((action) => {
+                      // Hide "Remove Background" for artistic styles
+                      // Remove.bg API cannot identify foreground in stylized images
+                      if (action.id === 'remove-bg' && ARTISTIC_STYLES.includes(selectedStyle)) {
+                        return false;
+                      }
+                      return true;
+                    })
+                    .map((action) => (
+                    <button
+                      key={action.id}
+                      onClick={() => handleQuickAction(action)}
+                      disabled={isApplyingPrompt}
+                      className="flex flex-col items-center gap-1.5 flex-shrink-0 group"
+                    >
+                      <div className={`
+                        w-14 h-14 rounded-2xl flex items-center justify-center transition
+                        ${isApplyingPrompt
+                          ? 'bg-zinc-100 text-zinc-300'
+                          : 'bg-zinc-100 text-zinc-600 group-hover:bg-purple-100 group-hover:text-purple-600 group-active:scale-95'}
+                      `}>
+                        <action.icon className="w-6 h-6" />
+                      </div>
+                      <span className="text-[11px] font-medium text-zinc-600 whitespace-nowrap">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
                 {promptError && (
                   <p className="text-xs text-red-500 text-center">{promptError}</p>
                 )}
