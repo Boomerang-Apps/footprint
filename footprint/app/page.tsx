@@ -48,16 +48,6 @@ export default function HomePage() {
 
             {/* Content */}
             <div className="order-2 lg:order-2">
-              {/* Rating Badge */}
-              <div className="inline-flex items-center gap-2.5 bg-zinc-100 px-4 py-2 rounded-full mb-6">
-                <div className="flex gap-0.5 text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <span className="text-[13px] text-zinc-500 font-medium">30,000+ לקוחות מרוצים</span>
-              </div>
-
               <h1 className="text-4xl lg:text-[52px] font-bold leading-[1.15] mb-5 text-zinc-900">
                 המתנה שלא שוכחים!
                 <br />
@@ -435,7 +425,7 @@ export default function HomePage() {
       {/* WhatsApp Button */}
       <a
         href="https://wa.me/972501234567"
-        className="fixed bottom-6 left-6 w-14 h-14 bg-[#25d366] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-500/40 z-50 hover:scale-110 transition"
+        className="fixed bottom-24 lg:bottom-6 left-6 w-14 h-14 bg-[#25d366] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-500/40 z-50 hover:scale-110 transition"
         target="_blank"
         rel="noopener noreferrer"
       >

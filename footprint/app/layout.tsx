@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Heebo } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
+import { MobileBottomNav } from '@/components/layout';
 
 const heebo = Heebo({ 
   subsets: ['hebrew', 'latin'],
@@ -30,9 +31,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="he" dir="rtl" className={heebo.variable}>
-      <body className="min-h-screen bg-white text-zinc-900 font-heebo antialiased">
+      <body className="min-h-screen bg-white text-zinc-900 font-heebo antialiased pb-16 lg:pb-0">
         <Providers>
           {children}
+          <MobileBottomNav />
         </Providers>
       </body>
     </html>

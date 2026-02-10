@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Menu, X, Search, ShoppingCart, Zap, Truck, LogIn, UserPlus, User, Package, LogOut } from 'lucide-react';
+import { Search, ShoppingCart, Zap, Truck, User, Package, LogOut } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { createClient } from '@/lib/supabase/client';
 
@@ -12,7 +12,6 @@ const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4
 
 export function Header() {
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { data: profile, isLoading } = useProfile();
 
@@ -150,151 +149,10 @@ export function Header() {
               </Link>
             )}
 
-            {/* Mobile: Hamburger menu */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden w-11 h-11 rounded-xl flex items-center justify-center text-zinc-900"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-
-          {/* Menu Panel */}
-          <div className="absolute top-0 left-0 w-[280px] h-full bg-white shadow-xl">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-zinc-200">
-              <span className="text-lg font-bold text-zinc-900">תפריט</span>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-500 hover:bg-zinc-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* User info if logged in */}
-            {profile && (
-              <div className="p-4 border-b border-zinc-200 flex items-center gap-3">
-                <img
-                  src={profile.avatarUrl || DEFAULT_AVATAR}
-                  alt={profile.name || profile.email}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-brand-purple"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-900 truncate">{profile.name || 'משתמש'}</p>
-                  <p className="text-xs text-zinc-500 truncate">{profile.email}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Menu Links */}
-            <div className="p-4 space-y-1">
-              <Link
-                href="/create"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-900 hover:bg-zinc-100 transition"
-              >
-                התחילו ליצור
-              </Link>
-              <Link
-                href="/#products"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
-              >
-                מוצרים
-              </Link>
-              <Link
-                href="/#gallery"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
-              >
-                גלריה
-              </Link>
-              <Link
-                href="/#how"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
-              >
-                איך זה עובד
-              </Link>
-              <Link
-                href="/#contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
-              >
-                צור קשר
-              </Link>
-            </div>
-
-            {/* Divider */}
-            <div className="mx-4 border-t border-zinc-200" />
-
-            {/* Auth Links */}
-            <div className="p-4 space-y-1">
-              {profile ? (
-                <>
-                  <Link
-                    href="/account/orders"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
-                  >
-                    <Package className="w-5 h-5" />
-                    ההזמנות שלי
-                  </Link>
-                  <Link
-                    href="/account/profile"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
-                  >
-                    <User className="w-5 h-5" />
-                    הפרופיל שלי
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleSignOut();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-red-600 hover:bg-red-50 transition w-full"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    התנתקות
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
-                  >
-                    <LogIn className="w-5 h-5" />
-                    התחברות
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-zinc-600 hover:bg-zinc-100 transition"
-                  >
-                    <UserPlus className="w-5 h-5" />
-                    הרשמה
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
