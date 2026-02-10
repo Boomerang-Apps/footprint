@@ -48,16 +48,6 @@ export default function HomePage() {
 
             {/* Content */}
             <div className="order-2 lg:order-2">
-              {/* Rating Badge */}
-              <div className="inline-flex items-center gap-2.5 bg-zinc-100 px-4 py-2 rounded-full mb-6">
-                <div className="flex gap-0.5 text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <span className="text-[13px] text-zinc-500 font-medium">30,000+ לקוחות מרוצים</span>
-              </div>
-
               <h1 className="text-4xl lg:text-[52px] font-bold leading-[1.15] mb-5 text-zinc-900">
                 המתנה שלא שוכחים!
                 <br />
