@@ -435,7 +435,7 @@ export default function HomePage() {
       {/* WhatsApp Button */}
       <a
         href="https://wa.me/972501234567"
-        className="fixed bottom-6 left-6 w-14 h-14 bg-[#25d366] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-500/40 z-50 hover:scale-110 transition"
+        className="fixed bottom-24 lg:bottom-6 left-6 w-14 h-14 bg-[#25d366] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-500/40 z-50 hover:scale-110 transition"
         target="_blank"
         rel="noopener noreferrer"
       >
