@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, Zap, Truck, User, Package, LogOut } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
@@ -42,10 +43,13 @@ export function Header() {
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-zinc-200">
         <div className="max-w-7xl mx-auto px-5 h-16 lg:h-[72px] flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <img
+            <Image
               src="/footprint-logo-black-v2.svg"
               alt="פוטפרינט"
+              width={120}
+              height={52}
               className="h-[52px] w-auto"
+              priority
             />
             <span className="text-[26px] font-bold text-zinc-900">פוטפרינט</span>
           </Link>
@@ -79,6 +83,7 @@ export function Header() {
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
                       className="w-11 h-11 rounded-full overflow-hidden hover:ring-2 hover:ring-brand-purple/50 transition"
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={profile.avatarUrl || DEFAULT_AVATAR}
                         alt={profile.name || profile.email}
