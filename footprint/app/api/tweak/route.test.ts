@@ -9,6 +9,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextResponse } from 'next/server';
 import { POST } from './route';
 
 // Mock dependencies
@@ -34,14 +35,8 @@ vi.mock('@/lib/ai/remove-bg', () => ({
   isRemoveBgConfigured: vi.fn(() => true),
 }));
 
-vi.mock('@/lib/ai/nano-banana', () => ({
-  transformWithNanoBananaRetry: vi.fn(),
-  dataUriToBase64: vi.fn((dataUri) => dataUri.split(',')[1]),
-  base64ToDataUri: vi.fn((base64, mimeType) => `data:${mimeType};base64,${base64}`),
-}));
-
 vi.mock('@/lib/rate-limit', () => ({
-  checkRateLimit: vi.fn(() => Promise.resolve({ success: true, remaining: 10 })),
+  checkRateLimit: vi.fn(() => Promise.resolve(null)), // null = rate limit passed
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -54,7 +49,6 @@ vi.mock('@/lib/logger', () => ({
 
 // Import mocked functions for assertions
 import { removeBackground, isRemoveBgConfigured } from '@/lib/ai/remove-bg';
-import { transformWithNanoBananaRetry } from '@/lib/ai/nano-banana';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 describe('TWEAK-API-001: AI Image Editing with Background Removal', () => {
@@ -84,7 +78,6 @@ describe('TWEAK-API-001: AI Image Editing with Background Removal', () => {
       expect(response.status).toBe(200);
       expect(data.imageUrl).toBe('https://images.footprint.co.il/tweaked/test.png');
       expect(removeBackground).toHaveBeenCalledWith('https://images.footprint.co.il/transformed/test.jpg');
-      expect(transformWithNanoBananaRetry).not.toHaveBeenCalled(); // Should use Remove.bg, not Gemini
     });
   });
 
@@ -166,7 +159,7 @@ describe('TWEAK-API-001: AI Image Editing with Background Removal', () => {
   describe('AC4: AI Edit Operations (Non-Background Removal)', () => {
     it('should use Gemini for other AI edits like enhance', async () => {
       // Arrange
-      vi.mocked(transformWithNanoBananaRetry).mockResolvedValue('edited-image-base64');
+      // Note: Gemini uses internal callGeminiWithPrompt function, so we test via response only
 
       const request = new Request('http://localhost:3000/api/tweak', {
         method: 'POST',
@@ -182,7 +175,7 @@ describe('TWEAK-API-001: AI Image Editing with Background Removal', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(transformWithNanoBananaRetry).toHaveBeenCalled();
+      expect(data.imageUrl).toBeDefined();
       expect(removeBackground).not.toHaveBeenCalled(); // Should NOT use Remove.bg for non-BG tasks
     });
   });
@@ -190,12 +183,19 @@ describe('TWEAK-API-001: AI Image Editing with Background Removal', () => {
   describe('AC5: Rate Limiting', () => {
     it('should return 429 when rate limit exceeded', async () => {
       // Arrange
-      vi.mocked(checkRateLimit).mockResolvedValue({
-        success: false,
-        remaining: 0,
-        limit: 10,
-        reset: Date.now() + 60000,
-      });
+      // checkRateLimit returns NextResponse when rate limited, null when allowed
+      const rateLimitResponse = NextResponse.json(
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': '60',
+            'X-RateLimit-Limit': '10',
+            'X-RateLimit-Reset': String(Date.now() + 60000),
+          }
+        }
+      );
+      vi.mocked(checkRateLimit).mockResolvedValue(rateLimitResponse);
 
       const request = new Request('http://localhost:3000/api/tweak', {
         method: 'POST',
