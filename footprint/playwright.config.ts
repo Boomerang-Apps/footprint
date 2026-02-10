@@ -18,6 +18,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // Note: Start dev server manually with `npm run dev` before running e2e tests
-  // Or set PLAYWRIGHT_BASE_URL to point to your running server
+  webServer: {
+    command: 'pnpm dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 });
