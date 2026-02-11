@@ -30,6 +30,7 @@ import {
   triggerNewOrderNotification,
 } from '@/lib/orders/create';
 import { logger } from '@/lib/logger';
+import { isValidGuestEmail } from '@/lib/auth/guest';
 
 interface CheckoutOrderItem {
   name: string;
@@ -84,22 +85,7 @@ export async function POST(
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    // 1. Check authentication (optional for test mode)
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    // Require auth only in production (when PayPlus is configured)
-    const payPlusConfigured = !!process.env.PAYPLUS_PAYMENT_PAGE_UID;
-    if (payPlusConfigured && !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please sign in to checkout' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Parse request body
+    // 1. Parse request body (before auth check so guest email is available)
     let body: CheckoutRequest;
     try {
       body = await request.json();
@@ -111,6 +97,23 @@ export async function POST(
     }
 
     const { orderId, amount, customerName, customerEmail, customerPhone } = body;
+
+    // 2. Check authentication (allow guest with valid email)
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const payPlusConfigured = !!process.env.PAYPLUS_PAYMENT_PAGE_UID;
+    if (payPlusConfigured && !user) {
+      // Allow guest checkout if a valid email is provided
+      if (!customerEmail || !isValidGuestEmail(customerEmail)) {
+        return NextResponse.json(
+          { error: 'Unauthorized - Please sign in or provide a valid email to checkout' },
+          { status: 401 }
+        );
+      }
+    }
 
     // 3. Validate required fields
     if (!orderId) {
@@ -181,10 +184,10 @@ export async function POST(
     }
 
     // Production: pre-create order with pending_payment status, then create PayPlus link
-    const email = customerEmail || user!.email || '';
+    const email = customerEmail || user?.email || '';
 
     const orderResult = await createOrder({
-      userId: user!.id,
+      userId: user?.id,
       customerName,
       customerEmail: email,
       customerPhone,
@@ -202,7 +205,7 @@ export async function POST(
     });
 
     const moreInfo = JSON.stringify({
-      userId: user!.id,
+      userId: user?.id,
       orderId: orderResult.orderId,
       orderNumber: orderResult.orderNumber,
       items: body.items || [],

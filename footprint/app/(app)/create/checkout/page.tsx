@@ -129,21 +129,17 @@ function CheckoutPageContent() {
 
   // Calculate total amount in agorot (ILS cents)
   const calculateTotalInAgorot = useCallback(() => {
-    // TEMP TEST OVERRIDE: 1 NIS = 100 agorot (remove after testing)
-    return 100;
-
-    // Original pricing (kept for restore):
-    // const sizes: Record<string, number> = { A5: 89, A4: 129, A3: 179, A2: 249 };
-    // const paperMods: Record<string, number> = { matte: 0, glossy: 20, canvas: 50 };
-    // const framePrices: Record<string, number> = { none: 0, black: 79, white: 79, oak: 99 };
-    // const basePrice = sizes[size] || 129;
-    // const paperMod = paperMods[paperType] || 0;
-    // const framePrice = framePrices[frameType] || 0;
-    // const wrappingCost = giftWrap ? GIFT_WRAPPING_PRICE : 0;
-    // const subtotal = basePrice + paperMod + framePrice + wrappingCost;
-    // const shipping = subtotal >= 299 ? 0 : 29;
-    // const total = subtotal + shipping;
-    // return total * 100;
+    const sizes: Record<string, number> = { A5: 89, A4: 129, A3: 179, A2: 249 };
+    const paperMods: Record<string, number> = { matte: 0, glossy: 20, canvas: 50 };
+    const framePrices: Record<string, number> = { none: 0, black: 79, white: 79, oak: 99 };
+    const basePrice = sizes[size] || 129;
+    const paperMod = paperMods[paperType] || 0;
+    const framePrice = framePrices[frameType] || 0;
+    const wrappingCost = giftWrap ? GIFT_WRAPPING_PRICE : 0;
+    const subtotal = basePrice + paperMod + framePrice + wrappingCost;
+    const shipping = subtotal >= 299 ? 0 : 29;
+    const total = subtotal + shipping;
+    return total * 100;
   }, [size, paperType, frameType, giftWrap]);
 
   const handleSubmit = async (e: React.FormEvent) => {
