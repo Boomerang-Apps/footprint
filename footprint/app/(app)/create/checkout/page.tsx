@@ -9,7 +9,6 @@ import { CheckoutProgressSteps } from '@/components/checkout/CheckoutProgressSte
 import { OrderSummary } from '@/components/checkout/OrderSummary';
 import { GiftOptionsSection } from '@/components/checkout/GiftOptionsSection';
 import { GiftWrappingOption } from '@/components/checkout/GiftWrappingOption';
-import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
 import { PaymentModal } from '@/components/checkout/PaymentModal';
 import { GIFT_WRAPPING_PRICE } from '@/types/order';
 import { createClient } from '@/lib/supabase/client';
@@ -56,7 +55,6 @@ function CheckoutPageContent() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [sandboxOrderContext, setSandboxOrderContext] = useState<{ orderId: string; email: string } | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'applePay' | 'googlePay' | 'creditCard'>('creditCard');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -527,12 +525,6 @@ function CheckoutPageContent() {
 
               {/* Gift Wrapping Option */}
               <GiftWrappingOption />
-
-              {/* Payment Method */}
-              <PaymentMethodSelector
-                selected={paymentMethod}
-                onSelect={setPaymentMethod}
-              />
 
               <p className="text-xs text-zinc-500 text-center">
                 בלחיצה על כפתור התשלום אתם מאשרים את <a href="/terms" className="underline">התקנון</a> ו<a href="/privacy" className="underline">מדיניות הפרטיות</a>
