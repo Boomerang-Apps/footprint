@@ -5,27 +5,27 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Check, Loader2, RectangleVertical, RectangleHorizontal } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import RoomPreview from '@/components/mockup/RoomPreview';
+import { BASE_PRICES, PAPER_MODIFIERS, FRAME_PRICES } from '@/lib/pricing/calculator';
 import type { SizeType, PaperType, FrameType, OrientationType } from '@/types';
 
-// Prices matching mockup 03-customize.html
 const sizes: { id: SizeType; name: string; dimensions: string; price: number; popular?: boolean }[] = [
-  { id: 'A5', name: 'A5', dimensions: '14.8×21 ס״מ', price: 89 },
-  { id: 'A4', name: 'A4', dimensions: '21×29.7 ס״מ', price: 149, popular: true },
-  { id: 'A3', name: 'A3', dimensions: '29.7×42 ס״מ', price: 249 },
-  { id: 'A2', name: 'A2', dimensions: '42×59.4 ס״מ', price: 379 },
+  { id: 'A5', name: 'A5', dimensions: '14.8×21 ס״מ', price: BASE_PRICES.A5 },
+  { id: 'A4', name: 'A4', dimensions: '21×29.7 ס״מ', price: BASE_PRICES.A4, popular: true },
+  { id: 'A3', name: 'A3', dimensions: '29.7×42 ס״מ', price: BASE_PRICES.A3 },
+  { id: 'A2', name: 'A2', dimensions: '42×59.4 ס״מ', price: BASE_PRICES.A2 },
 ];
 
 const papers: { id: PaperType; name: string; englishName: string; description: string; extraPrice: number }[] = [
-  { id: 'matte', name: 'נייר פיין ארט מט', englishName: 'Fine Art Matte', description: 'איכות מוזיאון', extraPrice: 0 },
-  { id: 'glossy', name: 'נייר צילום מבריק', englishName: 'Glossy Photo', description: 'צבעים עזים', extraPrice: 20 },
-  { id: 'canvas', name: 'קנבס', englishName: 'Canvas Texture', description: 'מראה ציורי', extraPrice: 40 },
+  { id: 'matte', name: 'נייר פיין ארט מט', englishName: 'Fine Art Matte', description: 'איכות מוזיאון', extraPrice: PAPER_MODIFIERS.matte },
+  { id: 'glossy', name: 'נייר צילום מבריק', englishName: 'Glossy Photo', description: 'צבעים עזים', extraPrice: PAPER_MODIFIERS.glossy },
+  { id: 'canvas', name: 'קנבס', englishName: 'Canvas Texture', description: 'מראה ציורי', extraPrice: PAPER_MODIFIERS.canvas },
 ];
 
 const frames: { id: FrameType; name: string; color: string; extraPrice: number }[] = [
-  { id: 'none', name: 'ללא', color: 'transparent', extraPrice: 0 },
-  { id: 'black', name: 'שחור', color: '#1a1a1a', extraPrice: 60 },
-  { id: 'white', name: 'לבן', color: '#ffffff', extraPrice: 60 },
-  { id: 'oak', name: 'אלון', color: '#daa520', extraPrice: 80 },
+  { id: 'none', name: 'ללא', color: 'transparent', extraPrice: FRAME_PRICES.none },
+  { id: 'black', name: 'שחור', color: '#1a1a1a', extraPrice: FRAME_PRICES.black },
+  { id: 'white', name: 'לבן', color: '#ffffff', extraPrice: FRAME_PRICES.white },
+  { id: 'oak', name: 'אלון', color: '#daa520', extraPrice: FRAME_PRICES.oak },
 ];
 
 const progressSteps = [

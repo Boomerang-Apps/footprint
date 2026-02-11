@@ -152,9 +152,9 @@ describe('CustomizePage', () => {
     it('shows correct prices for each size', () => {
       render(<CustomizePage />);
       expect(screen.getByText('₪89')).toBeInTheDocument(); // A5
-      expect(screen.getByText('₪149')).toBeInTheDocument(); // A4
-      expect(screen.getByText('₪249')).toBeInTheDocument(); // A3
-      expect(screen.getByText('₪379')).toBeInTheDocument(); // A2
+      expect(screen.getByText('₪129')).toBeInTheDocument(); // A4
+      expect(screen.getByText('₪179')).toBeInTheDocument(); // A3
+      expect(screen.getByText('₪249')).toBeInTheDocument(); // A2
     });
 
     it('shows "פופולרי" badge on A4', () => {
@@ -198,7 +198,7 @@ describe('CustomizePage', () => {
     it('shows correct prices for paper upgrades', () => {
       render(<CustomizePage />);
       expect(screen.getByText('+₪20')).toBeInTheDocument(); // Glossy
-      expect(screen.getByText('+₪40')).toBeInTheDocument(); // Canvas
+      expect(screen.getByText('+₪50')).toBeInTheDocument(); // Canvas
     });
 
     it('highlights selected paper', () => {
@@ -236,10 +236,10 @@ describe('CustomizePage', () => {
 
     it('shows correct prices for frames', () => {
       render(<CustomizePage />);
-      // +₪60 appears twice (black and white)
-      const prices60 = screen.getAllByText('+₪60');
-      expect(prices60.length).toBe(2);
-      expect(screen.getByText('+₪80')).toBeInTheDocument(); // Oak
+      // +₪79 appears twice (black and white)
+      const prices79 = screen.getAllByText('+₪79');
+      expect(prices79.length).toBe(2);
+      expect(screen.getByText('+₪99')).toBeInTheDocument(); // Oak
     });
 
     it('highlights selected frame', () => {
@@ -273,8 +273,8 @@ describe('CustomizePage', () => {
   describe('Price Calculation', () => {
     it('displays total price in bottom CTA', () => {
       render(<CustomizePage />);
-      // A4 (149) + matte (0) + black (60) = 209
-      expect(screen.getByTestId('total-price')).toHaveTextContent('₪209');
+      // A4 (129) + matte (0) + black (79) = 208
+      expect(screen.getByTestId('total-price')).toHaveTextContent('₪208');
     });
 
     it('shows "+ משלוח" after price', () => {
@@ -306,8 +306,8 @@ describe('CustomizePage', () => {
       });
 
       rerender(<CustomizePage />);
-      // A3 (249) + matte (0) + black (60) = 309
-      expect(screen.getByTestId('total-price')).toHaveTextContent('₪309');
+      // A3 (179) + matte (0) + black (79) = 258
+      expect(screen.getByTestId('total-price')).toHaveTextContent('₪258');
     });
 
     it('updates price when paper changes', () => {
@@ -334,8 +334,8 @@ describe('CustomizePage', () => {
       });
 
       rerender(<CustomizePage />);
-      // A4 (149) + glossy (20) + black (60) = 229
-      expect(screen.getByTestId('total-price')).toHaveTextContent('₪229');
+      // A4 (129) + glossy (20) + black (79) = 228
+      expect(screen.getByTestId('total-price')).toHaveTextContent('₪228');
     });
 
     it('updates price when frame changes', () => {
@@ -362,8 +362,8 @@ describe('CustomizePage', () => {
       });
 
       rerender(<CustomizePage />);
-      // A4 (149) + matte (0) + oak (80) = 229
-      expect(screen.getByTestId('total-price')).toHaveTextContent('₪229');
+      // A4 (129) + matte (0) + oak (99) = 228
+      expect(screen.getByTestId('total-price')).toHaveTextContent('₪228');
     });
   });
 
