@@ -180,9 +180,31 @@ export async function POST(
       });
     }
 
-    // Production: create PayPlus payment link (user guaranteed non-null — auth required above)
+    // Production: pre-create order with pending_payment status, then create PayPlus link
+    const email = customerEmail || user!.email || '';
+
+    const orderResult = await createOrder({
+      userId: user!.id,
+      customerName,
+      customerEmail: email,
+      customerPhone,
+      items: body.items || [{ name: 'Item', quantity: 1, price: amount / 100 }],
+      subtotal: body.subtotal || amount / 100,
+      shipping: body.shipping || 0,
+      total: body.total || amount / 100,
+      shippingAddress: body.shippingAddress || { street: '', city: '', postalCode: '', country: 'Israel' },
+      paymentProvider: 'payplus',
+      paymentTransactionId: `pending-${Date.now()}`,
+      isGift: body.isGift || false,
+      giftMessage: body.giftMessage,
+      hasPassepartout: body.hasPassepartout || false,
+      status: 'pending_payment',
+    });
+
     const moreInfo = JSON.stringify({
       userId: user!.id,
+      orderId: orderResult.orderId,
+      orderNumber: orderResult.orderNumber,
       items: body.items || [],
       subtotal: body.subtotal || 0,
       shipping: body.shipping || 0,
@@ -193,22 +215,31 @@ export async function POST(
       hasPassepartout: body.hasPassepartout || false,
     });
 
+    const successUrlParams = new URLSearchParams({
+      status: 'success',
+      page_request_uid: '{page_request_uid}',
+      orderId: orderResult.orderId,
+      orderNumber: orderResult.orderNumber,
+    });
+
     const paymentLink = await createPaymentLink({
       orderId,
       amount,
       customerName,
-      customerEmail: customerEmail || user!.email || '',
+      customerEmail: email,
       customerPhone,
-      successUrl: `${baseUrl}/payment/iframe-callback?status=success&page_request_uid={page_request_uid}`,
+      successUrl: `${baseUrl}/payment/iframe-callback?${successUrlParams.toString()}`,
       failureUrl: `${baseUrl}/payment/iframe-callback?status=failure`,
       callbackUrl: `${baseUrl}/api/webhooks/payplus`,
       moreInfo,
     });
 
-    // 6. Return payment URL
+    // 6. Return payment URL with order IDs
     return NextResponse.json({
       pageRequestUid: paymentLink.pageRequestUid,
       paymentUrl: paymentLink.paymentUrl,
+      orderId: orderResult.orderId,
+      orderNumber: orderResult.orderNumber,
     });
   } catch (error) {
     logger.error('Checkout error', error);
