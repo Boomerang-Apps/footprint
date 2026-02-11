@@ -2,11 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import {
-  Play,
-  ChevronRight,
   RefreshCw,
-  ExternalLink,
-  Loader2,
   Bot,
   Calendar,
   Target,
@@ -14,28 +10,14 @@ import {
   FileText,
   Map,
   Puzzle,
-  Users,
   Search,
   X,
-  Activity,
-  Clock,
-  Zap,
-  CircleDot,
-  AlertCircle,
-  CheckCircle2,
-  Timer,
-  GitBranch,
-  Check,
-  Info,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/Input';
-import { Separator } from '@/components/ui/separator';
 import { logger } from '@/lib/logger';
 import {
   dashboardConfig,
@@ -53,10 +35,15 @@ import {
   type StoryStatus,
 } from '@/data/dashboard/dev-progress';
 
-import { AgentRow, type AgentData } from './components/AgentRow';
+import { type AgentData } from './components/AgentRow';
 import { StoryModal } from './components/StoryModal';
 import { StoryRow } from './components/StoryRow';
 import { CollapsibleCard } from './components/CollapsibleCard';
+import { SprintView } from './components/views/SprintView';
+import { EpicsView } from './components/views/EpicsView';
+import { PagesView } from './components/views/PagesView';
+import { SitemapView } from './components/views/SitemapView';
+import { AgentsView } from './components/views/AgentsView';
 
 type ViewMode = 'sprints' | 'features' | 'components' | 'epics' | 'sitemap' | 'pages' | 'agents' | 'command';
 
@@ -261,7 +248,6 @@ export default function DevDashboard() {
   const [selectedSprintId, setSelectedSprintId] = useState<number>(3);
   const [stories, setStories] = useState<Record<string, Story>>(initialStories);
   const [syncingStories, setSyncingStories] = useState<Set<string>>(new Set());
-  const [isGlobalSyncing, setIsGlobalSyncing] = useState(false);
   const [isSyncingDB, setIsSyncingDB] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -379,43 +365,6 @@ export default function DevDashboard() {
     }
   };
 
-  // Sync all stories with Linear
-  const syncAll = async () => {
-    setIsGlobalSyncing(true);
-    setSyncError(null);
-
-    try {
-      const response = await fetch(`/api/linear/sync?projectId=${dashboardConfig.linearProjectId}`);
-      const data = await response.json();
-
-      if (response.ok && data.issues) {
-        const updates: Record<string, Story> = { ...stories };
-
-        data.issues.forEach((issue: { id: string; status: string }) => {
-          const storyEntry = Object.entries(stories).find(
-            ([, s]) => s.linearId === issue.id
-          );
-          if (storyEntry) {
-            const [storyId, story] = storyEntry;
-            updates[storyId] = {
-              ...story,
-              status: issue.status as StoryStatus,
-            };
-          }
-        });
-
-        setStories(updates);
-        setLastSyncTime(new Date());
-      } else {
-        setSyncError(data.error || 'Failed to sync');
-      }
-    } catch {
-      setSyncError('Network error - check LINEAR_API_KEY in .env');
-    } finally {
-      setIsGlobalSyncing(false);
-    }
-  };
-
   const priorityBadge = (priority: string) => {
     const colors: Record<string, string> = {
       'P0': 'bg-red-100 text-red-700',
@@ -430,6 +379,11 @@ export default function DevDashboard() {
   const getStoriesWithStatus = (storyList: Story[]) => {
     return storyList.map(s => stories[s.id] || s);
   };
+
+  // Get sprint stories with current status
+  const getSprintStoriesWithStatus = useCallback((sprintId: number) => {
+    return getStoriesWithStatus(getStoriesBySprint(sprintId));
+  }, [stories]);
 
   // Filter stories based on search query
   const filteredStories = searchQuery
@@ -452,7 +406,6 @@ export default function DevDashboard() {
               <p className="text-sm text-gray-500 mt-1">{dashboardConfig.name} - {dashboardConfig.subtitle}</p>
             </div>
             <div className="flex items-center gap-3">
-              {/* DB Connection Indicator with Last Sync */}
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-sm">
                 <div className={`w-2.5 h-2.5 rounded-full ${
                   dbConnected === null ? 'bg-gray-400 animate-pulse' :
@@ -465,8 +418,6 @@ export default function DevDashboard() {
                    ) : 'DB Offline'}
                 </span>
               </div>
-
-              {/* Sync from DB Button */}
               <Button
                 variant="outline"
                 size="sm"
@@ -612,167 +563,15 @@ export default function DevDashboard() {
         <div className="space-y-3">
           {/* Sprint View */}
           {viewMode === 'sprints' && (
-            <div className="space-y-4">
-              <div className="space-y-3">
-                {sprints.map(sprint => {
-                  const sprintStories = getStoriesWithStatus(getStoriesBySprint(sprint.id));
-                  const progress = getProgress(sprintStories);
-                  const isExpanded = selectedSprintId === sprint.id;
-
-                  return (
-                    <Collapsible
-                      key={sprint.id}
-                      open={isExpanded}
-                      onOpenChange={() => setSelectedSprintId(isExpanded ? 0 : sprint.id)}
-                    >
-                      <div className="bg-white border rounded-lg overflow-hidden">
-                        <CollapsibleTrigger className="w-full">
-                          <div className="p-4 flex items-center gap-4 hover:bg-gray-50">
-                            <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              sprint.status === 'completed' ? 'bg-green-100' :
-                              sprint.status === 'active' ? 'bg-blue-100' :
-                              'bg-amber-50'
-                            }`}>
-                              {sprint.status === 'completed' ? (
-                                <CheckCircle2 className="h-6 w-6 text-green-600" />
-                              ) : sprint.status === 'active' ? (
-                                <Calendar className="h-5 w-5 text-blue-600" />
-                              ) : (
-                                <FileText className="h-5 w-5 text-amber-600" />
-                              )}
-                            </div>
-                            <div className="flex-1 text-left">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold">{sprint.name}</span>
-                                <Badge variant={sprint.status === 'completed' || sprint.status === 'active' ? 'default' : 'secondary'} className={`text-xs ${
-                                  sprint.status === 'completed' ? 'bg-green-500' :
-                                  sprint.status === 'active' ? 'bg-blue-500' :
-                                  'bg-gray-200 text-gray-600'
-                                }`}>
-                                  {sprint.status === 'completed' ? 'Done' : sprint.status === 'active' ? 'Active' : 'Planned'}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-gray-500">{sprint.focus}</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="w-32">
-                                <Progress value={progress.percentage} className="h-2" />
-                              </div>
-                              <span className="text-sm text-gray-500 w-16 text-right">{progress.done}/{progress.total} done</span>
-                              <span className="text-lg font-bold w-12 text-right">{progress.percentage}%</span>
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-
-                        <CollapsibleContent>
-                          <div className="border-t divide-y">
-                            {sprintStories.map((story, idx) => {
-                              const stepMap: Record<string, number> = {
-                                'not-created': -1, 'backlog': 0, 'blocked': 0,
-                                'in-progress': 1, 'in-review': 2, 'done': 4,
-                              };
-                              const currentStep = stepMap[story.status] ?? 0;
-
-                              return (
-                                <div
-                                  key={story.id}
-                                  className={`px-4 py-3 flex items-center gap-4 hover:bg-gray-50 cursor-pointer ${
-                                    story.status === 'in-progress' ? 'bg-blue-50' : ''
-                                  }`}
-                                  onClick={() => openStoryDetails(story)}
-                                >
-                                  <span className="text-gray-400 text-sm w-6 pl-10">{idx + 1}</span>
-                                  <Badge variant="outline" className="text-xs">{story.id}</Badge>
-                                  <span className="flex-1 text-sm">{story.title}</span>
-                                  <span className="text-sm font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-600">
-                                    {story.agent || '-'}
-                                  </span>
-                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    story.status === 'done' ? 'bg-green-100 text-green-700' :
-                                    story.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
-                                    story.status === 'in-review' ? 'bg-purple-100 text-purple-700' :
-                                    story.status === 'blocked' ? 'bg-red-100 text-red-700' :
-                                    'bg-gray-100 text-gray-500'
-                                  }`}>
-                                    {story.status === 'done' ? 'Done' :
-                                     story.status === 'in-progress' ? 'In Progress' :
-                                     story.status === 'in-review' ? 'In Review' :
-                                     story.status === 'blocked' ? 'Blocked' :
-                                     story.status === 'backlog' ? 'Backlog' : 'Not Created'}
-                                  </span>
-                                  <div className="flex items-center gap-1 text-[9px] font-semibold">
-                                    {(['B', 'C', 'R', 'Q', 'D'] as const).map((letter, step) => (
-                                      <span
-                                        key={letter}
-                                        className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                                          story.status === 'blocked' && step === 0 ? 'bg-red-500 text-white' :
-                                          step < currentStep ? 'bg-green-500 text-white' :
-                                          step === currentStep ? (currentStep === 4 ? 'bg-green-500 text-white' : 'bg-blue-500 text-white') :
-                                          'bg-gray-200 text-gray-400'
-                                        }`}
-                                      >
-                                        {letter}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </CollapsibleContent>
-                      </div>
-                    </Collapsible>
-                  );
-                })}
-              </div>
-
-              {/* Bottom Stats Bar */}
-              <div className="grid grid-cols-6 gap-3">
-                {(() => {
-                  const allStories = getStoriesWithStatus(Object.values(stories));
-                  const done = allStories.filter(s => s.status === 'done').length;
-                  const inReview = allStories.filter(s => s.status === 'in-review').length;
-                  const inProgress = allStories.filter(s => s.status === 'in-progress').length;
-                  const blocked = allStories.filter(s => s.status === 'blocked').length;
-                  const backlog = allStories.filter(s => s.status === 'backlog').length;
-                  const notCreated = allStories.filter(s => s.status === 'not-created').length;
-
-                  return (
-                    <>
-                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-blue-600">{done}</p>
-                        <p className="text-xs text-gray-500">Done</p>
-                      </div>
-                      <div className="bg-orange-50 border border-orange-100 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-orange-600">{inReview}</p>
-                        <p className="text-xs text-gray-500">In Review</p>
-                      </div>
-                      <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-purple-600">{inProgress}</p>
-                        <p className="text-xs text-gray-500">In Progress</p>
-                      </div>
-                      <div className="bg-red-50 border border-red-100 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-red-600">{blocked}</p>
-                        <p className="text-xs text-gray-500">Blocked</p>
-                      </div>
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-gray-600">{backlog}</p>
-                        <p className="text-xs text-gray-500">Backlog</p>
-                      </div>
-                      <div className="bg-gray-50 border border-gray-100 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-gray-400">{notCreated}</p>
-                        <p className="text-xs text-gray-400">Not Created</p>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-
-              <p className="text-center text-sm text-gray-400">
-                Click sync icon on any story or use &quot;Sync All&quot; to fetch latest from Linear
-              </p>
-            </div>
+            <SprintView
+              sprints={sprints}
+              selectedSprintId={selectedSprintId}
+              onSelectSprint={setSelectedSprintId}
+              getSprintStories={getSprintStoriesWithStatus}
+              getProgress={getProgress}
+              stories={stories}
+              onOpenDetails={openStoryDetails}
+            />
           )}
 
           {/* Feature View */}
@@ -818,310 +617,32 @@ export default function DevDashboard() {
 
           {/* Epics View */}
           {viewMode === 'epics' && (
-            <div className="space-y-4">
-              {epics.map(epic => {
-                const epicFeatures = epic.features.map(fId => features[fId]).filter(Boolean);
-                const epicStories = epicFeatures.flatMap(f => f.stories);
-                const done = epicStories.filter(s => stories[s.id]?.status === 'done').length;
-                const total = epicStories.length;
-                const percentage = total > 0 ? Math.round((done / total) * 100) : 0;
-
-                return (
-                  <div key={epic.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="p-5 bg-gradient-to-r from-purple-50 to-indigo-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl">🏔️</span>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-sm text-purple-600">{epic.id}</span>
-                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                epic.status === 'done' ? 'bg-green-100 text-green-700' :
-                                epic.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
-                                'bg-gray-100 text-gray-600'
-                              }`}>
-                                {epic.status === 'in-progress' ? 'In Progress' : epic.status === 'done' ? 'Done' : 'Planned'}
-                              </span>
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900 mt-1">{epic.name}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{epic.description}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-purple-600">{percentage}%</div>
-                          <div className="text-xs text-gray-500">{done}/{total} stories</div>
-                          <div className="text-xs text-gray-400 mt-1">{epic.totalPoints || 0} pts</div>
-                        </div>
-                      </div>
-                      <div className="mt-4 w-full h-2 bg-white rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {epicFeatures.map(f => (
-                          <span key={f.id} className="px-2 py-1 bg-white rounded text-xs text-gray-600 border border-gray-200">
-                            {f.id}: {f.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <EpicsView epics={epics} features={features} stories={stories} />
           )}
 
           {/* Pages View */}
           {viewMode === 'pages' && (
-            <div className="space-y-6">
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">📄</span>
-                    <div>
-                      <h3 className="font-semibold text-emerald-900">UI Pages</h3>
-                      <p className="text-sm text-emerald-700">
-                        {uiPages.reduce((acc, cat) => acc + cat.pages.filter(p => p.status === 'done').length, 0)} of {uiPages.reduce((acc, cat) => acc + cat.pages.length, 0)} pages implemented
-                      </p>
-                    </div>
-                  </div>
-                  <a href="/design_mockups/index.html" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium">
-                    View All Mockups
-                  </a>
-                </div>
-              </div>
-
-              {uiPages.map(category => {
-                const doneCount = category.pages.filter(p => p.status === 'done').length;
-                return (
-                  <div key={category.category} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{category.icon}</span>
-                          <h3 className="font-semibold text-gray-900">{category.category}</h3>
-                        </div>
-                        <span className={`text-sm font-medium ${doneCount === category.pages.length ? 'text-green-600' : 'text-gray-500'}`}>
-                          {doneCount}/{category.pages.length} done
-                        </span>
-                      </div>
-                    </div>
-                    <div className="divide-y divide-gray-100">
-                      {category.pages.map(page => {
-                        const isDone = page.status === 'done';
-                        const isClickable = isDone && !page.route.includes('[');
-                        return (
-                          <div key={page.route} className="px-5 py-3 hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3 flex-1">
-                                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isDone ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className={`font-medium ${isDone ? 'text-gray-900' : 'text-gray-500'}`}>{page.name}</span>
-                                    <code className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{page.route}</code>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {page.mockup && (
-                                  <a href={`/design_mockups/${page.mockup}`} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-colors">
-                                    Mockup
-                                  </a>
-                                )}
-                                {isClickable ? (
-                                  <a href={page.route} target="_blank" rel="noopener noreferrer" className="text-xs px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors font-medium">
-                                    Open Page
-                                  </a>
-                                ) : (
-                                  <span className={`text-xs px-2 py-1 rounded ${isDone ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                    {isDone ? 'Done' : 'Planned'}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <PagesView uiPages={uiPages} />
           )}
 
           {/* Sitemap View */}
           {viewMode === 'sitemap' && (
-            <div className="space-y-6">
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">🎨</span>
-                    <div>
-                      <h3 className="font-semibold text-amber-900">Design Mockups</h3>
-                      <p className="text-sm text-amber-700">19 HTML mockups - source of truth for implementation</p>
-                    </div>
-                  </div>
-                  <a href="/design_mockups/index.html" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium">
-                    View All Mockups
-                  </a>
-                </div>
-              </div>
-
-              {Object.entries(screenCategories).map(([category, config]) => {
-                const categoryScreens = screens.filter(s => s.category === category);
-                if (categoryScreens.length === 0) return null;
-                const done = categoryScreens.filter(s => s.status === 'done').length;
-                const hasMockup = categoryScreens.filter(s => s.mockup).length;
-
-                return (
-                  <div key={category} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className={`px-5 py-3 ${config.bgColor} border-b border-gray-200`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <h3 className={`font-semibold ${config.color}`}>{config.label}</h3>
-                          {hasMockup > 0 && (
-                            <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded">
-                              {hasMockup} mockups
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-sm text-gray-500">{done}/{categoryScreens.length} done</span>
-                      </div>
-                    </div>
-                    <div className="divide-y divide-gray-100">
-                      {categoryScreens.map(screen => (
-                        <div key={screen.id} className="px-5 py-3 hover:bg-gray-50 transition-colors">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                                  screen.status === 'done' ? 'bg-green-500' :
-                                  screen.status === 'in-progress' ? 'bg-blue-500' : 'bg-gray-300'
-                                }`} />
-                                <span className="font-medium text-gray-900">{screen.name}</span>
-                                <code className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{screen.path}</code>
-                                {screen.mockup && (
-                                  <a href={`/design_mockups/${screen.mockup}`} target="_blank" rel="noopener noreferrer" className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-colors flex items-center gap-1">
-                                    🎨 Mockup
-                                  </a>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-500 mt-1">{screen.description}</p>
-                              {screen.stories && screen.stories.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-1">
-                                  {screen.stories.map(storyId => (
-                                    <span
-                                      key={storyId}
-                                      className="text-xs px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded cursor-pointer hover:bg-indigo-100"
-                                      onClick={() => {
-                                        const story = stories[storyId];
-                                        if (story) openStoryDetails(story);
-                                      }}
-                                    >
-                                      {storyId}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            <span className={`text-xs px-2 py-1 rounded flex-shrink-0 ${
-                              screen.status === 'done' ? 'bg-green-100 text-green-700' :
-                              screen.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
-                              'bg-gray-100 text-gray-500'
-                            }`}>
-                              {screen.status === 'in-progress' ? 'In Progress' : screen.status === 'done' ? 'Done' : 'Planned'}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <SitemapView
+              screens={screens}
+              screenCategories={screenCategories}
+              stories={stories}
+              onOpenDetails={openStoryDetails}
+            />
           )}
 
           {/* Agents View */}
           {viewMode === 'agents' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-3">
-                <Card className="bg-green-50 border-green-200">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className="p-2 bg-green-500 rounded-lg"><Activity className="h-5 w-5 text-white" /></div>
-                    <div>
-                      <p className="text-2xl font-bold text-green-700">{agentStatuses.filter(a => a.status === 'active').length}</p>
-                      <p className="text-xs text-green-600">Running</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className="p-2 bg-blue-500 rounded-lg"><Clock className="h-5 w-5 text-white" /></div>
-                    <div>
-                      <p className="text-2xl font-bold text-blue-700">{agentStatuses.filter(a => a.status === 'standby').length}</p>
-                      <p className="text-xs text-blue-600">Standby</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="bg-gray-50 border-gray-200">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className="p-2 bg-gray-400 rounded-lg"><Zap className="h-5 w-5 text-white" /></div>
-                    <div>
-                      <p className="text-2xl font-bold text-gray-700">{agentStatuses.filter(a => a.status === 'offline').length}</p>
-                      <p className="text-xs text-gray-600">Offline</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="bg-purple-50 border-purple-200">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className="p-2 bg-purple-500 rounded-lg"><Bot className="h-5 w-5 text-white" /></div>
-                    <div>
-                      <p className="text-2xl font-bold text-purple-700">{agentStatuses.length || 7}</p>
-                      <p className="text-xs text-purple-600">Total Agents</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Bot className="h-6 w-6 text-purple-600" />
-                      <div>
-                        <h3 className="font-semibold">Multi-Agent Framework</h3>
-                        <p className="text-sm text-muted-foreground">Workflow 2.0: CTO → PM → Agent → QA → PM</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={fetchAgentStatuses} disabled={isLoadingAgents}>
-                        <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingAgents ? 'animate-spin' : ''}`} />
-                        Refresh
-                      </Button>
-                      <Button asChild variant="secondary" size="sm">
-                        <a href="/.claudecode/CTO-CRASH-RECOVERY.md" target="_blank" rel="noopener noreferrer">
-                          Recovery Docs
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="space-y-3">
-                {agents.map(agent => {
-                  const liveStatus = agentStatuses.find(a => a.agent === agent.id);
-                  const updatedAgent = liveStatus ? {
-                    ...agent,
-                    status: liveStatus.status,
-                    stories: liveStatus.assignment?.stories || agent.stories,
-                  } : agent;
-                  return <AgentRow key={agent.id} agent={updatedAgent} />;
-                })}
-              </div>
-            </div>
+            <AgentsView
+              agents={agents}
+              agentStatuses={agentStatuses}
+              isLoadingAgents={isLoadingAgents}
+              onRefresh={fetchAgentStatuses}
+            />
           )}
         </div>
 
