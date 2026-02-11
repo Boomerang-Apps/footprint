@@ -48,7 +48,7 @@ function CollapsibleTrigger({ children, className = '', asChild = false }: Colla
   const handleClick = () => context.onOpenChange(!context.open);
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<any>, {
+    return React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
       onClick: handleClick,
     });
   }

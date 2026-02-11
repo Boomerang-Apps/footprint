@@ -49,8 +49,8 @@ interface OrderDetailResponse {
   hasPassepartout: boolean;
 
   // Addresses
-  shippingAddress: any;
-  billingAddress: any;
+  shippingAddress: Record<string, unknown> | null;
+  billingAddress: Record<string, unknown> | null;
 
   // Tracking
   trackingNumber: string | null;
@@ -184,6 +184,7 @@ export async function GET(
       : null;
 
     // 7. Transform items data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const items: OrderDetailItem[] = (order.order_items || []).map((item: any) => ({
       id: item.id,
       originalImageUrl: item.original_image_url,

@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     }
 
     // Convert array to Record<string, Story> format
-    const stories: Record<string, any> = {};
+    const stories: Record<string, { id: string; linearId: string | null; title: string; description: string | null; status: string; agent: string | null; points: number | null; component: string | null; blockedBy: string[] | null; sprintId: number | null }> = {};
     for (const story of storiesData || []) {
       stories[story.id] = {
         id: story.id,
