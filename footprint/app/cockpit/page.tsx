@@ -376,14 +376,14 @@ export default function DevDashboard() {
   };
 
   // Get stories with current status from state
-  const getStoriesWithStatus = (storyList: Story[]) => {
+  const getStoriesWithStatus = useCallback((storyList: Story[]) => {
     return storyList.map(s => stories[s.id] || s);
-  };
+  }, [stories]);
 
   // Get sprint stories with current status
   const getSprintStoriesWithStatus = useCallback((sprintId: number) => {
     return getStoriesWithStatus(getStoriesBySprint(sprintId));
-  }, [stories]);
+  }, [getStoriesWithStatus]);
 
   // Filter stories based on search query
   const filteredStories = searchQuery
