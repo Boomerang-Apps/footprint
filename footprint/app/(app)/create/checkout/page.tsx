@@ -760,7 +760,7 @@ function CheckoutPageContent() {
               </section>
 
               <p className="text-xs text-zinc-500 text-center">
-                בלחיצה על כפתור התשלום אתם מאשרים את <a href="#" className="underline">התקנון</a> ו<a href="#" className="underline">מדיניות הפרטיות</a>
+                בלחיצה על כפתור התשלום אתם מאשרים את <a href="/terms" className="underline">התקנון</a> ו<a href="/privacy" className="underline">מדיניות הפרטיות</a>
               </p>
             </form>
           </div>
