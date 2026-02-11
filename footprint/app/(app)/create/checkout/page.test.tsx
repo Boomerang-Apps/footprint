@@ -487,6 +487,80 @@ describe('CheckoutPage', () => {
     });
   });
 
+  describe('Payment Method Selector', () => {
+    it('renders payment method section with heading', async () => {
+      render(<CheckoutPage />);
+      await waitFor(() => {
+        expect(screen.getByText('אמצעי תשלום')).toBeInTheDocument();
+      });
+    });
+
+    it('renders all three payment method options', async () => {
+      render(<CheckoutPage />);
+      await waitFor(() => {
+        expect(screen.getByText('Apple Pay')).toBeInTheDocument();
+        expect(screen.getByText('Google Pay')).toBeInTheDocument();
+        expect(screen.getByText('כרטיס אשראי')).toBeInTheDocument();
+      });
+    });
+
+    it('defaults to credit card selected', async () => {
+      render(<CheckoutPage />);
+      await waitFor(() => {
+        const creditCardButton = screen.getByText('כרטיס אשראי').closest('button');
+        expect(creditCardButton).toHaveClass('border-violet-500');
+      });
+    });
+
+    it('switches selection when clicking a different method', async () => {
+      render(<CheckoutPage />);
+      await waitFor(() => {
+        expect(screen.getByText('Apple Pay')).toBeInTheDocument();
+      });
+
+      const applePayButton = screen.getByText('Apple Pay').closest('button')!;
+      fireEvent.click(applePayButton);
+
+      expect(applePayButton).toHaveClass('border-violet-500');
+
+      // Credit card should no longer be selected
+      const creditCardButton = screen.getByText('כרטיס אשראי').closest('button');
+      expect(creditCardButton).not.toHaveClass('border-violet-500');
+    });
+
+    it('shows filled radio indicator for selected method', async () => {
+      render(<CheckoutPage />);
+      await waitFor(() => {
+        expect(screen.getByText('כרטיס אשראי')).toBeInTheDocument();
+      });
+
+      // Credit card radio should have the filled indicator (violet border on the radio circle)
+      const creditCardButton = screen.getByText('כרטיס אשראי').closest('button')!;
+      const radioCircle = creditCardButton.querySelector('.border-violet-500.rounded-full');
+      expect(radioCircle).toBeInTheDocument();
+
+      // The filled dot inside should exist
+      const filledDot = radioCircle?.querySelector('.bg-violet-500');
+      expect(filledDot).toBeInTheDocument();
+    });
+
+    it('does not show filled radio for unselected methods', async () => {
+      render(<CheckoutPage />);
+      await waitFor(() => {
+        expect(screen.getByText('Apple Pay')).toBeInTheDocument();
+      });
+
+      // Apple Pay radio should NOT have violet styling (not selected by default)
+      const applePayButton = screen.getByText('Apple Pay').closest('button')!;
+      const radioCircle = applePayButton.querySelector('.border-zinc-300.rounded-full');
+      expect(radioCircle).toBeInTheDocument();
+
+      // Should NOT have a filled dot
+      const filledDot = radioCircle?.querySelector('.bg-violet-500');
+      expect(filledDot).not.toBeInTheDocument();
+    });
+  });
+
   describe('Navigation', () => {
     it('navigates back to customize when back button clicked', async () => {
       render(<CheckoutPage />);
