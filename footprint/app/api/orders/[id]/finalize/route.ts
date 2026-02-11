@@ -1,7 +1,7 @@
 /**
  * POST /api/orders/[id]/finalize
  *
- * Finalizes a pending_payment order after PayPlus redirect.
+ * Finalizes a pending order after PayPlus redirect.
  * Updates status to 'paid', sets paid_at, and triggers emails.
  * Idempotent: if order is already 'paid', returns success without duplicate emails.
  *
@@ -63,8 +63,8 @@ export async function POST(
       });
     }
 
-    // Only finalize pending_payment orders
-    if (order.status !== 'pending_payment') {
+    // Only finalize pending orders
+    if (order.status !== 'pending') {
       return NextResponse.json(
         { error: `Cannot finalize order with status: ${order.status}` },
         { status: 400 }

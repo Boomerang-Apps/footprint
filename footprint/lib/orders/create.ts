@@ -54,8 +54,8 @@ export interface CreateOrderParams {
   isGift?: boolean;
   giftMessage?: string;
   hasPassepartout?: boolean;
-  /** Order status — defaults to 'paid'. Use 'pending_payment' for pre-created orders. */
-  status?: 'paid' | 'pending_payment';
+  /** Order status — defaults to 'paid'. Use 'pending' for pre-created orders awaiting payment. */
+  status?: 'paid' | 'pending';
 }
 
 /**

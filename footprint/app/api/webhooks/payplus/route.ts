@@ -214,7 +214,7 @@ export async function POST(
             });
           }
 
-          // Update pending_payment → paid, store real transaction_uid
+          // Update pending → paid, store real transaction_uid
           const updatedNotes = (() => {
             try {
               const parsed = JSON.parse(existing.customer_notes || '{}');

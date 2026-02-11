@@ -198,7 +198,7 @@ export async function POST(
       isGift: body.isGift || false,
       giftMessage: body.giftMessage,
       hasPassepartout: body.hasPassepartout || false,
-      status: 'pending_payment',
+      status: 'pending',
     });
 
     const moreInfo = JSON.stringify({

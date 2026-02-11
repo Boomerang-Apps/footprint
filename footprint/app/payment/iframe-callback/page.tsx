@@ -41,7 +41,7 @@ function IframeCallbackContent() {
     async function handleTopLevelSuccess(oid: string, onum: string) {
       if (oid) {
         try {
-          // Finalize the pending_payment order (mark paid + trigger emails)
+          // Finalize the pending order (mark paid + trigger emails)
           const res = await fetch(`/api/orders/${oid}/finalize`, {
             method: 'POST',
           });
