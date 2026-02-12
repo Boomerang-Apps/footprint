@@ -415,12 +415,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="pt-8 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-center gap-6 text-[13px] text-zinc-500">
-            <span>© 2025 פוטפרינט. כל הזכויות שמורות.</span>
-            <div className="flex gap-6">
-              <Link href="/terms" className="hover:text-zinc-900 transition">תקנון</Link>
-              <Link href="/privacy" className="hover:text-zinc-900 transition">פרטיות</Link>
+          <div className="pt-8 border-t border-zinc-200 flex flex-col items-center gap-4 text-[13px] text-zinc-500">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <span>© 2025 פוטפרינט. כל הזכויות שמורות.</span>
+              <div className="flex gap-6">
+                <Link href="/terms" className="hover:text-zinc-900 transition">תקנון</Link>
+                <Link href="/privacy" className="hover:text-zinc-900 transition">פרטיות</Link>
+              </div>
             </div>
+            <span className="text-zinc-400">Footprint is a product by Boomerang-Application LTD</span>
           </div>
         </div>
       </footer>
