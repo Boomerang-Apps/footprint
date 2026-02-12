@@ -30,15 +30,18 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 }
 
 export async function middleware(request: NextRequest) {
-  // Skip Supabase auth for non-admin routes (performance optimization)
-  if (!request.nextUrl.pathname.startsWith('/admin')) {
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
+  const isAuthCallback = request.nextUrl.pathname.startsWith('/auth/callback');
+
+  // Skip Supabase auth for non-admin, non-auth-callback routes (performance optimization)
+  if (!isAdminRoute && !isAuthCallback) {
     const response = NextResponse.next({
       request: { headers: request.headers },
     });
     return applySecurityHeaders(response);
   }
 
-  // Admin routes: full auth check
+  // Auth callback and admin routes: full Supabase cookie handling
   const response = NextResponse.next({
     request: { headers: request.headers },
   });
@@ -61,11 +64,16 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // For auth callback, just ensure cookies are handled — no access control
+  if (isAuthCallback) {
+    return applySecurityHeaders(response);
+  }
+
+  // Admin routes: require authenticated user with admin role
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /admin routes: require authenticated user with admin role
   if (!user) {
     const redirect = NextResponse.redirect(new URL('/login', request.url));
     return applySecurityHeaders(redirect);

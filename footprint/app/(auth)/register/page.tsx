@@ -16,6 +16,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | undefined>();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -136,7 +137,30 @@ export default function RegisterPage() {
     }
   };
 
-  const isAnyLoading = isLoading || googleLoading || appleLoading;
+  const handleFacebookLogin = async () => {
+    setFacebookLoading(true);
+    setError(undefined);
+
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (authError) {
+        setError(authError.message);
+      }
+    } catch {
+      setError('Failed to sign in with Facebook. Please try again.');
+    } finally {
+      setFacebookLoading(false);
+    }
+  };
+
+  const isAnyLoading = isLoading || googleLoading || appleLoading || facebookLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-muted px-4 py-12">
@@ -151,8 +175,11 @@ export default function RegisterPage() {
           <SocialLoginButtons
             onGoogleClick={handleGoogleLogin}
             onAppleClick={handleAppleLogin}
+            onFacebookClick={handleFacebookLogin}
             googleLoading={googleLoading}
             appleLoading={appleLoading}
+            facebookLoading={facebookLoading}
+            showFacebook
             disabled={isAnyLoading}
           />
 

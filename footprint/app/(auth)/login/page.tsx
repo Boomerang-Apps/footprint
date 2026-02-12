@@ -23,6 +23,7 @@ function LoginPageContent() {
   }, [searchParams]);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
 
   const handleSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -105,7 +106,30 @@ function LoginPageContent() {
     }
   };
 
-  const isAnyLoading = isLoading || googleLoading || appleLoading;
+  const handleFacebookLogin = async () => {
+    setFacebookLoading(true);
+    setError(undefined);
+
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (authError) {
+        setError(authError.message);
+      }
+    } catch {
+      setError('Failed to sign in with Facebook. Please try again.');
+    } finally {
+      setFacebookLoading(false);
+    }
+  };
+
+  const isAnyLoading = isLoading || googleLoading || appleLoading || facebookLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-muted px-4 py-12">
@@ -120,8 +144,11 @@ function LoginPageContent() {
           <SocialLoginButtons
             onGoogleClick={handleGoogleLogin}
             onAppleClick={handleAppleLogin}
+            onFacebookClick={handleFacebookLogin}
             googleLoading={googleLoading}
             appleLoading={appleLoading}
+            facebookLoading={facebookLoading}
+            showFacebook
             disabled={isAnyLoading}
           />
 
