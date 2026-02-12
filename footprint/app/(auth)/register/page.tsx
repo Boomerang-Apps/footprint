@@ -147,6 +147,7 @@ export default function RegisterPage() {
         provider: 'facebook',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'email,public_profile',
         },
       });
 
