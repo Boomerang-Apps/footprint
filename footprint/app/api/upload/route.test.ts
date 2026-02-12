@@ -197,7 +197,7 @@ describe('POST /api/upload', () => {
   });
 
   describe('Authentication', () => {
-    it('should allow anonymous uploads when user is not authenticated', async () => {
+    it('should reject unauthenticated uploads in production', async () => {
       // Mock unauthenticated user
       mockGetUser.mockResolvedValue({
         data: { user: null },
@@ -216,8 +216,35 @@ describe('POST /api/upload', () => {
       });
 
       const response = await POST(request);
-      // Route allows anonymous uploads (falls back to 'anonymous' userId)
+      expect(response.status).toBe(401);
+      const data = await response.json();
+      expect(data.error).toBe('Authentication required');
+    });
+
+    it('should allow anonymous uploads when NEXT_PUBLIC_USE_MOCK is true', async () => {
+      vi.stubEnv('NEXT_PUBLIC_USE_MOCK', 'true');
+
+      // Mock unauthenticated user
+      mockGetUser.mockResolvedValue({
+        data: { user: null },
+        error: { message: 'Not authenticated' },
+      });
+
+      const request = new Request('http://localhost/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'presigned',
+          fileName: 'photo.jpg',
+          contentType: 'image/jpeg',
+          fileSize: 1024,
+        }),
+      });
+
+      const response = await POST(request);
       expect(response.status).toBe(200);
+
+      vi.unstubAllEnvs();
     });
   });
 

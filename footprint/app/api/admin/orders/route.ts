@@ -202,6 +202,7 @@ export async function GET(
     }
 
     // 8. Transform response
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transformedOrders: AdminOrderSummary[] = (orders || []).map((order: any) => ({
       id: order.id,
       orderNumber: order.order_number,

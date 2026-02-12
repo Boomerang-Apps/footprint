@@ -12,6 +12,7 @@ vi.mock('next/headers', () => ({
 // Mock dependencies
 const mockCreatePaymentLink = vi.fn();
 const mockGetUser = vi.fn();
+const mockCreateOrder = vi.fn();
 
 vi.mock('@/lib/payments/payplus', () => ({
   createPaymentLink: (...args: unknown[]) => mockCreatePaymentLink(...args),
@@ -23,6 +24,13 @@ vi.mock('@/lib/supabase/server', () => ({
       getUser: () => mockGetUser(),
     },
   }),
+  createAdminClient: () => ({}),
+}));
+
+vi.mock('@/lib/orders/create', () => ({
+  createOrder: (...args: unknown[]) => mockCreateOrder(...args),
+  triggerConfirmationEmail: vi.fn(),
+  triggerNewOrderNotification: vi.fn(),
 }));
 
 // Mock rate limiting to skip Upstash Redis in tests
@@ -49,6 +57,12 @@ describe('POST /api/checkout', () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'user123', email: 'test@example.com' } },
       error: null,
+    });
+
+    // Default: createOrder returns mock order
+    mockCreateOrder.mockResolvedValue({
+      orderId: 'order_db_123',
+      orderNumber: 'FP-20260211-0001',
     });
 
     // Default mock return
@@ -358,6 +372,8 @@ describe('POST /api/checkout', () => {
 
       expect(data).toHaveProperty('pageRequestUid');
       expect(data).toHaveProperty('paymentUrl');
+      expect(data).toHaveProperty('orderId');
+      expect(data).toHaveProperty('orderNumber');
       expect(typeof data.pageRequestUid).toBe('string');
       expect(typeof data.paymentUrl).toBe('string');
     });

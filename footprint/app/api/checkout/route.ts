@@ -30,6 +30,7 @@ import {
   triggerNewOrderNotification,
 } from '@/lib/orders/create';
 import { logger } from '@/lib/logger';
+import { isValidGuestEmail } from '@/lib/auth/guest';
 
 interface CheckoutOrderItem {
   name: string;
@@ -84,22 +85,7 @@ export async function POST(
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    // 1. Check authentication (optional for test mode)
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    // Require auth only in production (when PayPlus is configured)
-    const payPlusConfigured = !!process.env.PAYPLUS_PAYMENT_PAGE_UID;
-    if (payPlusConfigured && !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please sign in to checkout' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Parse request body
+    // 1. Parse request body (before auth check so guest email is available)
     let body: CheckoutRequest;
     try {
       body = await request.json();
@@ -111,6 +97,23 @@ export async function POST(
     }
 
     const { orderId, amount, customerName, customerEmail, customerPhone } = body;
+
+    // 2. Check authentication (allow guest with valid email)
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const payPlusConfigured = !!process.env.PAYPLUS_PAYMENT_PAGE_UID;
+    if (payPlusConfigured && !user) {
+      // Allow guest checkout if a valid email is provided
+      if (!customerEmail || !isValidGuestEmail(customerEmail)) {
+        return NextResponse.json(
+          { error: 'Unauthorized - Please sign in or provide a valid email to checkout' },
+          { status: 401 }
+        );
+      }
+    }
 
     // 3. Validate required fields
     if (!orderId) {
@@ -180,9 +183,31 @@ export async function POST(
       });
     }
 
-    // Production: create PayPlus payment link (user guaranteed non-null — auth required above)
+    // Production: pre-create order with pending_payment status, then create PayPlus link
+    const email = customerEmail || user?.email || '';
+
+    const orderResult = await createOrder({
+      userId: user?.id,
+      customerName,
+      customerEmail: email,
+      customerPhone,
+      items: body.items || [{ name: 'Item', quantity: 1, price: amount / 100 }],
+      subtotal: body.subtotal || amount / 100,
+      shipping: body.shipping || 0,
+      total: body.total || amount / 100,
+      shippingAddress: body.shippingAddress || { street: '', city: '', postalCode: '', country: 'Israel' },
+      paymentProvider: 'payplus',
+      paymentTransactionId: `pending-${Date.now()}`,
+      isGift: body.isGift || false,
+      giftMessage: body.giftMessage,
+      hasPassepartout: body.hasPassepartout || false,
+      status: 'pending',
+    });
+
     const moreInfo = JSON.stringify({
-      userId: user!.id,
+      userId: user?.id,
+      orderId: orderResult.orderId,
+      orderNumber: orderResult.orderNumber,
       items: body.items || [],
       subtotal: body.subtotal || 0,
       shipping: body.shipping || 0,
@@ -193,22 +218,31 @@ export async function POST(
       hasPassepartout: body.hasPassepartout || false,
     });
 
+    const successUrlParams = new URLSearchParams({
+      status: 'success',
+      page_request_uid: '{page_request_uid}',
+      orderId: orderResult.orderId,
+      orderNumber: orderResult.orderNumber,
+    });
+
     const paymentLink = await createPaymentLink({
       orderId,
       amount,
       customerName,
-      customerEmail: customerEmail || user!.email || '',
+      customerEmail: email,
       customerPhone,
-      successUrl: `${baseUrl}/payment/iframe-callback?status=success&page_request_uid={page_request_uid}`,
+      successUrl: `${baseUrl}/payment/iframe-callback?${successUrlParams.toString()}`,
       failureUrl: `${baseUrl}/payment/iframe-callback?status=failure`,
       callbackUrl: `${baseUrl}/api/webhooks/payplus`,
       moreInfo,
     });
 
-    // 6. Return payment URL
+    // 6. Return payment URL with order IDs
     return NextResponse.json({
       pageRequestUid: paymentLink.pageRequestUid,
       paymentUrl: paymentLink.paymentUrl,
+      orderId: orderResult.orderId,
+      orderNumber: orderResult.orderNumber,
     });
   } catch (error) {
     logger.error('Checkout error', error);

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { logger } from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
@@ -13,6 +14,9 @@ export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -87,6 +91,78 @@ export default function RegisterPage() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError(undefined);
+
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (authError) {
+        setError(authError.message);
+      }
+    } catch {
+      setError('Failed to sign in with Google. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    setAppleLoading(true);
+    setError(undefined);
+
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (authError) {
+        setError(authError.message);
+      }
+    } catch {
+      setError('Failed to sign in with Apple. Please try again.');
+    } finally {
+      setAppleLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    setFacebookLoading(true);
+    setError(undefined);
+
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'email,public_profile',
+        },
+      });
+
+      if (authError) {
+        setError(authError.message);
+      }
+    } catch {
+      setError('Failed to sign in with Facebook. Please try again.');
+    } finally {
+      setFacebookLoading(false);
+    }
+  };
+
+  const isAnyLoading = isLoading || googleLoading || appleLoading || facebookLoading;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-muted px-4 py-12">
       <Card className="w-full max-w-md">
@@ -96,7 +172,18 @@ export default function RegisterPage() {
             Sign up to start creating your prints
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          <SocialLoginButtons
+            onGoogleClick={handleGoogleLogin}
+            onAppleClick={handleAppleLogin}
+            onFacebookClick={handleFacebookLogin}
+            googleLoading={googleLoading}
+            appleLoading={appleLoading}
+            facebookLoading={facebookLoading}
+            showFacebook
+            disabled={isAnyLoading}
+          />
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div
@@ -183,7 +270,7 @@ export default function RegisterPage() {
               type="submit"
               fullWidth
               loading={isLoading}
-              disabled={isLoading}
+              disabled={isAnyLoading}
               size="lg"
               className="mt-6"
             >

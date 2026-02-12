@@ -2,30 +2,30 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Loader2, RectangleVertical, RectangleHorizontal } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
 import RoomPreview from '@/components/mockup/RoomPreview';
-import type { SizeType, PaperType, FrameType } from '@/types';
+import { BASE_PRICES, PAPER_MODIFIERS, FRAME_PRICES } from '@/lib/pricing/calculator';
+import type { SizeType, PaperType, FrameType, OrientationType } from '@/types';
 
-// Prices matching mockup 03-customize.html
 const sizes: { id: SizeType; name: string; dimensions: string; price: number; popular?: boolean }[] = [
-  { id: 'A5', name: 'A5', dimensions: '14.8×21 ס״מ', price: 89 },
-  { id: 'A4', name: 'A4', dimensions: '21×29.7 ס״מ', price: 149, popular: true },
-  { id: 'A3', name: 'A3', dimensions: '29.7×42 ס״מ', price: 249 },
-  { id: 'A2', name: 'A2', dimensions: '42×59.4 ס״מ', price: 379 },
+  { id: 'A5', name: 'A5', dimensions: '14.8×21 ס״מ', price: BASE_PRICES.A5 },
+  { id: 'A4', name: 'A4', dimensions: '21×29.7 ס״מ', price: BASE_PRICES.A4, popular: true },
+  { id: 'A3', name: 'A3', dimensions: '29.7×42 ס״מ', price: BASE_PRICES.A3 },
+  { id: 'A2', name: 'A2', dimensions: '42×59.4 ס״מ', price: BASE_PRICES.A2 },
 ];
 
 const papers: { id: PaperType; name: string; englishName: string; description: string; extraPrice: number }[] = [
-  { id: 'matte', name: 'נייר פיין ארט מט', englishName: 'Fine Art Matte', description: 'איכות מוזיאון', extraPrice: 0 },
-  { id: 'glossy', name: 'נייר צילום מבריק', englishName: 'Glossy Photo', description: 'צבעים עזים', extraPrice: 20 },
-  { id: 'canvas', name: 'קנבס', englishName: 'Canvas Texture', description: 'מראה ציורי', extraPrice: 40 },
+  { id: 'matte', name: 'נייר פיין ארט מט', englishName: 'Fine Art Matte', description: 'איכות מוזיאון', extraPrice: PAPER_MODIFIERS.matte },
+  { id: 'glossy', name: 'נייר צילום מבריק', englishName: 'Glossy Photo', description: 'צבעים עזים', extraPrice: PAPER_MODIFIERS.glossy },
+  { id: 'canvas', name: 'קנבס', englishName: 'Canvas Texture', description: 'מראה ציורי', extraPrice: PAPER_MODIFIERS.canvas },
 ];
 
 const frames: { id: FrameType; name: string; color: string; extraPrice: number }[] = [
-  { id: 'none', name: 'ללא', color: 'transparent', extraPrice: 0 },
-  { id: 'black', name: 'שחור', color: '#1a1a1a', extraPrice: 60 },
-  { id: 'white', name: 'לבן', color: '#ffffff', extraPrice: 60 },
-  { id: 'oak', name: 'אלון', color: '#daa520', extraPrice: 80 },
+  { id: 'none', name: 'ללא', color: 'transparent', extraPrice: FRAME_PRICES.none },
+  { id: 'black', name: 'שחור', color: '#1a1a1a', extraPrice: FRAME_PRICES.black },
+  { id: 'white', name: 'לבן', color: '#ffffff', extraPrice: FRAME_PRICES.white },
+  { id: 'oak', name: 'אלון', color: '#daa520', extraPrice: FRAME_PRICES.oak },
 ];
 
 const progressSteps = [
@@ -45,10 +45,12 @@ export default function CustomizePage() {
     size,
     paperType,
     frameType,
+    orientation,
     hasPassepartout,
     setSize,
     setPaperType,
     setFrameType,
+    setOrientation,
     setHasPassepartout,
     setStep,
     _hasHydrated,
@@ -154,6 +156,7 @@ export default function CustomizePage() {
               size={size}
               frameType={frameType}
               paperType={paperType}
+              orientation={orientation}
               onFrameChange={setFrameType}
               hasPassepartout={hasPassepartout}
               onPassepartoutChange={setHasPassepartout}
@@ -163,6 +166,48 @@ export default function CustomizePage() {
 
         {/* Options Section */}
         <div className="p-5 space-y-6">
+          {/* Orientation Toggle */}
+          <section role="group" aria-label="כיוון">
+            <div className="flex justify-center">
+              <div className="inline-flex rounded-full bg-zinc-100 p-1" role="radiogroup" aria-label="כיוון">
+                <button
+                  onClick={() => setOrientation('portrait')}
+                  role="radio"
+                  aria-checked={orientation === 'portrait'}
+                  aria-label="לאורך (Portrait)"
+                  className={`
+                    flex items-center gap-2 px-5 py-2 rounded-full transition-all
+                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
+                    ${orientation === 'portrait'
+                      ? 'bg-white text-violet-600 shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-700'
+                    }
+                  `}
+                >
+                  <span className="text-sm font-medium">לאורך</span>
+                  <RectangleVertical className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setOrientation('landscape')}
+                  role="radio"
+                  aria-checked={orientation === 'landscape'}
+                  aria-label="לרוחב (Landscape)"
+                  className={`
+                    flex items-center gap-2 px-5 py-2 rounded-full transition-all
+                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
+                    ${orientation === 'landscape'
+                      ? 'bg-white text-violet-600 shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-700'
+                    }
+                  `}
+                >
+                  <span className="text-sm font-medium">לרוחב</span>
+                  <RectangleHorizontal className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </section>
+
           {/* Size Selection */}
           <section>
             <h2 className="text-base font-semibold text-zinc-900 mb-3">גודל הדפסה</h2>

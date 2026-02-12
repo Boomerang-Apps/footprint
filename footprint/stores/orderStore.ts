@@ -7,7 +7,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { StyleType, SizeType, PaperType, FrameType, Address, PriceBreakdown, WrappingStyle } from '@/types';
+import type { StyleType, SizeType, PaperType, FrameType, OrientationType, Address, PriceBreakdown, WrappingStyle } from '@/types';
 import { GIFT_WRAPPING_PRICE } from '@/types/order';
 import { applyDiscount, type ApplyDiscountResult } from '@/lib/pricing/discounts';
 import {
@@ -89,6 +89,7 @@ interface OrderState {
   size: SizeType;
   paperType: PaperType;
   frameType: FrameType;
+  orientation: OrientationType;
   hasPassepartout: boolean;
   
   // Gift options
@@ -157,6 +158,7 @@ interface OrderActions {
   setSize: (size: SizeType) => void;
   setPaperType: (paper: PaperType) => void;
   setFrameType: (frame: FrameType) => void;
+  setOrientation: (orientation: OrientationType) => void;
   setHasPassepartout: (value: boolean) => void;
   
   // Gift
@@ -227,6 +229,7 @@ const initialState: OrderState = {
   size: 'A4',
   paperType: 'matte',
   frameType: 'none',
+  orientation: 'portrait',
   hasPassepartout: false,
   isGift: false,
   giftOccasion: null,
@@ -361,6 +364,11 @@ export const useOrderStore = create<OrderState & OrderActions>()(
       setSize: (size) => set({ size }),
       setPaperType: (paper) => set({ paperType: paper }),
       setFrameType: (frame) => set({ frameType: frame }),
+      /**
+       * Set the print orientation (portrait or landscape)
+       * @param orientation - The desired orientation ('portrait' or 'landscape')
+       */
+      setOrientation: (orientation) => set({ orientation }),
       setHasPassepartout: (value) => set({ hasPassepartout: value }),
 
       // Gift
@@ -534,6 +542,7 @@ export const useOrderStore = create<OrderState & OrderActions>()(
         size: state.size,
         paperType: state.paperType,
         frameType: state.frameType,
+        orientation: state.orientation,
         hasPassepartout: state.hasPassepartout,
         isGift: state.isGift,
         giftOccasion: state.giftOccasion,

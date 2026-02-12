@@ -1,19 +1,29 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginForm, type LoginFormData } from '@/components/auth/LoginForm';
 import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { createClient } from '@/lib/supabase/client';
 import { logger } from '@/lib/logger';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
+
+  // Show error from OAuth callback redirect
+  useEffect(() => {
+    const callbackError = searchParams?.get('error');
+    if (callbackError === 'auth_callback_failed') {
+      setError('Social login failed. Please try again.');
+    }
+  }, [searchParams]);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
 
   const handleSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -96,7 +106,31 @@ export default function LoginPage() {
     }
   };
 
-  const isAnyLoading = isLoading || googleLoading || appleLoading;
+  const handleFacebookLogin = async () => {
+    setFacebookLoading(true);
+    setError(undefined);
+
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'email,public_profile',
+        },
+      });
+
+      if (authError) {
+        setError(authError.message);
+      }
+    } catch {
+      setError('Failed to sign in with Facebook. Please try again.');
+    } finally {
+      setFacebookLoading(false);
+    }
+  };
+
+  const isAnyLoading = isLoading || googleLoading || appleLoading || facebookLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-light-muted px-4 py-12">
@@ -111,8 +145,11 @@ export default function LoginPage() {
           <SocialLoginButtons
             onGoogleClick={handleGoogleLogin}
             onAppleClick={handleAppleLogin}
+            onFacebookClick={handleFacebookLogin}
             googleLoading={googleLoading}
             appleLoading={appleLoading}
+            facebookLoading={facebookLoading}
+            showFacebook
             disabled={isAnyLoading}
           />
 
@@ -124,5 +161,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageContent />
+    </Suspense>
   );
 }

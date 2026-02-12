@@ -25,6 +25,7 @@ import {
   dataUriToBase64,
   base64ToDataUri,
 } from '@/lib/ai/nano-banana';
+import { removeBackground, isRemoveBgConfigured } from '@/lib/ai/remove-bg';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
@@ -155,8 +156,41 @@ export async function POST(
       );
     }
 
-    // 5. Build the edit prompt for Nano Banana
-    const editPrompt = `Edit this image according to the following instructions:
+    // 5. Detect if this is a background removal request
+    const isBackgroundRemoval = prompt.toLowerCase().includes('remove') &&
+                                 prompt.toLowerCase().includes('background');
+
+    // 6. Process image based on operation type
+    let outputBase64: string;
+    let outputMimeType: string;
+
+    if (isBackgroundRemoval && isRemoveBgConfigured()) {
+      // Use Remove.bg API for background removal
+      try {
+        logger.info('Using Remove.bg for background removal');
+        outputBase64 = await removeBackground(imageUrl);
+        outputMimeType = 'image/png'; // Remove.bg always returns PNG with transparency
+      } catch (error) {
+        // Remove.bg failed (e.g., can't identify foreground in artistic images)
+        logger.error('Remove.bg error', error);
+
+        const errorMessage = error instanceof Error ? error.message : 'Failed to remove background';
+        const userMessage = errorMessage.includes('Could not identify foreground')
+          ? 'לא ניתן לזהות את הנושא בתמונה. הסרת רקע עובדת הכי טוב עם נושאים ברורים ורקע פשוט. נסו תמונה אחרת.'
+          : 'שגיאה בהסרת הרקע. אנא נסו שוב מאוחר יותר.';
+
+        return NextResponse.json(
+          {
+            error: userMessage,
+            code: 'REMOVEBG_FAILED',
+            details: errorMessage
+          },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Use Gemini for other AI edits (enhance, change background, etc.)
+      const editPrompt = `Edit this image according to the following instructions:
 
 ${prompt.trim()}
 
@@ -166,27 +200,6 @@ Important:
 - Ensure high quality output suitable for printing
 - Output only the edited image`;
 
-    // 6. Call Nano Banana with custom prompt
-    let outputBase64: string;
-    let outputMimeType: string;
-    try {
-      // We'll use 'original' style as base since we're providing custom instructions
-      // The style prompts won't override our custom edit prompt
-      const result = await transformWithNanoBananaRetry(
-        imageBase64,
-        'original', // Use original style as base
-        mimeType,
-        3 // Max retries
-      );
-
-      // Note: The current nano-banana implementation uses style prompts
-      // We need to modify it to support custom prompts, or use the Gemini API directly
-      // For now, let's call the Gemini API directly with our custom prompt
-
-      outputBase64 = result.imageBase64;
-      outputMimeType = result.mimeType;
-    } catch (error) {
-      // Fallback: Call Gemini API directly with custom prompt
       try {
         const geminiResult = await callGeminiWithPrompt(imageBase64, mimeType, editPrompt);
         outputBase64 = geminiResult.imageBase64;

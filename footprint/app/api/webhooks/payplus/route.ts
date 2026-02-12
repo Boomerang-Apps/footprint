@@ -22,6 +22,7 @@ import {
   triggerNewOrderNotification,
   type CreateOrderParams,
 } from '@/lib/orders/create';
+import { createAdminClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/logger';
 
 /**
@@ -169,9 +170,102 @@ export async function POST(
     const isSuccess = payload.status_code === '000';
 
     if (isSuccess) {
-      // Payment successful - create order
+      // Payment successful
       logger.info(`Payment succeeded: ${payload.transaction_uid}`);
 
+      // Check if order was pre-created (orderId in more_info)
+      let preCreatedOrderId: string | null = null;
+      if (payload.more_info) {
+        try {
+          const moreInfoData = JSON.parse(payload.more_info);
+          preCreatedOrderId = moreInfoData.orderId || null;
+        } catch {
+          // Will fall through to legacy path
+        }
+      }
+
+      if (preCreatedOrderId) {
+        // Pre-created order path: update existing order
+        try {
+          const supabase = createAdminClient();
+          const { data: existing, error: fetchError } = await supabase
+            .from('orders')
+            .select('id, order_number, status, customer_notes')
+            .eq('id', preCreatedOrderId)
+            .single();
+
+          if (fetchError || !existing) {
+            logger.error('Pre-created order not found', { orderId: preCreatedOrderId });
+            return NextResponse.json({
+              received: true,
+              orderCreated: false,
+              reason: 'Pre-created order not found',
+            });
+          }
+
+          if (existing.status === 'paid') {
+            // Already finalized (e.g., by iframe-callback) — idempotent no-op
+            logger.info(`Order already finalized: ${existing.order_number}`);
+            return NextResponse.json({
+              received: true,
+              orderCreated: true,
+              orderId: existing.id,
+              orderNumber: existing.order_number,
+            });
+          }
+
+          // Update pending → paid, store real transaction_uid
+          const updatedNotes = (() => {
+            try {
+              const parsed = JSON.parse(existing.customer_notes || '{}');
+              parsed.txn = payload.transaction_uid;
+              return JSON.stringify(parsed);
+            } catch {
+              return JSON.stringify({ txn: payload.transaction_uid });
+            }
+          })();
+
+          const { error: updateError } = await supabase
+            .from('orders')
+            .update({
+              status: 'paid',
+              paid_at: new Date().toISOString(),
+              customer_notes: updatedNotes,
+            })
+            .eq('id', preCreatedOrderId);
+
+          if (updateError) {
+            logger.error('Failed to update pre-created order', updateError);
+            return NextResponse.json({
+              received: true,
+              orderCreated: false,
+              reason: 'Failed to update order status',
+            });
+          }
+
+          logger.info(`Order updated to paid: ${existing.order_number} (${existing.id})`);
+
+          // Trigger emails
+          triggerConfirmationEmail(existing.id);
+          triggerNewOrderNotification(existing.id);
+
+          return NextResponse.json({
+            received: true,
+            orderCreated: true,
+            orderId: existing.id,
+            orderNumber: existing.order_number,
+          });
+        } catch (error) {
+          logger.error('Failed to process pre-created order', error);
+          return NextResponse.json({
+            received: true,
+            orderCreated: false,
+            reason: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      }
+
+      // Legacy path: no pre-created order — create from scratch
       const orderParams = parseOrderData(payload);
 
       if (!orderParams) {
@@ -184,15 +278,11 @@ export async function POST(
       }
 
       try {
-        // Create order in database
         const orderResult = await createOrder(orderParams);
 
         logger.info(`Order created: ${orderResult.orderNumber} (${orderResult.orderId})`);
 
-        // Trigger confirmation email (fire and forget)
         triggerConfirmationEmail(orderResult.orderId);
-
-        // Trigger notification to shop owner (fire and forget)
         triggerNewOrderNotification(orderResult.orderId);
 
         return NextResponse.json({
@@ -202,7 +292,6 @@ export async function POST(
           orderNumber: orderResult.orderNumber,
         });
       } catch (error) {
-        // Log error but still return 200 to acknowledge webhook
         logger.error('Failed to create order', error);
         return NextResponse.json({
           received: true,

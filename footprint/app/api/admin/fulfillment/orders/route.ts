@@ -190,6 +190,7 @@ export async function GET(
     }
 
     // 7. Transform and filter by product attributes if needed
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let transformedOrders: FulfillmentOrder[] = (orders || []).map((order: any) => {
       const items = order.order_items || [];
       return {
@@ -203,6 +204,7 @@ export async function GET(
         createdAt: order.created_at,
         updatedAt: order.updated_at,
         thumbnailUrl: items[0]?.thumbnail_url || null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         items: items.map((item: any) => ({
           id: item.id,
           size: item.size,

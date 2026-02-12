@@ -54,6 +54,8 @@ export interface CreateOrderParams {
   isGift?: boolean;
   giftMessage?: string;
   hasPassepartout?: boolean;
+  /** Order status — defaults to 'paid'. Use 'pending' for pre-created orders awaiting payment. */
+  status?: 'paid' | 'pending';
 }
 
 /**
@@ -186,13 +188,14 @@ export async function createOrder(
   };
 
   // Insert order header
+  const orderStatus = params.status || 'paid';
   const { data, error } = await supabase
     .from('orders')
     .insert({
       user_id: params.userId || null,
       guest_email: params.userId ? null : params.customerEmail,
       order_number: orderNumber,
-      status: 'paid',
+      status: orderStatus,
       subtotal: toAgorot(params.subtotal),
       shipping_cost: toAgorot(params.shipping),
       discount_amount: 0,
@@ -202,7 +205,7 @@ export async function createOrder(
       shipping_address: shippingAddress,
       is_gift: params.isGift || false,
       gift_message: params.giftMessage || null,
-      paid_at: new Date().toISOString(),
+      paid_at: orderStatus === 'paid' ? new Date().toISOString() : null,
       customer_notes: customerNotesJson,
     })
     .select('id, order_number')

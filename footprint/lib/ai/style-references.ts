@@ -70,12 +70,12 @@ export const STYLE_REFERENCES: Record<StyleType, StyleConfig> = {
   line_art_watercolor: {
     id: 'line_art_watercolor',
     references: [
-      { path: '/style-references/line_art_watercolor/ref1.png', description: 'Line art watercolor example 1' },
-      { path: '/style-references/line_art_watercolor/ref2.png', description: 'Line art watercolor example 2' },
-      { path: '/style-references/line_art_watercolor/ref3.png', description: 'Line art watercolor example 3' },
-      { path: '/style-references/line_art_watercolor/ref4.png', description: 'Line art watercolor example 4' },
-      { path: '/style-references/line_art_watercolor/ref5.png', description: 'Line art watercolor example 5' },
-      { path: '/style-references/line_art_watercolor/ref6.png', description: 'Line art watercolor example 6' },
+      { path: '/style-references/line_art_watercolor/ref1.webp', description: 'Line art watercolor example 1' },
+      { path: '/style-references/line_art_watercolor/ref2.webp', description: 'Line art watercolor example 2' },
+      { path: '/style-references/line_art_watercolor/ref3.webp', description: 'Line art watercolor example 3' },
+      { path: '/style-references/line_art_watercolor/ref4.webp', description: 'Line art watercolor example 4' },
+      { path: '/style-references/line_art_watercolor/ref5.webp', description: 'Line art watercolor example 5' },
+      { path: '/style-references/line_art_watercolor/ref6.webp', description: 'Line art watercolor example 6' },
     ],
     useReferences: true,
     referencePrompt:

@@ -14,6 +14,9 @@ const tabs = [
 export function MobileBottomNav() {
   const pathname = usePathname() ?? '';
 
+  // Hide during order creation/edit flow
+  if (pathname.startsWith('/create')) return null;
+
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-zinc-200 lg:hidden pb-[env(safe-area-inset-bottom)]">
       <div className="grid grid-cols-4 h-16">

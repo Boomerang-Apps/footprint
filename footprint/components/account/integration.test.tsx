@@ -74,7 +74,8 @@ vi.mock('next/navigation', () => ({
 
 // Mock Next.js Image component
 vi.mock('next/image', () => ({
-  default: ({ src, alt, ...props }: any) => <img src={src} alt={alt} {...props} />,
+  // eslint-disable-next-line @next/next/no-img-element
+  default: ({ src, alt, ...props }: Record<string, unknown>) => <img src={src as string} alt={alt as string} {...props} />,
 }));
 
 const createQueryClient = () => new QueryClient({

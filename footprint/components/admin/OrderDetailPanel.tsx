@@ -7,7 +7,7 @@
  * Shows order info, items, status actions, and print/download options.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { X, Printer, Download, Package, Clock, User, Mail, MapPin } from 'lucide-react';
 import { type FulfillmentStatus } from '@/lib/fulfillment/status-transitions';
@@ -57,6 +57,14 @@ export function OrderDetailPanel({
   onDownloadPrintFiles,
 }: OrderDetailPanelProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const isMountedRef = useRef(true);
+
+  // Cleanup: track mounted state to prevent setState after unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const handleStatusUpdate = useCallback(
     async (newStatus: FulfillmentStatus) => {
@@ -66,7 +74,10 @@ export function OrderDetailPanel({
       try {
         await onStatusUpdate(order.id, newStatus);
       } finally {
-        setIsUpdating(false);
+        // Only update state if component is still mounted
+        if (isMountedRef.current) {
+          setIsUpdating(false);
+        }
       }
     },
     [order, isUpdating, onStatusUpdate]

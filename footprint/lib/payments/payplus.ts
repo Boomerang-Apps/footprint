@@ -128,8 +128,10 @@ export async function createPaymentLink(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        api_key: config.apiKey,
-        secret_key: config.secretKey,
+        Authorization: JSON.stringify({
+          api_key: config.apiKey,
+          secret_key: config.secretKey,
+        }),
       },
       body: JSON.stringify(requestBody),
     }

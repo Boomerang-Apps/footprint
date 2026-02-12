@@ -487,6 +487,7 @@ describe('CheckoutPage', () => {
     });
   });
 
+
   describe('Navigation', () => {
     it('navigates back to customize when back button clicked', async () => {
       render(<CheckoutPage />);

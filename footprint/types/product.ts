@@ -59,12 +59,35 @@ export interface Frame {
   popular?: boolean;
 }
 
+// Orientation Types
+/**
+ * Print orientation type - portrait (vertical) or landscape (horizontal)
+ */
+export type OrientationType = 'portrait' | 'landscape';
+
+/**
+ * Orientation configuration for print layout
+ * @property id - Orientation identifier (portrait or landscape)
+ * @property name - English display name
+ * @property nameHe - Hebrew display name (RTL)
+ * @property description - English description of the orientation
+ * @property descriptionHe - Hebrew description of the orientation
+ */
+export interface Orientation {
+  id: OrientationType;
+  name: string;
+  nameHe: string;
+  description: string;
+  descriptionHe: string;
+}
+
 // Product Configuration
 export interface ProductConfig {
   style: StyleType;
   size: SizeType;
   paperType: PaperType;
   frameType: FrameType;
+  orientation: OrientationType;
 }
 
 // Price Calculation Result
