@@ -136,17 +136,36 @@ export default function AdminUsersPage() {
     setOpenDropdown(openDropdown === userId ? null : userId);
   };
 
-  const handleQuickAction = (action: string, userId: string) => {
+  const handleQuickAction = async (action: string, userId: string) => {
     setOpenDropdown(null);
+    const targetUser = users.find((u: AdminUserSummary) => u.id === userId);
     switch (action) {
       case 'view':
         router.push(`/admin/users/${userId}`);
         break;
       case 'makeAdmin':
-        // TODO: Implement role change
+        try {
+          await fetch(`/api/admin/users/${userId}/role`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isAdmin: !targetUser?.isAdmin }),
+          });
+          refetch();
+        } catch {
+          // Silently fail — user will see unchanged state
+        }
         break;
       case 'deactivate':
-        // TODO: Implement status change
+        try {
+          await fetch(`/api/admin/users/${userId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'inactive' }),
+          });
+          refetch();
+        } catch {
+          // Silently fail — user will see unchanged state
+        }
         break;
     }
   };
