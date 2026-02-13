@@ -50,6 +50,9 @@ const { mockUseOrderHistory, mockOrderHistoryData } = vi.hoisted(() => {
     totalOrders: 2,
     totalSpent: 546,
     inTransitCount: 1,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
   };
 
   const mockUseOrderHistory = vi.fn(() => ({
@@ -181,7 +184,7 @@ describe('OrderHistoryList', () => {
   describe('Loading State', () => {
     it('shows loading spinner when data is loading', () => {
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: true,
         isError: false,
         error: null,
@@ -197,7 +200,7 @@ describe('OrderHistoryList', () => {
   describe('Error State', () => {
     it('shows error message when there is an error', () => {
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: false,
         isError: true,
         error: new Error('Failed to fetch orders'),
@@ -213,7 +216,7 @@ describe('OrderHistoryList', () => {
     it('calls refetch when retry button is clicked', () => {
       const mockRefetch = vi.fn();
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: false,
         isError: true,
         error: new Error('Failed to fetch orders'),
@@ -232,7 +235,7 @@ describe('OrderHistoryList', () => {
   describe('Empty State', () => {
     it('shows empty state when no orders exist', () => {
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: false,
         isError: false,
         error: null,
@@ -247,7 +250,7 @@ describe('OrderHistoryList', () => {
 
     it('navigates to create page when "צור עכשיו" is clicked', () => {
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: false,
         isError: false,
         error: null,
@@ -260,6 +263,94 @@ describe('OrderHistoryList', () => {
       fireEvent.click(createButton);
 
       expect(mockPush).toHaveBeenCalledWith('/create');
+    });
+  });
+
+  describe('Pagination', () => {
+    it('renders pagination when totalPages > 1', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: {
+          ...mockOrderHistoryData,
+          totalPages: 3,
+          hasPrevPage: false,
+          hasNextPage: true,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      expect(screen.getByLabelText('עמוד קודם')).toBeInTheDocument();
+      expect(screen.getByLabelText('עמוד הבא')).toBeInTheDocument();
+    });
+
+    it('disables previous button on first page', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: {
+          ...mockOrderHistoryData,
+          totalPages: 3,
+          hasPrevPage: false,
+          hasNextPage: true,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      const prevButton = screen.getByLabelText('עמוד קודם');
+      expect(prevButton).toBeDisabled();
+    });
+
+    it('navigates to next page when next button clicked', () => {
+      const scrollToMock = vi.fn();
+      Object.defineProperty(window, 'scrollTo', { value: scrollToMock, writable: true });
+
+      mockUseOrderHistory.mockReturnValue({
+        data: {
+          ...mockOrderHistoryData,
+          totalPages: 3,
+          hasPrevPage: false,
+          hasNextPage: true,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      const nextButton = screen.getByLabelText('עמוד הבא');
+      fireEvent.click(nextButton);
+
+      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+    });
+
+    it('renders page number buttons', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: {
+          ...mockOrderHistoryData,
+          totalPages: 3,
+          hasPrevPage: false,
+          hasNextPage: true,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(screen.getByText('3')).toBeInTheDocument();
     });
   });
 

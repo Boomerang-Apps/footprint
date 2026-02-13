@@ -198,6 +198,36 @@ describe('OrderCard', () => {
 
       expect(handleClick).toHaveBeenCalledWith(mockOrder);
     });
+
+    it('calls onClick when Enter key is pressed', () => {
+      const handleClick = vi.fn();
+      render(<OrderCard order={mockOrder} onClick={handleClick} />);
+
+      const card = screen.getByTestId('order-card');
+      fireEvent.keyDown(card, { key: 'Enter' });
+
+      expect(handleClick).toHaveBeenCalledWith(mockOrder);
+    });
+
+    it('calls onClick when Space key is pressed', () => {
+      const handleClick = vi.fn();
+      render(<OrderCard order={mockOrder} onClick={handleClick} />);
+
+      const card = screen.getByTestId('order-card');
+      fireEvent.keyDown(card, { key: ' ' });
+
+      expect(handleClick).toHaveBeenCalledWith(mockOrder);
+    });
+
+    it('does not call onClick for other keys', () => {
+      const handleClick = vi.fn();
+      render(<OrderCard order={mockOrder} onClick={handleClick} />);
+
+      const card = screen.getByTestId('order-card');
+      fireEvent.keyDown(card, { key: 'Tab' });
+
+      expect(handleClick).not.toHaveBeenCalled();
+    });
   });
 
   describe('RTL Support', () => {

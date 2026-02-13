@@ -328,6 +328,23 @@ describe('OrderDetailView', () => {
 
       expect(screen.getByText('100%')).toBeInTheDocument();
     });
+
+    it('shows 0% for cancelled status', () => {
+      mockUseOrder.mockReturnValue({
+        data: {
+          ...mockOrder,
+          status: 'cancelled',
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('0%')).toBeInTheDocument();
+    });
   });
 
   // ═══════════════════════════════════════════════════════════════
@@ -447,6 +464,48 @@ describe('OrderDetailView', () => {
       fireEvent.click(screen.getByText('צור קשר'));
 
       expect(mockPush).toHaveBeenCalledWith('/support?order=demo_order_001');
+    });
+
+    it('sets gift options when reordering a gift order', () => {
+      mockUseOrder.mockReturnValue({
+        data: {
+          ...mockOrder,
+          isGift: true,
+          giftMessage: 'Happy Birthday!',
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      fireEvent.click(screen.getByText('הזמן שוב'));
+
+      expect(mockSetIsGift).toHaveBeenCalledWith(true);
+      expect(mockSetGiftMessage).toHaveBeenCalledWith('Happy Birthday!');
+    });
+
+    it('sets gift flag without message when gift has no message', () => {
+      mockUseOrder.mockReturnValue({
+        data: {
+          ...mockOrder,
+          isGift: true,
+          giftMessage: null,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      fireEvent.click(screen.getByText('הזמן שוב'));
+
+      expect(mockSetIsGift).toHaveBeenCalledWith(true);
+      expect(mockSetGiftMessage).not.toHaveBeenCalled();
     });
   });
 
