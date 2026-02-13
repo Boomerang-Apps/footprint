@@ -55,16 +55,20 @@ test.describe('Settings Page', () => {
   });
 
   test('back button navigates to /account', async ({ page }) => {
-    await page.goto('/account/settings', { waitUntil: 'networkidle' });
-    await page.getByTestId('settings-back-button').click();
+    await page.goto('/account/settings');
+    const backButton = page.getByTestId('settings-back-button');
+    await expect(backButton).toBeVisible({ timeout: 10000 });
+    await backButton.click();
     await page.waitForURL('**/account');
     expect(page.url()).toContain('/account');
   });
 
   test('toggle switches are interactive', async ({ page }) => {
-    await page.goto('/account/settings', { waitUntil: 'networkidle' });
+    await page.goto('/account/settings');
+    // Wait for settings page to fully render with Zustand hydration
+    await expect(page.getByTestId('app-version')).toBeVisible({ timeout: 10000 });
     const switches = page.getByRole('switch');
-    await expect(switches.first()).toBeVisible();
+    await expect(switches.first()).toBeVisible({ timeout: 10000 });
     const count = await switches.count();
     expect(count).toBeGreaterThanOrEqual(3);
 
@@ -126,8 +130,10 @@ test.describe('Navigation Integration', () => {
   });
 
   test('profile edit back button goes to /account', async ({ page }) => {
-    await page.goto('/account/profile', { waitUntil: 'networkidle' });
-    await page.getByTestId('back-button').click();
+    await page.goto('/account/profile');
+    const backButton = page.getByTestId('back-button');
+    await expect(backButton).toBeVisible({ timeout: 10000 });
+    await backButton.click();
     await page.waitForURL('**/account');
     expect(page.url()).toContain('/account');
   });

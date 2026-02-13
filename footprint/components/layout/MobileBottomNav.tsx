@@ -25,47 +25,57 @@ export function MobileBottomNav() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
-    const supabase = createClient();
+    let subscription: { unsubscribe: () => void } | null = null;
 
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        // Try to get profile data for avatar and name
-        try {
-          const res = await fetch('/api/profile', { credentials: 'include' });
-          if (res.ok) {
-            const profile = await res.json();
+    const init = async () => {
+      try {
+        const supabase = createClient();
+
+        const fetchUser = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            try {
+              const res = await fetch('/api/profile', { credentials: 'include' });
+              if (res.ok) {
+                const profile = await res.json();
+                setUserInfo({
+                  name: profile.name || null,
+                  email: session.user.email || '',
+                  avatarUrl: profile.avatarUrl || null,
+                });
+                return;
+              }
+            } catch {
+              // Fall back to session data
+            }
             setUserInfo({
-              name: profile.name || null,
+              name: null,
               email: session.user.email || '',
-              avatarUrl: profile.avatarUrl || null,
+              avatarUrl: null,
             });
-            return;
+          } else {
+            setUserInfo(null);
           }
-        } catch {
-          // Fall back to session data
-        }
-        setUserInfo({
-          name: null,
-          email: session.user.email || '',
-          avatarUrl: null,
+        };
+
+        await fetchUser();
+
+        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+          if (!session) {
+            setUserInfo(null);
+          } else {
+            fetchUser();
+          }
         });
-      } else {
-        setUserInfo(null);
+        subscription = data.subscription;
+      } catch {
+        // Supabase not configured (e.g. CI/test environment)
       }
     };
 
-    fetchUser();
+    init();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        setUserInfo(null);
-      } else {
-        fetchUser();
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe();
   }, []);
 
   // Hide during order creation/edit flow
