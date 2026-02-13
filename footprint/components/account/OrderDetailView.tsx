@@ -179,7 +179,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
               className="flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100"
               aria-label="חזרה"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5" aria-hidden="true" />
             </button>
             <div className="h-6 w-32 bg-gray-200 rounded animate-pulse" />
             <div className="w-10 h-10" />
@@ -209,7 +209,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
               className="flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100"
               aria-label="חזרה"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5" aria-hidden="true" />
             </button>
             <h1 className="text-lg font-semibold text-gray-900">פרטי הזמנה</h1>
             <div className="w-10 h-10" />
@@ -229,7 +229,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
                 חזרה להזמנות
               </Button>
               <Button onClick={() => refetch()}>
-                <RotateCcw className="h-4 w-4 ml-2" />
+                <RotateCcw className="h-4 w-4 me-2" />
                 נסה שוב
               </Button>
             </div>
@@ -257,7 +257,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
             className="flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
             aria-label="חזרה"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
           <h1 className="text-lg font-semibold text-gray-900">
             פרטי הזמנה

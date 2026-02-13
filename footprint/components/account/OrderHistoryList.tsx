@@ -161,7 +161,7 @@ export function OrderHistoryList(): React.ReactElement {
                   )}
                   aria-label="עמוד קודם"
                 >
-                  <ChevronRight className="h-5 w-5" />
+                  <ChevronRight className="h-5 w-5" aria-hidden="true" />
                 </button>
 
                 <div className="flex items-center gap-1">
@@ -192,7 +192,7 @@ export function OrderHistoryList(): React.ReactElement {
                   )}
                   aria-label="עמוד הבא"
                 >
-                  <ChevronLeft className="h-5 w-5" />
+                  <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
             )}
