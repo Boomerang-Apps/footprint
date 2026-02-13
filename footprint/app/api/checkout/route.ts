@@ -245,7 +245,8 @@ export async function POST(
       orderNumber: orderResult.orderNumber,
     });
   } catch (error) {
-    logger.error('Checkout error', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Checkout error', { message, stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json(
       { error: 'Failed to create payment link' },
       { status: 500 }

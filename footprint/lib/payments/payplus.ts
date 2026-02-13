@@ -139,11 +139,15 @@ export async function createPaymentLink(
 
   // Check HTTP status
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    let description = 'Unknown error';
+    try {
+      const errorData = await response.json() as PayPlusResponse;
+      description = errorData?.results?.description || `HTTP ${response.status}`;
+    } catch {
+      description = `HTTP ${response.status}`;
+    }
     throw new Error(
-      `PayPlus API error: ${response.status} - ${
-        (errorData as PayPlusResponse)?.results?.description || 'Unknown error'
-      }`
+      `PayPlus API error: ${response.status} [${config.sandbox ? 'sandbox' : 'production'}] - ${description}`
     );
   }
 
