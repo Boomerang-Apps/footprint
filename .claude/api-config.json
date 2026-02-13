@@ -1,0 +1,71 @@
+{
+  "apiConfig": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-20250514",
+    "maxTokens": 4096,
+    "temperature": 0.3
+  },
+  "analysis": {
+    "qa": {
+      "enabled": true,
+      "model": "claude-sonnet-4-20250514",
+      "checks": [
+        "acceptance-criteria",
+        "test-coverage",
+        "code-quality",
+        "security-scan",
+        "accessibility"
+      ],
+      "thresholds": {
+        "testCoverage": 70,
+        "codeQuality": 80,
+        "securityScore": 90
+      }
+    },
+    "cto": {
+      "enabled": true,
+      "model": "claude-sonnet-4-20250514",
+      "analyses": [
+        "health",
+        "debt",
+        "risks",
+        "roadmap",
+        "plan",
+        "architecture"
+      ],
+      "reporting": {
+        "format": "markdown",
+        "outputPath": ".claude/reports/"
+      }
+    },
+    "prd": {
+      "enabled": true,
+      "model": "claude-sonnet-4-20250514",
+      "prdPaths": [
+        "docs/PRD.md",
+        "planning/*.md"
+      ],
+      "storyPaths": [
+        "stories/**/*.json"
+      ]
+    }
+  },
+  "automation": {
+    "runOnCommit": false,
+    "runOnPush": false,
+    "scheduledAnalysis": {
+      "enabled": false,
+      "cron": "0 9 * * 1"
+    }
+  },
+  "notifications": {
+    "slack": {
+      "enabled": true,
+      "webhookEnvVar": "SLACK_WEBHOOK_URL",
+      "channels": {
+        "qa": "#qa-alerts",
+        "cto": "#engineering"
+      }
+    }
+  }
+}

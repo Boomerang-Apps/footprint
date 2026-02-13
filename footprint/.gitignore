@@ -17,6 +17,7 @@ __pycache__/
 
 # Claude Code runtime files (temporary)
 .claude/signal-*
+.claude/signals/
 .claude/black-box/
 .claude/locks/
 .claude/*.lock

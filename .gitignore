@@ -34,3 +34,9 @@ footprint-worktrees/
 test-output/
 worktrees/
 .env.mcp
+
+# Claude ephemeral files
+.claude/reports/
+.claude/black-box/
+.claude/locks/
+.claude/gate0-lock.json
