@@ -8,7 +8,7 @@ const tabs = [
   { href: '/', label: 'בית', icon: Home },
   { href: '/favorites', label: 'מועדפים', icon: Heart },
   { href: '/account/orders', label: 'הזמנות', icon: Package },
-  { href: '/account/profile', label: 'פרופיל', icon: User },
+  { href: '/account', label: 'פרופיל', icon: User },
 ] as const;
 
 export function MobileBottomNav() {
