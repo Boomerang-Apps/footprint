@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Package,
@@ -9,8 +11,10 @@ import {
   Shield,
   HelpCircle,
   ChevronLeft,
+  LogOut,
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { createClient } from '@/lib/supabase/client';
 
 interface MenuItem {
   href: string;
@@ -36,29 +40,48 @@ export interface ProfileMenuProps {
  * Each row has purple icon background, label, and chevron
  */
 export function ProfileMenu({ className = '' }: ProfileMenuProps): React.ReactElement {
+  const router = useRouter();
+
+  const handleLogout = useCallback(async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/');
+  }, [router]);
+
   return (
-    <Card data-testid="profile-menu" className={`mx-4 mt-4 overflow-hidden ${className}`}>
-      <nav aria-label="תפריט חשבון">
-        <ul className="divide-y divide-light-border">
-          {menuItems.map(({ href, label, icon: Icon }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                className="flex items-center gap-3 px-4 py-3.5 hover:bg-light-soft transition-colors"
-              >
-                <div className="w-9 h-9 rounded-lg bg-brand-purple/10 flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-brand-purple" aria-hidden="true" />
-                </div>
-                <span className="flex-1 text-sm font-medium text-text-primary">
-                  {label}
-                </span>
-                <ChevronLeft className="w-4 h-4 text-text-muted" aria-hidden="true" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </Card>
+    <div className={`mx-4 mt-4 ${className}`}>
+      <Card data-testid="profile-menu" className="overflow-hidden">
+        <nav aria-label="תפריט חשבון">
+          <ul className="divide-y divide-light-border">
+            {menuItems.map(({ href, label, icon: Icon }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-light-soft transition-colors"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-brand-purple/10 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-brand-purple" aria-hidden="true" />
+                  </div>
+                  <span className="flex-1 text-sm font-medium text-text-primary">
+                    {label}
+                  </span>
+                  <ChevronLeft className="w-4 h-4 text-text-muted" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </Card>
+
+      <button
+        data-testid="logout-button"
+        onClick={handleLogout}
+        className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 text-red-600 font-semibold text-sm hover:bg-red-100 transition-colors"
+      >
+        <LogOut className="w-4 h-4" aria-hidden="true" />
+        התנתקות
+      </button>
+    </div>
   );
 }
 

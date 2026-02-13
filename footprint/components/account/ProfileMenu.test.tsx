@@ -1,6 +1,19 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import { ProfileMenu } from './ProfileMenu';
+
+const mockPush = vi.hoisted(() => vi.fn());
+const mockSignOut = vi.hoisted(() => vi.fn().mockResolvedValue({}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: { signOut: mockSignOut },
+  }),
+}));
 
 describe('ProfileMenu', () => {
   it('renders all menu items', () => {
@@ -47,5 +60,24 @@ describe('ProfileMenu', () => {
 
     const items = screen.getAllByRole('listitem');
     expect(items).toHaveLength(6);
+  });
+
+  it('renders logout button', () => {
+    render(<ProfileMenu />);
+    const logoutButton = screen.getByTestId('logout-button');
+    expect(logoutButton).toBeInTheDocument();
+    expect(logoutButton).toHaveTextContent('התנתקות');
+  });
+
+  it('calls signOut and redirects on logout click', async () => {
+    render(<ProfileMenu />);
+    const logoutButton = screen.getByTestId('logout-button');
+    fireEvent.click(logoutButton);
+
+    // Wait for async signOut
+    await vi.waitFor(() => {
+      expect(mockSignOut).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith('/');
+    });
   });
 });

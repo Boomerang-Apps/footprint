@@ -28,7 +28,9 @@ vi.mock('@/stores/orderStore');
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     auth: {
-      getSession: () => Promise.resolve({ data: { session: { user: { id: 'test-user' } } } }),
+      getSession: () => Promise.resolve({
+        data: { session: { user: { id: 'test-user', email: 'test@example.com' } } },
+      }),
     },
   }),
 }));
@@ -92,6 +94,18 @@ describe('CheckoutPage', () => {
     mockFetch.mockReset();
     mockSearchParams.delete('error');
 
+    // By default, handle /api/profile calls (from pre-fill logic) transparently
+    mockFetch.mockImplementation((url: string) => {
+      if (url === '/api/profile') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ name: '', email: '', phone: '' }),
+        });
+      }
+      // Other calls return a default empty response (overridden per test)
+      return Promise.resolve({ ok: false, json: () => Promise.resolve({ error: 'Not mocked' }) });
+    });
+
     (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue(defaultMockStore);
   });
 
@@ -137,7 +151,7 @@ describe('CheckoutPage', () => {
   });
 
   describe('Form Validation', () => {
-    it('does not call API when form is empty', async () => {
+    it('does not call checkout API when form is empty', async () => {
       render(<CheckoutPage />);
 
       // Wait for auth check and form to be visible
@@ -145,11 +159,14 @@ describe('CheckoutPage', () => {
       fireEvent.click(submitButton);
 
       // Browser native validation prevents form submission
-      // API should not be called
-      expect(mockFetch).not.toHaveBeenCalled();
+      // Checkout API should not be called (profile pre-fill is expected)
+      const checkoutCalls = mockFetch.mock.calls.filter(
+        (call: unknown[]) => call[0] === '/api/checkout'
+      );
+      expect(checkoutCalls).toHaveLength(0);
     });
 
-    it('validates required fields before API call', async () => {
+    it('validates required fields before checkout API call', async () => {
       render(<CheckoutPage />);
 
       // Wait for auth check to complete and form to be visible
@@ -163,8 +180,11 @@ describe('CheckoutPage', () => {
       const submitButton = screen.getByRole('button', { name: /לתשלום/i });
       fireEvent.click(submitButton);
 
-      // Should not call API without all required fields
-      expect(mockFetch).not.toHaveBeenCalled();
+      // Should not call checkout API without all required fields
+      const checkoutCalls = mockFetch.mock.calls.filter(
+        (call: unknown[]) => call[0] === '/api/checkout'
+      );
+      expect(checkoutCalls).toHaveLength(0);
     });
   });
 
@@ -190,12 +210,17 @@ describe('CheckoutPage', () => {
     };
 
     it('calls PayPlus API when form is submitted', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          pageRequestUid: 'test-uid-123',
-          paymentUrl: 'https://payments.payplus.co.il/test',
-        }),
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            pageRequestUid: 'test-uid-123',
+            paymentUrl: 'https://payments.payplus.co.il/test',
+          }),
+        });
       });
 
       render(<CheckoutPage />);
@@ -216,12 +241,17 @@ describe('CheckoutPage', () => {
     });
 
     it('sends correct payment data to API', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          pageRequestUid: 'test-uid-123',
-          paymentUrl: 'https://payments.payplus.co.il/test',
-        }),
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            pageRequestUid: 'test-uid-123',
+            paymentUrl: 'https://payments.payplus.co.il/test',
+          }),
+        });
       });
 
       render(<CheckoutPage />);
@@ -232,7 +262,11 @@ describe('CheckoutPage', () => {
       });
 
       await waitFor(() => {
-        const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+        const checkoutCall = mockFetch.mock.calls.find(
+          (call: unknown[]) => call[0] === '/api/checkout'
+        );
+        expect(checkoutCall).toBeDefined();
+        const callBody = JSON.parse((checkoutCall![1] as { body: string }).body);
         expect(callBody.customerName).toBe('Test User');
         expect(callBody.customerEmail).toBe('test@example.com');
         expect(callBody.customerPhone).toBe('0501234567');
@@ -244,12 +278,17 @@ describe('CheckoutPage', () => {
     it('shows PayPlus payment modal on success', async () => {
       const paymentUrl = 'https://payments.payplus.co.il/test-checkout';
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          pageRequestUid: 'test-uid-123',
-          paymentUrl,
-        }),
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            pageRequestUid: 'test-uid-123',
+            paymentUrl,
+          }),
+        });
       });
 
       render(<CheckoutPage />);
@@ -269,8 +308,11 @@ describe('CheckoutPage', () => {
     });
 
     it('shows loading state during payment processing', async () => {
-      mockFetch.mockImplementation(() =>
-        new Promise(resolve =>
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return new Promise(resolve =>
           setTimeout(() => resolve({
             ok: true,
             json: () => Promise.resolve({
@@ -278,8 +320,8 @@ describe('CheckoutPage', () => {
               paymentUrl: 'https://payments.payplus.co.il/test',
             }),
           }), 100)
-        )
-      );
+        );
+      });
 
       render(<CheckoutPage />);
       await fillValidForm();
@@ -292,8 +334,11 @@ describe('CheckoutPage', () => {
     });
 
     it('disables submit button during processing', async () => {
-      mockFetch.mockImplementation(() =>
-        new Promise(resolve =>
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return new Promise(resolve =>
           setTimeout(() => resolve({
             ok: true,
             json: () => Promise.resolve({
@@ -301,8 +346,8 @@ describe('CheckoutPage', () => {
               paymentUrl: 'https://payments.payplus.co.il/test',
             }),
           }), 100)
-        )
-      );
+        );
+      });
 
       render(<CheckoutPage />);
       await fillValidForm();
@@ -317,9 +362,14 @@ describe('CheckoutPage', () => {
     });
 
     it('shows error when PayPlus API fails', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: 'Payment service unavailable' }),
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return Promise.resolve({
+          ok: false,
+          json: () => Promise.resolve({ error: 'Payment service unavailable' }),
+        });
       });
 
       render(<CheckoutPage />);
@@ -335,7 +385,12 @@ describe('CheckoutPage', () => {
     });
 
     it('handles network error gracefully', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return Promise.reject(new Error('Network error'));
+      });
 
       render(<CheckoutPage />);
       await fillValidForm();
@@ -362,12 +417,17 @@ describe('CheckoutPage', () => {
     it('allows retry after payment failure', async () => {
       mockSearchParams.set('error', 'payment_failed');
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          pageRequestUid: 'test-uid',
-          paymentUrl: 'https://payments.payplus.co.il/test',
-        }),
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            pageRequestUid: 'test-uid',
+            paymentUrl: 'https://payments.payplus.co.il/test',
+          }),
+        });
       });
 
       render(<CheckoutPage />);
@@ -402,12 +462,17 @@ describe('CheckoutPage', () => {
 
   describe('Order Amount Calculation', () => {
     it('calculates correct amount based on product options', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          pageRequestUid: 'test-uid',
-          paymentUrl: 'https://payments.payplus.co.il/test',
-        }),
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            pageRequestUid: 'test-uid',
+            paymentUrl: 'https://payments.payplus.co.il/test',
+          }),
+        });
       });
 
       render(<CheckoutPage />);
@@ -435,7 +500,11 @@ describe('CheckoutPage', () => {
       });
 
       await waitFor(() => {
-        const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+        const checkoutCall = mockFetch.mock.calls.find(
+          (call: unknown[]) => call[0] === '/api/checkout'
+        );
+        expect(checkoutCall).toBeDefined();
+        const callBody = JSON.parse((checkoutCall![1] as { body: string }).body);
         // A4 = 129 ILS + 29 shipping = 158 ILS = 15800 agorot
         expect(callBody.amount).toBe(15800);
       });
@@ -444,12 +513,17 @@ describe('CheckoutPage', () => {
 
   describe('Address Storage', () => {
     it('saves shipping address to store before payment', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          pageRequestUid: 'test-uid',
-          paymentUrl: 'https://payments.payplus.co.il/test',
-        }),
+      mockFetch.mockImplementation((url: string) => {
+        if (url === '/api/profile') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: '', email: '', phone: '' }) });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            pageRequestUid: 'test-uid',
+            paymentUrl: 'https://payments.payplus.co.il/test',
+          }),
+        });
       });
 
       render(<CheckoutPage />);

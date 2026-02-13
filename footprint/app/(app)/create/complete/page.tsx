@@ -164,6 +164,14 @@ function CompletePageContent() {
 
       try {
         const response = await fetch(`/api/orders/${orderId}/confirm`);
+
+        // On 401 (auth session lost after PayPlus redirect), fall back to
+        // Zustand store data + URL params instead of showing an error screen
+        if (response.status === 401) {
+          setIsLoading(false);
+          return;
+        }
+
         const data = await response.json();
 
         if (!response.ok) {

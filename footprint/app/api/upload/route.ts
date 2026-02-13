@@ -56,32 +56,17 @@ export async function POST(request: Request): Promise<Response> {
   if (rateLimited) return rateLimited;
 
   try {
-    // Authenticate user
-    let userId: string;
+    // Authenticate user — allow anonymous uploads for guest checkout
+    let userId: string = 'anonymous';
 
     try {
       const supabase = await createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         userId = user.id;
-      } else if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
-        userId = 'anonymous';
-      } else {
-        return NextResponse.json(
-          { error: 'Authentication required' },
-          { status: 401 }
-        );
       }
     } catch (authError) {
-      if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
-        userId = 'anonymous';
-      } else {
-        logger.error('Auth check failed', authError);
-        return NextResponse.json(
-          { error: 'Authentication required' },
-          { status: 401 }
-        );
-      }
+      logger.warn('Auth check failed, proceeding as anonymous', authError);
     }
 
     const contentType = request.headers.get('content-type') || '';
