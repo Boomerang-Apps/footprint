@@ -57,8 +57,8 @@ const mockOrder: Order = {
   deliveredAt: null,
 };
 
-// Mock useOrder hook
-const { mockUseOrder } = vi.hoisted(() => ({
+// Use vi.hoisted to define mocks
+const { mockUseOrder, mockIsFavorite, mockAddFavorite, mockRemoveFavorite, mockFavorites } = vi.hoisted(() => ({
   mockUseOrder: vi.fn((): { data: Order | null; isLoading: boolean; isError: boolean; error: Error | null; refetch: ReturnType<typeof vi.fn> } => ({
     data: mockOrder,
     isLoading: false,
@@ -66,6 +66,10 @@ const { mockUseOrder } = vi.hoisted(() => ({
     error: null,
     refetch: vi.fn(),
   })),
+  mockIsFavorite: vi.fn(() => false),
+  mockAddFavorite: vi.fn(),
+  mockRemoveFavorite: vi.fn(),
+  mockFavorites: [] as Array<{ id: string; imageUrl: string }>,
 }));
 
 vi.mock('@/hooks/useOrderHistory', () => ({
@@ -75,6 +79,16 @@ vi.mock('@/hooks/useOrderHistory', () => ({
 // Mock OrderTimeline
 vi.mock('./OrderTimeline', () => ({
   OrderTimeline: () => <div data-testid="order-timeline">Timeline Component</div>,
+}));
+
+// Mock favoritesStore
+vi.mock('@/stores/favoritesStore', () => ({
+  useFavoritesStore: () => ({
+    isFavorite: mockIsFavorite,
+    addFavorite: mockAddFavorite,
+    removeFavorite: mockRemoveFavorite,
+    favorites: mockFavorites,
+  }),
 }));
 
 // Mock orderStore
@@ -104,20 +118,6 @@ vi.mock('@/stores/orderStore', () => ({
   }),
 }));
 
-// Mock favoritesStore
-const mockIsFavorite = vi.fn(() => false);
-const mockAddFavorite = vi.fn();
-const mockRemoveFavorite = vi.fn();
-
-vi.mock('@/stores/favoritesStore', () => ({
-  useFavoritesStore: () => ({
-    isFavorite: mockIsFavorite,
-    addFavorite: mockAddFavorite,
-    removeFavorite: mockRemoveFavorite,
-    favorites: [],
-  }),
-}));
-
 // Mock styles-ui
 vi.mock('@/lib/ai/styles-ui', () => ({
   getStyleById: (id: string) => {
@@ -127,6 +127,20 @@ vi.mock('@/lib/ai/styles-ui', () => ({
     };
     return styles[id] || undefined;
   },
+}));
+
+// Mock PriceDisplay
+vi.mock('@/components/ui/PriceDisplay', () => ({
+  PriceDisplay: ({ amount, color }: { amount: number; color?: string }) => (
+    <span data-testid="price-display" data-color={color}>₪{amount}</span>
+  ),
+}));
+
+// Mock OrderStatusBadge
+vi.mock('@/components/ui/OrderStatusBadge', () => ({
+  OrderStatusBadge: ({ status }: { status: string }) => (
+    <span data-testid="status-badge">{status}</span>
+  ),
 }));
 
 // Mock next/navigation
@@ -177,132 +191,295 @@ describe('OrderDetailView', () => {
     mockIsFavorite.mockReturnValue(false);
   });
 
-  describe('Hero Section', () => {
+  describe('Order Header', () => {
+    it('displays back button', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+      expect(screen.getByTestId('back-button')).toBeInTheDocument();
+    });
+
+    it('navigates back when back button is clicked', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+      const backButton = screen.getByTestId('back-button');
+      fireEvent.click(backButton);
+      expect(mockPush).toHaveBeenCalledWith('/account/orders');
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // AC-011: WHEN user views OrderDetailView
+  //         THEN hero section shows gradient background, order image, and status badge
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-011: Hero Section', () => {
     it('renders hero section with gradient background', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
       const hero = screen.getByTestId('order-hero');
       expect(hero).toBeInTheDocument();
       expect(hero).toHaveClass('bg-gradient-to-br');
+      // Should use watercolor gradient from styles-ui
+      expect(hero).toHaveClass('from-blue-500');
+      expect(hero).toHaveClass('to-cyan-400');
     });
 
-    it('displays order image in hero', () => {
+    it('shows order image in hero section', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
-      const image = screen.getByAltText('צבעי מים');
+      const hero = screen.getByTestId('order-hero');
+      const image = hero.querySelector('img');
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute('src', 'https://example.com/transformed.jpg');
     });
 
-    it('displays status badge on hero', () => {
+    it('displays OrderStatusBadge in hero section', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
-      expect(screen.getByTestId('order-status-badge')).toBeInTheDocument();
+      const hero = screen.getByTestId('order-hero');
+      const badge = hero.querySelector('[data-testid="status-badge"]');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('shipped');
     });
   });
 
-  describe('Favorite Toggle', () => {
-    it('renders favorite toggle button', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-012: WHEN user views OrderDetailView
+  //         THEN a favorite heart toggle button is shown in hero
+  //         AND it calls useFavoritesStore for toggle
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-012: Favorite Heart Toggle', () => {
+    it('renders favorite toggle button in hero', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
       const favButton = screen.getByTestId('favorite-toggle');
       expect(favButton).toBeInTheDocument();
     });
 
-    it('calls addFavorite when item is not favorited', () => {
+    it('calls addFavorite when item is not yet favorited', () => {
       mockIsFavorite.mockReturnValue(false);
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
       const favButton = screen.getByTestId('favorite-toggle');
       fireEvent.click(favButton);
 
-      expect(mockAddFavorite).toHaveBeenCalledWith({
+      expect(mockAddFavorite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          imageUrl: 'https://example.com/transformed.jpg',
+          style: 'watercolor',
+        })
+      );
+    });
+
+    it('calls removeFavorite when item is already favorited', () => {
+      mockIsFavorite.mockReturnValue(true);
+      const favId = 'fav-123';
+      (mockFavorites as Array<{ id: string; imageUrl: string }>).length = 0;
+      (mockFavorites as Array<{ id: string; imageUrl: string }>).push({
+        id: favId,
         imageUrl: 'https://example.com/transformed.jpg',
-        originalImageUrl: 'https://example.com/original.jpg',
-        style: 'watercolor',
-        styleName: 'צבעי מים',
       });
+
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      const favButton = screen.getByTestId('favorite-toggle');
+      fireEvent.click(favButton);
+
+      expect(mockRemoveFavorite).toHaveBeenCalledWith(favId);
     });
   });
 
-  describe('Progress Bar', () => {
-    it('renders progress bar', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-013: WHEN user views OrderDetailView
+  //         THEN a progress bar shows percentage based on status
+  //         AND estimated delivery date (7 Israel business days, skip Fri/Sat)
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-013: Progress Bar', () => {
+    it('renders progress bar element', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
-      expect(screen.getByTestId('progress-bar')).toBeInTheDocument();
-      expect(screen.getByText('התקדמות ההזמנה')).toBeInTheDocument();
+      const progressBar = screen.getByTestId('progress-bar');
+      expect(progressBar).toBeInTheDocument();
     });
 
-    it('shows correct percentage for shipped status', () => {
+    it('shows percentage for shipped status (75%)', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
       expect(screen.getByText('75%')).toBeInTheDocument();
     });
 
-    it('shows estimated delivery date', () => {
+    it('shows estimated delivery text', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
       expect(screen.getByText(/משלוח משוער/)).toBeInTheDocument();
     });
+
+    it('shows 100% for delivered status', () => {
+      mockUseOrder.mockReturnValue({
+        data: {
+          ...mockOrder,
+          status: 'delivered',
+          deliveredAt: new Date('2024-12-25T10:00:00'),
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('100%')).toBeInTheDocument();
+    });
   });
 
-  describe('Order Header', () => {
-    it('displays order number', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-014: WHEN user views OrderDetailView
+  //         THEN vertical OrderTimeline is integrated
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-014: Vertical Timeline Integration', () => {
+    it('renders OrderTimeline component', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
-      const orderNumbers = screen.getAllByText(/FP-/);
-      expect(orderNumbers.length).toBeGreaterThan(0);
-    });
-
-    it('navigates back when back button is clicked', () => {
-      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
-
-      const backButton = screen.getByTestId('back-button');
-      fireEvent.click(backButton);
-
-      expect(mockPush).toHaveBeenCalledWith('/account/orders');
+      expect(screen.getByTestId('order-timeline')).toBeInTheDocument();
     });
   });
 
-  describe('No Breadcrumb or Lightbox', () => {
-    it('does not render breadcrumb navigation', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-015: WHEN user views OrderDetailView
+  //         THEN product details card shows labeled rows:
+  //         style name, size, paper type, frame type
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-015: Product Details Card', () => {
+    it('shows product details section title', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
-      const breadcrumb = document.querySelector('nav[aria-label="Breadcrumb"]');
-      expect(breadcrumb).not.toBeInTheDocument();
+      expect(screen.getByText('פרטי המוצר')).toBeInTheDocument();
     });
 
-    it('does not render bottom navigation', () => {
+    it('shows style label and value from styles-ui', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('סגנון אמנות')).toBeInTheDocument();
+      expect(screen.getByText('צבעי מים')).toBeInTheDocument();
+    });
+
+    it('shows size label and value', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('גודל הדפס')).toBeInTheDocument();
+      expect(screen.getByText('A4')).toBeInTheDocument();
+    });
+
+    it('shows paper type label and translated value', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('סוג נייר')).toBeInTheDocument();
+      expect(screen.getByText('נייר מט')).toBeInTheDocument();
+    });
+
+    it('shows frame type label and translated value', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('מסגרת')).toBeInTheDocument();
+      expect(screen.getByText('מסגרת שחורה')).toBeInTheDocument();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // AC-016: WHEN user views payment section
+  //         THEN title is "פירוט מחיר" (NOT "סיכום תשלום")
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-016: Payment Section Title', () => {
+    it('shows "פירוט מחיר" as payment section title', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('פירוט מחיר')).toBeInTheDocument();
+    });
+
+    it('does NOT show old "סיכום תשלום" title', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.queryByText('סיכום תשלום')).not.toBeInTheDocument();
+    });
+
+    it('shows subtotal, shipping, and total', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('סכום ביניים')).toBeInTheDocument();
+      expect(screen.getByText('משלוח')).toBeInTheDocument();
+      expect(screen.getByText('סה״כ')).toBeInTheDocument();
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // AC-017: WHEN user views OrderDetailView actions
+  //         THEN exactly 2 buttons shown: "הזמן שוב" + "צור קשר"
+  //         AND buttons are side by side (grid-cols-2)
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-017: Two Action Buttons', () => {
+    it('shows "הזמן שוב" and "צור קשר" buttons', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.getByText('הזמן שוב')).toBeInTheDocument();
+      expect(screen.getByText('צור קשר')).toBeInTheDocument();
+    });
+
+    it('buttons are in a grid-cols-2 layout (side by side)', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      const reorderButton = screen.getByText('הזמן שוב').closest('button');
+      const container = reorderButton?.parentElement;
+      expect(container).toHaveClass('grid', 'grid-cols-2');
+    });
+
+    it('calls reorder handler when "הזמן שוב" clicked', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      fireEvent.click(screen.getByText('הזמן שוב'));
+
+      expect(mockReset).toHaveBeenCalled();
+      expect(mockSetSelectedStyle).toHaveBeenCalledWith('watercolor');
+      expect(mockSetStep).toHaveBeenCalledWith('customize');
+      expect(mockPush).toHaveBeenCalledWith('/create/customize');
+    });
+
+    it('navigates to support when "צור קשר" clicked', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      fireEvent.click(screen.getByText('צור קשר'));
+
+      expect(mockPush).toHaveBeenCalledWith('/support?order=demo_order_001');
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // AC-018: WHEN user views OrderDetailView
+  //         THEN NO breadcrumb, NO lightbox, NO custom bottom nav,
+  //         NO download invoice button
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-018: Removed Elements', () => {
+    it('does NOT render breadcrumb navigation', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      expect(screen.queryByLabelText('Breadcrumb')).not.toBeInTheDocument();
+    });
+
+    it('does NOT render lightbox overlay', () => {
+      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
+
+      const lightbox = document.querySelector('.fixed.inset-0.z-\\[100\\]');
+      expect(lightbox).not.toBeInTheDocument();
+    });
+
+    it('does NOT render custom bottom navigation', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
       const fixedNav = document.querySelector('nav.fixed');
       expect(fixedNav).not.toBeInTheDocument();
     });
-  });
 
-  describe('Product Details', () => {
-    it('displays product details card', () => {
+    it('does NOT render download invoice button', () => {
       renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
 
-      expect(screen.getByText('פרטי המוצר')).toBeInTheDocument();
-      expect(screen.getByText('סגנון אמנות')).toBeInTheDocument();
-      expect(screen.getByText('צבעי מים')).toBeInTheDocument();
-    });
-
-    it('displays item details', () => {
-      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
-
-      expect(screen.getByText('A4')).toBeInTheDocument();
-      expect(screen.getByText('נייר מט')).toBeInTheDocument();
-      expect(screen.getByText('מסגרת שחורה')).toBeInTheDocument();
-    });
-  });
-
-  describe('Order Timeline', () => {
-    it('renders order timeline component', () => {
-      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
-
-      expect(screen.getByTestId('order-timeline')).toBeInTheDocument();
+      expect(screen.queryByText('הורד חשבונית')).not.toBeInTheDocument();
     });
   });
 
@@ -335,55 +512,6 @@ describe('OrderDetailView', () => {
       expect(screen.getByText('כתובת למשלוח')).toBeInTheDocument();
       expect(screen.getByText('ישראל ישראלי')).toBeInTheDocument();
       expect(screen.getByText('רחוב הרצל 123')).toBeInTheDocument();
-    });
-  });
-
-  describe('Payment Summary', () => {
-    it('displays price breakdown', () => {
-      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
-
-      expect(screen.getByText('פירוט מחיר')).toBeInTheDocument();
-      expect(screen.getByText('סכום ביניים')).toBeInTheDocument();
-      expect(screen.getByText('משלוח')).toBeInTheDocument();
-    });
-  });
-
-  describe('Action Buttons', () => {
-    it('renders reorder and contact buttons side by side', () => {
-      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
-
-      expect(screen.getByText('הזמן שוב')).toBeInTheDocument();
-      expect(screen.getByText('צור קשר')).toBeInTheDocument();
-    });
-
-    it('does not render download invoice button', () => {
-      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
-
-      expect(screen.queryByText('הורד חשבונית')).not.toBeInTheDocument();
-    });
-
-    it('calls reorder function when button clicked', () => {
-      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
-
-      const reorderButton = screen.getByText('הזמן שוב');
-      fireEvent.click(reorderButton);
-
-      expect(mockReset).toHaveBeenCalled();
-      expect(mockSetOriginalImage).toHaveBeenCalled();
-      expect(mockSetSelectedStyle).toHaveBeenCalledWith('watercolor');
-      expect(mockSetStep).toHaveBeenCalledWith('customize');
-      expect(mockPush).toHaveBeenCalledWith('/create/customize');
-    });
-  });
-
-  describe('Contact Support', () => {
-    it('navigates to support page when clicked', () => {
-      renderWithQueryClient(<OrderDetailView orderId="demo_order_001" />);
-
-      const supportButton = screen.getByText('צור קשר');
-      fireEvent.click(supportButton);
-
-      expect(mockPush).toHaveBeenCalledWith('/support?order=demo_order_001');
     });
   });
 

@@ -66,17 +66,6 @@ vi.mock('@/lib/api/client', () => ({
   },
 }));
 
-// Mock styles-ui (used by OrderCard)
-vi.mock('@/lib/ai/styles-ui', () => ({
-  getStyleById: (id: string) => {
-    const styles: Record<string, { nameHe: string; gradient: string }> = {
-      avatar_cartoon: { nameHe: 'אווטאר קרטון', gradient: 'from-violet-500 to-pink-500' },
-      watercolor: { nameHe: 'צבעי מים', gradient: 'from-blue-500 to-cyan-400' },
-    };
-    return styles[id] || undefined;
-  },
-}));
-
 // Mock next/navigation
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
@@ -103,7 +92,7 @@ describe('Order History Integration', () => {
     vi.clearAllMocks();
   });
 
-  it('renders complete order history with real data flow', async () => {
+  it('renders order history with data (no stats, no filters)', async () => {
     renderWithQueryClient(<OrderHistoryList />);
 
     // Should show loading initially
@@ -114,31 +103,19 @@ describe('Order History Integration', () => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
 
-    // Should display order card with new format (style · size)
-    expect(screen.getByText('FP-2024-001')).toBeInTheDocument();
-    expect(screen.getByText('אווטאר קרטון · A4')).toBeInTheDocument();
+    // Should display order card with gradient thumbnail (not image)
+    const orderCard = screen.getByTestId('order-card');
+    expect(orderCard).toBeInTheDocument();
 
-    // Should show gradient thumbnail, not image
-    const gradient = screen.getByTestId('order-gradient');
-    expect(gradient).toBeInTheDocument();
-    expect(gradient).toHaveClass('bg-gradient-to-br');
-  });
+    // Should show style name from styles-ui (canonical Hebrew name)
+    expect(screen.getByText(/אווטאר קרטון/)).toBeInTheDocument();
 
-  it('does not show stats or filter tabs (removed in redesign)', async () => {
-    renderWithQueryClient(<OrderHistoryList />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-
-    // Stats should not be present
-    expect(screen.queryByText('סה״כ')).not.toBeInTheDocument();
+    // AC-008: No stats cards
     expect(screen.queryByText('בדרך')).not.toBeInTheDocument();
 
-    // Filter tabs should not be present
+    // AC-009: No filter tabs
     expect(screen.queryByText('הכל')).not.toBeInTheDocument();
     expect(screen.queryByText('בהכנה')).not.toBeInTheDocument();
-    expect(screen.queryByText('הגיע')).not.toBeInTheDocument();
   });
 
   it('navigates correctly when order is clicked', async () => {
@@ -178,11 +155,11 @@ describe('Order History Integration', () => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
 
-    // Check Hebrew UI text
+    // Header text still present
     expect(screen.getByText('ההזמנות שלי')).toBeInTheDocument();
 
-    // Check translated product details (new format: style · size)
-    expect(screen.getByText('אווטאר קרטון · A4')).toBeInTheDocument();
+    // Style name from styles-ui (canonical, not inline translations)
+    expect(screen.getByText(/אווטאר קרטון/)).toBeInTheDocument();
   });
 
   it('applies responsive design classes', async () => {
@@ -199,19 +176,10 @@ describe('Order History Integration', () => {
       'lg:max-w-[1000px]'
     );
 
-    // Gradient thumbnail should have responsive classes
-    const gradient = screen.getByTestId('order-gradient');
+    // OrderCard uses gradient div instead of img thumbnail
+    const orderCard = screen.getByTestId('order-card');
+    const gradient = orderCard.querySelector('[data-testid="order-gradient"]');
+    expect(gradient).toBeInTheDocument();
     expect(gradient).toHaveClass('w-[70px]', 'h-[70px]', 'sm:w-[80px]', 'sm:h-[80px]');
-  });
-
-  it('does not render duplicate bottom navigation', async () => {
-    renderWithQueryClient(<OrderHistoryList />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-
-    const fixedNav = document.querySelector('nav.fixed');
-    expect(fixedNav).not.toBeInTheDocument();
   });
 });

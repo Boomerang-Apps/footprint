@@ -120,7 +120,11 @@ describe('OrderHistoryList', () => {
     });
   });
 
-  describe('No Stats or Filters', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-008: WHEN user views OrderHistoryList
+  //         THEN no stats cards are shown
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-008: No Stats Cards', () => {
     it('does not display statistics cards', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
@@ -128,7 +132,13 @@ describe('OrderHistoryList', () => {
       expect(screen.queryByText('בדרך')).not.toBeInTheDocument();
       expect(screen.queryByText('₪546')).not.toBeInTheDocument();
     });
+  });
 
+  // ═══════════════════════════════════════════════════════════════
+  // AC-009: WHEN user views OrderHistoryList
+  //         THEN no filter tabs are shown
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-009: No Filter Tabs', () => {
     it('does not display filter tabs', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
@@ -137,11 +147,14 @@ describe('OrderHistoryList', () => {
     });
   });
 
-  describe('No Duplicate Bottom Nav', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-010: WHEN user views OrderHistoryList
+  //         THEN no custom bottom nav (global MobileBottomNav handles this)
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-010: No Duplicate Bottom Nav', () => {
     it('does not render a custom bottom navigation', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
-      // The old bottom nav had a "בית" button inside a fixed nav
       const fixedNav = document.querySelector('nav.fixed');
       expect(fixedNav).not.toBeInTheDocument();
     });

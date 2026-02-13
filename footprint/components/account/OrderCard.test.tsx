@@ -87,25 +87,65 @@ describe('OrderCard', () => {
       expect(screen.getByText('FP-2024-001')).toBeInTheDocument();
       expect(screen.getByTestId('order-date')).toBeInTheDocument();
     });
+  });
 
+  // ═══════════════════════════════════════════════════════════════
+  // AC-004: WHEN user views OrderCard
+  //         THEN gradient thumbnail is shown (not an image element)
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-004: Gradient Thumbnail', () => {
     it('displays gradient thumbnail instead of image', () => {
       render(<OrderCard order={mockOrder} />);
 
       const gradient = screen.getByTestId('order-gradient');
       expect(gradient).toBeInTheDocument();
       expect(gradient).toHaveClass('bg-gradient-to-br');
-      // Should use the style-specific gradient
+      // Should use the style-specific gradient from styles-ui
       expect(gradient).toHaveClass('from-violet-500');
       expect(gradient).toHaveClass('to-pink-500');
     });
 
+    it('does not render image thumbnail', () => {
+      render(<OrderCard order={mockOrder} />);
+
+      expect(screen.queryByTestId('order-thumbnail')).not.toBeInTheDocument();
+    });
+
+    it('shows fallback gradient when style not found', () => {
+      const unknownStyleOrder: Order = {
+        ...mockOrder,
+        items: [{
+          ...mockOrder.items[0],
+          style: 'unknown_style' as never,
+        }],
+      };
+      render(<OrderCard order={unknownStyleOrder} />);
+
+      const gradient = screen.getByTestId('order-gradient');
+      expect(gradient).toHaveClass('bg-gradient-to-br');
+      expect(gradient).toHaveClass('from-purple-100');
+      expect(gradient).toHaveClass('to-pink-100');
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // AC-005: WHEN user views OrderCard
+  //         THEN text shows "Style · Size" format in Hebrew
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-005: Style · Size Format', () => {
     it('shows style name and size from styles-ui', () => {
       render(<OrderCard order={mockOrder} />);
 
-      // Uses canonical style name from styles-ui.ts
+      // Uses canonical style name from styles-ui.ts (not inline translations)
       expect(screen.getByText('אווטאר קרטון · A4')).toBeInTheDocument();
     });
+  });
 
+  // ═══════════════════════════════════════════════════════════════
+  // AC-006: WHEN user views OrderCard
+  //         THEN price is green via PriceDisplay color="success"
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-006: Green Price', () => {
     it('shows order total price with success color', () => {
       render(<OrderCard order={mockOrder} />);
 
@@ -115,7 +155,24 @@ describe('OrderCard', () => {
     });
   });
 
-  describe('Status Badge', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-007: WHEN user views OrderCard
+  //         THEN no CardFooter exists (no action button, no gift, no multi-item)
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-007: Simplified Layout', () => {
+    it('does not render a footer', () => {
+      render(<OrderCard order={mockOrder} />);
+
+      expect(screen.queryByTestId('order-action-button')).not.toBeInTheDocument();
+    });
+
+    it('does not render gift indicator', () => {
+      const giftOrder = { ...mockOrder, isGift: true, giftMessage: 'Happy Birthday!' };
+      render(<OrderCard order={giftOrder} />);
+
+      expect(screen.queryByTestId('gift-indicator')).not.toBeInTheDocument();
+    });
+
     it('renders status badge in card body', () => {
       render(<OrderCard order={mockOrder} />);
 
@@ -128,28 +185,6 @@ describe('OrderCard', () => {
       render(<OrderCard order={processingOrder} />);
 
       expect(screen.getByTestId('status-badge')).toHaveTextContent('processing');
-    });
-  });
-
-  describe('Simplified Layout', () => {
-    it('does not render a footer', () => {
-      render(<OrderCard order={mockOrder} />);
-
-      // No footer action button should exist
-      expect(screen.queryByTestId('order-action-button')).not.toBeInTheDocument();
-    });
-
-    it('does not render gift indicator', () => {
-      const giftOrder = { ...mockOrder, isGift: true, giftMessage: 'Happy Birthday!' };
-      render(<OrderCard order={giftOrder} />);
-
-      expect(screen.queryByTestId('gift-indicator')).not.toBeInTheDocument();
-    });
-
-    it('does not render image thumbnail', () => {
-      render(<OrderCard order={mockOrder} />);
-
-      expect(screen.queryByTestId('order-thumbnail')).not.toBeInTheDocument();
     });
   });
 
@@ -171,25 +206,6 @@ describe('OrderCard', () => {
 
       const card = screen.getByTestId('order-card');
       expect(card).toHaveAttribute('dir', 'rtl');
-    });
-  });
-
-  describe('Fallback gradient', () => {
-    it('shows fallback gradient when style not found', () => {
-      const unknownStyleOrder: Order = {
-        ...mockOrder,
-        items: [{
-          ...mockOrder.items[0],
-          style: 'unknown_style' as never,
-        }],
-      };
-      render(<OrderCard order={unknownStyleOrder} />);
-
-      const gradient = screen.getByTestId('order-gradient');
-      expect(gradient).toHaveClass('bg-gradient-to-br');
-      // Fallback gradient
-      expect(gradient).toHaveClass('from-purple-100');
-      expect(gradient).toHaveClass('to-pink-100');
     });
   });
 });

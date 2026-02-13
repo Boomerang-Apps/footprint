@@ -18,6 +18,9 @@ import { cn } from '@/lib/utils';
 /**
  * OrderHistoryList - Order history page component
  * Displays user's orders with pagination. No stats, no filters, no bottom nav.
+ *
+ * @story ORD-01
+ * @acceptance-criteria AC-008, AC-009, AC-010
  */
 export function OrderHistoryList(): React.ReactElement {
   const router = useRouter();

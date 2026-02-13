@@ -6,8 +6,8 @@
  * Displays complete order information with hero section, progress bar,
  * vertical timeline, product details, and payment summary.
  *
- * @story UA-02 / ORD-01
- * @acceptance-criteria AC-001 through AC-015
+ * @story ORD-01
+ * @acceptance-criteria AC-011 through AC-018
  */
 
 import Image from 'next/image';
@@ -152,15 +152,15 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
     const primaryItem = order.items?.[0];
     if (!primaryItem) return;
 
-    const imageUrl = primaryItem.transformedImageUrl || primaryItem.originalImageUrl;
+    const imgUrl = primaryItem.transformedImageUrl || primaryItem.originalImageUrl;
     const styleInfo = getStyleById(primaryItem.style as StyleType);
 
-    if (isFavorite(imageUrl)) {
-      const fav = favorites.find((f) => f.imageUrl === imageUrl);
+    if (isFavorite(imgUrl)) {
+      const fav = favorites.find((f) => f.imageUrl === imgUrl);
       if (fav) removeFavorite(fav.id);
     } else {
       addFavorite({
-        imageUrl,
+        imageUrl: imgUrl,
         originalImageUrl: primaryItem.originalImageUrl,
         style: primaryItem.style as StyleType,
         styleName: styleInfo?.nameHe || primaryItem.style,
@@ -267,7 +267,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
       </header>
 
       <main className="max-w-[800px] mx-auto px-4 space-y-4 pt-4">
-        {/* 4A: Hero Section */}
+        {/* AC-011: Hero Section */}
         <div
           data-testid="order-hero"
           className={cn(
@@ -289,7 +289,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
               </div>
             )}
 
-            {/* Favorite toggle */}
+            {/* AC-012: Favorite toggle */}
             <button
               data-testid="favorite-toggle"
               onClick={handleFavoriteToggle}
@@ -311,7 +311,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </div>
         </div>
 
-        {/* 4B: Order Info Section */}
+        {/* Order Info Section */}
         <Card>
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
@@ -333,7 +333,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </CardContent>
         </Card>
 
-        {/* 4C: Progress Bar Card */}
+        {/* AC-013: Progress Bar Card */}
         <Card>
           <CardHeader className="pb-2">
             <h3 className="text-base font-semibold text-gray-900">
@@ -358,7 +358,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </CardContent>
         </Card>
 
-        {/* 4D: Vertical Timeline Card */}
+        {/* AC-014: Vertical Timeline Card */}
         <Card>
           <CardHeader>
             <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
@@ -371,7 +371,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </CardContent>
         </Card>
 
-        {/* 4E: Tracking Number Card */}
+        {/* Tracking Number Card */}
         {hasTracking && (
           <Card>
             <CardContent className="py-4">
@@ -399,7 +399,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </Card>
         )}
 
-        {/* 4F: Product Details Card */}
+        {/* AC-015: Product Details Card */}
         <Card>
           <CardHeader>
             <h3 className="text-base font-semibold text-gray-900">
@@ -440,7 +440,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </CardContent>
         </Card>
 
-        {/* 4G: Price Breakdown Card */}
+        {/* AC-016: Price Breakdown Card */}
         <Card>
           <CardHeader>
             <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
@@ -474,7 +474,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </CardContent>
         </Card>
 
-        {/* 4H: Shipping Address Card */}
+        {/* Shipping Address Card */}
         <Card>
           <CardHeader>
             <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
@@ -501,7 +501,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </CardContent>
         </Card>
 
-        {/* 4I: Action Buttons */}
+        {/* AC-017: Action Buttons - 2 side-by-side */}
         <div className="grid grid-cols-2 gap-3 pb-4">
           <Button
             onClick={handleReorder}

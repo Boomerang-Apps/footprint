@@ -27,6 +27,9 @@ const formatOrderNumber = (orderId: string): string => {
 /**
  * OrderCard - Individual order card component
  * Displays order with gradient thumbnail, status badge, and green price
+ *
+ * @story ORD-01
+ * @acceptance-criteria AC-004, AC-005, AC-006, AC-007
  */
 export function OrderCard({
   order,

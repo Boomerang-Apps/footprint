@@ -6,7 +6,7 @@
  * Displays a vertical timeline of order status changes with dates.
  *
  * @story UA-02 / ORD-01
- * @acceptance-criteria AC-006
+ * @acceptance-criteria AC-001, AC-002, AC-003
  */
 
 import { Check, Clock, Package, Truck, Home, Printer } from 'lucide-react';
