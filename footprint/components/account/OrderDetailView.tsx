@@ -3,14 +3,13 @@
 /**
  * OrderDetailView
  *
- * Displays complete order information including items, shipping details,
- * payment summary, and delivery timeline.
+ * Displays complete order information with hero section, progress bar,
+ * vertical timeline, product details, and payment summary.
  *
- * @story UA-02
+ * @story UA-02 / ORD-01
  * @acceptance-criteria AC-001 through AC-015
  */
 
-import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -18,43 +17,29 @@ import {
   Package,
   MapPin,
   CreditCard,
-  Gift,
-  Download,
   MessageCircle,
   RotateCcw,
   ExternalLink,
   AlertCircle,
-  Loader2,
-  Home,
   Truck,
+  Heart,
 } from 'lucide-react';
 import { useOrder } from '@/hooks/useOrderHistory';
 import { useOrderStore } from '@/stores/orderStore';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 import { OrderTimeline } from './OrderTimeline';
 import { OrderStatusBadge } from '@/components/ui/OrderStatusBadge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { PriceDisplay } from '@/components/ui/PriceDisplay';
 import { cn, formatOrderDate } from '@/lib/utils';
-import type { Order, OrderItem } from '@/types';
+import { getStyleById } from '@/lib/ai/styles-ui';
+import type { Order } from '@/types';
+import type { StyleType } from '@/types/product';
 
 interface OrderDetailViewProps {
   orderId: string;
 }
-
-// Style translations to Hebrew
-const styleTranslations: Record<string, string> = {
-  avatar_cartoon: 'אווטר קריקטורה',
-  watercolor: 'צבעי מים',
-  oil_painting: 'ציור שמן',
-  line_art: 'ציור קווי',
-  line_art_watercolor: 'קווי + צבעי מים',
-  original: 'מקורי משופר',
-  pop_art: 'פופ ארט',
-  comic: 'קומיקס',
-  romantic: 'רומנטי',
-  vintage: 'וינטאג׳',
-};
 
 // Frame translations
 const frameTranslations: Record<string, string> = {
@@ -75,23 +60,48 @@ const paperTranslations: Record<string, string> = {
 // Format order number
 const formatOrderNumber = (orderId: string): string => {
   if (orderId.startsWith('FP-')) return orderId;
-  const orderNum = orderId.replace(/[^0-9]/g, '').padStart(3, '0');
-  return `FP-2024-${orderNum}`;
+  const orderNum = orderId.replace(/[^0-9]/g, '').padStart(6, '0');
+  return `#FP-${orderNum}`;
 };
+
+// Progress percentage based on status
+const getProgressPercentage = (status: Order['status']): number => {
+  switch (status) {
+    case 'pending': return 0;
+    case 'paid': return 10;
+    case 'processing': return 25;
+    case 'printing': return 50;
+    case 'shipped': return 75;
+    case 'delivered': return 100;
+    case 'cancelled': return 0;
+    default: return 0;
+  }
+};
+
+// Estimate delivery date: createdAt + 7 business days (skip Fri/Sat for Israel)
+function estimateDelivery(createdAt: Date): string {
+  const date = new Date(createdAt);
+  let businessDays = 0;
+  while (businessDays < 7) {
+    date.setDate(date.getDate() + 1);
+    const day = date.getDay();
+    // Skip Friday (5) and Saturday (6) for Israel
+    if (day !== 5 && day !== 6) {
+      businessDays++;
+    }
+  }
+  return formatOrderDate(date);
+}
 
 export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactElement {
   const router = useRouter();
   const orderStore = useOrderStore();
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const { isFavorite, addFavorite, removeFavorite, favorites } = useFavoritesStore();
 
   const { data: order, isLoading, isError, error, refetch } = useOrder(orderId);
 
   const handleBackClick = () => {
     router.push('/account/orders');
-  };
-
-  const handleHomeClick = () => {
-    router.push('/');
   };
 
   const handleReorder = () => {
@@ -124,7 +134,6 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
   const handleTrackShipment = () => {
     if (!order || !order.trackingNumber) return;
 
-    // Use Israel Post tracking URL by default, or carrier-specific URL if carrier is known
     const trackingUrl = order.carrier === 'fedex'
       ? `https://www.fedex.com/fedextrack/?trknbr=${order.trackingNumber}`
       : order.carrier === 'dhl'
@@ -134,23 +143,29 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
     window.open(trackingUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleDownloadInvoice = async () => {
-    if (!order) return;
-    // Trigger invoice download via API
-    window.open(`/api/orders/${orderId}/invoice`, '_blank');
-  };
-
   const handleContactSupport = () => {
-    // Navigate to support with order context
     router.push(`/support?order=${orderId}`);
   };
 
-  const handleImageClick = (imageUrl: string) => {
-    setLightboxImage(imageUrl);
-  };
+  const handleFavoriteToggle = () => {
+    if (!order) return;
+    const primaryItem = order.items?.[0];
+    if (!primaryItem) return;
 
-  const closeLightbox = () => {
-    setLightboxImage(null);
+    const imageUrl = primaryItem.transformedImageUrl || primaryItem.originalImageUrl;
+    const styleInfo = getStyleById(primaryItem.style as StyleType);
+
+    if (isFavorite(imageUrl)) {
+      const fav = favorites.find((f) => f.imageUrl === imageUrl);
+      if (fav) removeFavorite(fav.id);
+    } else {
+      addFavorite({
+        imageUrl,
+        originalImageUrl: primaryItem.originalImageUrl,
+        style: primaryItem.style as StyleType,
+        styleName: styleInfo?.nameHe || primaryItem.style,
+      });
+    }
   };
 
   // Loading state
@@ -171,18 +186,10 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </div>
         </header>
         <main className="max-w-[800px] mx-auto p-4 space-y-4">
-          {/* Skeleton loader */}
+          <div className="h-48 bg-gray-200 rounded-2xl animate-pulse" />
           <div className="bg-white rounded-2xl p-6 space-y-4">
             <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
             <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-            <div className="flex gap-4">
-              <div className="w-24 h-24 bg-gray-200 rounded-xl animate-pulse" />
-              <div className="flex-1 space-y-2">
-                <div className="h-5 w-40 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
-              </div>
-            </div>
           </div>
           <div className="bg-white rounded-2xl p-6 h-32 animate-pulse" />
           <div className="bg-white rounded-2xl p-6 h-48 animate-pulse" />
@@ -232,11 +239,15 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
     );
   }
 
+  const primaryItem = order.items?.[0];
+  const styleInfo = primaryItem ? getStyleById(primaryItem.style as StyleType) : undefined;
+  const imageUrl = primaryItem?.transformedImageUrl || primaryItem?.originalImageUrl;
   const hasTracking = !!order.trackingNumber;
-  const isPaid = order.paidAt !== null || (order.status !== 'pending' && order.status !== 'cancelled');
+  const progressPercent = getProgressPercentage(order.status);
+  const isFav = imageUrl ? isFavorite(imageUrl) : false;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 lg:pb-8" dir="rtl">
+    <div className="min-h-screen bg-gray-50 pb-8" dir="rtl">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between max-w-[800px] mx-auto">
@@ -249,50 +260,105 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
             <ChevronRight className="h-5 w-5" />
           </button>
           <h1 className="text-lg font-semibold text-gray-900">
-            {formatOrderNumber(order.id)}
+            פרטי הזמנה
           </h1>
           <div className="w-10 h-10" />
         </div>
       </header>
 
-      {/* Breadcrumb */}
-      <nav className="max-w-[800px] mx-auto px-4 py-3" aria-label="Breadcrumb">
-        <ol className="flex items-center gap-2 text-sm text-gray-500">
-          <li>
-            <button onClick={handleHomeClick} className="hover:text-gray-700">
-              <Home className="h-4 w-4" />
-            </button>
-          </li>
-          <li>/</li>
-          <li>
-            <button onClick={handleBackClick} className="hover:text-gray-700">
-              הזמנות
-            </button>
-          </li>
-          <li>/</li>
-          <li className="text-gray-900 font-medium">{formatOrderNumber(order.id)}</li>
-        </ol>
-      </nav>
+      <main className="max-w-[800px] mx-auto px-4 space-y-4 pt-4">
+        {/* 4A: Hero Section */}
+        <div
+          data-testid="order-hero"
+          className={cn(
+            'relative rounded-2xl overflow-hidden bg-gradient-to-br p-6',
+            styleInfo?.gradient || 'from-purple-500 to-pink-500'
+          )}
+        >
+          <div className="flex items-start justify-between">
+            {/* Order image */}
+            {imageUrl && (
+              <div className="w-32 h-32 rounded-xl overflow-hidden shadow-lg">
+                <Image
+                  src={imageUrl}
+                  alt={styleInfo?.nameHe || 'תמונת הזמנה'}
+                  width={128}
+                  height={128}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
 
-      <main className="max-w-[800px] mx-auto px-4 space-y-4">
-        {/* Order Header Card */}
+            {/* Favorite toggle */}
+            <button
+              data-testid="favorite-toggle"
+              onClick={handleFavoriteToggle}
+              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+              aria-label={isFav ? 'הסר ממועדפים' : 'הוסף למועדפים'}
+            >
+              <Heart
+                className={cn(
+                  'h-5 w-5',
+                  isFav ? 'fill-red-500 text-red-500' : 'text-white'
+                )}
+              />
+            </button>
+          </div>
+
+          {/* Status badge on hero */}
+          <div className="mt-4">
+            <OrderStatusBadge status={order.status} size="md" />
+          </div>
+        </div>
+
+        {/* 4B: Order Info Section */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-lg font-bold text-gray-900">
                   {formatOrderNumber(order.id)}
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 mt-0.5">
                   {formatOrderDate(order.createdAt)}
                 </p>
               </div>
-              <OrderStatusBadge status={order.status} size="md" />
+              <PriceDisplay
+                amount={order.total}
+                size="lg"
+                locale="he"
+                color="success"
+              />
             </div>
-          </CardHeader>
+          </CardContent>
         </Card>
 
-        {/* Order Timeline */}
+        {/* 4C: Progress Bar Card */}
+        <Card>
+          <CardHeader className="pb-2">
+            <h3 className="text-base font-semibold text-gray-900">
+              התקדמות ההזמנה
+            </h3>
+          </CardHeader>
+          <CardContent>
+            <div data-testid="progress-bar" className="space-y-3">
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-purple-600 h-2.5 rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>{progressPercent}%</span>
+                <span>
+                  משלוח משוער: {estimateDelivery(order.createdAt)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 4D: Vertical Timeline Card */}
         <Card>
           <CardHeader>
             <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
@@ -305,7 +371,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </CardContent>
         </Card>
 
-        {/* Tracking Info (if shipped) */}
+        {/* 4E: Tracking Number Card */}
         {hasTracking && (
           <Card>
             <CardContent className="py-4">
@@ -316,7 +382,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">מספר מעקב</p>
-                    <p className="text-sm text-gray-500">{order.trackingNumber || 'זמין'}</p>
+                    <p className="text-sm text-gray-500">{order.trackingNumber}</p>
                   </div>
                 </div>
                 <Button
@@ -333,77 +399,53 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </Card>
         )}
 
-        {/* Order Items */}
+        {/* 4F: Product Details Card */}
         <Card>
           <CardHeader>
             <h3 className="text-base font-semibold text-gray-900">
-              פריטים ({order.items?.length || 0})
-            </h3>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {order.items?.map((item, index) => (
-              <OrderItemCard
-                key={item.id || index}
-                item={item}
-                onImageClick={handleImageClick}
-                hasPassepartout={order.hasPassepartout}
-              />
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Gift Info (if gift order) */}
-        {order.isGift && (
-          <Card className="border-pink-200 bg-pink-50">
-            <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Gift className="h-5 w-5 text-pink-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-pink-900">הזמנת מתנה</p>
-                  {order.giftMessage && (
-                    <p className="text-sm text-pink-700 mt-1">&quot;{order.giftMessage}&quot;</p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Shipping Address */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-purple-600" />
-              כתובת למשלוח
+              פרטי המוצר
             </h3>
           </CardHeader>
           <CardContent>
-            {order.shippingAddress ? (
-              <div className="text-sm text-gray-700 leading-relaxed">
-                <p className="font-medium">{order.shippingAddress.name}</p>
-                <p>{order.shippingAddress.street}</p>
-                <p>
-                  {order.shippingAddress.city}
-                  {order.shippingAddress.postalCode && `, ${order.shippingAddress.postalCode}`}
-                </p>
-                {order.shippingAddress.phone && (
-                  <p className="mt-2 text-gray-500">{order.shippingAddress.phone}</p>
-                )}
+            {primaryItem ? (
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">סגנון אמנות</span>
+                  <span className="font-medium text-gray-900">
+                    {styleInfo?.nameHe || primaryItem.style}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">גודל הדפס</span>
+                  <span className="font-medium text-gray-900">
+                    {primaryItem.size}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">סוג נייר</span>
+                  <span className="font-medium text-gray-900">
+                    {paperTranslations[primaryItem.paperType] || primaryItem.paperType}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">מסגרת</span>
+                  <span className="font-medium text-gray-900">
+                    {frameTranslations[primaryItem.frameType] || primaryItem.frameType}
+                  </span>
+                </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">כתובת לא זמינה</p>
+              <p className="text-sm text-gray-500">אין פרטי מוצר זמינים</p>
             )}
           </CardContent>
         </Card>
 
-        {/* Payment Summary */}
+        {/* 4G: Price Breakdown Card */}
         <Card>
           <CardHeader>
             <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-purple-600" />
-              סיכום תשלום
+              פירוט מחיר
             </h3>
           </CardHeader>
           <CardContent>
@@ -432,153 +474,52 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps): React.ReactE
           </CardContent>
         </Card>
 
-        {/* Actions */}
-        <div className="space-y-3 pb-4">
+        {/* 4H: Shipping Address Card */}
+        <Card>
+          <CardHeader>
+            <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-purple-600" />
+              כתובת למשלוח
+            </h3>
+          </CardHeader>
+          <CardContent>
+            {order.shippingAddress ? (
+              <div className="text-sm text-gray-700 leading-relaxed">
+                <p className="font-medium">{order.shippingAddress.name}</p>
+                <p>{order.shippingAddress.street}</p>
+                <p>
+                  {order.shippingAddress.city}
+                  {order.shippingAddress.postalCode && `, ${order.shippingAddress.postalCode}`}
+                </p>
+                {order.shippingAddress.phone && (
+                  <p className="mt-2 text-gray-500">{order.shippingAddress.phone}</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">כתובת לא זמינה</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 4I: Action Buttons */}
+        <div className="grid grid-cols-2 gap-3 pb-4">
           <Button
             onClick={handleReorder}
-            className="w-full bg-purple-600 hover:bg-purple-700"
+            className="bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2"
           >
-            <RotateCcw className="h-4 w-4 ml-2" />
+            <RotateCcw className="h-4 w-4" />
             הזמן שוב
           </Button>
-
-          <div className="grid grid-cols-2 gap-3">
-            {isPaid && (
-              <Button
-                variant="outline"
-                onClick={handleDownloadInvoice}
-                className="flex items-center justify-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                הורד חשבונית
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={handleContactSupport}
-              className={cn("flex items-center justify-center gap-2", !isPaid && "col-span-2")}
-            >
-              <MessageCircle className="h-4 w-4" />
-              צור קשר
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={handleContactSupport}
+            className="flex items-center justify-center gap-2"
+          >
+            <MessageCircle className="h-4 w-4" />
+            צור קשר
+          </Button>
         </div>
       </main>
-
-      {/* Lightbox */}
-      {lightboxImage && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
-          onClick={closeLightbox}
-        >
-          <button
-            className="absolute top-4 right-4 text-white p-2 hover:bg-white/20 rounded-full"
-            onClick={closeLightbox}
-            aria-label="סגור"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-          <Image
-            src={lightboxImage}
-            alt="תמונה מוגדלת"
-            width={800}
-            height={800}
-            className="max-w-full max-h-[80vh] object-contain rounded-lg"
-          />
-        </div>
-      )}
-
-      {/* Bottom Navigation (Mobile) */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 lg:hidden">
-        <div className="max-w-[500px] mx-auto flex justify-around">
-          <button
-            onClick={handleHomeClick}
-            className="flex flex-col items-center gap-1 py-2 px-4 text-gray-400 text-xs font-medium"
-          >
-            <Home className="h-5 w-5" />
-            בית
-          </button>
-          <button
-            onClick={handleBackClick}
-            className="flex flex-col items-center gap-1 py-2 px-4 text-purple-600 text-xs font-medium"
-          >
-            <Package className="h-5 w-5" />
-            הזמנות
-          </button>
-        </div>
-      </nav>
-    </div>
-  );
-}
-
-// Order Item Card Sub-component
-interface OrderItemCardProps {
-  item: OrderItem;
-  onImageClick: (url: string) => void;
-  hasPassepartout?: boolean;
-}
-
-// Frame border colors for visual representation
-const FRAME_COLORS: Record<string, string> = {
-  black: '#1a1a1a',
-  white: '#ffffff',
-  oak: '#b8860b',
-};
-
-function getFrameStyle(frameType: string | undefined): React.CSSProperties {
-  const color = FRAME_COLORS[frameType || ''];
-  if (!color) return {};
-  return {
-    border: `4px solid ${color}`,
-    ...(frameType === 'white' ? { boxShadow: '0 0 0 1px #e5e5e5' } : {}),
-  };
-}
-
-function OrderItemCard({ item, onImageClick, hasPassepartout }: OrderItemCardProps): React.ReactElement {
-  const imageUrl = item.transformedImageUrl || item.originalImageUrl;
-  const hasFrame = item.frameType && item.frameType !== 'none';
-  const frameStyle = getFrameStyle(item.frameType);
-  const showPassepartout = hasPassepartout && hasFrame;
-
-  return (
-    <div className="flex gap-4 p-3 bg-gray-50 rounded-xl">
-      <button
-        onClick={() => onImageClick(imageUrl)}
-        className="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-purple-500 rounded"
-      >
-        <div
-          className="overflow-hidden bg-gray-100"
-          style={{
-            borderRadius: hasFrame ? '2px' : '12px',
-            ...frameStyle,
-            ...(showPassepartout ? { padding: '4px', background: 'white' } : {}),
-            width: showPassepartout ? '88px' : '80px',
-            height: showPassepartout ? '121px' : '113px',
-          }}
-        >
-          <Image
-            src={imageUrl}
-            alt={styleTranslations[item.style] || item.style}
-            width={80}
-            height={113}
-            className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
-          />
-        </div>
-      </button>
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-semibold text-gray-900">
-          {styleTranslations[item.style] || item.style}
-        </h4>
-        <p className="text-xs text-gray-500 mt-1">
-          {item.size} • {paperTranslations[item.paperType] || item.paperType}
-        </p>
-        <p className="text-xs text-gray-500">
-          {frameTranslations[item.frameType] || item.frameType}{showPassepartout ? ' • פספרטו' : ''}
-        </p>
-        <div className="mt-2">
-          <PriceDisplay amount={item.price} size="sm" locale="he" />
-        </div>
-      </div>
     </div>
   );
 }

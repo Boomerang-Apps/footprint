@@ -3,9 +3,9 @@
 /**
  * OrderTimeline
  *
- * Displays a visual timeline of order status changes.
+ * Displays a vertical timeline of order status changes with dates.
  *
- * @story UA-02
+ * @story UA-02 / ORD-01
  * @acceptance-criteria AC-006
  */
 
@@ -128,39 +128,66 @@ export function OrderTimeline({ order }: OrderTimelineProps): React.ReactElement
         </div>
       )}
 
-      {/* Horizontal Timeline */}
-      <div className="relative flex justify-between">
-        {/* Progress line */}
-        <div className="absolute top-5 right-5 left-5 h-0.5 bg-gray-200" />
-
-        {visibleSteps.map((step) => {
+      {/* Vertical Timeline */}
+      <div className="relative flex flex-col gap-0">
+        {visibleSteps.map((step, index) => {
           const status = getStepStatus(step.id, order.status);
           const Icon = step.icon;
+          const isLast = index === visibleSteps.length - 1;
+          const stepDate = (status === 'completed' || status === 'current')
+            ? getStatusDate(step.id, order)
+            : null;
 
           return (
-            <div key={step.id} className="flex flex-col items-center gap-1.5 relative z-10">
-              <div
-                className={cn(
-                  'flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 transition-colors',
-                  status === 'completed' && 'bg-purple-600 text-white',
-                  status === 'current' && 'bg-purple-100 text-purple-600 ring-4 ring-purple-50',
-                  status === 'upcoming' && 'bg-gray-100 text-gray-400'
-                )}
-              >
-                {status === 'completed' ? (
-                  <Check className="h-5 w-5" />
-                ) : (
-                  <Icon className="h-5 w-5" />
+            <div key={step.id} className="flex items-start gap-3 relative">
+              {/* Icon column with connecting line */}
+              <div className="flex flex-col items-center flex-shrink-0">
+                <div
+                  className={cn(
+                    'flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 transition-colors z-10',
+                    status === 'completed' && 'bg-purple-600 text-white',
+                    status === 'current' && 'bg-purple-100 text-purple-600 ring-4 ring-purple-50',
+                    status === 'upcoming' && 'bg-gray-100 text-gray-400'
+                  )}
+                >
+                  {status === 'completed' ? (
+                    <Check className="h-5 w-5" />
+                  ) : (
+                    <Icon className="h-5 w-5" />
+                  )}
+                </div>
+                {/* Vertical connecting line */}
+                {!isLast && (
+                  <div
+                    className={cn(
+                      'w-0.5 h-8 my-1',
+                      status === 'completed' ? 'bg-purple-600' : 'bg-gray-200'
+                    )}
+                  />
                 )}
               </div>
-              <span
-                className={cn(
-                  'text-xs text-center max-w-[70px] leading-tight',
-                  status === 'upcoming' ? 'text-gray-400' : 'text-gray-900 font-medium'
-                )}
-              >
-                {step.label}
-              </span>
+
+              {/* Label and date */}
+              <div className="pt-2 min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className={cn(
+                      'text-sm leading-tight',
+                      status === 'upcoming' ? 'text-gray-400' : 'text-gray-900 font-medium'
+                    )}
+                  >
+                    {step.label}
+                  </span>
+                  {stepDate && (
+                    <span
+                      data-testid="step-date"
+                      className="text-xs text-gray-400 whitespace-nowrap"
+                    >
+                      {formatOrderDate(stepDate)}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           );
         })}

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { OrderHistoryList } from './OrderHistoryList';
@@ -120,50 +120,30 @@ describe('OrderHistoryList', () => {
     });
   });
 
-  describe('Statistics Display', () => {
-    it('displays order statistics correctly', () => {
+  describe('No Stats or Filters', () => {
+    it('does not display statistics cards', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
-      expect(screen.getByText('2')).toBeInTheDocument(); // Total orders
-      expect(screen.getByText('₪546')).toBeInTheDocument(); // Total spent
+      // Stats labels from old design should not be present
+      expect(screen.queryByText('בדרך')).not.toBeInTheDocument();
+      expect(screen.queryByText('₪546')).not.toBeInTheDocument();
+    });
 
-      // Use getAllByText for labels that appear multiple times
-      expect(screen.getAllByText('הזמנות').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('סה״כ')).toBeInTheDocument();
-      expect(screen.getByText('בדרך')).toBeInTheDocument();
+    it('does not display filter tabs', () => {
+      renderWithQueryClient(<OrderHistoryList />);
+
+      expect(screen.queryByText('הכל')).not.toBeInTheDocument();
+      expect(screen.queryByText('בהכנה')).not.toBeInTheDocument();
     });
   });
 
-  describe('Filter Tabs', () => {
-    it('renders all filter tabs', () => {
+  describe('No Duplicate Bottom Nav', () => {
+    it('does not render a custom bottom navigation', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
-      expect(screen.getByText('הכל')).toBeInTheDocument();
-      expect(screen.getByText('בהכנה')).toBeInTheDocument();
-      expect(screen.getByText('נשלח')).toBeInTheDocument();
-      expect(screen.getByText('הגיע')).toBeInTheDocument();
-    });
-
-    it('sets "הכל" as active by default', () => {
-      renderWithQueryClient(<OrderHistoryList />);
-
-      const allTab = screen.getByText('הכל').closest('button');
-      expect(allTab).toHaveClass('bg-purple-600', 'text-white');
-    });
-
-    it('changes filter when tab is clicked', async () => {
-      renderWithQueryClient(<OrderHistoryList />);
-
-      const deliveredTab = screen.getByText('הגיע').closest('button');
-      fireEvent.click(deliveredTab!);
-
-      await waitFor(() => {
-        expect(mockUseOrderHistory).toHaveBeenCalledWith({
-          statusFilter: 'delivered',
-          page: 1,
-          pageSize: 10,
-        });
-      });
+      // The old bottom nav had a "בית" button inside a fixed nav
+      const fixedNav = document.querySelector('nav.fixed');
+      expect(fixedNav).not.toBeInTheDocument();
     });
   });
 

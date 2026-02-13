@@ -66,16 +66,21 @@ vi.mock('@/lib/api/client', () => ({
   },
 }));
 
+// Mock styles-ui (used by OrderCard)
+vi.mock('@/lib/ai/styles-ui', () => ({
+  getStyleById: (id: string) => {
+    const styles: Record<string, { nameHe: string; gradient: string }> = {
+      avatar_cartoon: { nameHe: 'אווטאר קרטון', gradient: 'from-violet-500 to-pink-500' },
+      watercolor: { nameHe: 'צבעי מים', gradient: 'from-blue-500 to-cyan-400' },
+    };
+    return styles[id] || undefined;
+  },
+}));
+
 // Mock next/navigation
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
-}));
-
-// Mock Next.js Image component
-vi.mock('next/image', () => ({
-  // eslint-disable-next-line @next/next/no-img-element
-  default: ({ src, alt, ...props }: Record<string, unknown>) => <img src={src as string} alt={alt as string} {...props} />,
 }));
 
 const createQueryClient = () => new QueryClient({
@@ -109,35 +114,31 @@ describe('Order History Integration', () => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
 
-    // Should display statistics (multiple "1" values: total orders and in-transit)
-    const statValues = screen.getAllByText('1');
-    expect(statValues.length).toBeGreaterThanOrEqual(1);
-    // Total spent displays "237" which may appear multiple times (stats + order card)
-    const priceElements = screen.getAllByText(/237/);
-    expect(priceElements.length).toBeGreaterThanOrEqual(1);
-
-    // Should display order card
+    // Should display order card with new format (style · size)
     expect(screen.getByText('FP-2024-001')).toBeInTheDocument();
-    expect(screen.getByText('אווטר קריקטורה')).toBeInTheDocument();
-    expect(screen.getByText('A4 • מסגרת שחורה')).toBeInTheDocument();
+    expect(screen.getByText('אווטאר קרטון · A4')).toBeInTheDocument();
+
+    // Should show gradient thumbnail, not image
+    const gradient = screen.getByTestId('order-gradient');
+    expect(gradient).toBeInTheDocument();
+    expect(gradient).toHaveClass('bg-gradient-to-br');
   });
 
-  it('handles filter changes correctly', async () => {
+  it('does not show stats or filter tabs (removed in redesign)', async () => {
     renderWithQueryClient(<OrderHistoryList />);
 
-    // Wait for initial load
     await waitFor(() => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
 
-    // Click on shipped filter (use getByRole to target the button specifically)
-    const shippedTab = screen.getByRole('button', { name: 'נשלח' });
-    fireEvent.click(shippedTab);
+    // Stats should not be present
+    expect(screen.queryByText('סה״כ')).not.toBeInTheDocument();
+    expect(screen.queryByText('בדרך')).not.toBeInTheDocument();
 
-    // Should still show the order (it's shipped)
-    await waitFor(() => {
-      expect(screen.getByText('FP-2024-001')).toBeInTheDocument();
-    });
+    // Filter tabs should not be present
+    expect(screen.queryByText('הכל')).not.toBeInTheDocument();
+    expect(screen.queryByText('בהכנה')).not.toBeInTheDocument();
+    expect(screen.queryByText('הגיע')).not.toBeInTheDocument();
   });
 
   it('navigates correctly when order is clicked', async () => {
@@ -177,19 +178,11 @@ describe('Order History Integration', () => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
 
-    // Check Hebrew UI text (use getAllByText for duplicates)
+    // Check Hebrew UI text
     expect(screen.getByText('ההזמנות שלי')).toBeInTheDocument();
-    expect(screen.getAllByText('הזמנות').length).toBeGreaterThan(0);
-    expect(screen.getByText('סה״כ')).toBeInTheDocument();
-    expect(screen.getByText('בדרך')).toBeInTheDocument();
-    expect(screen.getByText('הכל')).toBeInTheDocument();
-    expect(screen.getByText('בהכנה')).toBeInTheDocument();
-    expect(screen.getAllByText('נשלח').length).toBeGreaterThan(0);
-    expect(screen.getByText('הגיע')).toBeInTheDocument();
 
-    // Check translated product details
-    expect(screen.getByText('אווטר קריקטורה')).toBeInTheDocument();
-    expect(screen.getByText('A4 • מסגרת שחורה')).toBeInTheDocument();
+    // Check translated product details (new format: style · size)
+    expect(screen.getByText('אווטאר קרטון · A4')).toBeInTheDocument();
   });
 
   it('applies responsive design classes', async () => {
@@ -206,15 +199,19 @@ describe('Order History Integration', () => {
       'lg:max-w-[1000px]'
     );
 
-    const orderCard = screen.getByTestId('order-card');
-    const thumbnail = orderCard.querySelector('img');
-    expect(thumbnail).toHaveClass(
-      'w-[70px]',
-      'h-[70px]',
-      'sm:w-[80px]',
-      'sm:h-[80px]',
-      'lg:w-[90px]',
-      'lg:h-[90px]'
-    );
+    // Gradient thumbnail should have responsive classes
+    const gradient = screen.getByTestId('order-gradient');
+    expect(gradient).toHaveClass('w-[70px]', 'h-[70px]', 'sm:w-[80px]', 'sm:h-[80px]');
+  });
+
+  it('does not render duplicate bottom navigation', async () => {
+    renderWithQueryClient(<OrderHistoryList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+    });
+
+    const fixedNav = document.querySelector('nav.fixed');
+    expect(fixedNav).not.toBeInTheDocument();
   });
 });
