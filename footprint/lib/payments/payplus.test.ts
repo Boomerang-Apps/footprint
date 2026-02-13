@@ -122,10 +122,8 @@ describe('PayPlus Payment Module', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': JSON.stringify({
-              api_key: 'test_api_key',
-              secret_key: 'test_secret_key',
-            }),
+            'api-key': 'test_api_key',
+            'secret-key': 'test_secret_key',
           },
         })
       );
