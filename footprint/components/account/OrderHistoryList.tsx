@@ -37,6 +37,12 @@ export function OrderHistoryList(): React.ReactElement {
     pageSize: 10,
   });
 
+  // Treat unauthorized errors as empty state (user not signed in)
+  const isUnauthorized = isError && (
+    error?.message?.includes('Unauthorized') ||
+    error?.message?.includes('401')
+  );
+
   const handleOrderClick = (order: { id: string }) => {
     router.push(`/account/orders/${order.id}`);
   };
@@ -91,8 +97,8 @@ export function OrderHistoryList(): React.ReactElement {
           </div>
         )}
 
-        {/* Error State */}
-        {isError && (
+        {/* Error State (non-auth errors only) */}
+        {isError && !isUnauthorized && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -112,8 +118,8 @@ export function OrderHistoryList(): React.ReactElement {
           </div>
         )}
 
-        {/* Empty State */}
-        {!isLoading && !isError && data.orders.length === 0 && (
+        {/* Empty State (also shown for unauthorized) */}
+        {!isLoading && (isUnauthorized || (!isError && data.orders.length === 0)) && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
               <ShoppingBag className="h-9 w-9 text-gray-400" />

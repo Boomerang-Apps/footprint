@@ -232,6 +232,40 @@ describe('OrderHistoryList', () => {
     });
   });
 
+  describe('Unauthorized State', () => {
+    it('shows empty state instead of error when unauthorized', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+        isLoading: false,
+        isError: true,
+        error: new Error('Unauthorized - Please sign in'),
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      // Should show empty state, NOT error state
+      expect(screen.getByText('אין הזמנות עדיין')).toBeInTheDocument();
+      expect(screen.getByText('צור עכשיו')).toBeInTheDocument();
+      expect(screen.queryByText('שגיאה בטעינת ההזמנות')).not.toBeInTheDocument();
+    });
+
+    it('shows empty state for 401 API error', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+        isLoading: false,
+        isError: true,
+        error: new Error('API error: 401'),
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      expect(screen.getByText('אין הזמנות עדיין')).toBeInTheDocument();
+      expect(screen.queryByText('שגיאה בטעינת ההזמנות')).not.toBeInTheDocument();
+    });
+  });
+
   describe('Empty State', () => {
     it('shows empty state when no orders exist', () => {
       mockUseOrderHistory.mockReturnValue({
