@@ -110,16 +110,7 @@ describe('OrderHistoryList', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
       expect(screen.getByText('ההזמנות שלי')).toBeInTheDocument();
-      expect(screen.getByTestId('back-button')).toBeInTheDocument();
-    });
-
-    it('navigates back when back button is clicked', () => {
-      renderWithQueryClient(<OrderHistoryList />);
-
-      const backButton = screen.getByTestId('back-button');
-      fireEvent.click(backButton);
-
-      expect(mockPush).toHaveBeenCalledWith('/');
+      expect(screen.getByText('כל ההזמנות שלך במקום אחד')).toBeInTheDocument();
     });
   });
 

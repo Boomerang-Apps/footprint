@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ChevronRight,
   ChevronLeft,
+  ChevronRight,
   ShoppingBag,
   AlertCircle,
   RotateCcw,
   Plus,
+  Package,
 } from 'lucide-react';
 import { OrderCard } from './OrderCard';
 import { Button } from '@/components/ui/Button';
@@ -47,10 +48,6 @@ export function OrderHistoryList(): React.ReactElement {
     router.push(`/account/orders/${order.id}`);
   };
 
-  const handleBackClick = () => {
-    router.push('/');
-  };
-
   const handleCreateClick = () => {
     router.push('/create');
   };
@@ -63,22 +60,13 @@ export function OrderHistoryList(): React.ReactElement {
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between max-w-[600px] sm:max-w-[800px] lg:max-w-[1000px] mx-auto">
-          <button
-            data-testid="back-button"
-            onClick={handleBackClick}
-            className="flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
-            aria-label="חזור"
-          >
-            <ChevronRight className="h-5 w-5" aria-hidden="true" />
-          </button>
-
-          <h1 className="text-lg font-semibold text-gray-900">
-            ההזמנות שלי
-          </h1>
-
-          <div className="w-10 h-10" /> {/* Spacer for centering */}
+      <header className="bg-white border-b border-zinc-200">
+        <div className="max-w-4xl mx-auto px-4 py-6 text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Package className="w-5 h-5 text-violet-600" />
+            <h1 className="text-2xl font-bold text-zinc-900">ההזמנות שלי</h1>
+          </div>
+          <p className="text-sm text-zinc-500">כל ההזמנות שלך במקום אחד</p>
         </div>
       </header>
 
