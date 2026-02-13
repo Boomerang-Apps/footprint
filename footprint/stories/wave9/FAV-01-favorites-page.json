@@ -10,7 +10,7 @@
   "priority": "high",
   "story_points": 8,
   "description": "Create a standalone Favorites page where users can view all their hearted/saved AI creations that persist across sessions via localStorage. The MobileBottomNav already links to /favorites with a Heart icon but no page exists. Currently, 'hearted' versions in the style step are tied to the order session and lost on reset. This story extracts the STYLES UI config to a shared module, creates a Zustand favoritesStore with localStorage persistence, builds the /favorites page with a responsive grid of favorited creations, and integrates the heart toggle on the style page so favorites persist beyond the current order.",
-  "status": "in_progress",
+  "status": "complete",
   "objective": {
     "as_a": "user who has created AI-transformed artwork",
     "i_want": "to save my favorite AI creations to a permanent collection and revisit them anytime",
