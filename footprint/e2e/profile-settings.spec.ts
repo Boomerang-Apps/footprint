@@ -55,15 +55,16 @@ test.describe('Settings Page', () => {
   });
 
   test('back button navigates to /account', async ({ page }) => {
-    await page.goto('/account/settings');
+    await page.goto('/account/settings', { waitUntil: 'networkidle' });
     await page.getByTestId('settings-back-button').click();
     await page.waitForURL('**/account');
     expect(page.url()).toContain('/account');
   });
 
   test('toggle switches are interactive', async ({ page }) => {
-    await page.goto('/account/settings');
+    await page.goto('/account/settings', { waitUntil: 'networkidle' });
     const switches = page.getByRole('switch');
+    await expect(switches.first()).toBeVisible();
     const count = await switches.count();
     expect(count).toBeGreaterThanOrEqual(3);
 
@@ -125,7 +126,7 @@ test.describe('Navigation Integration', () => {
   });
 
   test('profile edit back button goes to /account', async ({ page }) => {
-    await page.goto('/account/profile');
+    await page.goto('/account/profile', { waitUntil: 'networkidle' });
     await page.getByTestId('back-button').click();
     await page.waitForURL('**/account');
     expect(page.url()).toContain('/account');
