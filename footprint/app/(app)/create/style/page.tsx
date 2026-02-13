@@ -3,89 +3,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowRight, X, Sparkles, Check, Zap, Droplet, Pen, Brush, CircleOff, Layers, AlertCircle, RefreshCw, RotateCcw, Maximize2, Heart, Grid3X3, Trash2, Palette, Camera, Flower2 } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Check, AlertCircle, RefreshCw, RotateCcw, Maximize2, Heart, Grid3X3, Trash2 } from 'lucide-react';
 import { useOrderStore } from '@/stores/orderStore';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 import { StyleLoader } from '@/components/ui/StyleLoader';
+import { STYLES } from '@/lib/ai/styles-ui';
 import type { StyleType } from '@/types';
 import toast from 'react-hot-toast';
-
-interface StyleOption {
-  id: StyleType;
-  name: string;
-  nameHe: string;
-  icon: React.ElementType;
-  gradient: string;
-  badge?: 'popular' | 'new';
-}
-
-const STYLES: StyleOption[] = [
-  {
-    id: 'original',
-    name: 'No Filter',
-    nameHe: 'ללא פילטר',
-    icon: CircleOff,
-    gradient: 'from-zinc-500 to-zinc-400',
-  },
-  {
-    id: 'watercolor',
-    name: 'Watercolor',
-    nameHe: 'צבעי מים',
-    icon: Droplet,
-    gradient: 'from-blue-500 to-cyan-400',
-    badge: 'popular',
-  },
-  {
-    id: 'line_art',
-    name: 'Line Art',
-    nameHe: 'ציור קווי',
-    icon: Pen,
-    gradient: 'from-gray-500 to-gray-400',
-  },
-  {
-    id: 'line_art_watercolor',
-    name: 'Line + Watercolor',
-    nameHe: 'קו+מים',
-    icon: Layers,
-    gradient: 'from-purple-500 to-blue-400',
-  },
-  {
-    id: 'oil_painting',
-    name: 'Oil',
-    nameHe: 'ציור שמן',
-    icon: Brush,
-    gradient: 'from-amber-500 to-amber-600',
-  },
-  {
-    id: 'avatar_cartoon',
-    name: 'Avatar Cartoon',
-    nameHe: 'אווטאר קרטון',
-    icon: Zap,
-    gradient: 'from-violet-500 to-pink-500',
-  },
-  {
-    id: 'pop_art',
-    name: 'Pop Art',
-    nameHe: 'פופ ארט',
-    icon: Palette,
-    gradient: 'from-red-500 to-yellow-400',
-    badge: 'new',
-  },
-  {
-    id: 'vintage',
-    name: 'Vintage',
-    nameHe: 'וינטג׳',
-    icon: Camera,
-    gradient: 'from-amber-700 to-amber-500',
-  },
-  {
-    id: 'romantic',
-    name: 'Romantic',
-    nameHe: 'רומנטי',
-    icon: Flower2,
-    gradient: 'from-pink-400 to-rose-300',
-    badge: 'new',
-  },
-];
 
 const STEPS = [
   { id: 'upload', label: 'העלאה' },
@@ -112,6 +36,8 @@ export default function StylePage() {
     selectSavedVersion,
     _hasHydrated,
   } = useOrderStore();
+
+  const { addFavorite, isFavorite } = useFavoritesStore();
 
   // Local state for transform error and pending style for retry
   const [transformError, setTransformError] = useState<string | null>(null);
@@ -218,7 +144,7 @@ export default function StylePage() {
     setIsFullscreen((prev) => !prev);
   }, []);
 
-  // Save current version to collection
+  // Save current version to collection + favorites
   const handleSaveVersion = useCallback(() => {
     if (!transformedImage) {
       toast.error('אין תמונה לשמירה');
@@ -232,9 +158,17 @@ export default function StylePage() {
 
     const success = addSavedVersion();
     if (success) {
+      // Also persist to favorites store (survives order reset)
+      const currentStyle = STYLES.find(s => s.id === selectedStyle);
+      addFavorite({
+        imageUrl: transformedImage,
+        originalImageUrl: originalImage || '',
+        style: selectedStyle,
+        styleName: currentStyle?.nameHe || selectedStyle,
+      });
       toast.success(`נשמר! (${savedVersions.length + 1}/${MAX_VERSIONS})`);
     }
-  }, [transformedImage, savedVersions.length, addSavedVersion]);
+  }, [transformedImage, savedVersions.length, addSavedVersion, addFavorite, originalImage, selectedStyle]);
 
   // Select a version from grid and continue
   const handleSelectVersion = useCallback((id: string) => {
@@ -387,7 +321,7 @@ export default function StylePage() {
               )}
               {/* Save Version Button */}
               {transformedImage && selectedStyle !== 'original' && (() => {
-                const isAlreadySaved = savedVersions.some(v => v.imageUrl === transformedImage);
+                const isAlreadySaved = savedVersions.some(v => v.imageUrl === transformedImage) || isFavorite(transformedImage);
                 return (
                   <button
                     onClick={handleSaveVersion}

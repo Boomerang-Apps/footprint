@@ -1,0 +1,361 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "FAV-01",
+  "type": "feature",
+  "wave_number": "9",
+  "title": "Favorites Page — Persistent AI Creations Gallery",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 8,
+  "description": "Create a standalone Favorites page where users can view all their hearted/saved AI creations that persist across sessions via localStorage. The MobileBottomNav already links to /favorites with a Heart icon but no page exists. Currently, 'hearted' versions in the style step are tied to the order session and lost on reset. This story extracts the STYLES UI config to a shared module, creates a Zustand favoritesStore with localStorage persistence, builds the /favorites page with a responsive grid of favorited creations, and integrates the heart toggle on the style page so favorites persist beyond the current order.",
+  "status": "in_progress",
+  "objective": {
+    "as_a": "user who has created AI-transformed artwork",
+    "i_want": "to save my favorite AI creations to a permanent collection and revisit them anytime",
+    "so_that": "I can browse my saved creations later, compare them, and easily reorder or continue customizing them"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "Favorites page renders at /favorites route",
+      "ears_format": "WHEN user navigates to /favorites THEN display the favorites gallery page with Hebrew header 'היצירות שלי' and subtitle 'יצירות ה-AI השמורות שלך'",
+      "test_approach": "Render favorites page, verify heading text and subtitle present"
+    },
+    {
+      "id": "AC-002",
+      "description": "Empty state when no favorites exist",
+      "ears_format": "WHEN user has no saved favorites THEN display empty state with Heart icon, encouraging Hebrew text 'עדיין לא שמרת יצירות', and CTA button linking to /create",
+      "test_approach": "Render page with empty store, verify empty state UI elements"
+    },
+    {
+      "id": "AC-003",
+      "description": "Display favorites in responsive 2-column grid",
+      "ears_format": "WHEN user has saved favorites THEN display them in a 2-column grid on mobile (sm:3-column on tablet+) with image, style name, date, and action buttons",
+      "test_approach": "Render page with mock favorites, verify grid layout and card contents"
+    },
+    {
+      "id": "AC-004",
+      "description": "Each favorite card shows image with style gradient background",
+      "ears_format": "WHEN favorite card renders THEN show the AI-transformed image with rounded corners and the style's gradient color as a decorative background accent",
+      "test_approach": "Verify card renders image and correct gradient class for each style"
+    },
+    {
+      "id": "AC-005",
+      "description": "Heart icon removes favorite on click",
+      "ears_format": "WHEN user clicks the filled heart icon on a favorite card THEN remove that item from favorites and update the grid immediately",
+      "test_approach": "Click heart on card, verify removeFavorite called and card disappears"
+    },
+    {
+      "id": "AC-006",
+      "description": "Style name displayed in Hebrew",
+      "ears_format": "WHEN favorite card renders THEN display the Hebrew style name (e.g., 'צבעי מים', 'ציור שמן') from the shared STYLES config",
+      "test_approach": "Render card with known style, verify Hebrew name displayed"
+    },
+    {
+      "id": "AC-007",
+      "description": "Formatted creation date displayed",
+      "ears_format": "WHEN favorite card renders THEN display creation date formatted in Hebrew locale (e.g., '3 בפברואר 2026')",
+      "test_approach": "Render card with known timestamp, verify formatted date output"
+    },
+    {
+      "id": "AC-008",
+      "description": "'Use This' button loads image into order flow",
+      "ears_format": "WHEN user clicks 'השתמש ביצירה' button on a favorite card THEN set originalImage and transformedImage in orderStore, set selectedStyle, and navigate to /create/style",
+      "test_approach": "Click 'Use This' button, verify orderStore updated and router.push called with /create/style"
+    },
+    {
+      "id": "AC-009",
+      "description": "Favorites persist across page refreshes via localStorage",
+      "ears_format": "WHEN user refreshes the page or closes and reopens the browser THEN all previously saved favorites are still visible [threshold: localStorage key 'footprint-favorites']",
+      "test_approach": "Add favorites, simulate rehydration, verify favorites restored from localStorage"
+    },
+    {
+      "id": "AC-010",
+      "description": "Heart toggle on style page saves to favoritesStore",
+      "ears_format": "WHEN user clicks the heart button on a transformed image in the style selection step THEN save the image to favoritesStore in addition to the existing orderStore savedVersions",
+      "test_approach": "Mock favoritesStore, click heart on style page, verify addFavorite called with correct data"
+    },
+    {
+      "id": "AC-011",
+      "description": "Heart state on style page reflects favoritesStore",
+      "ears_format": "WHEN a transformed image is already in favoritesStore THEN show filled heart icon on the style page preview",
+      "test_approach": "Pre-populate favoritesStore with matching imageUrl, verify filled heart rendered"
+    },
+    {
+      "id": "AC-012",
+      "description": "STYLES config extracted to shared module",
+      "ears_format": "WHEN style page or favorites page imports STYLES THEN both import from the same shared module at lib/ai/styles-ui.ts",
+      "test_approach": "Verify both pages import STYLES from lib/ai/styles-ui, verify STYLES array has 9 items with correct shape"
+    },
+    {
+      "id": "AC-013",
+      "description": "RTL layout and Hebrew-first UI",
+      "ears_format": "WHEN favorites page renders THEN all text is Hebrew, layout uses RTL logical properties (start/end, ms-/me-), and content aligns correctly",
+      "test_approach": "Verify dir='rtl' on container, verify Tailwind classes use start/end not left/right"
+    },
+    {
+      "id": "AC-014",
+      "description": "Mobile bottom nav highlights favorites tab",
+      "ears_format": "WHEN user is on /favorites THEN the Heart tab in MobileBottomNav shows active (brand-purple) state",
+      "test_approach": "Navigate to /favorites, verify MobileBottomNav heart icon has active class"
+    },
+    {
+      "id": "AC-015",
+      "description": "Zustand favoritesStore with correct interface",
+      "ears_format": "WHEN favoritesStore is created THEN it exposes addFavorite, removeFavorite, isFavorite, clearAll methods and persists favorites array to localStorage",
+      "test_approach": "Unit test store: add, remove, check isFavorite, clearAll, verify localStorage interaction"
+    },
+    {
+      "id": "AC-016",
+      "description": "Prevent duplicate favorites",
+      "ears_format": "WHEN user tries to save an image that is already in favorites (same imageUrl) THEN do not add a duplicate entry",
+      "test_approach": "Add same imageUrl twice, verify favorites.length === 1"
+    }
+  ],
+  "files": {
+    "create": [
+      "stores/favoritesStore.ts",
+      "stores/favoritesStore.test.ts",
+      "lib/ai/styles-ui.ts",
+      "lib/ai/styles-ui.test.ts",
+      "app/(app)/favorites/page.tsx",
+      "app/(app)/favorites/page.test.tsx"
+    ],
+    "modify": [
+      "app/(app)/create/style/page.tsx"
+    ],
+    "forbidden": [
+      "app/api/*",
+      "lib/payments/*",
+      "lib/supabase/*",
+      "stores/orderStore.ts"
+    ]
+  },
+  "technical_requirements": {
+    "state_management": {
+      "store": "Zustand with persist middleware",
+      "localStorage_key": "footprint-favorites",
+      "pattern": "Follow stores/orderStore.ts persist + partialize pattern",
+      "id_generation": "Date.now() + Math.random().toString(36).substr(2, 9) — same as SavedVersion in orderStore"
+    },
+    "shared_styles_module": {
+      "location": "lib/ai/styles-ui.ts",
+      "exports": ["STYLES array", "StyleOption interface", "getStyleById helper"],
+      "source": "Extract from app/(app)/create/style/page.tsx lines 12-88",
+      "consumers": ["style page", "favorites page"]
+    },
+    "reuse_components": [
+      "components/ui/Card.tsx",
+      "lucide-react: Heart, Sparkles, Plus, Trash2, ArrowRight"
+    ],
+    "routing": {
+      "page_path": "app/(app)/favorites/page.tsx",
+      "route": "/favorites",
+      "route_group": "(app) — consistent layout with nav",
+      "client_component": true
+    },
+    "favorites_interface": {
+      "FavoriteItem": {
+        "id": "string",
+        "imageUrl": "string",
+        "originalImageUrl": "string",
+        "style": "StyleType",
+        "styleName": "string",
+        "createdAt": "number (timestamp)"
+      },
+      "FavoritesState": {
+        "favorites": "FavoriteItem[]",
+        "addFavorite": "(item: Omit<FavoriteItem, 'id' | 'createdAt'>) => void",
+        "removeFavorite": "(id: string) => void",
+        "isFavorite": "(imageUrl: string) => boolean",
+        "clearAll": "() => void"
+      }
+    },
+    "use_this_flow": {
+      "description": "When user clicks 'Use This' on a favorite card",
+      "steps": [
+        "1. Set orderStore.originalImage to favorite.originalImageUrl",
+        "2. Set orderStore.transformedImage to favorite.imageUrl",
+        "3. Set orderStore.selectedStyle to favorite.style",
+        "4. Navigate to /create/style via router.push"
+      ]
+    }
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "stores/favoritesStore.test.ts",
+      "lib/ai/styles-ui.test.ts",
+      "app/(app)/favorites/page.test.tsx"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "FavoritesStore — Core Operations",
+        "count": 7,
+        "examples": [
+          "should initialize with empty favorites array",
+          "should add a favorite with generated id and timestamp",
+          "should remove a favorite by id",
+          "should return true from isFavorite for saved imageUrl",
+          "should return false from isFavorite for unsaved imageUrl",
+          "should not add duplicate favorites (same imageUrl)",
+          "should clear all favorites"
+        ]
+      },
+      {
+        "name": "FavoritesStore — Persistence",
+        "count": 3,
+        "examples": [
+          "should persist favorites to localStorage under 'footprint-favorites' key",
+          "should rehydrate favorites from localStorage on init",
+          "should handle corrupted localStorage gracefully"
+        ]
+      },
+      {
+        "name": "Styles UI Module",
+        "count": 3,
+        "examples": [
+          "should export STYLES array with 9 style options",
+          "should have correct shape for each StyleOption (id, name, nameHe, icon, gradient)",
+          "getStyleById should return correct style or undefined"
+        ]
+      },
+      {
+        "name": "Favorites Page — Rendering",
+        "count": 5,
+        "examples": [
+          "should render page header with Hebrew title",
+          "should show empty state when no favorites",
+          "should render grid of favorite cards when favorites exist",
+          "should display Hebrew style name on each card",
+          "should display formatted creation date on each card"
+        ]
+      },
+      {
+        "name": "Favorites Page — Interactions",
+        "count": 4,
+        "examples": [
+          "should remove favorite when heart icon clicked",
+          "should navigate to /create/style when 'Use This' clicked",
+          "should update orderStore with favorite data on 'Use This'",
+          "should link to /create from empty state CTA"
+        ]
+      },
+      {
+        "name": "Style Page — Favorites Integration",
+        "count": 3,
+        "examples": [
+          "should call addFavorite when heart button clicked on transformed image",
+          "should show filled heart when image is already in favorites",
+          "should show outline heart when image is not in favorites"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "store": "Create real Zustand store instance for unit tests",
+      "router": "vi.mock('next/navigation') for page tests",
+      "image": "vi.mock('next/image') — render as plain img",
+      "localStorage": "Use vitest built-in localStorage mock"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "localStorage quota exceeded with too many high-resolution image URLs",
+        "severity": "minor",
+        "likelihood": "remote",
+        "mitigation": "Image URLs are references (not base64), so size is minimal. Add a max favorites limit (e.g., 50) as a safety cap."
+      },
+      {
+        "id": "HAZ-002",
+        "description": "'Use This' overwrites current in-progress order state",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Show confirmation dialog if orderStore has an active order in progress before overwriting. Phase 1: overwrite directly (matches existing 'select version' behavior)."
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Image URLs become stale (R2/CDN URLs expire or get deleted)",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Show broken-image fallback UI. Phase 2: add image URL validation on page load."
+      },
+      {
+        "id": "HAZ-004",
+        "description": "Favorites lost when user clears browser data",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Phase 2 will add Supabase sync for logged-in users. Phase 1: localStorage only, accepted limitation."
+      }
+    ],
+    "risk_level": "low"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Modification to orderStore.ts structure (read-only import allowed)",
+      "Changes to payment or API routes",
+      "Storing actual image binary data in localStorage"
+    ],
+    "escalation_triggers": [
+      "localStorage usage exceeds 1MB for favorites data",
+      "Build fails after style page modifications"
+    ],
+    "rollback_plan": "Remove favorites page route, revert style page heart button to order-only behavior, delete favoritesStore"
+  },
+  "dependencies": {
+    "required_before": [
+      "WAVE1-FE-002"
+    ],
+    "blocks": [
+      "FAV-02"
+    ]
+  },
+  "traceability": {
+    "requirements": [
+      "PRD-USER-EXPERIENCE",
+      "PRD-ENGAGEMENT"
+    ],
+    "epic": "FAVORITES",
+    "related_stories": [
+      "WAVE1-FE-002",
+      "FAV-02"
+    ]
+  },
+  "implementation_notes": {
+    "step_1_extract_styles": {
+      "description": "Extract STYLES array and StyleOption interface from app/(app)/create/style/page.tsx (lines 12-88) into lib/ai/styles-ui.ts. Add getStyleById(id) helper. Update style page to import from new location.",
+      "files_touched": ["lib/ai/styles-ui.ts", "app/(app)/create/style/page.tsx"]
+    },
+    "step_2_create_store": {
+      "description": "Create stores/favoritesStore.ts following the exact Zustand persist pattern from stores/orderStore.ts. Interface: FavoriteItem { id, imageUrl, originalImageUrl, style, styleName, createdAt }. Methods: addFavorite (with duplicate check by imageUrl), removeFavorite, isFavorite, clearAll. Persist to localStorage key 'footprint-favorites'.",
+      "files_touched": ["stores/favoritesStore.ts"]
+    },
+    "step_3_create_page": {
+      "description": "Create app/(app)/favorites/page.tsx as 'use client' component. Header with Hebrew title/subtitle. 2-col responsive grid using Card component. Each card: Image with gradient accent, filled Heart button (removes), style name (Hebrew), formatted date, 'השתמש ביצירה' button. Empty state with Heart icon + encouraging text + CTA to /create. All RTL with start/end Tailwind classes.",
+      "files_touched": ["app/(app)/favorites/page.tsx"]
+    },
+    "step_4_integrate_style_page": {
+      "description": "In app/(app)/create/style/page.tsx, import useFavoritesStore. In the heart button handler (handleSaveVersion around line 222), also call addFavorite({ imageUrl: transformedImage, originalImageUrl: originalImage, style: selectedStyle, styleName: currentStyle.nameHe }). Update heart icon fill state to check favoritesStore.isFavorite(transformedImage) in addition to existing savedVersions check.",
+      "files_touched": ["app/(app)/create/style/page.tsx"]
+    },
+    "step_5_use_this_flow": {
+      "description": "In the favorites page, the 'Use This' handler should: (1) set orderStore originalImage from favorite.originalImageUrl, (2) set orderStore transformedImage from favorite.imageUrl, (3) set orderStore selectedStyle from favorite.style, (4) router.push('/create/style').",
+      "files_touched": ["app/(app)/favorites/page.tsx"]
+    }
+  },
+  "phase_2_deferred": {
+    "story_id": "FAV-02",
+    "title": "Supabase Sync for Favorites",
+    "description": "Add Supabase favorites table and sync logic. On login, merge localStorage favorites into DB. On page load for authenticated users, fetch from DB. Keeps localStorage as offline cache.",
+    "status": "not_started"
+  },
+  "metadata": {
+    "created_at": "2026-02-13T12:00:00Z",
+    "created_by": "claude-opus-4-6"
+  },
+  "estimated_tests": 25
+}
