@@ -1,0 +1,305 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - img [ref=e5]
+        - text: פריט שני ב-50% הנחה
+      - text: "|"
+      - generic [ref=e7]:
+        - img [ref=e8]
+        - text: משלוח חינם מעל ₪299
+    - navigation [ref=e13]:
+      - generic [ref=e14]:
+        - link "פוטפרינט פוטפרינט" [ref=e15] [cursor=pointer]:
+          - /url: /
+          - img "פוטפרינט" [ref=e16]
+          - generic [ref=e17]: פוטפרינט
+        - generic [ref=e18]:
+          - link "מוצרים" [ref=e19] [cursor=pointer]:
+            - /url: /#products
+          - link "גלריה" [ref=e20] [cursor=pointer]:
+            - /url: /#gallery
+          - link "איך זה עובד" [ref=e21] [cursor=pointer]:
+            - /url: /#how
+          - link "צור קשר" [ref=e22] [cursor=pointer]:
+            - /url: /#contact
+        - generic [ref=e23]:
+          - button [ref=e24] [cursor=pointer]:
+            - img [ref=e25]
+          - button "0" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - generic [ref=e33]: "0"
+          - link "התחברות" [ref=e386] [cursor=pointer]:
+            - /url: /login
+          - link "התחילו" [ref=e34] [cursor=pointer]:
+            - /url: /create
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - generic [ref=e41]:
+          - img [ref=e42]
+          - text: מונע בינה מלאכותית
+        - img [ref=e46]
+        - img [ref=e54]
+        - img [ref=e61]
+      - generic [ref=e63]:
+        - heading "המתנה שלא שוכחים! אמנות AI מהתמונות שלכם" [level=1] [ref=e64]:
+          - text: המתנה שלא שוכחים!
+          - text: אמנות AI מהתמונות שלכם
+        - paragraph [ref=e65]: צרו מתנות מרגשות שמספרות את הסיפור שלכם. בינה מלאכותית הופכת כל תמונה ליצירת אמנות, מודפסת באיכות מוזיאון.
+        - generic [ref=e66]:
+          - link "לרכישת מתנה" [ref=e67] [cursor=pointer]:
+            - /url: /create
+            - generic [ref=e68]: לרכישת מתנה
+            - img [ref=e69]
+          - button "צפו בדוגמאות" [ref=e71] [cursor=pointer]:
+            - img [ref=e72]
+            - generic [ref=e74]: צפו בדוגמאות
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]: 500+
+            - generic [ref=e78]: לקוחות
+          - generic [ref=e79]:
+            - generic [ref=e80]: "4.9"
+            - generic [ref=e81]: דירוג
+          - generic [ref=e82]:
+            - generic [ref=e83]: 24h
+            - generic [ref=e84]: משלוח
+    - generic [ref=e86]:
+      - generic [ref=e87]:
+        - img [ref=e89]
+        - generic [ref=e91]:
+          - generic [ref=e92]: יצירה אישית
+          - generic [ref=e93]: כל יצירה נעשית במיוחד עבורכם
+      - generic [ref=e94]:
+        - img [ref=e96]
+        - generic [ref=e98]:
+          - generic [ref=e99]: שביעות רצון
+          - generic [ref=e100]: לא מרוצים? נתקן או נחזיר כסף
+      - generic [ref=e101]:
+        - img [ref=e103]
+        - generic [ref=e108]:
+          - generic [ref=e109]: משלוח מהיר
+          - generic [ref=e110]: עד 5 ימי עסקים לכל הארץ
+      - generic [ref=e111]:
+        - img [ref=e113]
+        - generic [ref=e116]:
+          - generic [ref=e117]: איכות מוזיאון
+          - generic [ref=e118]: הדפסה על נייר פיין ארט
+    - generic [ref=e120]:
+      - generic [ref=e121]:
+        - heading "המוצרים שלנו" [level=2] [ref=e122]
+        - paragraph [ref=e123]: מתנות מרגשות לכל אירוע. יום הולדת, יום נישואין, או סתם להגיד תודה.
+      - generic [ref=e124]:
+        - generic [ref=e125]:
+          - img [ref=e128]
+          - generic [ref=e130]:
+            - generic [ref=e131]: AI Art Print
+            - heading "אמנות AI מתמונה" [level=3] [ref=e132]
+            - paragraph [ref=e133]: הבינה המלאכותית שלנו הופכת את התמונה שלכם ליצירת אמנות בסגנון ייחודי.
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - generic [ref=e136]: החל מ-
+                - generic [ref=e137]: ₪89
+              - link "לרכישה" [ref=e138] [cursor=pointer]:
+                - /url: /create
+        - generic [ref=e139]:
+          - generic [ref=e140]: הכי פופולרי
+          - img [ref=e143]
+          - generic [ref=e148]:
+            - generic [ref=e149]: Family Portrait
+            - heading "פורטרט משפחתי" [level=3] [ref=e150]
+            - paragraph [ref=e151]: הפכו תמונה משפחתית ליצירת אמנות מרהיבה. מושלם כמתנה.
+            - generic [ref=e152]:
+              - generic [ref=e153]:
+                - generic [ref=e154]: החל מ-
+                - generic [ref=e155]: ₪149
+              - link "לרכישה" [ref=e156] [cursor=pointer]:
+                - /url: /create
+        - generic [ref=e157]:
+          - img [ref=e160]
+          - generic [ref=e162]:
+            - generic [ref=e163]: Pet Portrait
+            - heading "פורטרט חיית מחמד" [level=3] [ref=e164]
+            - paragraph [ref=e165]: הנציחו את חיית המחמד האהובה בסגנון אמנותי ייחודי.
+            - generic [ref=e166]:
+              - generic [ref=e167]:
+                - generic [ref=e168]: החל מ-
+                - generic [ref=e169]: ₪119
+              - link "לרכישה" [ref=e170] [cursor=pointer]:
+                - /url: /create
+    - generic [ref=e172]:
+      - generic [ref=e173]:
+        - heading "סגנונות אמנות" [level=2] [ref=e174]
+        - paragraph [ref=e175]: בחרו את הסגנון שמתאים לכם
+      - generic [ref=e176]:
+        - link "רומנטי" [ref=e177] [cursor=pointer]:
+          - /url: /create
+          - img [ref=e179]
+          - generic [ref=e181]: רומנטי
+        - link "אמנותי" [ref=e182] [cursor=pointer]:
+          - /url: /create
+          - img [ref=e184]
+          - generic [ref=e187]: אמנותי
+        - link "משפחתי" [ref=e188] [cursor=pointer]:
+          - /url: /create
+          - img [ref=e190]
+          - generic [ref=e193]: משפחתי
+        - link "מינימליסטי" [ref=e194] [cursor=pointer]:
+          - /url: /create
+          - img [ref=e196]
+          - generic [ref=e198]: מינימליסטי
+    - generic [ref=e200]:
+      - generic [ref=e201]:
+        - heading "איך זה עובד?" [level=2] [ref=e202]
+        - paragraph [ref=e203]: שלושה צעדים פשוטים ליצירת אמנות
+      - generic [ref=e204]:
+        - generic [ref=e205]:
+          - generic [ref=e206]:
+            - img [ref=e208]
+            - generic [ref=e211]: "01"
+          - heading "העלו תמונה" [level=3] [ref=e212]
+          - paragraph [ref=e213]: בחרו תמונה מהגלריה שלכם
+        - generic [ref=e214]:
+          - generic [ref=e215]:
+            - img [ref=e217]
+            - generic [ref=e223]: "02"
+          - heading "בחרו סגנון" [level=3] [ref=e224]
+          - paragraph [ref=e225]: AI הופך את התמונה לאמנות
+        - generic [ref=e226]:
+          - generic [ref=e227]:
+            - img [ref=e229]
+            - generic [ref=e233]: "03"
+          - heading "קבלו הדפסה" [level=3] [ref=e234]
+          - paragraph [ref=e235]: משלוח מהיר עד הבית
+    - generic [ref=e237]:
+      - generic [ref=e238]:
+        - generic [ref=e239]:
+          - img [ref=e240]
+          - img [ref=e242]
+          - img [ref=e244]
+          - img [ref=e246]
+          - img [ref=e248]
+        - paragraph [ref=e250]: מעל 500 ביקורות חיוביות בגוגל
+      - generic [ref=e251]:
+        - generic [ref=e252]:
+          - generic [ref=e253]:
+            - img [ref=e254]
+            - img [ref=e256]
+            - img [ref=e258]
+            - img [ref=e260]
+            - img [ref=e262]
+          - paragraph [ref=e264]: "\"הזמנתי מתנה לבעלי ליום ההולדת. האיכות מדהימה והוא התרגש עד דמעות!\""
+          - generic [ref=e265]:
+            - generic [ref=e266]: מ
+            - generic [ref=e267]:
+              - generic [ref=e268]: מיכל כ.
+              - generic [ref=e269]: תל אביב
+        - generic [ref=e270]:
+          - generic [ref=e271]:
+            - img [ref=e272]
+            - img [ref=e274]
+            - img [ref=e276]
+            - img [ref=e278]
+            - img [ref=e280]
+          - paragraph [ref=e282]: "\"הפכתי תמונה מהחתונה שלנו לאמנות. התוצאה מעבר לכל ציפייה.\""
+          - generic [ref=e283]:
+            - generic [ref=e284]: י
+            - generic [ref=e285]:
+              - generic [ref=e286]: יוסי ל.
+              - generic [ref=e287]: חיפה
+        - generic [ref=e288]:
+          - generic [ref=e289]:
+            - img [ref=e290]
+            - img [ref=e292]
+            - img [ref=e294]
+            - img [ref=e296]
+            - img [ref=e298]
+          - paragraph [ref=e300]: "\"עשיתי פורטרט לכלב שלנו. יצא כל כך יפה שהזמנתי עוד שניים!\""
+          - generic [ref=e301]:
+            - generic [ref=e302]: נ
+            - generic [ref=e303]:
+              - generic [ref=e304]: נועה ש.
+              - generic [ref=e305]: ירושלים
+    - generic [ref=e308]:
+      - img [ref=e310]
+      - heading "קבלו הנחות ועדכונים" [level=3] [ref=e314]
+      - paragraph [ref=e315]: הירשמו לניוזלטר וקבלו 10% הנחה על ההזמנה הראשונה
+      - generic [ref=e316]:
+        - textbox "הזינו אימייל" [ref=e317]
+        - button "הרשמה" [ref=e318] [cursor=pointer]
+    - generic [ref=e320]:
+      - heading "מוכנים להפוך זיכרון ליצירת אמנות?" [level=2] [ref=e321]:
+        - text: מוכנים להפוך זיכרון
+        - text: ליצירת אמנות?
+      - paragraph [ref=e322]: העלו תמונה וראו את הקסם - בחינם
+      - link "התחילו עכשיו" [ref=e323] [cursor=pointer]:
+        - /url: /create
+        - generic [ref=e324]: התחילו עכשיו
+        - img [ref=e325]
+    - generic [ref=e328]:
+      - generic [ref=e329]:
+        - generic [ref=e330]:
+          - img "פוטפרינט" [ref=e331]
+          - generic [ref=e332]: פוטפרינט
+          - paragraph [ref=e333]: מסגרו את הסיפורים שלכם
+          - generic [ref=e334]:
+            - link [ref=e335] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e336]
+            - link [ref=e339] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e340]
+            - link [ref=e342] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e343]
+            - link [ref=e345] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e346]
+        - generic [ref=e348]:
+          - heading "מוצרים" [level=4] [ref=e349]
+          - list [ref=e350]:
+            - listitem [ref=e351]:
+              - link "אמנות AI" [ref=e352] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e353]:
+              - link "פורטרט משפחתי" [ref=e354] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e355]:
+              - link "פורטרט חיות" [ref=e356] [cursor=pointer]:
+                - /url: "#"
+        - generic [ref=e357]:
+          - heading "מידע" [level=4] [ref=e358]
+          - list [ref=e359]:
+            - listitem [ref=e360]:
+              - link "אודות" [ref=e361] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e362]:
+              - link "שאלות נפוצות" [ref=e363] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e364]:
+              - link "משלוחים" [ref=e365] [cursor=pointer]:
+                - /url: "#"
+        - generic [ref=e366]:
+          - heading "צור קשר" [level=4] [ref=e367]
+          - list [ref=e368]:
+            - listitem [ref=e369]:
+              - img [ref=e370]
+              - text: WhatsApp
+            - listitem [ref=e372]:
+              - img [ref=e373]
+              - text: hello@footprint.co.il
+      - generic [ref=e376]:
+        - generic [ref=e377]:
+          - generic [ref=e378]: © 2025 פוטפרינט. כל הזכויות שמורות.
+          - generic [ref=e379]:
+            - link "תקנון" [ref=e380] [cursor=pointer]:
+              - /url: /terms
+            - link "פרטיות" [ref=e381] [cursor=pointer]:
+              - /url: /privacy
+        - generic [ref=e382]: Footprint is a product by Boomerang-Application LTD
+    - link [ref=e383] [cursor=pointer]:
+      - /url: https://wa.me/972501234567
+      - img [ref=e384]
+  - button "Open Next.js Dev Tools" [ref=e392] [cursor=pointer]:
+    - img [ref=e393]
+  - alert [ref=e396]: המתנה שלא שוכחים! אמנות AI מהתמונות שלכם
