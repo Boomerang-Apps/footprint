@@ -18,7 +18,8 @@ export interface AdminAuthResult {
     email: string;
     role: string;
   };
-  error?: NextResponse;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error?: NextResponse<any>;
 }
 
 /**
@@ -34,7 +35,7 @@ const ADMIN_EMAIL_ALLOWLIST = process.env.ADMIN_EMAIL_ALLOWLIST
  *
  * Checks:
  * 1. User is authenticated
- * 2. User has 'admin' role in user_metadata
+ * 2. User has is_admin=true in profiles table (DB-backed, not client-controllable)
  * 3. (Optional) User email is in the allowlist if configured
  *
  * @returns AdminAuthResult with user data if authorized, or error response if not
@@ -52,19 +53,24 @@ export async function verifyAdmin(): Promise<AdminAuthResult> {
       return {
         isAuthorized: false,
         error: NextResponse.json(
-          { error: 'Unauthorized - Please sign in' },
+          { error: 'נדרשת הזדהות' },
           { status: 401 }
         ),
       };
     }
 
-    // Check admin role
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
+    // Check admin role via DB (profiles.is_admin) — not client-controllable JWT claims
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile?.is_admin) {
       return {
         isAuthorized: false,
         error: NextResponse.json(
-          { error: 'Admin access required' },
+          { error: 'נדרשת הרשאת מנהל' },
           { status: 403 }
         ),
       };
@@ -78,7 +84,7 @@ export async function verifyAdmin(): Promise<AdminAuthResult> {
         return {
           isAuthorized: false,
           error: NextResponse.json(
-            { error: 'Admin access required' },
+            { error: 'נדרשת הרשאת מנהל' },
             { status: 403 }
           ),
         };
@@ -91,7 +97,7 @@ export async function verifyAdmin(): Promise<AdminAuthResult> {
       user: {
         id: user.id,
         email: user.email || '',
-        role: userRole,
+        role: 'admin',
       },
     };
   } catch (error) {

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { getDefaultShippingService } from '@/lib/shipping/providers/shipping-service';
@@ -61,30 +62,14 @@ export async function POST(
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    // 1. Verify authentication (AC-015)
+    // 1. Admin authorization (DB-backed)
+    const auth = await verifyAdmin();
+    if (!auth.isAuthorized) return auth.error!;
+    const user = auth.user!;
+
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Check admin role
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 403 }
-      );
-    }
-
-    // 3. Parse request body
+    // 2. Parse request body
     let body: CreateShipmentBody;
     try {
       body = await request.json();
@@ -269,30 +254,13 @@ export async function GET(
   if (rateLimited) return rateLimited;
 
   try {
-    // 1. Verify authentication
+    // 1. Admin authorization (DB-backed)
+    const authResult = await verifyAdmin();
+    if (!authResult.isAuthorized) return authResult.error!;
+
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Check admin role
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 403 }
-      );
-    }
-
-    // 3. Parse query parameters
+    // 2. Parse query parameters
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('orderId');
     const page = parseInt(searchParams.get('page') || '1', 10);

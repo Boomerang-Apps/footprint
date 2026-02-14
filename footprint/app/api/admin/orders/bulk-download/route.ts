@@ -24,6 +24,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { uploadToR2, getDownloadUrl } from '@/lib/storage/r2';
@@ -77,30 +78,14 @@ export async function POST(
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    // 1. Verify authentication (AC-009)
+    // 1. Admin authorization (DB-backed)
+    const auth = await verifyAdmin();
+    if (!auth.isAuthorized) return auth.error!;
+    const user = auth.user!;
+
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Check admin role
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 403 }
-      );
-    }
-
-    // 3. Parse and validate request body
+    // 2. Parse and validate request body
     let body: BulkDownloadRequest;
     try {
       body = await request.json();

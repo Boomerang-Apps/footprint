@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
@@ -25,28 +26,11 @@ export async function GET(
   try {
     const { id: orderId } = await params;
 
-    // Verify authentication
+    // Verify admin authorization (DB-backed)
+    const auth = await verifyAdmin();
+    if (!auth.isAuthorized) return auth.error!;
+
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please sign in' },
-        { status: 401 }
-      );
-    }
-
-    // Check admin role
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
 
     // Fetch order with all related data
     const { data: order, error: orderError } = await supabase

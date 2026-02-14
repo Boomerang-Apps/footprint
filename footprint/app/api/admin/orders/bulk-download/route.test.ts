@@ -5,10 +5,15 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Mock verifyAdmin
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
+}));
 
 // Mock Supabase
-const mockGetUser = vi.fn();
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
 const mockIn = vi.fn();
@@ -16,9 +21,6 @@ const mockInsert = vi.fn();
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve({
-    auth: {
-      getUser: mockGetUser,
-    },
     from: mockFrom,
   })),
 }));
@@ -69,10 +71,10 @@ describe('POST /api/admin/orders/bulk-download', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Default: authenticated admin user
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: 'admin-1', user_metadata: { role: 'admin' } } },
-      error: null,
+    // Default: admin authorized
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin-1', email: 'admin@example.com', role: 'admin' },
     });
 
     // Default: mock database chain
@@ -108,9 +110,9 @@ describe('POST /api/admin/orders/bulk-download', () => {
 
   describe('Authentication (AC-009)', () => {
     it('should return 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({
-        data: { user: null },
-        error: { message: 'Not authenticated' },
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 401 }),
       });
 
       const request = createRequest({ orderIds: ['order-1'] });
@@ -122,9 +124,9 @@ describe('POST /api/admin/orders/bulk-download', () => {
     });
 
     it('should return 403 when user is not admin', async () => {
-      mockGetUser.mockResolvedValue({
-        data: { user: { id: 'user-1', user_metadata: { role: 'customer' } } },
-        error: null,
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
       });
 
       const request = createRequest({ orderIds: ['order-1'] });

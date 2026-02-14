@@ -23,6 +23,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import {
@@ -63,30 +64,14 @@ export async function PATCH(
   try {
     const { id: orderId } = await params;
 
-    // 2. Authentication check
+    // 2. Admin authorization (DB-backed)
+    const auth = await verifyAdmin();
+    if (!auth.isAuthorized) return auth.error!;
+    const user = auth.user!;
+
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 401 }
-      );
-    }
-
-    // 3. Admin authorization check
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 403 }
-      );
-    }
-
-    // 4. Parse request body
+    // 3. Parse request body
     let body: StatusUpdateRequest;
     try {
       body = await request.json();

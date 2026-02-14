@@ -6,7 +6,12 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { POST } from './route';
+
+// Mock verifyAdmin
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
+}));
 
 // Mock Supabase - using separate mock functions
 const mockSupabaseSelect = vi.fn();
@@ -15,11 +20,9 @@ const mockSupabaseEq = vi.fn();
 const mockSupabaseUpdate = vi.fn();
 const mockSupabaseInsert = vi.fn();
 const mockSupabaseFrom = vi.fn();
-const mockGetUser = vi.fn();
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve({
-    auth: { getUser: mockGetUser },
     from: mockSupabaseFrom,
   })),
 }));
@@ -28,11 +31,7 @@ vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
 }));
 
-const mockAdminUser = {
-  id: 'admin-1',
-  email: 'admin@example.com',
-  user_metadata: { role: 'admin' },
-};
+import { POST } from './route';
 
 const mockOrders = [
   { id: 'order-1', status: 'pending', order_number: 'FP-2026-001' },
@@ -65,18 +64,18 @@ function setupChainedMocks() {
 describe('POST /api/admin/orders/bulk-status', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetUser.mockResolvedValue({
-      data: { user: mockAdminUser },
-      error: null,
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin-1', email: 'admin@example.com', role: 'admin' },
     });
     setupChainedMocks();
   });
 
   describe('Authentication', () => {
     it('should return 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({
-        data: { user: null },
-        error: { message: 'Not authenticated' },
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 401 }),
       });
 
       const request = createRequest({ orderIds: ['order-1'], status: 'printing' });
@@ -88,9 +87,9 @@ describe('POST /api/admin/orders/bulk-status', () => {
     });
 
     it('should return 403 for non-admin users', async () => {
-      mockGetUser.mockResolvedValue({
-        data: { user: { ...mockAdminUser, user_metadata: { role: 'user' } } },
-        error: null,
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
       });
 
       const request = createRequest({ orderIds: ['order-1'], status: 'printing' });

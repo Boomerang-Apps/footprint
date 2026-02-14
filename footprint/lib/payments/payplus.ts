@@ -6,6 +6,7 @@
  */
 
 import crypto from 'crypto';
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
 
 // ============================================================================
 // Types
@@ -122,7 +123,7 @@ export async function createPaymentLink(
   };
 
   // Make API request
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${config.baseUrl}/PaymentPages/generateLink`,
     {
       method: 'POST',
@@ -132,6 +133,7 @@ export async function createPaymentLink(
         'secret-key': config.secretKey,
       },
       body: JSON.stringify(requestBody),
+      timeout: TIMEOUT_DEFAULTS.API,
     }
   );
 

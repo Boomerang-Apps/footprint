@@ -6,15 +6,18 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Mock verifyAdmin
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
+}));
 
 // Mock Supabase client - must be defined inline
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
-      auth: {
-        getUser: vi.fn(),
-      },
       from: vi.fn(() => ({
         select: vi.fn(),
         update: vi.fn(),
@@ -74,12 +77,6 @@ const mockSendStatusUpdateEmail = sendStatusUpdateEmail as ReturnType<typeof vi.
 describe('PATCH /api/admin/orders/[id]/status', () => {
   // Helper to set up the mock client
   function setupMockClient(options: {
-    user?: {
-      id: string;
-      email: string;
-      user_metadata: { role: string };
-    } | null;
-    authError?: { message: string } | null;
     order?: {
       id: string;
       status: string;
@@ -95,11 +92,6 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
     } | null;
     updateError?: { message: string } | null;
   }) {
-    const mockGetUser = vi.fn().mockResolvedValue({
-      data: { user: options.user ?? null },
-      error: options.authError ?? null,
-    });
-
     const mockSingle = vi.fn().mockResolvedValue({
       data: options.order ?? null,
       error: options.fetchError ?? null,
@@ -122,23 +114,23 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
     });
 
     mockCreateClient.mockResolvedValue({
-      auth: { getUser: mockGetUser },
       from: mockFrom,
     });
 
-    return { mockGetUser, mockSelect, mockUpdate };
+    return { mockSelect, mockUpdate };
   }
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Default setup: authenticated admin user with existing order
+    // Default: admin authorized
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin_123', email: 'admin@footprint.co.il', role: 'admin' },
+    });
+
+    // Default setup: existing order
     setupMockClient({
-      user: {
-        id: 'admin_123',
-        email: 'admin@footprint.co.il',
-        user_metadata: { role: 'admin' },
-      },
       order: {
         id: 'order_123',
         status: 'processing',
@@ -170,9 +162,9 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
 
   describe('Authentication', () => {
     it('should return 401 for unauthenticated requests', async () => {
-      setupMockClient({
-        user: null,
-        authError: { message: 'Not authenticated' },
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
       });
 
       const request = createRequest({ status: 'shipped' });
@@ -180,16 +172,13 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
       const body = await response.json();
 
       expect(response.status).toBe(401);
-      expect(body.error).toContain('Unauthorized');
+      expect(body.error).toBe('נדרשת הזדהות');
     });
 
     it('should return 403 for non-admin users', async () => {
-      setupMockClient({
-        user: {
-          id: 'user_123',
-          email: 'user@example.com',
-          user_metadata: { role: 'customer' },
-        },
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
       });
 
       const request = createRequest({ status: 'shipped' });
@@ -197,7 +186,7 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
       const body = await response.json();
 
       expect(response.status).toBe(403);
-      expect(body.error).toContain('Admin access required');
+      expect(body.error).toBe('נדרשת הרשאת מנהל');
     });
 
     it('should allow admin users to proceed', async () => {
@@ -245,11 +234,6 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
 
     it('should return 404 for non-existent order', async () => {
       setupMockClient({
-        user: {
-          id: 'admin_123',
-          email: 'admin@footprint.co.il',
-          user_metadata: { role: 'admin' },
-        },
         order: null,
         fetchError: { message: 'Not found' },
       });
@@ -286,11 +270,6 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
 
     it('should return 400 for transition from terminal state', async () => {
       setupMockClient({
-        user: {
-          id: 'admin_123',
-          email: 'admin@footprint.co.il',
-          user_metadata: { role: 'admin' },
-        },
         order: {
           id: 'order_123',
           status: 'delivered',
@@ -389,11 +368,6 @@ describe('PATCH /api/admin/orders/[id]/status', () => {
   describe('Database Operations', () => {
     it('should return 500 on database update error', async () => {
       setupMockClient({
-        user: {
-          id: 'admin_123',
-          email: 'admin@footprint.co.il',
-          user_metadata: { role: 'admin' },
-        },
         order: {
           id: 'order_123',
           status: 'processing',

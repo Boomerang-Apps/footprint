@@ -7,6 +7,7 @@
  */
 
 import sharp from 'sharp';
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
 import type {
   DetectedFace,
   FaceDetectionResult,
@@ -183,7 +184,7 @@ async function detectFacesWithReplicate(
   const base64Image = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
 
   // Use MediaPipe face detection model on Replicate
-  const response = await fetch('https://api.replicate.com/v1/predictions', {
+  const response = await fetchWithTimeout('https://api.replicate.com/v1/predictions', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${replicateApiKey}`,
@@ -196,6 +197,7 @@ async function detectFacesWithReplicate(
         min_confidence: options.minConfidence ?? DEFAULT_DETECTION_OPTIONS.minConfidence,
       },
     }),
+    timeout: TIMEOUT_DEFAULTS.AI,
   });
 
   if (!response.ok) {
@@ -221,8 +223,9 @@ async function detectFacesWithReplicate(
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const pollResponse = await fetch(result.urls.get, {
+    const pollResponse = await fetchWithTimeout(result.urls.get, {
       headers: { Authorization: `Bearer ${replicateApiKey}` },
+      timeout: TIMEOUT_DEFAULTS.AI,
     });
 
     result = (await pollResponse.json()) as typeof result;

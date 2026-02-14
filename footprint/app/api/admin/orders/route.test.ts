@@ -4,9 +4,14 @@
  * Tests for GET /api/admin/orders - List all orders with filters
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from './route';
+
+// Mock verifyAdmin
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
+}));
 
 // Mock Supabase
 const mockSupabaseSelect = vi.fn();
@@ -21,13 +26,8 @@ const mockSupabaseFrom = vi.fn(() => ({
   select: mockSupabaseSelect,
 }));
 
-const mockGetUser = vi.fn();
-
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve({
-    auth: {
-      getUser: mockGetUser,
-    },
     from: mockSupabaseFrom,
   })),
 }));
@@ -37,19 +37,9 @@ vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
 }));
 
+import { GET } from './route';
+
 // Sample test data
-const mockAdminUser = {
-  id: 'admin-user-id',
-  email: 'admin@footprint.co.il',
-  user_metadata: { role: 'admin' },
-};
-
-const mockRegularUser = {
-  id: 'regular-user-id',
-  email: 'user@example.com',
-  user_metadata: { role: 'user' },
-};
-
 const mockOrders = [
   {
     id: 'order-1',
@@ -138,33 +128,42 @@ function setupSupabaseChain(data: any[], count: number = data.length) {
 describe('GET /api/admin/orders', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' },
+    });
   });
 
   describe('Authentication', () => {
     it('should return 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
+      });
 
       const request = createRequest('/api/admin/orders');
       const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('Unauthorized - Please sign in');
+      expect(data.error).toBe('נדרשת הזדהות');
     });
 
     it('should return 403 when user is not admin', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: mockRegularUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
+      });
 
       const request = createRequest('/api/admin/orders');
       const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('Admin access required');
+      expect(data.error).toBe('נדרשת הרשאת מנהל');
     });
 
     it('should allow admin users to access', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
       setupSupabaseChain(mockOrders);
 
       const request = createRequest('/api/admin/orders');
@@ -175,10 +174,6 @@ describe('GET /api/admin/orders', () => {
   });
 
   describe('Success Responses', () => {
-    beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
-    });
-
     it('should return orders with correct structure', async () => {
       setupSupabaseChain(mockOrders, 2);
 
@@ -224,10 +219,6 @@ describe('GET /api/admin/orders', () => {
   });
 
   describe('Pagination', () => {
-    beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
-    });
-
     it('should use default pagination (page 1, limit 20)', async () => {
       setupSupabaseChain(mockOrders);
 
@@ -271,7 +262,6 @@ describe('GET /api/admin/orders', () => {
 
   describe('Filtering', () => {
     beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
       setupSupabaseChain(mockOrders);
     });
 
@@ -315,7 +305,6 @@ describe('GET /api/admin/orders', () => {
 
   describe('Sorting', () => {
     beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
       setupSupabaseChain(mockOrders);
     });
 
@@ -351,10 +340,6 @@ describe('GET /api/admin/orders', () => {
   });
 
   describe('Error Handling', () => {
-    beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
-    });
-
     it('should return 500 on database error', async () => {
       mockSupabaseSelect.mockReturnValue({
         order: vi.fn().mockReturnValue({
@@ -374,7 +359,10 @@ describe('GET /api/admin/orders', () => {
     });
 
     it('should handle auth errors gracefully', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'Auth failed' } });
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
+      });
 
       const request = createRequest('/api/admin/orders');
       const response = await GET(request);

@@ -5,20 +5,25 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest } from 'next/server';
-import { PATCH } from './route';
+import { NextRequest, NextResponse } from 'next/server';
 
-const mockGetUser = vi.fn();
+// Mock verifyAdmin
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
+}));
+
 const mockFrom = vi.fn();
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
-      auth: { getUser: mockGetUser },
       from: mockFrom,
     })
   ),
 }));
+
+import { PATCH } from './route';
 
 vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
@@ -66,9 +71,9 @@ describe('PATCH /api/admin/shipments/[id]/retry (AC-011)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: 'admin-1', user_metadata: { role: 'admin' } } },
-      error: null,
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' },
     });
 
     mockFrom.mockImplementation((table: string) => {
@@ -199,9 +204,9 @@ describe('PATCH /api/admin/shipments/[id]/retry (AC-011)', () => {
   });
 
   it('should return 401 when not authenticated', async () => {
-    mockGetUser.mockResolvedValue({
-      data: { user: null },
-      error: { message: 'Not auth' },
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: false,
+      error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
     });
 
     const request = new NextRequest('http://localhost/api/admin/shipments/shipment-1/retry', {

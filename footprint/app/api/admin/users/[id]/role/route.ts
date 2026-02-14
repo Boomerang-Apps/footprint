@@ -24,6 +24,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
@@ -60,30 +61,14 @@ export async function PATCH(
       return rateLimitResult as NextResponse<ErrorResponse>;
     }
 
-    // 2. Authentication check
+    // 2. Admin authorization (DB-backed)
+    const auth = await verifyAdmin();
+    if (!auth.isAuthorized) return auth.error!;
+    const user = auth.user!;
+
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please sign in' },
-        { status: 401 }
-      );
-    }
-
-    // 3. Admin authorization check
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
-
-    // 4. Parse and validate request body
+    // 3. Parse and validate request body
     let body: RoleUpdateRequest;
     try {
       body = await request.json();

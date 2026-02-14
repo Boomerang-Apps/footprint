@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { getDefaultShippingService } from '@/lib/shipping/providers/shipping-service';
@@ -44,26 +45,12 @@ export async function PATCH(
 
   try {
     const { id } = await context.params;
+
+    const auth = await verifyAdmin();
+    if (!auth.isAuthorized) return auth.error!;
+    const user = auth.user!;
+
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 401 }
-      );
-    }
-
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'נדרשת הרשאת מנהל' },
-        { status: 403 }
-      );
-    }
 
     // Fetch existing shipment
     const { data: shipment, error: fetchError } = await supabase

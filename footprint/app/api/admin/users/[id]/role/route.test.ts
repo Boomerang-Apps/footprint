@@ -4,7 +4,7 @@
  * Tests for PATCH /api/admin/users/[id]/role - Update user admin status
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PATCH } from './route';
 
@@ -21,34 +21,22 @@ const mockSupabaseFrom = vi.fn(() => ({
   insert: mockSupabaseInsert,
 }));
 
-const mockGetUser = vi.fn();
-
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve({
-    auth: {
-      getUser: mockGetUser,
-    },
     from: mockSupabaseFrom,
   })),
+}));
+
+// Mock admin auth
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
 }));
 
 // Mock rate limiter
 vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
 }));
-
-// Sample test data
-const mockAdminUser = {
-  id: 'admin-user-id',
-  email: 'admin@footprint.co.il',
-  user_metadata: { role: 'admin' },
-};
-
-const mockRegularUser = {
-  id: 'regular-user-id',
-  email: 'user@example.com',
-  user_metadata: { role: 'user' },
-};
 
 const mockTargetUser = {
   id: 'target-user-id',
@@ -116,29 +104,29 @@ describe('PATCH /api/admin/users/[id]/role', () => {
 
   describe('Authentication', () => {
     it('should return 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: false, error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }) });
 
       const request = createRequest('/api/admin/users/target-user-id/role', { isAdmin: true });
       const response = await PATCH(request, { params: Promise.resolve({ id: 'target-user-id' }) });
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('Unauthorized - Please sign in');
+      expect(data.error).toBe('נדרשת הזדהות');
     });
 
     it('should return 403 when user is not admin', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: mockRegularUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: false, error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }) });
 
       const request = createRequest('/api/admin/users/target-user-id/role', { isAdmin: true });
       const response = await PATCH(request, { params: Promise.resolve({ id: 'target-user-id' }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('Admin access required');
+      expect(data.error).toBe('נדרשת הרשאת מנהל');
     });
 
     it('should allow admin users to access', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
       setupSupabaseUpdateChain({ ...mockTargetUser, is_admin: true });
       setupAuditLogInsert();
 
@@ -151,7 +139,7 @@ describe('PATCH /api/admin/users/[id]/role', () => {
 
   describe('Role Management', () => {
     beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
     });
 
     it('should promote user to admin', async () => {
@@ -220,7 +208,7 @@ describe('PATCH /api/admin/users/[id]/role', () => {
 
   describe('Audit Logging', () => {
     beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
     });
 
     it('should log role changes', async () => {
@@ -243,7 +231,7 @@ describe('PATCH /api/admin/users/[id]/role', () => {
   describe('Rate Limiting', () => {
     it('should apply rate limiting', async () => {
       const { checkRateLimit } = await import('@/lib/rate-limit');
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
       setupSupabaseUpdateChain({ ...mockTargetUser, is_admin: true });
       setupAuditLogInsert();
 
@@ -269,7 +257,7 @@ describe('PATCH /api/admin/users/[id]/role', () => {
 
   describe('Error Handling', () => {
     beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
     });
 
     it('should return 500 on database error', async () => {
@@ -293,7 +281,7 @@ describe('PATCH /api/admin/users/[id]/role', () => {
     });
 
     it('should handle auth errors gracefully', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'Auth failed' } });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: false, error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }) });
 
       const request = createRequest('/api/admin/users/target-user-id/role', { isAdmin: true });
       const response = await PATCH(request, { params: Promise.resolve({ id: 'target-user-id' }) });

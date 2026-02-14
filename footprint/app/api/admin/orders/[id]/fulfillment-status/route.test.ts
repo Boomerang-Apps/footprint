@@ -5,8 +5,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest } from 'next/server';
-import { PATCH } from './route';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Mock verifyAdmin
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
+}));
 
 // Mock Supabase - using separate mock functions
 const mockSupabaseSelect = vi.fn();
@@ -15,11 +20,9 @@ const mockSupabaseUpdate = vi.fn();
 const mockSupabaseInsert = vi.fn();
 const mockSupabaseSingle = vi.fn();
 const mockSupabaseFrom = vi.fn();
-const mockGetUser = vi.fn();
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve({
-    auth: { getUser: mockGetUser },
     from: mockSupabaseFrom,
   })),
 }));
@@ -27,6 +30,8 @@ vi.mock('@/lib/supabase/server', () => ({
 vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
 }));
+
+import { PATCH } from './route';
 
 function setupChainedMocks() {
   mockSupabaseFrom.mockReturnValue({
@@ -46,12 +51,6 @@ function setupChainedMocks() {
     single: mockSupabaseSingle,
   });
 }
-
-const mockAdminUser = {
-  id: 'admin-1',
-  email: 'admin@example.com',
-  user_metadata: { role: 'admin' },
-};
 
 const mockOrder = {
   id: 'order-1',
@@ -73,18 +72,18 @@ function createRequest(body: object): NextRequest {
 describe('PATCH /api/admin/orders/[id]/fulfillment-status', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetUser.mockResolvedValue({
-      data: { user: mockAdminUser },
-      error: null,
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin-1', email: 'admin@example.com', role: 'admin' },
     });
     setupChainedMocks();
   });
 
   describe('Authentication', () => {
     it('should return 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({
-        data: { user: null },
-        error: { message: 'Not authenticated' },
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 401 }),
       });
 
       const request = createRequest({ status: 'printing' });
@@ -96,9 +95,9 @@ describe('PATCH /api/admin/orders/[id]/fulfillment-status', () => {
     });
 
     it('should return 403 for non-admin users', async () => {
-      mockGetUser.mockResolvedValue({
-        data: { user: { ...mockAdminUser, user_metadata: { role: 'user' } } },
-        error: null,
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
       });
 
       const request = createRequest({ status: 'printing' });

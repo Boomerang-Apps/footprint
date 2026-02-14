@@ -4,9 +4,14 @@
  * Tests for GET /api/admin/orders/[id] - Fetch single order with details
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from './route';
+
+// Mock verifyAdmin
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
+}));
 
 // Mock Supabase
 const mockSingle = vi.fn();
@@ -28,12 +33,9 @@ const mockFrom = vi.fn(() => {
   return { select: mockSelectShipments };
 });
 
-const mockGetUser = vi.fn();
-
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
-      auth: { getUser: mockGetUser },
       from: mockFrom,
     })
   ),
@@ -43,19 +45,9 @@ vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
 }));
 
+import { GET } from './route';
+
 // Test data
-const mockAdminUser = {
-  id: 'admin-id',
-  email: 'admin@footprint.co.il',
-  user_metadata: { role: 'admin' },
-};
-
-const mockRegularUser = {
-  id: 'user-id',
-  email: 'user@example.com',
-  user_metadata: { role: 'user' },
-};
-
 const mockOrder = {
   id: 'order-1',
   order_number: 'FP-2024-001',
@@ -120,22 +112,32 @@ describe('GET /api/admin/orders/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fromCallCount = 0;
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin-id', email: 'admin@footprint.co.il', role: 'admin' },
+    });
   });
 
   describe('Authentication & Authorization', () => {
     it('returns 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'Not authenticated' } });
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
+      });
 
       const [req, ctx] = createRequest('order-1');
       const response = await GET(req, ctx);
       const body = await response.json();
 
       expect(response.status).toBe(401);
-      expect(body.error).toContain('Unauthorized');
+      expect(body.error).toBe('נדרשת הזדהות');
     });
 
     it('returns 401 when auth error occurs', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'Token expired' } });
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
+      });
 
       const [req, ctx] = createRequest('order-1');
       const response = await GET(req, ctx);
@@ -144,22 +146,21 @@ describe('GET /api/admin/orders/[id]', () => {
     });
 
     it('returns 403 for non-admin users', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: mockRegularUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
+      });
 
       const [req, ctx] = createRequest('order-1');
       const response = await GET(req, ctx);
       const body = await response.json();
 
       expect(response.status).toBe(403);
-      expect(body.error).toContain('Admin access required');
+      expect(body.error).toBe('נדרשת הרשאת מנהל');
     });
   });
 
   describe('Successful Order Fetch', () => {
-    beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
-    });
-
     it('returns order with items and shipments', async () => {
       mockSingle.mockResolvedValue({ data: mockOrder, error: null });
       mockEqItems.mockResolvedValue({ data: mockItems, error: null });
@@ -281,10 +282,6 @@ describe('GET /api/admin/orders/[id]', () => {
   });
 
   describe('Error Handling', () => {
-    beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
-    });
-
     it('returns 404 when order not found', async () => {
       mockSingle.mockResolvedValue({
         data: null,
@@ -355,7 +352,6 @@ describe('GET /api/admin/orders/[id]', () => {
 
   describe('Database Queries', () => {
     beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
       mockSingle.mockResolvedValue({ data: mockOrder, error: null });
       mockEqItems.mockResolvedValue({ data: mockItems, error: null });
       mockOrderShipments.mockResolvedValue({ data: mockShipments, error: null });

@@ -352,7 +352,7 @@ describe('loadReferenceImages', () => {
 
     await loadReferenceImages(['/ref.jpg'], 'https://myapp.com');
 
-    expect(mockFetch).toHaveBeenCalledWith('https://myapp.com/ref.jpg');
+    expect(mockFetch).toHaveBeenCalledWith('https://myapp.com/ref.jpg', expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it('should use absolute URL as-is', async () => {
@@ -364,7 +364,7 @@ describe('loadReferenceImages', () => {
 
     await loadReferenceImages(['https://cdn.example.com/img.jpg'], 'https://myapp.com');
 
-    expect(mockFetch).toHaveBeenCalledWith('https://cdn.example.com/img.jpg');
+    expect(mockFetch).toHaveBeenCalledWith('https://cdn.example.com/img.jpg', expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it('should skip failed downloads', async () => {

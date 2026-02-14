@@ -17,6 +17,7 @@ import {
   hasStyleReferences,
 } from './style-references';
 import { logger } from '@/lib/logger';
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
 
 /**
  * Nano Banana model configuration
@@ -236,13 +237,14 @@ export async function transformWithNanoBanana(
   const url = `${API_BASE_URL}/models/${NANO_BANANA_MODEL}:generateContent`;
   logger.info(`Nano Banana: Calling model ${NANO_BANANA_MODEL}`);
 
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-goog-api-key': apiKey,
     },
     body: JSON.stringify(requestBody),
+    timeout: TIMEOUT_DEFAULTS.AI,
   });
 
   if (!response.ok) {
@@ -394,7 +396,7 @@ export async function loadReferenceImages(
       // Build full URL if relative path
       const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 
-      const response = await fetch(fullUrl);
+      const response = await fetchWithTimeout(fullUrl, { timeout: TIMEOUT_DEFAULTS.AI });
       if (!response.ok) {
         logger.warn(`Failed to load reference image: ${fullUrl}`);
         continue;

@@ -14,13 +14,22 @@ function shouldLog(level: LogLevel): boolean {
   return LOG_LEVELS[level] >= LOG_LEVELS[currentLevel];
 }
 
+function serializeError(error: Error): Record<string, unknown> {
+  const isProd = process.env.NODE_ENV === 'production';
+  return {
+    name: error.name,
+    message: error.message,
+    ...(isProd ? {} : { stack: error.stack }),
+  };
+}
+
 function formatMessage(level: LogLevel, message: string, data?: unknown): string {
   const timestamp = new Date().toISOString();
   const base = `[${timestamp}] ${level.toUpperCase()} ${message}`;
   if (data !== undefined) {
     try {
       const serialized = data instanceof Error
-        ? { message: data.message, stack: data.stack }
+        ? serializeError(data)
         : data;
       return `${base} ${JSON.stringify(serialized)}`;
     } catch {

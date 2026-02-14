@@ -10,6 +10,8 @@
  * 3. Add REMOVEBG_API_KEY to .env.local or Doppler
  */
 
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
+
 /**
  * Check if Remove.bg is properly configured
  */
@@ -37,12 +39,13 @@ export async function removeBackground(imageUrl: string): Promise<string> {
     formData.append('size', 'auto'); // Original size
     formData.append('format', 'png'); // PNG with transparency
 
-    const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+    const response = await fetchWithTimeout('https://api.remove.bg/v1.0/removebg', {
       method: 'POST',
       headers: {
         'X-Api-Key': apiKey,
       },
       body: formData,
+      timeout: TIMEOUT_DEFAULTS.AI,
     });
 
     if (!response.ok) {

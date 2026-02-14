@@ -19,6 +19,7 @@ import {
   type RateQuote,
   ShippingProviderError,
 } from './types';
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
 
 // Israel Post API base URL (mock for now, would be real API in production)
 const API_BASE_URL = process.env.ISRAEL_POST_API_URL || 'https://api.israelpost.co.il/v1';
@@ -130,7 +131,7 @@ export class IsraelPostProvider implements ShippingProvider {
       options.body = JSON.stringify(body);
     }
 
-    const response = await fetch(url, options);
+    const response = await fetchWithTimeout(url, { ...options, timeout: TIMEOUT_DEFAULTS.API });
     const data = await response.json();
 
     if (!response.ok) {

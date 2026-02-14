@@ -26,6 +26,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import type { OrderStatus } from '@/types/order';
 import { logger } from '@/lib/logger';
@@ -87,30 +88,12 @@ export async function GET(
       return rateLimitResult as NextResponse<ErrorResponse>;
     }
 
-    // 2. Authentication check
+    // 2. Admin authorization (DB-backed)
+    const auth = await verifyAdmin();
+    if (!auth.isAuthorized) return auth.error!;
+
+    // 3. Parse query parameters
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please sign in' },
-        { status: 401 }
-      );
-    }
-
-    // 3. Admin authorization check
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
-
-    // 4. Parse query parameters
     const { searchParams } = new URL(request.url);
 
     // Pagination
@@ -128,7 +111,7 @@ export async function GET(
     const sortBy = searchParams.get('sortBy') || 'created_at';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
-    // 5. Validate parameters
+    // 4. Validate parameters
     if (status && !VALID_STATUSES.includes(status as OrderStatus)) {
       return NextResponse.json(
         { error: `Invalid status. Valid values: ${VALID_STATUSES.join(', ')}` },
@@ -143,7 +126,7 @@ export async function GET(
       );
     }
 
-    // 6. Build query
+    // 5. Build query
     let query = supabase
       .from('orders')
       .select(`
@@ -190,7 +173,7 @@ export async function GET(
     // Apply pagination
     query = query.range(offset, offset + limit - 1);
 
-    // 7. Execute query
+    // 6. Execute query
     const { data: orders, error: queryError, count } = await query;
 
     if (queryError) {
@@ -201,7 +184,7 @@ export async function GET(
       );
     }
 
-    // 8. Transform response
+    // 7. Transform response
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transformedOrders: AdminOrderSummary[] = (orders || []).map((order: any) => ({
       id: order.id,

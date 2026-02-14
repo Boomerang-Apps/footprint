@@ -2,6 +2,7 @@
  * Admin Authentication Tests
  *
  * Tests for admin auth verification and withAdminAuth HOF.
+ * Verifies DB-backed admin check (profiles.is_admin) instead of JWT claims.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -9,10 +10,26 @@ import { NextResponse } from 'next/server';
 
 // Mock Supabase server client
 const mockGetUser = vi.fn();
+const mockSelect = vi.fn();
+const mockEq = vi.fn();
+const mockSingle = vi.fn();
+const mockFrom = vi.fn().mockReturnValue({
+  select: (...args: unknown[]) => {
+    mockSelect(...args);
+    return {
+      eq: (...eqArgs: unknown[]) => {
+        mockEq(...eqArgs);
+        return { single: mockSingle };
+      },
+    };
+  },
+});
+
 const mockCreateClient = vi.fn().mockResolvedValue({
   auth: {
     getUser: mockGetUser,
   },
+  from: mockFrom,
 });
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -44,7 +61,7 @@ describe('lib/auth/admin', () => {
   });
 
   describe('verifyAdmin', () => {
-    it('should return authorized for admin user', async () => {
+    it('should return authorized for admin user with DB is_admin=true', async () => {
       mockGetUser.mockResolvedValue({
         data: {
           user: {
@@ -53,6 +70,10 @@ describe('lib/auth/admin', () => {
             user_metadata: { role: 'admin' },
           },
         },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: true },
         error: null,
       });
 
@@ -65,6 +86,10 @@ describe('lib/auth/admin', () => {
         role: 'admin',
       });
       expect(result.error).toBeUndefined();
+      // Verify DB query was made
+      expect(mockFrom).toHaveBeenCalledWith('profiles');
+      expect(mockSelect).toHaveBeenCalledWith('is_admin');
+      expect(mockEq).toHaveBeenCalledWith('id', 'user-123');
     });
 
     it('should return 401 when auth error occurs', async () => {
@@ -91,7 +116,7 @@ describe('lib/auth/admin', () => {
       expect(result.error).toBeInstanceOf(NextResponse);
     });
 
-    it('should return 403 when user is not admin', async () => {
+    it('should return 403 when user is not admin in DB', async () => {
       mockGetUser.mockResolvedValue({
         data: {
           user: {
@@ -102,6 +127,10 @@ describe('lib/auth/admin', () => {
         },
         error: null,
       });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: false },
+        error: null,
+      });
 
       const result = await verifyAdmin();
 
@@ -109,7 +138,7 @@ describe('lib/auth/admin', () => {
       expect(result.error).toBeInstanceOf(NextResponse);
     });
 
-    it('should return 403 when user has no role metadata', async () => {
+    it('should return 403 when profile query fails', async () => {
       mockGetUser.mockResolvedValue({
         data: {
           user: {
@@ -118,6 +147,53 @@ describe('lib/auth/admin', () => {
             user_metadata: {},
           },
         },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: null,
+        error: new Error('Profile not found'),
+      });
+
+      const result = await verifyAdmin();
+
+      expect(result.isAuthorized).toBe(false);
+    });
+
+    it('should return 403 when profile has no is_admin field', async () => {
+      mockGetUser.mockResolvedValue({
+        data: {
+          user: {
+            id: 'user-789',
+            email: 'norole@example.com',
+            user_metadata: {},
+          },
+        },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: null },
+        error: null,
+      });
+
+      const result = await verifyAdmin();
+
+      expect(result.isAuthorized).toBe(false);
+    });
+
+    it('should ignore user_metadata.role and rely on DB', async () => {
+      // User has admin in JWT but NOT in DB — should be denied
+      mockGetUser.mockResolvedValue({
+        data: {
+          user: {
+            id: 'user-spoofed',
+            email: 'spoofed@example.com',
+            user_metadata: { role: 'admin' },
+          },
+        },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: false },
         error: null,
       });
 
@@ -135,6 +211,10 @@ describe('lib/auth/admin', () => {
             user_metadata: { role: 'admin' },
           },
         },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: true },
         error: null,
       });
 
@@ -165,6 +245,39 @@ describe('lib/auth/admin', () => {
       expect(result.isAuthorized).toBe(false);
       expect(logger.error).toHaveBeenCalled();
     });
+
+    it('should return Hebrew error messages', async () => {
+      // Test 401 message
+      mockGetUser.mockResolvedValue({
+        data: { user: null },
+        error: null,
+      });
+
+      const result401 = await verifyAdmin();
+      const body401 = await result401.error!.json();
+      expect(body401.error).toBe('נדרשת הזדהות');
+
+      // Test 403 message
+      vi.clearAllMocks();
+      mockGetUser.mockResolvedValue({
+        data: {
+          user: {
+            id: 'user-403',
+            email: 'user@example.com',
+            user_metadata: {},
+          },
+        },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: false },
+        error: null,
+      });
+
+      const result403 = await verifyAdmin();
+      const body403 = await result403.error!.json();
+      expect(body403.error).toBe('נדרשת הרשאת מנהל');
+    });
   });
 
   describe('withAdminAuth', () => {
@@ -177,6 +290,10 @@ describe('lib/auth/admin', () => {
             user_metadata: { role: 'admin' },
           },
         },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: true },
         error: null,
       });
 
@@ -216,7 +333,7 @@ describe('lib/auth/admin', () => {
       expect(response).toBeInstanceOf(NextResponse);
     });
 
-    it('should not call handler when user is not admin', async () => {
+    it('should not call handler when user is not admin in DB', async () => {
       mockGetUser.mockResolvedValue({
         data: {
           user: {
@@ -225,6 +342,10 @@ describe('lib/auth/admin', () => {
             user_metadata: { role: 'client' },
           },
         },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: false },
         error: null,
       });
 
@@ -247,6 +368,10 @@ describe('lib/auth/admin', () => {
             user_metadata: { role: 'admin' },
           },
         },
+        error: null,
+      });
+      mockSingle.mockResolvedValue({
+        data: { is_admin: true },
         error: null,
       });
 

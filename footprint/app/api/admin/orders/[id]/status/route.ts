@@ -27,6 +27,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin';
 import {
   isValidStatusTransition,
   createStatusHistoryEntry,
@@ -81,30 +82,14 @@ export async function PATCH(
   try {
     const { id: orderId } = await params;
 
-    // 1. Verify authentication
+    // 1. Admin authorization (DB-backed)
+    const auth = await verifyAdmin();
+    if (!auth.isAuthorized) return auth.error!;
+    const user = auth.user!;
+
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please sign in' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Check admin role
-    const userRole = user.user_metadata?.role;
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
-
-    // 3. Parse request body
+    // 2. Parse request body
     let body: StatusUpdateRequest;
     try {
       body = await request.json();
@@ -115,7 +100,7 @@ export async function PATCH(
       );
     }
 
-    // 4. Validate status field exists
+    // 3. Validate status field exists
     if (!body.status) {
       return NextResponse.json(
         { error: 'Missing required field: status' },
@@ -123,7 +108,7 @@ export async function PATCH(
       );
     }
 
-    // 5. Validate status value
+    // 4. Validate status value
     if (!VALID_STATUSES.includes(body.status)) {
       return NextResponse.json(
         { error: `Invalid status value. Must be one of: ${VALID_STATUSES.join(', ')}` },
@@ -131,7 +116,7 @@ export async function PATCH(
       );
     }
 
-    // 6. Fetch existing order
+    // 5. Fetch existing order
     const { data: order, error: fetchError } = await supabase
       .from('orders')
       .select('id, status, customer_email, customer_name, status_history')
@@ -145,7 +130,7 @@ export async function PATCH(
       );
     }
 
-    // 7. Validate status transition
+    // 6. Validate status transition
     const currentStatus = order.status as OrderStatus;
     const newStatus = body.status;
 
@@ -156,7 +141,7 @@ export async function PATCH(
       );
     }
 
-    // 8. Create status history entry
+    // 7. Create status history entry
     const historyEntry = createStatusHistoryEntry(
       newStatus,
       user.id,
@@ -166,7 +151,7 @@ export async function PATCH(
     const existingHistory = order.status_history || [];
     const updatedHistory = [...existingHistory, historyEntry];
 
-    // 9. Update order in database
+    // 8. Update order in database
     const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
       .update({
@@ -186,7 +171,7 @@ export async function PATCH(
       );
     }
 
-    // 10. Send customer notification email
+    // 9. Send customer notification email
     let notificationResult = {
       sent: false as boolean,
       to: order.customer_email as string | undefined,
@@ -216,7 +201,7 @@ export async function PATCH(
       };
     }
 
-    // 11. Return success response
+    // 10. Return success response
     return NextResponse.json({
       success: true,
       order: {

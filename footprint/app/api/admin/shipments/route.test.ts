@@ -5,11 +5,15 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest } from 'next/server';
-import { POST, GET } from './route';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Mock verifyAdmin
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
+}));
 
 // Mock Supabase
-const mockGetUser = vi.fn();
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
 const mockInsert = vi.fn();
@@ -18,13 +22,12 @@ const mockUpdate = vi.fn();
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() =>
     Promise.resolve({
-      auth: {
-        getUser: mockGetUser,
-      },
       from: mockFrom,
     })
   ),
 }));
+
+import { POST, GET } from './route';
 
 // Mock rate limiting
 vi.mock('@/lib/rate-limit', () => ({
@@ -75,9 +78,9 @@ describe('POST /api/admin/shipments', () => {
     vi.clearAllMocks();
 
     // Default: authenticated admin user
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: 'admin-1', user_metadata: { role: 'admin' } } },
-      error: null,
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' },
     });
 
     // Default: order exists with valid address
@@ -142,9 +145,9 @@ describe('POST /api/admin/shipments', () => {
 
   describe('Authentication (AC-015)', () => {
     it('should return 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({
-        data: { user: null },
-        error: { message: 'Not authenticated' },
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
       });
 
       const request = createPostRequest({ orderId: 'order-123' });
@@ -152,13 +155,13 @@ describe('POST /api/admin/shipments', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toContain('נדרשת הרשאת מנהל');
+      expect(data.error).toContain('נדרשת הזדהות');
     });
 
     it('should return 403 when user is not admin', async () => {
-      mockGetUser.mockResolvedValue({
-        data: { user: { id: 'user-1', user_metadata: { role: 'customer' } } },
-        error: null,
+      mockVerifyAdmin.mockResolvedValue({
+        isAuthorized: false,
+        error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
       });
 
       const request = createPostRequest({ orderId: 'order-123' });
@@ -370,9 +373,9 @@ describe('GET /api/admin/shipments', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetUser.mockResolvedValue({
-      data: { user: { id: 'admin-1', user_metadata: { role: 'admin' } } },
-      error: null,
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: true,
+      user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' },
     });
 
     mockFrom.mockReturnValue({ select: mockSelect });
@@ -430,9 +433,9 @@ describe('GET /api/admin/shipments', () => {
   });
 
   it('should return 401 when not authenticated', async () => {
-    mockGetUser.mockResolvedValue({
-      data: { user: null },
-      error: { message: 'Not authenticated' },
+    mockVerifyAdmin.mockResolvedValue({
+      isAuthorized: false,
+      error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
     });
 
     const request = createGetRequest();
@@ -440,6 +443,6 @@ describe('GET /api/admin/shipments', () => {
     const data = await response.json();
 
     expect(response.status).toBe(401);
-    expect(data.error).toContain('נדרשת הרשאת מנהל');
+    expect(data.error).toContain('נדרשת הזדהות');
   });
 });

@@ -4,7 +4,7 @@
  * Tests for GET /api/admin/users/stats - Get user statistics
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from './route';
 
@@ -18,35 +18,23 @@ const mockSupabaseFrom = vi.fn(() => ({
   select: mockSupabaseSelect,
 }));
 
-const mockGetUser = vi.fn();
-
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve({
-    auth: {
-      getUser: mockGetUser,
-    },
     from: mockSupabaseFrom,
     rpc: mockSupabaseRpc,
   })),
+}));
+
+// Mock admin auth
+const mockVerifyAdmin = vi.fn();
+vi.mock('@/lib/auth/admin', () => ({
+  verifyAdmin: () => mockVerifyAdmin(),
 }));
 
 // Mock rate limiter
 vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
 }));
-
-// Sample test data
-const mockAdminUser = {
-  id: 'admin-user-id',
-  email: 'admin@footprint.co.il',
-  user_metadata: { role: 'admin' },
-};
-
-const mockRegularUser = {
-  id: 'regular-user-id',
-  email: 'user@example.com',
-  user_metadata: { role: 'user' },
-};
 
 const mockStats = {
   totalUsers: 150,
@@ -68,29 +56,29 @@ describe('GET /api/admin/users/stats', () => {
 
   describe('Authentication', () => {
     it('should return 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: false, error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }) });
 
       const request = createRequest('/api/admin/users/stats');
       const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('Unauthorized - Please sign in');
+      expect(data.error).toBe('נדרשת הזדהות');
     });
 
     it('should return 403 when user is not admin', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: mockRegularUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: false, error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }) });
 
       const request = createRequest('/api/admin/users/stats');
       const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('Admin access required');
+      expect(data.error).toBe('נדרשת הרשאת מנהל');
     });
 
     it('should allow admin users to access', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
       mockRpcResult.mockResolvedValue({ data: mockStats, error: null });
 
       const request = createRequest('/api/admin/users/stats');
@@ -102,7 +90,7 @@ describe('GET /api/admin/users/stats', () => {
 
   describe('Stats Response', () => {
     beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
     });
 
     it('should return total user count', async () => {
@@ -174,7 +162,7 @@ describe('GET /api/admin/users/stats', () => {
   describe('Rate Limiting', () => {
     it('should apply rate limiting', async () => {
       const { checkRateLimit } = await import('@/lib/rate-limit');
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
       mockRpcResult.mockResolvedValue({ data: mockStats, error: null });
 
       const request = createRequest('/api/admin/users/stats');
@@ -199,7 +187,7 @@ describe('GET /api/admin/users/stats', () => {
 
   describe('Error Handling', () => {
     beforeEach(() => {
-      mockGetUser.mockResolvedValue({ data: { user: mockAdminUser }, error: null });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: true, user: { id: 'admin-user-id', email: 'admin@footprint.co.il', role: 'admin' } });
     });
 
     it('should return 500 on database error', async () => {
@@ -214,7 +202,7 @@ describe('GET /api/admin/users/stats', () => {
     });
 
     it('should handle auth errors gracefully', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'Auth failed' } });
+      mockVerifyAdmin.mockResolvedValue({ isAuthorized: false, error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }) });
 
       const request = createRequest('/api/admin/users/stats');
       const response = await GET(request);
