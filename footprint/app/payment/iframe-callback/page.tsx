@@ -48,10 +48,12 @@ function IframeCallbackContent() {
 
           if (!res.ok) {
             const data = await res.json().catch(() => ({}));
+            // eslint-disable-next-line no-console
             console.error('Finalize failed:', data.error || res.statusText);
           }
         } catch (err) {
           // Non-blocking — order can still be finalized by webhook
+          // eslint-disable-next-line no-console
           console.error('Finalize request failed:', err);
         }
       }

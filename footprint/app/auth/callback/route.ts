@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: Request): Promise<NextResponse> {
   const { searchParams, origin } = new URL(request.url);
@@ -41,7 +42,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    console.error('[auth/callback] Code exchange failed:', error.message);
+    logger.error('[auth/callback] Code exchange failed', new Error(error.message));
     return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
   }
 
