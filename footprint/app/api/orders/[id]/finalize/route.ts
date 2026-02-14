@@ -2,11 +2,12 @@
  * POST /api/orders/[id]/finalize
  *
  * Finalizes a pending order after PayPlus redirect.
- * Updates status to 'paid', sets paid_at, and triggers emails.
+ * Updates status to 'paid' ONLY if a real payment record from the webhook exists.
  * Idempotent: if order is already 'paid', returns success without duplicate emails.
  *
  * Called from the iframe-callback page when PayPlus uses top-level navigation.
- * No auth required — uses admin client (similar to webhook pattern).
+ * Security: payment is verified by checking that the webhook has already created
+ * a succeeded payment record with a real PayPlus transaction_uid.
  */
 
 import { NextResponse } from 'next/server';
@@ -15,7 +16,6 @@ import {
   triggerConfirmationEmail,
   triggerNewOrderNotification,
 } from '@/lib/orders/create';
-import { createPaymentRecord } from '@/lib/payments/record';
 import { logger } from '@/lib/logger';
 
 interface FinalizeResponse {
@@ -23,6 +23,7 @@ interface FinalizeResponse {
   orderId: string;
   orderNumber?: string;
   alreadyFinalized?: boolean;
+  pendingPayment?: boolean;
 }
 
 interface ErrorResponse {
@@ -72,7 +73,29 @@ export async function POST(
       );
     }
 
-    // Update to paid
+    // Verify payment: a real succeeded payment record must exist from the webhook.
+    // This prevents marking orders as paid without actual payment confirmation.
+    const { data: payment } = await supabase
+      .from('payments')
+      .select('id')
+      .eq('order_id', orderId)
+      .eq('status', 'succeeded')
+      .single();
+
+    if (!payment) {
+      // Webhook hasn't arrived yet — tell the client to retry
+      logger.info(
+        `Finalize called but no payment record yet for order ${order.order_number}`
+      );
+      return NextResponse.json({
+        success: false,
+        orderId: order.id,
+        orderNumber: order.order_number,
+        pendingPayment: true,
+      });
+    }
+
+    // Payment verified — update to paid
     const { error: updateError } = await supabase
       .from('orders')
       .update({
@@ -90,19 +113,6 @@ export async function POST(
     }
 
     logger.info(`Order finalized: ${order.order_number} (${orderId})`);
-
-    // Defensive payment record (webhook usually arrives first)
-    try {
-      await createPaymentRecord({
-        orderId: order.id,
-        provider: 'payplus',
-        status: 'succeeded',
-        externalTransactionId: `finalize-${order.id}`,
-        amount: 0,
-      });
-    } catch (e) {
-      logger.error('Defensive payment record failed (non-fatal)', e);
-    }
 
     // Fire-and-forget email triggers
     triggerConfirmationEmail(orderId);
