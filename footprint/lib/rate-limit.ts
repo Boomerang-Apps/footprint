@@ -41,10 +41,10 @@ export const rateLimits = {
     prefix: 'ratelimit:upload',
   }),
 
-  // AI Transform: 10 per minute (expensive, uses AI credits)
+  // AI Transform: 20 per minute (AC-011)
   transform: new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(10, '1 m'),
+    limiter: Ratelimit.slidingWindow(20, '1 m'),
     analytics: true,
     prefix: 'ratelimit:transform',
   }),

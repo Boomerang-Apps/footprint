@@ -10,7 +10,7 @@
   "priority": "medium",
   "story_points": 8,
   "description": "Optimize AI style transformation pipeline for sub-3-second generation time, implementing caching, queue management, and progressive loading for better user experience",
-  "status": "pending",
+  "status": "in_progress",
   "objective": {
     "as_a": "customer previewing art styles",
     "i_want": "to see style transformations quickly",
@@ -96,18 +96,15 @@
   ],
   "files": {
     "create": [
-      "lib/ai/transformation-queue.ts",
-      "lib/ai/transformation-queue.test.ts",
       "lib/ai/transformation-cache.ts",
       "lib/ai/transformation-cache.test.ts",
-      "lib/ai/progressive-loader.ts",
-      "lib/ai/progressive-loader.test.ts",
-      "app/api/ai/transform/route.ts",
-      "app/api/ai/transform/route.test.ts"
+      "lib/ai/concurrency-limit.ts",
+      "lib/ai/concurrency-limit.test.ts"
     ],
     "modify": [
-      "lib/ai/style-transformer.ts",
-      "lib/ai/index.ts"
+      "app/api/transform/route.ts",
+      "app/api/transform/route.test.ts",
+      "lib/rate-limit.ts"
     ],
     "forbidden": [
       "components/*",
@@ -116,85 +113,68 @@
   },
   "technical_requirements": {
     "infrastructure": {
-      "cache": "Redis for transformation cache with R2 for result storage",
-      "queue": "BullMQ for job queue management",
-      "gpu": "Replicate or Modal for GPU inference"
+      "cache": "Upstash Redis for fast transformation cache, Supabase for persistent storage",
+      "concurrency": "Upstash Redis INCR/DECR for per-user concurrent limiting",
+      "gpu": "Replicate/Nano Banana for AI inference (managed externally)"
     },
     "performance": {
-      "preview_latency_p95_ms": 3000,
       "cache_hit_latency_ms": 200,
-      "max_concurrent_per_user": 3
+      "max_concurrent_per_user": 3,
+      "rate_limit_per_minute": 20
     },
     "caching_strategy": {
-      "key_format": "transform:{image_hash}:{style_id}:{resolution}",
+      "key_format": "transform:{original_image_key}:{style}",
       "ttl_days": 7,
-      "storage": "R2 for images, Redis for metadata"
+      "storage": "Upstash Redis for fast cache, Supabase for result storage"
     }
   },
   "tdd": {
     "test_framework": "vitest",
     "test_files": [
-      "lib/ai/transformation-queue.test.ts",
       "lib/ai/transformation-cache.test.ts",
-      "lib/ai/progressive-loader.test.ts",
-      "app/api/ai/transform/route.test.ts"
+      "lib/ai/concurrency-limit.test.ts",
+      "app/api/transform/route.test.ts"
     ],
     "coverage_target": 85,
     "test_categories": [
       {
-        "name": "Caching",
-        "count": 5,
+        "name": "Transformation Cache",
+        "count": 9,
         "examples": [
-          "should return cached result instantly",
-          "should cache new transformation",
-          "should invalidate old cache entries",
-          "should handle cache miss gracefully",
-          "should generate cache key correctly"
+          "should return cached data on Redis hit",
+          "should return null on cache miss",
+          "should return null when Upstash not configured",
+          "should SET with correct key, value, and 7-day TTL",
+          "should DEL the correct key"
         ]
       },
       {
-        "name": "Queue Management",
-        "count": 5,
+        "name": "Concurrency Limit",
+        "count": 11,
         "examples": [
-          "should prioritize paid users",
-          "should limit concurrent requests per user",
-          "should return queue position",
-          "should process in order",
-          "should handle queue full scenario"
+          "should allow when count < 3",
+          "should reject at 4 and decrement back",
+          "should set TTL on counter key",
+          "should delete key when count reaches 0",
+          "should allow on Redis error"
         ]
       },
       {
-        "name": "Progressive Loading",
-        "count": 3,
+        "name": "Route Integration",
+        "count": 6,
         "examples": [
-          "should return low-res preview first",
-          "should upgrade to full-res",
-          "should use progressive JPEG format"
-        ]
-      },
-      {
-        "name": "Rate Limiting",
-        "count": 3,
-        "examples": [
-          "should allow requests under limit",
-          "should return 429 over limit",
-          "should reset after window"
-        ]
-      },
-      {
-        "name": "Error Handling",
-        "count": 3,
-        "examples": [
-          "should retry on failure",
-          "should use exponential backoff",
-          "should return error after max retries"
+          "should return cached result from Redis",
+          "should fall through to AI when Redis misses",
+          "should populate Redis cache after transformation",
+          "should return 429 on concurrent limit exceeded",
+          "should release concurrency slot on failure"
         ]
       }
     ],
     "mocking_strategy": {
-      "redis": "vi.mock('ioredis')",
-      "queue": "vi.mock('bullmq')",
-      "ai_provider": "vi.mock('@/lib/ai/replicate-client')"
+      "redis": "_setRedisClient() injection for unit tests",
+      "cache": "vi.mock('@/lib/ai/transformation-cache') for route tests",
+      "concurrency": "vi.mock('@/lib/ai/concurrency-limit') for route tests"
     }
   },
   "hazard_analysis": {
@@ -258,5 +238,5 @@
     "created_at": "2026-02-01T21:00:00Z",
     "created_by": "claude-opus-4-5"
   },
-  "estimated_tests": 19
+  "estimated_tests": 28
 }
