@@ -72,12 +72,6 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
-// Mock Next.js Image component
-vi.mock('next/image', () => ({
-  // eslint-disable-next-line @next/next/no-img-element
-  default: ({ src, alt, ...props }: Record<string, unknown>) => <img src={src as string} alt={alt as string} {...props} />,
-}));
-
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: { retry: false },
@@ -98,7 +92,7 @@ describe('Order History Integration', () => {
     vi.clearAllMocks();
   });
 
-  it('renders complete order history with real data flow', async () => {
+  it('renders order history with data (no stats, no filters)', async () => {
     renderWithQueryClient(<OrderHistoryList />);
 
     // Should show loading initially
@@ -109,35 +103,19 @@ describe('Order History Integration', () => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
 
-    // Should display statistics (multiple "1" values: total orders and in-transit)
-    const statValues = screen.getAllByText('1');
-    expect(statValues.length).toBeGreaterThanOrEqual(1);
-    // Total spent displays "237" which may appear multiple times (stats + order card)
-    const priceElements = screen.getAllByText(/237/);
-    expect(priceElements.length).toBeGreaterThanOrEqual(1);
+    // Should display order card with gradient thumbnail (not image)
+    const orderCard = screen.getByTestId('order-card');
+    expect(orderCard).toBeInTheDocument();
 
-    // Should display order card
-    expect(screen.getByText('FP-2024-001')).toBeInTheDocument();
-    expect(screen.getByText('אווטר קריקטורה')).toBeInTheDocument();
-    expect(screen.getByText('A4 • מסגרת שחורה')).toBeInTheDocument();
-  });
+    // Should show style name from styles-ui (canonical Hebrew name)
+    expect(screen.getByText(/אווטאר קרטון/)).toBeInTheDocument();
 
-  it('handles filter changes correctly', async () => {
-    renderWithQueryClient(<OrderHistoryList />);
+    // AC-008: No stats cards
+    expect(screen.queryByText('בדרך')).not.toBeInTheDocument();
 
-    // Wait for initial load
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-
-    // Click on shipped filter (use getByRole to target the button specifically)
-    const shippedTab = screen.getByRole('button', { name: 'נשלח' });
-    fireEvent.click(shippedTab);
-
-    // Should still show the order (it's shipped)
-    await waitFor(() => {
-      expect(screen.getByText('FP-2024-001')).toBeInTheDocument();
-    });
+    // AC-009: No filter tabs
+    expect(screen.queryByText('הכל')).not.toBeInTheDocument();
+    expect(screen.queryByText('בהכנה')).not.toBeInTheDocument();
   });
 
   it('navigates correctly when order is clicked', async () => {
@@ -177,19 +155,11 @@ describe('Order History Integration', () => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
 
-    // Check Hebrew UI text (use getAllByText for duplicates)
+    // Header text still present
     expect(screen.getByText('ההזמנות שלי')).toBeInTheDocument();
-    expect(screen.getAllByText('הזמנות').length).toBeGreaterThan(0);
-    expect(screen.getByText('סה״כ')).toBeInTheDocument();
-    expect(screen.getByText('בדרך')).toBeInTheDocument();
-    expect(screen.getByText('הכל')).toBeInTheDocument();
-    expect(screen.getByText('בהכנה')).toBeInTheDocument();
-    expect(screen.getAllByText('נשלח').length).toBeGreaterThan(0);
-    expect(screen.getByText('הגיע')).toBeInTheDocument();
 
-    // Check translated product details
-    expect(screen.getByText('אווטר קריקטורה')).toBeInTheDocument();
-    expect(screen.getByText('A4 • מסגרת שחורה')).toBeInTheDocument();
+    // Style name from styles-ui (canonical, not inline translations)
+    expect(screen.getByText(/אווטאר קרטון/)).toBeInTheDocument();
   });
 
   it('applies responsive design classes', async () => {
@@ -206,15 +176,10 @@ describe('Order History Integration', () => {
       'lg:max-w-[1000px]'
     );
 
+    // OrderCard uses gradient div instead of img thumbnail
     const orderCard = screen.getByTestId('order-card');
-    const thumbnail = orderCard.querySelector('img');
-    expect(thumbnail).toHaveClass(
-      'w-[70px]',
-      'h-[70px]',
-      'sm:w-[80px]',
-      'sm:h-[80px]',
-      'lg:w-[90px]',
-      'lg:h-[90px]'
-    );
+    const gradient = orderCard.querySelector('[data-testid="order-gradient"]');
+    expect(gradient).toBeInTheDocument();
+    expect(gradient).toHaveClass('w-[70px]', 'h-[70px]', 'sm:w-[80px]', 'sm:h-[80px]');
   });
 });

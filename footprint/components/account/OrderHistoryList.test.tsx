@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { OrderHistoryList } from './OrderHistoryList';
@@ -50,6 +50,9 @@ const { mockUseOrderHistory, mockOrderHistoryData } = vi.hoisted(() => {
     totalOrders: 2,
     totalSpent: 546,
     inTransitCount: 1,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
   };
 
   const mockUseOrderHistory = vi.fn(() => ({
@@ -107,63 +110,47 @@ describe('OrderHistoryList', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
       expect(screen.getByText('ההזמנות שלי')).toBeInTheDocument();
-      expect(screen.getByTestId('back-button')).toBeInTheDocument();
-    });
-
-    it('navigates back when back button is clicked', () => {
-      renderWithQueryClient(<OrderHistoryList />);
-
-      const backButton = screen.getByTestId('back-button');
-      fireEvent.click(backButton);
-
-      expect(mockPush).toHaveBeenCalledWith('/');
+      expect(screen.getByText('כל ההזמנות שלך במקום אחד')).toBeInTheDocument();
     });
   });
 
-  describe('Statistics Display', () => {
-    it('displays order statistics correctly', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-008: WHEN user views OrderHistoryList
+  //         THEN no stats cards are shown
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-008: No Stats Cards', () => {
+    it('does not display statistics cards', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
-      expect(screen.getByText('2')).toBeInTheDocument(); // Total orders
-      expect(screen.getByText('₪546')).toBeInTheDocument(); // Total spent
-
-      // Use getAllByText for labels that appear multiple times
-      expect(screen.getAllByText('הזמנות').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('סה״כ')).toBeInTheDocument();
-      expect(screen.getByText('בדרך')).toBeInTheDocument();
+      // Stats labels from old design should not be present
+      expect(screen.queryByText('בדרך')).not.toBeInTheDocument();
+      expect(screen.queryByText('₪546')).not.toBeInTheDocument();
     });
   });
 
-  describe('Filter Tabs', () => {
-    it('renders all filter tabs', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-009: WHEN user views OrderHistoryList
+  //         THEN no filter tabs are shown
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-009: No Filter Tabs', () => {
+    it('does not display filter tabs', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
-      expect(screen.getByText('הכל')).toBeInTheDocument();
-      expect(screen.getByText('בהכנה')).toBeInTheDocument();
-      expect(screen.getByText('נשלח')).toBeInTheDocument();
-      expect(screen.getByText('הגיע')).toBeInTheDocument();
+      expect(screen.queryByText('הכל')).not.toBeInTheDocument();
+      expect(screen.queryByText('בהכנה')).not.toBeInTheDocument();
     });
+  });
 
-    it('sets "הכל" as active by default', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-010: WHEN user views OrderHistoryList
+  //         THEN no custom bottom nav (global MobileBottomNav handles this)
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-010: No Duplicate Bottom Nav', () => {
+    it('does not render a custom bottom navigation', () => {
       renderWithQueryClient(<OrderHistoryList />);
 
-      const allTab = screen.getByText('הכל').closest('button');
-      expect(allTab).toHaveClass('bg-purple-600', 'text-white');
-    });
-
-    it('changes filter when tab is clicked', async () => {
-      renderWithQueryClient(<OrderHistoryList />);
-
-      const deliveredTab = screen.getByText('הגיע').closest('button');
-      fireEvent.click(deliveredTab!);
-
-      await waitFor(() => {
-        expect(mockUseOrderHistory).toHaveBeenCalledWith({
-          statusFilter: 'delivered',
-          page: 1,
-          pageSize: 10,
-        });
-      });
+      const fixedNav = document.querySelector('nav.fixed');
+      expect(fixedNav).not.toBeInTheDocument();
     });
   });
 
@@ -188,7 +175,7 @@ describe('OrderHistoryList', () => {
   describe('Loading State', () => {
     it('shows loading spinner when data is loading', () => {
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: true,
         isError: false,
         error: null,
@@ -204,7 +191,7 @@ describe('OrderHistoryList', () => {
   describe('Error State', () => {
     it('shows error message when there is an error', () => {
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: false,
         isError: true,
         error: new Error('Failed to fetch orders'),
@@ -220,7 +207,7 @@ describe('OrderHistoryList', () => {
     it('calls refetch when retry button is clicked', () => {
       const mockRefetch = vi.fn();
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: false,
         isError: true,
         error: new Error('Failed to fetch orders'),
@@ -236,10 +223,44 @@ describe('OrderHistoryList', () => {
     });
   });
 
+  describe('Unauthorized State', () => {
+    it('shows empty state instead of error when unauthorized', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+        isLoading: false,
+        isError: true,
+        error: new Error('Unauthorized - Please sign in'),
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      // Should show empty state, NOT error state
+      expect(screen.getByText('אין הזמנות עדיין')).toBeInTheDocument();
+      expect(screen.getByText('צור עכשיו')).toBeInTheDocument();
+      expect(screen.queryByText('שגיאה בטעינת ההזמנות')).not.toBeInTheDocument();
+    });
+
+    it('shows empty state for 401 API error', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+        isLoading: false,
+        isError: true,
+        error: new Error('API error: 401'),
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      expect(screen.getByText('אין הזמנות עדיין')).toBeInTheDocument();
+      expect(screen.queryByText('שגיאה בטעינת ההזמנות')).not.toBeInTheDocument();
+    });
+  });
+
   describe('Empty State', () => {
     it('shows empty state when no orders exist', () => {
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: false,
         isError: false,
         error: null,
@@ -254,7 +275,7 @@ describe('OrderHistoryList', () => {
 
     it('navigates to create page when "צור עכשיו" is clicked', () => {
       mockUseOrderHistory.mockReturnValue({
-        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0 },
+        data: { orders: [], totalOrders: 0, totalSpent: 0, inTransitCount: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
         isLoading: false,
         isError: false,
         error: null,
@@ -267,6 +288,94 @@ describe('OrderHistoryList', () => {
       fireEvent.click(createButton);
 
       expect(mockPush).toHaveBeenCalledWith('/create');
+    });
+  });
+
+  describe('Pagination', () => {
+    it('renders pagination when totalPages > 1', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: {
+          ...mockOrderHistoryData,
+          totalPages: 3,
+          hasPrevPage: false,
+          hasNextPage: true,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      expect(screen.getByLabelText('עמוד קודם')).toBeInTheDocument();
+      expect(screen.getByLabelText('עמוד הבא')).toBeInTheDocument();
+    });
+
+    it('disables previous button on first page', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: {
+          ...mockOrderHistoryData,
+          totalPages: 3,
+          hasPrevPage: false,
+          hasNextPage: true,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      const prevButton = screen.getByLabelText('עמוד קודם');
+      expect(prevButton).toBeDisabled();
+    });
+
+    it('navigates to next page when next button clicked', () => {
+      const scrollToMock = vi.fn();
+      Object.defineProperty(window, 'scrollTo', { value: scrollToMock, writable: true });
+
+      mockUseOrderHistory.mockReturnValue({
+        data: {
+          ...mockOrderHistoryData,
+          totalPages: 3,
+          hasPrevPage: false,
+          hasNextPage: true,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      const nextButton = screen.getByLabelText('עמוד הבא');
+      fireEvent.click(nextButton);
+
+      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+    });
+
+    it('renders page number buttons', () => {
+      mockUseOrderHistory.mockReturnValue({
+        data: {
+          ...mockOrderHistoryData,
+          totalPages: 3,
+          hasPrevPage: false,
+          hasNextPage: true,
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      renderWithQueryClient(<OrderHistoryList />);
+
+      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(screen.getByText('3')).toBeInTheDocument();
     });
   });
 

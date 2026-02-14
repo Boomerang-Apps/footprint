@@ -32,8 +32,12 @@ const createMockOrder = (overrides: Partial<Order> = {}): Order => ({
 });
 
 describe('OrderTimeline', () => {
-  describe('Status Display', () => {
-    it('renders all timeline steps', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-001: WHEN user views OrderTimeline
+  //         THEN layout is vertical (flex-col) with connecting lines
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-001: Vertical Layout', () => {
+    it('renders all timeline steps in a vertical layout', () => {
       const order = createMockOrder();
       render(<OrderTimeline order={order} />);
 
@@ -43,11 +47,107 @@ describe('OrderTimeline', () => {
       expect(screen.getByText('הגיע')).toBeInTheDocument();
     });
 
+    it('uses vertical flex-col layout instead of horizontal', () => {
+      const order = createMockOrder();
+      render(<OrderTimeline order={order} />);
+
+      // Must use flex-col for vertical stacking
+      const verticalContainer = document.querySelector('.flex.flex-col.gap-0');
+      expect(verticalContainer).toBeInTheDocument();
+    });
+
+    it('renders connecting lines between steps (not last step)', () => {
+      // Use order without paidAt so all 5 steps render
+      const order = createMockOrder({ paidAt: null });
+      render(<OrderTimeline order={order} />);
+
+      // Vertical connecting lines between step circles
+      const connectingLines = document.querySelectorAll('.w-0\\.5.h-8');
+      // 5 steps means 4 connecting lines
+      expect(connectingLines.length).toBe(4);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // AC-002: WHEN order step is completed THEN connecting line is purple
+  //         WHEN upcoming THEN connecting line is gray
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-002: Connecting Line Colors', () => {
+    it('shows purple connecting lines for completed steps', () => {
+      const order = createMockOrder({ status: 'shipped' });
+      render(<OrderTimeline order={order} />);
+
+      // Completed steps should have purple connecting lines
+      const purpleLines = document.querySelectorAll('.w-0\\.5.h-8.bg-purple-600');
+      expect(purpleLines.length).toBeGreaterThan(0);
+    });
+
+    it('shows gray connecting lines for upcoming steps', () => {
+      const order = createMockOrder({ status: 'processing' });
+      render(<OrderTimeline order={order} />);
+
+      // Upcoming steps should have gray connecting lines
+      const grayLines = document.querySelectorAll('.w-0\\.5.h-8.bg-gray-200');
+      expect(grayLines.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // AC-003: WHEN order step is completed or current
+  //         THEN date is displayed using formatOrderDate
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-003: Date Rendering', () => {
+    it('shows dates for completed and current steps', () => {
+      const order = createMockOrder({
+        status: 'processing',
+        createdAt: new Date('2024-12-20T10:00:00'),
+      });
+      render(<OrderTimeline order={order} />);
+
+      const stepDates = screen.getAllByTestId('step-date');
+      expect(stepDates.length).toBeGreaterThan(0);
+    });
+
+    it('does not show dates for upcoming steps', () => {
+      const order = createMockOrder({ status: 'processing' });
+      render(<OrderTimeline order={order} />);
+
+      // Count date elements - should be fewer than total steps
+      const stepDates = screen.queryAllByTestId('step-date');
+      // Only completed + current steps have dates, not upcoming
+      expect(stepDates.length).toBeLessThan(5);
+    });
+
+    it('shows shipped date for shipped orders', () => {
+      const order = createMockOrder({
+        status: 'shipped',
+        shippedAt: new Date('2024-12-22T14:00:00'),
+      });
+      render(<OrderTimeline order={order} />);
+
+      const stepDates = screen.getAllByTestId('step-date');
+      expect(stepDates.length).toBeGreaterThan(0);
+    });
+
+    it('shows delivered date for delivered orders', () => {
+      const order = createMockOrder({
+        status: 'delivered',
+        deliveredAt: new Date('2024-12-25T10:00:00'),
+        shippedAt: new Date('2024-12-22T14:00:00'),
+      });
+      render(<OrderTimeline order={order} />);
+
+      const stepDates = screen.getAllByTestId('step-date');
+      // All steps should have dates (all completed/current)
+      expect(stepDates.length).toBeGreaterThanOrEqual(4);
+    });
+  });
+
+  describe('Status Display', () => {
     it('shows current status with special styling', () => {
       const order = createMockOrder({ status: 'processing' });
       render(<OrderTimeline order={order} />);
 
-      // Current step should have distinct ring styling
       const currentStep = document.querySelector('.ring-purple-50');
       expect(currentStep).toBeInTheDocument();
     });
@@ -56,8 +156,6 @@ describe('OrderTimeline', () => {
       const order = createMockOrder({ status: 'shipped' });
       render(<OrderTimeline order={order} />);
 
-      // Previous steps should be completed
-      // The check icon SVG should be visible for completed steps
       const checkIcons = document.querySelectorAll('.bg-purple-600');
       expect(checkIcons.length).toBeGreaterThan(0);
     });
@@ -66,7 +164,6 @@ describe('OrderTimeline', () => {
       const order = createMockOrder({ status: 'processing' });
       render(<OrderTimeline order={order} />);
 
-      // Later steps should have gray styling
       const upcomingSteps = document.querySelectorAll('.text-gray-400');
       expect(upcomingSteps.length).toBeGreaterThan(0);
     });

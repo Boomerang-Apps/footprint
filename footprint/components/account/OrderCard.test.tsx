@@ -5,7 +5,9 @@ import type { Order } from '@/types';
 
 // Mock the PriceDisplay component
 vi.mock('@/components/ui/PriceDisplay', () => ({
-  PriceDisplay: ({ amount }: { amount: number }) => <span data-testid="price-display">₪{amount}</span>,
+  PriceDisplay: ({ amount, color }: { amount: number; color?: string }) => (
+    <span data-testid="price-display" data-color={color}>₪{amount}</span>
+  ),
 }));
 
 // Mock the OrderStatusBadge component
@@ -13,6 +15,17 @@ vi.mock('@/components/ui/OrderStatusBadge', () => ({
   OrderStatusBadge: ({ status }: { status: string }) => (
     <span data-testid="status-badge">{status}</span>
   ),
+}));
+
+// Mock styles-ui
+vi.mock('@/lib/ai/styles-ui', () => ({
+  getStyleById: (id: string) => {
+    const styles: Record<string, { nameHe: string; gradient: string }> = {
+      avatar_cartoon: { nameHe: 'אווטאר קרטון', gradient: 'from-violet-500 to-pink-500' },
+      watercolor: { nameHe: 'צבעי מים', gradient: 'from-blue-500 to-cyan-400' },
+    };
+    return styles[id] || undefined;
+  },
 }));
 
 const mockOrder: Order = {
@@ -74,100 +87,104 @@ describe('OrderCard', () => {
       expect(screen.getByText('FP-2024-001')).toBeInTheDocument();
       expect(screen.getByTestId('order-date')).toBeInTheDocument();
     });
+  });
 
-    it('displays product thumbnail with proper alt text', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-004: WHEN user views OrderCard
+  //         THEN gradient thumbnail is shown (not an image element)
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-004: Gradient Thumbnail', () => {
+    it('displays gradient thumbnail instead of image', () => {
       render(<OrderCard order={mockOrder} />);
 
-      const thumbnail = screen.getByTestId('order-thumbnail');
-      // Next.js Image component transforms src, so check it contains the original URL
-      expect(thumbnail.getAttribute('src')).toContain('transformed.jpg');
-      // Alt text uses Hebrew style name
-      expect(thumbnail).toHaveAttribute('alt', 'אווטר קריקטורה artwork');
+      const gradient = screen.getByTestId('order-gradient');
+      expect(gradient).toBeInTheDocument();
+      expect(gradient).toHaveClass('bg-gradient-to-br');
+      // Should use the style-specific gradient from styles-ui
+      expect(gradient).toHaveClass('from-violet-500');
+      expect(gradient).toHaveClass('to-pink-500');
     });
 
-    it('shows Hebrew style name', () => {
+    it('does not render image thumbnail', () => {
       render(<OrderCard order={mockOrder} />);
 
-      expect(screen.getByText('אווטר קריקטורה')).toBeInTheDocument();
+      expect(screen.queryByTestId('order-thumbnail')).not.toBeInTheDocument();
     });
 
-    it('displays product specifications in Hebrew', () => {
+    it('shows fallback gradient when style not found', () => {
+      const unknownStyleOrder: Order = {
+        ...mockOrder,
+        items: [{
+          ...mockOrder.items[0],
+          style: 'unknown_style' as never,
+        }],
+      };
+      render(<OrderCard order={unknownStyleOrder} />);
+
+      const gradient = screen.getByTestId('order-gradient');
+      expect(gradient).toHaveClass('bg-gradient-to-br');
+      expect(gradient).toHaveClass('from-purple-100');
+      expect(gradient).toHaveClass('to-pink-100');
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // AC-005: WHEN user views OrderCard
+  //         THEN text shows "Style · Size" format in Hebrew
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-005: Style · Size Format', () => {
+    it('shows style name and size from styles-ui', () => {
       render(<OrderCard order={mockOrder} />);
 
-      expect(screen.getByText('A4 • מסגרת שחורה')).toBeInTheDocument();
+      // Uses canonical style name from styles-ui.ts (not inline translations)
+      expect(screen.getByText('אווטאר קרטון · A4')).toBeInTheDocument();
     });
+  });
 
-    it('shows order total price', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-006: WHEN user views OrderCard
+  //         THEN price is green via PriceDisplay color="success"
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-006: Green Price', () => {
+    it('shows order total price with success color', () => {
       render(<OrderCard order={mockOrder} />);
 
       const priceDisplay = screen.getByTestId('price-display');
       expect(priceDisplay).toHaveTextContent('₪237');
+      expect(priceDisplay).toHaveAttribute('data-color', 'success');
     });
   });
 
-  describe('Order Status and Actions', () => {
-    it('renders status badge', () => {
+  // ═══════════════════════════════════════════════════════════════
+  // AC-007: WHEN user views OrderCard
+  //         THEN no CardFooter exists (no action button, no gift, no multi-item)
+  // ═══════════════════════════════════════════════════════════════
+  describe('AC-007: Simplified Layout', () => {
+    it('does not render a footer', () => {
+      render(<OrderCard order={mockOrder} />);
+
+      expect(screen.queryByTestId('order-action-button')).not.toBeInTheDocument();
+    });
+
+    it('does not render gift indicator', () => {
+      const giftOrder = { ...mockOrder, isGift: true, giftMessage: 'Happy Birthday!' };
+      render(<OrderCard order={giftOrder} />);
+
+      expect(screen.queryByTestId('gift-indicator')).not.toBeInTheDocument();
+    });
+
+    it('renders status badge in card body', () => {
       render(<OrderCard order={mockOrder} />);
 
       const statusBadge = screen.getByTestId('status-badge');
       expect(statusBadge).toHaveTextContent('shipped');
     });
 
-    it('shows track shipment action for shipped orders', () => {
-      render(<OrderCard order={mockOrder} />);
-
-      expect(screen.getByText('מעקב משלוח')).toBeInTheDocument();
-    });
-
-    it('shows details action for processing orders', () => {
+    it('shows correct status for different order states', () => {
       const processingOrder = { ...mockOrder, status: 'processing' as const };
       render(<OrderCard order={processingOrder} />);
 
-      expect(screen.getByText('פרטים')).toBeInTheDocument();
-    });
-
-    it('shows reorder action for delivered orders', () => {
-      const deliveredOrder = { ...mockOrder, status: 'delivered' as const };
-      render(<OrderCard order={deliveredOrder} />);
-
-      expect(screen.getByText('הזמנה חוזרת')).toBeInTheDocument();
-    });
-  });
-
-  describe('Gift Orders', () => {
-    it('shows gift indicator for gift orders', () => {
-      const giftOrder = { ...mockOrder, isGift: true, giftMessage: 'Happy Birthday!' };
-      render(<OrderCard order={giftOrder} />);
-
-      expect(screen.getByTestId('gift-indicator')).toBeInTheDocument();
-      expect(screen.getByText('מתנה')).toBeInTheDocument();
-    });
-  });
-
-  describe('Multiple Items', () => {
-    it('displays first item and shows additional items count', () => {
-      const multiItemOrder: Order = {
-        ...mockOrder,
-        items: [
-          ...mockOrder.items,
-          {
-            id: 'item_002',
-            orderId: 'demo_order_001',
-            originalImageUrl: 'https://example.com/image2.jpg',
-            transformedImageUrl: 'https://example.com/transformed2.jpg',
-            style: 'watercolor' as const,
-            size: 'A3' as const,
-            paperType: 'canvas' as const,
-            frameType: 'white' as const,
-            price: 309,
-            createdAt: new Date('2024-12-24T10:00:00'),
-          },
-        ],
-      };
-
-      render(<OrderCard order={multiItemOrder} />);
-
-      expect(screen.getByText('+1 עוד')).toBeInTheDocument();
+      expect(screen.getByTestId('status-badge')).toHaveTextContent('processing');
     });
   });
 
@@ -181,14 +198,35 @@ describe('OrderCard', () => {
 
       expect(handleClick).toHaveBeenCalledWith(mockOrder);
     });
-  });
 
-  describe('Responsive Design', () => {
-    it('applies responsive thumbnail sizes', () => {
-      render(<OrderCard order={mockOrder} />);
+    it('calls onClick when Enter key is pressed', () => {
+      const handleClick = vi.fn();
+      render(<OrderCard order={mockOrder} onClick={handleClick} />);
 
-      const thumbnail = screen.getByTestId('order-thumbnail');
-      expect(thumbnail).toHaveClass('w-[70px] h-[70px] sm:w-[80px] sm:h-[80px] lg:w-[90px] lg:h-[90px]');
+      const card = screen.getByTestId('order-card');
+      fireEvent.keyDown(card, { key: 'Enter' });
+
+      expect(handleClick).toHaveBeenCalledWith(mockOrder);
+    });
+
+    it('calls onClick when Space key is pressed', () => {
+      const handleClick = vi.fn();
+      render(<OrderCard order={mockOrder} onClick={handleClick} />);
+
+      const card = screen.getByTestId('order-card');
+      fireEvent.keyDown(card, { key: ' ' });
+
+      expect(handleClick).toHaveBeenCalledWith(mockOrder);
+    });
+
+    it('does not call onClick for other keys', () => {
+      const handleClick = vi.fn();
+      render(<OrderCard order={mockOrder} onClick={handleClick} />);
+
+      const card = screen.getByTestId('order-card');
+      fireEvent.keyDown(card, { key: 'Tab' });
+
+      expect(handleClick).not.toHaveBeenCalled();
     });
   });
 

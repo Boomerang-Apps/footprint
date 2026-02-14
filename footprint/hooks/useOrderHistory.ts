@@ -104,7 +104,13 @@ export function useOrderHistory({
     },
     enabled,
     staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
-    retry: 3,
+    retry: (failureCount, error) => {
+      // Don't retry on auth errors (401)
+      if (error?.message?.includes('Unauthorized') || error?.message?.includes('401')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 
   return {
@@ -134,6 +140,11 @@ export function useOrder(orderId: string, enabled = true) {
     queryFn: () => api.orders.get(orderId),
     enabled: enabled && !!orderId,
     staleTime: 30 * 60 * 1000, // Consider data stale after 30 minutes
-    retry: 3,
+    retry: (failureCount, error) => {
+      if (error?.message?.includes('Unauthorized') || error?.message?.includes('401')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 }

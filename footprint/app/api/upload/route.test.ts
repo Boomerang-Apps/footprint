@@ -197,7 +197,7 @@ describe('POST /api/upload', () => {
   });
 
   describe('Authentication', () => {
-    it('should reject unauthenticated uploads in production', async () => {
+    it('should allow anonymous uploads for guest checkout', async () => {
       // Mock unauthenticated user
       mockGetUser.mockResolvedValue({
         data: { user: null },
@@ -216,9 +216,9 @@ describe('POST /api/upload', () => {
       });
 
       const response = await POST(request);
-      expect(response.status).toBe(401);
+      expect(response.status).toBe(200);
       const data = await response.json();
-      expect(data.error).toBe('Authentication required');
+      expect(data.uploadUrl).toBeDefined();
     });
 
     it('should allow anonymous uploads when NEXT_PUBLIC_USE_MOCK is true', async () => {

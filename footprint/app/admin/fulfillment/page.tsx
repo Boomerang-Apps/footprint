@@ -14,7 +14,7 @@ import { FulfillmentBoard } from '@/components/admin/FulfillmentBoard';
 import { OrderDetailPanel } from '@/components/admin/OrderDetailPanel';
 import { type OrderCardOrder } from '@/components/admin/OrderCard';
 import { type FulfillmentStatus } from '@/lib/fulfillment/status-transitions';
-import { bulkUpdateStatus } from '@/lib/fulfillment/bulk-operations';
+import { bulkUpdateStatus, bulkDownloadPrintFiles, initiateDownload } from '@/lib/fulfillment/bulk-operations';
 import { logger } from '@/lib/logger';
 
 export default function FulfillmentPage() {
@@ -67,19 +67,26 @@ export default function FulfillmentPage() {
     [refetch, selectedOrder]
   );
 
-  const handleBulkDownload = useCallback((orderIds: string[]) => {
-    // TODO: Implement bulk download (BE-08)
-    logger.debug('Download print files for orders', { orderIds });
+  const handleBulkDownload = useCallback(async (orderIds: string[]) => {
+    try {
+      const result = await bulkDownloadPrintFiles(orderIds);
+      initiateDownload(result.downloadUrl, result.fileName);
+    } catch (error) {
+      logger.error('Bulk download failed', { orderIds, error });
+    }
   }, []);
 
   const handlePrint = useCallback((orderId: string) => {
-    // TODO: Implement print functionality
-    logger.debug('Print order', { orderId });
+    window.open(`/admin/orders/${orderId}?print=true`, '_blank');
   }, []);
 
-  const handleDownloadPrintFiles = useCallback((orderId: string) => {
-    // TODO: Implement single order download
-    logger.debug('Download print files for order', { orderId });
+  const handleDownloadPrintFiles = useCallback(async (orderId: string) => {
+    try {
+      const result = await bulkDownloadPrintFiles([orderId]);
+      initiateDownload(result.downloadUrl, result.fileName);
+    } catch (error) {
+      logger.error('Download print files failed', { orderId, error });
+    }
   }, []);
 
   return (

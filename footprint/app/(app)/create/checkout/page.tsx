@@ -64,7 +64,7 @@ function CheckoutPageContent() {
     zipCode: '',
   });
 
-  // Check authentication status on mount
+  // Check authentication status on mount and pre-fill from profile
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -72,8 +72,29 @@ function CheckoutPageContent() {
         const { data: { session } } = await supabase.auth.getSession();
         setIsAuthenticated(!!session);
 
-        // If not authenticated and not guest, show auth flow
-        if (!session && !isGuest) {
+        if (session?.user) {
+          // Pre-fill email from session (only if not already set)
+          setFormData(prev => ({
+            ...prev,
+            email: prev.email || session.user.email || '',
+          }));
+
+          // Pre-fill name and phone from profile API
+          try {
+            const res = await fetch('/api/profile', { credentials: 'include' });
+            if (res.ok) {
+              const profile = await res.json();
+              setFormData(prev => ({
+                ...prev,
+                fullName: prev.fullName || profile.name || '',
+                email: prev.email || profile.email || '',
+                phone: prev.phone || profile.phone || '',
+              }));
+            }
+          } catch {
+            // Profile fetch is non-blocking
+          }
+        } else if (!isGuest) {
           setShowAuthFlow(true);
         }
       } catch {
