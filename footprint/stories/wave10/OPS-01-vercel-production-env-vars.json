@@ -1,0 +1,173 @@
+{
+  "$schema": "../../planning/schemas/story-schema-v4.3.json",
+  "schema_version": "4.3",
+  "story_id": "OPS-01",
+  "type": "infrastructure",
+  "wave_number": 10,
+  "title": "Set PayPlus Webhook IPs & Cron Secret in Vercel Production",
+  "domain": "backend",
+  "agent": "be-dev",
+  "priority": "P0",
+  "story_points": 2,
+  "description": "Configure two critical production environment variables in Vercel: PAYPLUS_WEBHOOK_IPS (comma-separated IP whitelist for webhook endpoint security) and CRON_SECRET (Bearer token for cron job authentication). Both are required by code already merged to main (CO-06, PR #24). Without these, the webhook endpoint accepts requests from any IP and the cron job for expiring pending orders returns 401 on every invocation.",
+  "status": "pending",
+  "objective": {
+    "as_a": "operations engineer",
+    "i_want": "to configure production environment variables for PayPlus webhook IP whitelisting and cron job authentication",
+    "so_that": "webhook requests are restricted to PayPlus servers and the pending-order expiry cron runs securely every 5 minutes"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-01",
+      "description": "CRON_SECRET set in Vercel production",
+      "ears_format": "WHEN Vercel production environment is checked THEN CRON_SECRET is set to a cryptographically random 32-byte base64 value",
+      "test_approach": "Verify via Vercel dashboard or CLI that CRON_SECRET exists in production env vars"
+    },
+    {
+      "id": "AC-02",
+      "description": "Cron job authenticates successfully",
+      "ears_format": "WHEN Vercel cron triggers GET /api/cron/expire-pending-orders THEN request includes Authorization: Bearer <CRON_SECRET> and receives 200 response",
+      "test_approach": "Check Vercel function logs after next cron invocation (runs every 5 minutes)"
+    },
+    {
+      "id": "AC-03",
+      "description": "PAYPLUS_WEBHOOK_IPS set in Vercel production",
+      "ears_format": "WHEN Vercel production environment is checked THEN PAYPLUS_WEBHOOK_IPS contains comma-separated PayPlus server IPs obtained from PayPlus dashboard",
+      "test_approach": "Verify via Vercel dashboard that PAYPLUS_WEBHOOK_IPS is set with valid IPs"
+    },
+    {
+      "id": "AC-04",
+      "description": "Webhook IP whitelisting active",
+      "ears_format": "WHEN PayPlus sends webhook to /api/webhooks/payplus THEN request IP is validated against PAYPLUS_WEBHOOK_IPS whitelist before processing",
+      "test_approach": "Trigger a test payment in PayPlus sandbox, verify webhook processes successfully from PayPlus IP"
+    },
+    {
+      "id": "AC-05",
+      "description": "Non-whitelisted IPs rejected",
+      "ears_format": "WHEN a request from a non-PayPlus IP hits /api/webhooks/payplus THEN return 403 Forbidden",
+      "test_approach": "curl the webhook endpoint from a non-whitelisted IP, verify 403 response"
+    },
+    {
+      "id": "AC-06",
+      "description": "Env vars scoped to production only",
+      "ears_format": "WHEN env vars are configured THEN they are set for Production environment only, not Preview or Development",
+      "test_approach": "Verify Vercel env var scope settings in dashboard"
+    }
+  ],
+  "context": {
+    "read_files": [
+      "lib/payments/ip-whitelist.ts",
+      "app/api/cron/expire-pending-orders/route.ts",
+      "app/api/webhooks/payplus/route.ts",
+      "vercel.json"
+    ],
+    "similar_implementations": []
+  },
+  "execution": {
+    "model_tier": "haiku",
+    "checkpoint_frequency": "on_complete"
+  },
+  "files": {
+    "create": [],
+    "modify": [],
+    "forbidden": [
+      "lib/payments/*",
+      "app/api/*",
+      "vercel.json"
+    ]
+  },
+  "design_source": {
+    "type": "none"
+  },
+  "technical_requirements": {
+    "reuse_components": [],
+    "reuse_patterns": {
+      "cron_auth": "Authorization: Bearer <CRON_SECRET> with crypto.timingSafeEqual",
+      "ip_whitelist": "Comma-separated IPs/CIDRs in PAYPLUS_WEBHOOK_IPS"
+    },
+    "configuration": "Vercel Dashboard → Settings → Environment Variables → Production scope"
+  },
+  "tdd": {
+    "test_framework": "manual",
+    "test_files": [],
+    "coverage_target": 0,
+    "test_categories": [
+      {
+        "name": "Production Verification",
+        "count": 3,
+        "examples": [
+          "Cron job returns 200 in Vercel function logs",
+          "Webhook processes PayPlus sandbox payment",
+          "Non-PayPlus IP gets 403 on webhook endpoint"
+        ]
+      }
+    ],
+    "mocking_strategy": {}
+  },
+  "safety": {
+    "stop_conditions": [
+      "Never commit env var values to git",
+      "Never log CRON_SECRET value",
+      "Never expose PayPlus IPs publicly"
+    ],
+    "escalation_triggers": [
+      "Cron job still returning 401 after env var set",
+      "Legitimate PayPlus webhooks getting 403",
+      "Payment flow broken in production"
+    ],
+    "rollback_plan": "Remove PAYPLUS_WEBHOOK_IPS to allow all IPs (reverts to dev behavior). Remove CRON_SECRET to disable cron auth (cron will fail safely)."
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Wrong IPs in PAYPLUS_WEBHOOK_IPS blocks legitimate payment webhooks",
+        "severity": "critical",
+        "likelihood": "occasional",
+        "mitigation": "Verify IPs from PayPlus dashboard documentation. Test with sandbox payment before going live. Can remove env var to disable whitelist as emergency fallback."
+      },
+      {
+        "id": "HAZ-002",
+        "description": "CRON_SECRET exposed in logs or error messages",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Code uses timingSafeEqual and never logs the secret value. Vercel masks env vars in logs."
+      },
+      {
+        "id": "HAZ-003",
+        "description": "PayPlus changes their server IPs without notice",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Monitor webhook 403 rate. If spikes, check PayPlus IP documentation and update env var."
+      }
+    ],
+    "risk_level": "medium"
+  },
+  "dependencies": {
+    "required_before": ["CO-06"],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": ["PRD-PAYMENTS", "PRD-SECURITY"],
+    "epic": "OPERATIONS",
+    "related_stories": ["CO-06"]
+  },
+  "output": {
+    "files_created": [],
+    "files_modified": [],
+    "tests_passing": true,
+    "pr_description": "ops(OPS-01): configure PAYPLUS_WEBHOOK_IPS and CRON_SECRET in Vercel production"
+  },
+  "validation": {
+    "lint_command": "n/a",
+    "test_command": "n/a",
+    "build_command": "n/a",
+    "type_check_command": "n/a"
+  },
+  "estimated_tests": 0,
+  "metadata": {
+    "created_at": "2026-02-14T17:30:00Z",
+    "created_by": "claude-opus-4-6"
+  },
+  "notes": "Pure operations story — no code changes. CRON_SECRET pre-generated: bRWEfZThXiZWRorALkEEkT0zg8sRVSCEl7Rfu4W9pgA= (from openssl rand -base64 32). PAYPLUS_WEBHOOK_IPS format: comma-separated IPs or CIDRs (e.g., '185.180.224.0/24,185.180.225.0/24'). Get exact IPs from PayPlus merchant dashboard under webhook settings. Cron runs every 5 min (vercel.json). Empty PAYPLUS_WEBHOOK_IPS = allow all (current dev behavior)."
+}
