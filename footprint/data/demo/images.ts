@@ -28,6 +28,7 @@ export const stylePreviewImages: Record<StyleType, string> = {
   line_art: '/demo/styles/line-art.jpg',
   line_art_watercolor: '/demo/styles/line-watercolor.jpg',
   pop_art: '/demo/styles/pop-art.jpg',
+  wpap: '/demo/styles/wpap.jpg',
 };
 
 // Transformed image examples (same image in different styles)
@@ -37,6 +38,7 @@ export const transformedExamples: Record<StyleType, string> = {
   line_art: 'https://picsum.photos/seed/line_art_demo/800/600',
   line_art_watercolor: 'https://picsum.photos/seed/line_watercolor_demo/800/600',
   pop_art: 'https://picsum.photos/seed/pop_art_demo/800/600',
+  wpap: 'https://picsum.photos/seed/wpap_demo/800/600',
 };
 
 // Aggregated demo images export

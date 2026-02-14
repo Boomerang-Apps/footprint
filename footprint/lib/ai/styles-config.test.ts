@@ -23,10 +23,11 @@ describe('STYLE_CONFIGS', () => {
     'watercolor',
     'line_art',
     'original_enhanced',
+    'wpap',
   ];
 
-  it('should have all 4 styles defined', () => {
-    expect(Object.keys(STYLE_CONFIGS)).toHaveLength(4);
+  it('should have all 5 styles defined', () => {
+    expect(Object.keys(STYLE_CONFIGS)).toHaveLength(5);
   });
 
   it('should include every expected style', () => {
@@ -93,9 +94,9 @@ describe('STYLE_CONFIGS', () => {
 });
 
 describe('getAllStyles', () => {
-  it('should return array of all 4 styles', () => {
+  it('should return array of all 5 styles', () => {
     const styles = getAllStyles();
-    expect(styles).toHaveLength(4);
+    expect(styles).toHaveLength(5);
   });
 
   it('should return StyleConfig objects', () => {
@@ -166,8 +167,8 @@ describe('isValidStyleId', () => {
 });
 
 describe('STYLE_IDS', () => {
-  it('should have 4 entries', () => {
-    expect(STYLE_IDS).toHaveLength(4);
+  it('should have 5 entries', () => {
+    expect(STYLE_IDS).toHaveLength(5);
   });
 
   it('should match keys of STYLE_CONFIGS', () => {

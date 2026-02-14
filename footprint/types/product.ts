@@ -6,7 +6,8 @@ export type StyleType =
   | 'watercolor'
   | 'line_art'
   | 'line_art_watercolor'
-  | 'pop_art';
+  | 'pop_art'
+  | 'wpap';
 
 export interface Style {
   id: StyleType;

@@ -15,7 +15,8 @@ export type StyleType =
   | 'watercolor'
   | 'line_art'
   | 'line_art_watercolor'
-  | 'pop_art';
+  | 'pop_art'
+  | 'wpap';
 
 /**
  * List of all allowed styles for validation
@@ -26,6 +27,7 @@ export const ALLOWED_STYLES: readonly StyleType[] = [
   'line_art',
   'line_art_watercolor',
   'pop_art',
+  'wpap',
 ] as const;
 
 /**
@@ -48,6 +50,8 @@ export const STYLE_PROMPTS: Record<StyleType, string> = {
 
   pop_art:
     'Transform into bold Pop Art style inspired by Andy Warhol and Roy Lichtenstein. Style: vibrant saturated colors like hot pink, electric blue, bright yellow and orange, visible halftone dot patterns in shadow areas, strong black outlines defining shapes, high contrast with simplified tonal areas, graphic poster-like quality with clean color separations, screen-printed aesthetic. Preserve subject likeness while creating iconic pop art portrait suitable for framing.',
+
+  wpap: 'Create a WPAP (Wedha\'s Pop Art Portrait) vector illustration. The FACE must be colored with bold flat polygon fills — forehead golden yellow, one cheek deep purple, other cheek orange, nose olive green, chin teal, shadows in magenta. NO natural skin color anywhere — every face polygon a different bold color. Razor-sharp straight edges between every polygon like Illustrator vector art. Hair as sharp angular geometric strokes in dark tones with colorful highlights. Background: large pastel geometric rectangles in soft yellow, pink, pale blue, teal. Single flat solid color per polygon — no gradients, no soft edges. Crisp vector quality. Preserve facial likeness.',
 };
 
 /**

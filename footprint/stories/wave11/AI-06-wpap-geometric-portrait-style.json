@@ -1,0 +1,347 @@
+{
+  "$schema": "../../planning/schemas/story-schema-v4.3.json",
+  "schema_version": "4.3",
+  "story_id": "AI-06",
+  "type": "feature",
+  "wave_number": 11,
+  "title": "Add WPAP Geometric Portrait Style to Nano Banana Pipeline",
+  "domain": "fullstack",
+  "agent": "be-dev",
+  "priority": "P1",
+  "story_points": 5,
+  "description": "Add a new WPAP (Wedha's Pop Art Portrait) AI style to the Nano Banana transformation pipeline. WPAP renders portraits as sharp angular polygon planes with bold flat solid colors and high contrast — inspired by Wedha Abdul Rasyid. This involves adding the style configuration with optimized prompts, updating the UI style picker gallery (9th position, after 'original'), updating the StyleType/StyleId unions, and adding the 'חדש' badge. WPAP is highly print-friendly due to flat color planes and hard edges with no gradient banding artifacts.",
+  "status": "complete",
+  "objective": {
+    "as_a": "customer creating a photo-to-art order",
+    "i_want": "to select a WPAP geometric portrait style from the style gallery",
+    "so_that": "I can transform my photo into a sharp, colorful geometric polygon artwork suitable for high-quality printing"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-01",
+      "description": "WPAP style appears in gallery as 9th item",
+      "ears_format": "WHEN user navigates to /create/style THEN WPAP appears as the 9th style option after 'original' with hexagon icon and tri-color gradient",
+      "test_approach": "Render StyleGallery component, verify 'wpap' is at index position after 'original' with correct icon and gradient"
+    },
+    {
+      "id": "AC-02",
+      "description": "חדש badge displays correctly in RTL",
+      "ears_format": "WHEN style gallery renders THEN WPAP style shows 'חדש' badge with correct RTL alignment",
+      "test_approach": "Render style option, assert badge text is 'חדש' and badge type is 'new'"
+    },
+    {
+      "id": "AC-03",
+      "description": "Selecting WPAP triggers AI transformation",
+      "ears_format": "WHEN user taps WPAP style THEN POST /api/transform fires with style: 'wpap' and the optimized WPAP prompt",
+      "test_approach": "Mock /api/transform, select wpap style, verify request body contains style 'wpap' and correct prompt"
+    },
+    {
+      "id": "AC-04",
+      "description": "WPAP prompt produces geometric polygon output",
+      "ears_format": "WHEN transformation completes THEN result image shows angular polygon planes with flat solid colors and no gradients",
+      "test_approach": "Manual visual QA — compare output against WPAP reference images for polygon structure and flat color planes"
+    },
+    {
+      "id": "AC-05",
+      "description": "Facial likeness preserved in WPAP output",
+      "ears_format": "WHEN WPAP transformation completes THEN subject's facial features, hairstyle, glasses, and identifying characteristics are recognizable",
+      "test_approach": "Manual visual QA — side-by-side comparison of original photo and WPAP output for identity preservation"
+    },
+    {
+      "id": "AC-06",
+      "description": "Output resolution sufficient for print",
+      "ears_format": "WHEN WPAP transformation completes THEN output image has minimum 3000px on long edge",
+      "threshold": "resolution: >=3000px long edge",
+      "test_approach": "Check returned image dimensions from transformation API response"
+    },
+    {
+      "id": "AC-07",
+      "description": "WPAP style persists through order flow",
+      "ears_format": "WHEN user selects WPAP and proceeds through customize to checkout THEN order store retains style 'wpap' at every step",
+      "test_approach": "Unit test: set orderStore style to 'wpap', navigate through steps, assert style value persists"
+    },
+    {
+      "id": "AC-08",
+      "description": "StyleType and StyleId unions include wpap",
+      "ears_format": "WHEN TypeScript compiles THEN 'wpap' is a valid value for both StyleType and StyleId types",
+      "test_approach": "pnpm type-check passes with 'wpap' assigned to StyleType and StyleId variables"
+    },
+    {
+      "id": "AC-09",
+      "description": "WPAP style config has complete Nano Banana prompt",
+      "ears_format": "WHEN STYLE_CONFIGS['wpap'] is accessed THEN it returns a StyleConfig with prompt under 950 chars, negativePrompt, and correct styleAnchors",
+      "test_approach": "Unit test: assert STYLE_CONFIGS.wpap.prompt.length < 950, negativePrompt defined, all styleAnchors present"
+    },
+    {
+      "id": "AC-10",
+      "description": "Negative prompt included for WPAP",
+      "ears_format": "WHEN WPAP transformation request is built THEN negative prompt excluding gradients, watercolor, realism, and anime is included",
+      "test_approach": "Unit test: verify STYLE_CONFIGS.wpap includes negativePrompt with key exclusion terms"
+    },
+    {
+      "id": "AC-11",
+      "description": "Style name shows on preview",
+      "ears_format": "WHEN WPAP preview renders THEN style name badge shows 'דיוקן גיאומטרי' in Hebrew",
+      "test_approach": "Render preview component with style 'wpap', assert text content includes 'דיוקן גיאומטרי'"
+    },
+    {
+      "id": "AC-12",
+      "description": "Admin panel displays WPAP label on orders",
+      "ears_format": "WHEN admin views an order with style 'wpap' THEN the style column shows 'WPAP' or 'דיוקן גיאומטרי'",
+      "test_approach": "Verify admin order list renders style label for 'wpap' orders"
+    }
+  ],
+  "context": {
+    "read_files": [
+      "lib/ai/styles-config.ts",
+      "lib/ai/styles-ui.ts",
+      "lib/ai/nano-banana.ts",
+      "lib/ai/index.ts",
+      "types/product.ts",
+      "stores/orderStore.ts",
+      "app/(app)/create/style/page.tsx"
+    ],
+    "code_examples": [
+      {
+        "description": "Existing Nano Banana style config pattern (pop_art)",
+        "code": "pop_art: {\n  id: 'pop_art',\n  nameHe: 'פופ ארט',\n  nameEn: 'Pop Art',\n  prompt: `...`,\n  styleAnchors: { medium, era, palette, texture, lighting },\n  parameters: { temperature: 0.8 },\n  cssFilter: '...',\n  icon: 'zap',\n  gradient: ['#8b5cf6', '#ec4899']\n}",
+        "file_reference": "lib/ai/styles-config.ts"
+      },
+      {
+        "description": "Existing UI style option pattern",
+        "code": "{\n  id: 'pop_art',\n  name: 'Pop Art',\n  nameHe: 'פופ ארט',\n  icon: Palette,\n  gradient: 'from-red-500 to-yellow-400',\n  badge: 'new'\n}",
+        "file_reference": "lib/ai/styles-ui.ts"
+      }
+    ],
+    "similar_implementations": [
+      "lib/ai/styles-config.ts (pop_art entry)",
+      "lib/ai/styles-ui.ts (pop_art entry)"
+    ]
+  },
+  "execution": {
+    "max_retries": 3,
+    "timeout_minutes": 60,
+    "model_tier": "sonnet",
+    "checkpoint_frequency": "per_gate"
+  },
+  "subtasks": [
+    {
+      "id": "ST-01",
+      "title": "Add 'wpap' to StyleType union in types/product.ts",
+      "description": "Add 'wpap' to the StyleType union type",
+      "status": "pending"
+    },
+    {
+      "id": "ST-02",
+      "title": "Add 'wpap' to StyleId union and STYLE_CONFIGS in styles-config.ts",
+      "description": "Add wpap to StyleId type and create full StyleConfig entry with optimized WPAP prompt, negative prompt, styleAnchors, parameters, cssFilter, icon, and gradient",
+      "checkpoint_after": true,
+      "status": "pending"
+    },
+    {
+      "id": "ST-03",
+      "title": "Add WPAP to UI styles array in styles-ui.ts",
+      "description": "Add wpap StyleOption with Hexagon icon from lucide-react, gradient 'from-cyan-500 via-violet-500 to-pink-500', badge 'new', positioned after 'original' (last in array = 6th, or insert at specific index for 9th position as spec requires)",
+      "status": "pending"
+    },
+    {
+      "id": "ST-04",
+      "title": "Verify style picker component renders WPAP correctly",
+      "description": "Ensure the style selection page and any StyleGallery components pick up the new style from the STYLES array without requiring component changes",
+      "status": "pending"
+    },
+    {
+      "id": "ST-05",
+      "title": "Add negativePrompt support to StyleConfig interface if missing",
+      "description": "The spec requires a negativePrompt field. Check if StyleConfig interface already supports it; if not, add it as optional field and wire it through the Nano Banana transformation call",
+      "checkpoint_after": true,
+      "status": "pending"
+    },
+    {
+      "id": "ST-06",
+      "title": "Write unit tests for WPAP style configuration",
+      "description": "Add tests: WPAP in STYLE_CONFIGS, prompt under 950 chars, negativePrompt contains key exclusion terms, styleAnchors complete, WPAP in STYLES UI array with correct badge",
+      "status": "pending"
+    },
+    {
+      "id": "ST-07",
+      "title": "Run type-check, lint, build, and full test suite",
+      "description": "Ensure 0 TS errors, 0 lint errors, build passes, all tests pass",
+      "checkpoint_after": true,
+      "status": "pending"
+    }
+  ],
+  "files": {
+    "create": [
+      "lib/ai/__tests__/wpap-style.test.ts"
+    ],
+    "modify": [
+      "types/product.ts",
+      "lib/ai/replicate.ts",
+      "lib/ai/styles-config.ts",
+      "lib/ai/styles-ui.ts"
+    ],
+    "forbidden": [
+      "stores/orderStore.ts",
+      "app/api/transform/route.ts",
+      "lib/ai/nano-banana.ts",
+      "lib/payments/*",
+      "supabase/*"
+    ]
+  },
+  "design_source": {
+    "type": "none",
+    "interactions": [
+      {
+        "trigger": "User taps WPAP style in gallery",
+        "action": "Set style to 'wpap' in order store, trigger /api/transform",
+        "target": "Style preview panel"
+      }
+    ],
+    "accessibility": {
+      "wcag_level": "AA",
+      "aria_requirements": [
+        "aria-label on style button: 'דיוקן גיאומטרי (WPAP)'",
+        "aria-selected on active style"
+      ],
+      "keyboard_navigation": true
+    }
+  },
+  "technical_requirements": {
+    "reuse_components": [
+      "StyleOption interface (lib/ai/styles-ui.ts)",
+      "StyleConfig interface (lib/ai/styles-config.ts)",
+      "Hexagon icon (lucide-react)"
+    ],
+    "reuse_patterns": {
+      "style_config": "Follow pop_art StyleConfig pattern in styles-config.ts",
+      "style_ui": "Follow pop_art StyleOption pattern in styles-ui.ts",
+      "prompt_structure": "Narrative prompt style per Google best practices (94% coherence)"
+    },
+    "configuration": "No new env vars required. WPAP uses existing Nano Banana (Gemini 2.5 Flash) pipeline."
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "lib/ai/__tests__/wpap-style.test.ts",
+      "lib/ai/styles-ui.test.ts"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Style Config Validation",
+        "count": 6,
+        "examples": [
+          "WPAP exists in STYLE_CONFIGS",
+          "WPAP prompt is under 950 characters",
+          "WPAP negativePrompt contains anti-gradient terms",
+          "WPAP styleAnchors has medium, palette, and texture",
+          "WPAP parameters.temperature is set",
+          "WPAP cssFilter is defined"
+        ]
+      },
+      {
+        "name": "UI Style Array",
+        "count": 4,
+        "examples": [
+          "WPAP exists in STYLES array",
+          "WPAP has badge 'new'",
+          "WPAP icon is Hexagon",
+          "WPAP nameHe is 'דיוקן גיאומטרי'"
+        ]
+      },
+      {
+        "name": "Type Safety",
+        "count": 2,
+        "examples": [
+          "'wpap' is assignable to StyleType",
+          "'wpap' is assignable to StyleId"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "nano_banana": "Not needed — testing config objects only, no API calls"
+    }
+  },
+  "safety": {
+    "stop_conditions": [
+      "Do not modify the Nano Banana API client (nano-banana.ts)",
+      "Do not modify the transform API route",
+      "Do not change existing style prompts or parameters",
+      "Do not remove the 'new' badge from pop_art when adding it to wpap"
+    ],
+    "escalation_triggers": [
+      "WPAP prompt exceeds 950 characters",
+      "Type-check fails after adding 'wpap' to unions",
+      "Existing style tests break after adding WPAP"
+    ],
+    "rollback_plan": "Remove 'wpap' from StyleType, StyleId, STYLE_CONFIGS, and STYLES arrays. Revert to previous state — no database changes, no API changes, purely additive config."
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "WPAP prompt produces painterly/gradient output instead of flat polygon planes",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Prompt includes explicit anti-gradient instructions and negative prompt. Fallback prompt variations provided in spec for tuning."
+      },
+      {
+        "id": "HAZ-002",
+        "description": "Facial likeness lost in geometric transformation",
+        "severity": "major",
+        "likelihood": "occasional",
+        "mitigation": "Prompt prioritizes identity preservation as first instruction. Fallback prompt variation available to strengthen facial structure anchoring."
+      },
+      {
+        "id": "HAZ-003",
+        "description": "Adding 6th style increases gallery scroll or breaks layout on small screens",
+        "severity": "minor",
+        "likelihood": "remote",
+        "mitigation": "Gallery already supports horizontal scroll. Test on 375px width (iPhone SE). Style count is data-driven from STYLES array."
+      },
+      {
+        "id": "HAZ-004",
+        "description": "Nano Banana cost increase from additional style usage",
+        "severity": "minor",
+        "likelihood": "remote",
+        "mitigation": "Same pricing per transformation (~$0.039/image). Caching (7-day TTL) and rate limiting (20/min) already in place."
+      }
+    ],
+    "risk_level": "low"
+  },
+  "dependencies": {
+    "required_before": ["AI-05"],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": ["PRD-AI-STYLES", "PRD-PRODUCT-CATALOG"],
+    "epic": "AI-STYLES",
+    "related_stories": ["AI-05"]
+  },
+  "output": {
+    "files_created": [
+      "lib/ai/__tests__/wpap-style.test.ts"
+    ],
+    "files_modified": [
+      "types/product.ts",
+      "lib/ai/replicate.ts",
+      "lib/ai/styles-config.ts",
+      "lib/ai/styles-ui.ts"
+    ],
+    "tests_passing": true,
+    "pr_description": "feat(AI-06): add WPAP geometric portrait style to Nano Banana pipeline"
+  },
+  "validation": {
+    "lint_command": "pnpm lint",
+    "test_command": "pnpm test:run",
+    "build_command": "pnpm build",
+    "type_check_command": "pnpm type-check"
+  },
+  "estimated_tests": 12,
+  "metadata": {
+    "created_at": "2026-02-14T18:00:00Z",
+    "created_by": "claude-opus-4-6"
+  },
+  "notes": "WPAP (Wedha's Pop Art Portrait) is a geometric polygon art style. Primary prompt is optimized for Gemini 2.5 Flash Image (Nano Banana) at ~720 chars. Negative prompt and fallback prompt variations provided in spec for tuning if output quality needs adjustment. WPAP is exceptionally print-friendly — flat color planes, hard edges, no gradient banding. Best paper pairing: Fine Art Matte or Glossy Photo. The spec includes 4 fallback prompt variations for common failure modes (painterly output, likeness drift, muted colors, insufficient polygons)."
+}

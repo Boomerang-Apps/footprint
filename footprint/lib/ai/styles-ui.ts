@@ -11,6 +11,7 @@ import {
   Pen,
   Layers,
   Palette,
+  Hexagon,
 } from 'lucide-react';
 import type { StyleType } from '@/types';
 
@@ -59,6 +60,14 @@ export const STYLES: StyleOption[] = [
     nameHe: 'פופ ארט',
     icon: Palette,
     gradient: 'from-red-500 to-yellow-400',
+    badge: 'new',
+  },
+  {
+    id: 'wpap',
+    name: 'WPAP',
+    nameHe: 'דיוקן גיאומטרי',
+    icon: Hexagon,
+    gradient: 'from-cyan-500 via-violet-500 to-pink-500',
     badge: 'new',
   },
 ];

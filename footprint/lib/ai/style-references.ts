@@ -90,6 +90,14 @@ export const STYLE_REFERENCES: Record<StyleType, StyleConfig> = {
       'Transform into bold pop art style with vibrant colors, halftone dots, and strong outlines inspired by Warhol and Lichtenstein.',
   },
 
+  wpap: {
+    id: 'wpap',
+    references: [],
+    useReferences: true,
+    referencePrompt:
+      'Create WPAP geometric polygon art. CRITICAL: Replace ALL natural skin tones with vivid artificial colors (red, cyan, purple, orange, blue, yellow, magenta, green, teal). Every polygon must be a different bold saturated color. No realistic colors anywhere. Sharp angular facets, flat solid fills, crisp hard edges. White background.',
+  },
+
 };
 
 /**
