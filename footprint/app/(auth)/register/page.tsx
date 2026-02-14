@@ -183,6 +183,10 @@ export default function RegisterPage() {
             facebookLoading={facebookLoading}
             showFacebook
             disabled={isAnyLoading}
+            googleLabel="המשך עם Google"
+            facebookLabel="המשך עם Facebook"
+            appleLabel="המשך עם Apple"
+            dividerText="או"
           />
 
           <form onSubmit={handleSubmit} className="space-y-4" dir="rtl" noValidate>

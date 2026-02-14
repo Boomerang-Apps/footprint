@@ -152,6 +152,10 @@ function LoginPageContent() {
             facebookLoading={facebookLoading}
             showFacebook
             disabled={isAnyLoading}
+            googleLabel="המשך עם Google"
+            facebookLabel="המשך עם Facebook"
+            appleLabel="המשך עם Apple"
+            dividerText="או"
           />
 
           <LoginForm
