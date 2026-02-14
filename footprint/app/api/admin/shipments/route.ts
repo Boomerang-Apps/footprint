@@ -10,7 +10,9 @@ import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { getDefaultShippingService } from '@/lib/shipping/providers/shipping-service';
+import { ShippingProviderError } from '@/lib/shipping/providers/types';
 import { type CarrierCode } from '@/lib/shipping/tracking';
+import { validateAddress } from '@/lib/shipping/validation';
 
 interface CreateShipmentBody {
   orderId: string;
@@ -28,6 +30,7 @@ interface ShipmentResponse {
 
 interface ErrorResponse {
   error: string;
+  code?: string;
 }
 
 // Default sender address (Footprint shop)
@@ -53,12 +56,12 @@ const DEFAULT_PACKAGE = {
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ShipmentResponse | ErrorResponse>> {
-  // Rate limiting
-  const rateLimited = await checkRateLimit('general', request);
+  // Rate limiting — 20/min for shipment operations (AC-014)
+  const rateLimited = await checkRateLimit('shipping', request);
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    // 1. Verify authentication
+    // 1. Verify authentication (AC-015)
     const supabase = await createClient();
     const {
       data: { user },
@@ -67,7 +70,7 @@ export async function POST(
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Unauthorized - Please sign in' },
+        { error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
       );
     }
@@ -76,7 +79,7 @@ export async function POST(
     const userRole = user.user_metadata?.role;
     if (userRole !== 'admin') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: 'נדרשת הרשאת מנהל' },
         { status: 403 }
       );
     }
@@ -87,7 +90,7 @@ export async function POST(
       body = await request.json();
     } catch {
       return NextResponse.json(
-        { error: 'Invalid JSON body' },
+        { error: 'גוף בקשה לא תקין' },
         { status: 400 }
       );
     }
@@ -96,7 +99,7 @@ export async function POST(
 
     if (!orderId) {
       return NextResponse.json(
-        { error: 'Missing required field: orderId' },
+        { error: 'חסר שדה orderId' },
         { status: 400 }
       );
     }
@@ -110,20 +113,48 @@ export async function POST(
 
     if (orderError || !order) {
       return NextResponse.json(
-        { error: 'Order not found' },
+        { error: 'הזמנה לא נמצאה' },
         { status: 404 }
       );
     }
 
-    // 5. Validate shipping address
+    // 5. Validate shipping address (AC-006)
     if (!order.shipping_address) {
       return NextResponse.json(
-        { error: 'Order has no shipping address' },
+        { error: 'להזמנה אין כתובת משלוח' },
         { status: 400 }
       );
     }
 
-    // 6. Create shipment with provider
+    const addressValidation = validateAddress(order.shipping_address);
+    if (!addressValidation.valid) {
+      const errorMessages = Object.values(addressValidation.errors).filter(Boolean);
+      return NextResponse.json(
+        {
+          error: 'כתובת משלוח לא תקינה',
+          code: 'INVALID_ADDRESS',
+          ...({ validationErrors: addressValidation.errors }),
+        } as ErrorResponse,
+        { status: 400 }
+      );
+    }
+
+    // 6. Check for existing shipment (prevent duplicates - HAZ-004)
+    const { data: existingShipment } = await supabase
+      .from('shipments')
+      .select('id, tracking_number')
+      .eq('order_id', orderId)
+      .eq('status', 'created')
+      .maybeSingle();
+
+    if (existingShipment) {
+      return NextResponse.json(
+        { error: 'כבר קיימת משלוח פעיל להזמנה זו' },
+        { status: 409 }
+      );
+    }
+
+    // 7. Create shipment with provider
     const shippingService = getDefaultShippingService();
 
     const shipmentRequest = {
@@ -147,9 +178,29 @@ export async function POST(
       reference: order.order_number,
     };
 
-    const result = await shippingService.createShipment(shipmentRequest, carrier);
+    let result;
+    try {
+      result = await shippingService.createShipment(shipmentRequest, carrier);
+    } catch (error) {
+      // AC-013: Handle carrier API errors with 502 and Hebrew message
+      if (error instanceof ShippingProviderError) {
+        logger.error(`Carrier API error: ${error.carrier}`, {
+          code: error.code,
+          message: error.message,
+          retryable: error.retryable,
+        });
+        return NextResponse.json(
+          {
+            error: 'שגיאה בשירות השילוח',
+            code: error.code,
+          },
+          { status: 502 }
+        );
+      }
+      throw error;
+    }
 
-    // 7. Store shipment in database
+    // 8. Store shipment in database (AC-005)
     const { error: insertError } = await supabase.from('shipments').insert({
       order_id: orderId,
       shipment_id: result.shipmentId,
@@ -166,7 +217,7 @@ export async function POST(
       // Don't fail - shipment was created with carrier
     }
 
-    // 8. Update order fulfillment status
+    // 9. Update order fulfillment status
     await supabase
       .from('orders')
       .update({
@@ -176,7 +227,21 @@ export async function POST(
       })
       .eq('id', orderId);
 
-    // 9. Return success response
+    // 10. Audit log (AC-016)
+    await supabase.from('admin_audit_log').insert({
+      admin_id: user.id,
+      action: 'shipment_created',
+      details: {
+        orderId,
+        shipmentId: result.shipmentId,
+        trackingNumber: result.trackingNumber,
+        carrier: result.carrier,
+        serviceType,
+      },
+      created_at: new Date().toISOString(),
+    });
+
+    // 11. Return success response
     return NextResponse.json(
       {
         success: true,
@@ -190,7 +255,7 @@ export async function POST(
   } catch (error) {
     logger.error('Shipment creation error', error);
     return NextResponse.json(
-      { error: 'Failed to create shipment' },
+      { error: 'שגיאת מערכת' },
       { status: 500 }
     );
   }
@@ -200,7 +265,7 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse> {
   // Rate limiting
-  const rateLimited = await checkRateLimit('general', request);
+  const rateLimited = await checkRateLimit('shipping', request);
   if (rateLimited) return rateLimited;
 
   try {
@@ -213,7 +278,7 @@ export async function GET(
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Unauthorized - Please sign in' },
+        { error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
       );
     }
@@ -222,7 +287,7 @@ export async function GET(
     const userRole = user.user_metadata?.role;
     if (userRole !== 'admin') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: 'נדרשת הרשאת מנהל' },
         { status: 403 }
       );
     }
@@ -251,7 +316,7 @@ export async function GET(
     if (error) {
       logger.error('Failed to fetch shipments', error);
       return NextResponse.json(
-        { error: 'Failed to fetch shipments' },
+        { error: 'שגיאת מערכת' },
         { status: 500 }
       );
     }
@@ -267,7 +332,7 @@ export async function GET(
   } catch (error) {
     logger.error('Shipments fetch error', error);
     return NextResponse.json(
-      { error: 'Failed to fetch shipments' },
+      { error: 'שגיאת מערכת' },
       { status: 500 }
     );
   }

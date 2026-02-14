@@ -10,7 +10,7 @@
   "priority": "medium",
   "story_points": 3,
   "description": "Create API endpoint for batch downloading print-ready files from multiple orders as a ZIP archive, optimized for production printing workflow",
-  "status": "pending",
+  "status": "completed",
   "objective": {
     "as_a": "Footprint admin",
     "i_want": "to download print files for multiple orders at once",

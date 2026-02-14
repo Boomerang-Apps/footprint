@@ -57,6 +57,30 @@ export const rateLimits = {
     prefix: 'ratelimit:checkout',
   }),
 
+  // Bulk admin: 10 per minute (bulk order operations — BE-07 AC-013)
+  bulk: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(10, '1 m'),
+    analytics: true,
+    prefix: 'ratelimit:bulk',
+  }),
+
+  // Download: 5 per minute (batch file downloads — BE-08 AC-010)
+  download: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, '1 m'),
+    analytics: true,
+    prefix: 'ratelimit:download',
+  }),
+
+  // Shipping: 20 per minute (shipment operations — INT-07 AC-014)
+  shipping: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(20, '1 m'),
+    analytics: true,
+    prefix: 'ratelimit:shipping',
+  }),
+
   // Strict: 3 per minute (for sensitive operations)
   strict: new Ratelimit({
     redis,

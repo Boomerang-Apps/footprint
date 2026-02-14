@@ -167,10 +167,9 @@ export async function GET(
       query = query.lte('created_at', `${endDate}T23:59:59.999Z`);
     }
 
-    // Search filter
-    if (search) {
-      query = query.ilike('order_number', `%${search}%`);
-    }
+    // Search filter applied post-query to match orderNumber, customerName,
+    // or customerEmail (AC-009). Done post-query because Supabase can't OR
+    // across joined tables with ilike.
 
     // Sort by created_at descending
     query = query.order('created_at', { ascending: false });
@@ -213,6 +212,17 @@ export async function GET(
         })),
       };
     });
+
+    // Post-query: also match customer name/email for search (AC-009)
+    // DB-level ilike only covers order_number; this extends to customer fields
+    if (search) {
+      const searchLower = search.toLowerCase();
+      transformedOrders = transformedOrders.filter((order) =>
+        order.orderNumber.toLowerCase().includes(searchLower) ||
+        (order.customerName && order.customerName.toLowerCase().includes(searchLower)) ||
+        (order.customerEmail && order.customerEmail.toLowerCase().includes(searchLower))
+      );
+    }
 
     // Filter by product attributes (post-query filtering)
     if (size) {

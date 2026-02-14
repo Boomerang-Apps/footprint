@@ -234,18 +234,39 @@ describe('GET /api/admin/fulfillment/orders', () => {
       expect(mockSupabaseSelect).toHaveBeenCalled();
     });
 
-    it('should search by order number', async () => {
+    it('should search by order number (post-query)', async () => {
       const request = createRequest({ search: 'FP-2026-001' });
-      await GET(request);
+      const response = await GET(request);
 
-      expect(mockSupabaseIlike).toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      // Post-query filter: only matching order should remain
+      expect(data.orders.every((o: { orderNumber: string }) =>
+        o.orderNumber.includes('FP-2026-001')
+      )).toBe(true);
     });
 
-    it('should search by customer name', async () => {
+    it('should search by customer name (post-query)', async () => {
       const request = createRequest({ search: 'John' });
-      await GET(request);
+      const response = await GET(request);
 
-      expect(mockSupabaseIlike).toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      // Post-query filter: should match customer name
+      expect(data.orders.every((o: { customerName: string | null }) =>
+        o.customerName?.toLowerCase().includes('john')
+      )).toBe(true);
+    });
+
+    it('should search by customer email (post-query)', async () => {
+      const request = createRequest({ search: 'customer@example' });
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data.orders.every((o: { customerEmail: string | null }) =>
+        o.customerEmail?.toLowerCase().includes('customer@example')
+      )).toBe(true);
     });
 
     it('should filter by status', async () => {

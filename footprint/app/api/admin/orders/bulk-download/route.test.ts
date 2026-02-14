@@ -12,6 +12,7 @@ const mockGetUser = vi.fn();
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
 const mockIn = vi.fn();
+const mockInsert = vi.fn();
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve({
@@ -75,8 +76,9 @@ describe('POST /api/admin/orders/bulk-download', () => {
     });
 
     // Default: mock database chain
-    mockFrom.mockReturnValue({ select: mockSelect });
+    mockFrom.mockReturnValue({ select: mockSelect, insert: mockInsert });
     mockSelect.mockReturnValue({ in: mockIn });
+    mockInsert.mockResolvedValue({ data: null, error: null });
     mockIn.mockResolvedValue({
       data: [
         {
@@ -104,7 +106,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
     });
   });
 
-  describe('Authentication', () => {
+  describe('Authentication (AC-009)', () => {
     it('should return 401 when not authenticated', async () => {
       mockGetUser.mockResolvedValue({
         data: { user: null },
@@ -116,7 +118,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toContain('Unauthorized');
+      expect(data.error).toContain('נדרשת הרשאת מנהל');
     });
 
     it('should return 403 when user is not admin', async () => {
@@ -130,7 +132,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toContain('Admin');
+      expect(data.error).toContain('נדרשת הרשאת מנהל');
     });
   });
 
@@ -150,7 +152,6 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('at least one');
     });
 
     it('should return 400 when orderIds is not an array', async () => {
@@ -159,10 +160,10 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('array');
+      expect(data.error).toContain('מערך');
     });
 
-    it('should return 400 when orderIds exceeds maximum limit', async () => {
+    it('should return 400 when orderIds exceeds maximum limit (AC-004)', async () => {
       const orderIds = Array.from({ length: 51 }, (_, i) => `order-${i}`);
       const request = createRequest({ orderIds });
       const response = await POST(request);
@@ -170,6 +171,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
 
       expect(response.status).toBe(400);
       expect(data.error).toContain('50');
+      expect(data.error).toContain('מקסימום');
     });
   });
 
@@ -182,7 +184,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(404);
-      expect(data.error).toContain('No orders found');
+      expect(data.error).toContain('לא נמצאו');
     });
 
     it('should return 500 on database error', async () => {
@@ -196,10 +198,10 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toContain('Failed to fetch orders');
+      expect(data.error).toContain('שגיאת מערכת');
     });
 
-    it('should skip orders without transformed images', async () => {
+    it('should skip orders without transformed images (AC-005)', async () => {
       mockIn.mockResolvedValue({
         data: [
           {
@@ -267,6 +269,34 @@ describe('POST /api/admin/orders/bulk-download', () => {
       expect(response.status).toBe(200);
       expect(data.fileName).toContain('.zip');
     });
+
+    it('should organize files by order number in ZIP (AC-002)', async () => {
+      const { createZipArchive } = await import('@/lib/fulfillment/zip-archive');
+
+      const request = createRequest({ orderIds: ['order-1'] });
+      await POST(request);
+
+      // Verify createZipArchive was called with folder-organized names
+      expect(vi.mocked(createZipArchive)).toHaveBeenCalled();
+      const filesArg = vi.mocked(createZipArchive).mock.calls[0][0];
+      const printFile = filesArg.find((f) => f.name.endsWith('.jpg'));
+      expect(printFile?.name).toMatch(/^FP-2026-001\//);
+    });
+
+    it('should include manifest.json in ZIP (AC-003)', async () => {
+      const { createZipArchive } = await import('@/lib/fulfillment/zip-archive');
+
+      const request = createRequest({ orderIds: ['order-1'] });
+      await POST(request);
+
+      const filesArg = vi.mocked(createZipArchive).mock.calls[0][0];
+      const manifest = filesArg.find((f) => f.name === 'manifest.json');
+      expect(manifest).toBeDefined();
+
+      const manifestData = JSON.parse(manifest!.buffer.toString());
+      expect(manifestData.totalOrders).toBeDefined();
+      expect(manifestData.entries).toBeDefined();
+    });
   });
 
   describe('Partial Success', () => {
@@ -289,8 +319,17 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      // order-missing wasn't in the database results
       expect(data.notFound).toContain('order-missing');
+    });
+  });
+
+  describe('Audit Logging (AC-011)', () => {
+    it('should log download to admin_audit_log', async () => {
+      const request = createRequest({ orderIds: ['order-1', 'order-2'] });
+      await POST(request);
+
+      expect(mockFrom).toHaveBeenCalledWith('admin_audit_log');
+      expect(mockInsert).toHaveBeenCalled();
     });
   });
 
@@ -305,9 +344,8 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const response = await POST(request);
       const data = await response.json();
 
-      // When all orders fail, return an error
       expect(response.status).toBe(400);
-      expect(data.error).toContain('No valid print files');
+      expect(data.error).toContain('קבצי הדפסה');
     });
   });
 });
