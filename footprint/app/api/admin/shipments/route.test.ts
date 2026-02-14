@@ -1,7 +1,7 @@
 /**
  * Shipments API Tests - INT-07
  *
- * Tests for creating shipments and managing shipping operations
+ * Tests for creating shipments and listing shipping operations
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -12,8 +12,6 @@ import { POST, GET } from './route';
 const mockGetUser = vi.fn();
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockSingle = vi.fn();
 const mockInsert = vi.fn();
 const mockUpdate = vi.fn();
 
@@ -33,14 +31,21 @@ vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
 }));
 
+// Mock address validation
+vi.mock('@/lib/shipping/validation', () => ({
+  validateAddress: vi.fn(() => ({ valid: true, errors: {} })),
+}));
+
 // Mock shipping service
 const mockCreateShipment = vi.fn();
 const mockGetTracking = vi.fn();
+const mockCancelShipment = vi.fn();
 
 vi.mock('@/lib/shipping/providers/shipping-service', () => ({
   getDefaultShippingService: vi.fn(() => ({
     createShipment: mockCreateShipment,
     getTracking: mockGetTracking,
+    cancelShipment: mockCancelShipment,
     getAvailableProviders: vi.fn(() => [
       { carrier: 'israel_post', name: 'Israel Post', isConfigured: () => true },
     ]),
@@ -75,7 +80,7 @@ describe('POST /api/admin/shipments', () => {
       error: null,
     });
 
-    // Default: order exists
+    // Default: order exists with valid address
     mockFrom.mockImplementation((table: string) => {
       if (table === 'orders') {
         return {
@@ -108,7 +113,18 @@ describe('POST /api/admin/shipments', () => {
       if (table === 'shipments') {
         return {
           insert: vi.fn().mockResolvedValue({ data: { id: 'shipment-1' }, error: null }),
-          select: mockSelect,
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+              }),
+            }),
+          }),
+        };
+      }
+      if (table === 'admin_audit_log') {
+        return {
+          insert: vi.fn().mockResolvedValue({ data: null, error: null }),
         };
       }
       return { select: mockSelect, insert: mockInsert, update: mockUpdate };
@@ -122,17 +138,9 @@ describe('POST /api/admin/shipments', () => {
       carrier: 'israel_post',
       labelUrl: 'https://israelpost.co.il/labels/ISP-12345.pdf',
     });
-
-    // Default: database insert succeeds
-    mockInsert.mockResolvedValue({ data: { id: 'shipment-1' }, error: null });
-
-    // Default: database update succeeds
-    mockUpdate.mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-    });
   });
 
-  describe('Authentication', () => {
+  describe('Authentication (AC-015)', () => {
     it('should return 401 when not authenticated', async () => {
       mockGetUser.mockResolvedValue({
         data: { user: null },
@@ -144,7 +152,7 @@ describe('POST /api/admin/shipments', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toContain('Unauthorized');
+      expect(data.error).toContain('נדרשת הרשאת מנהל');
     });
 
     it('should return 403 when user is not admin', async () => {
@@ -158,7 +166,7 @@ describe('POST /api/admin/shipments', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toContain('Admin');
+      expect(data.error).toContain('נדרשת הרשאת מנהל');
     });
   });
 
@@ -191,7 +199,7 @@ describe('POST /api/admin/shipments', () => {
       const data = await response.json();
 
       expect(response.status).toBe(404);
-      expect(data.error).toContain('Order not found');
+      expect(data.error).toContain('לא נמצאה');
     });
 
     it('should return 400 when order has no shipping address', async () => {
@@ -221,11 +229,11 @@ describe('POST /api/admin/shipments', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('shipping address');
+      expect(data.error).toContain('כתובת משלוח');
     });
   });
 
-  describe('Shipment Creation', () => {
+  describe('Shipment Creation (AC-001)', () => {
     it('should create shipment successfully', async () => {
       const request = createPostRequest({
         orderId: 'order-123',
@@ -248,7 +256,7 @@ describe('POST /api/admin/shipments', () => {
       expect(mockCreateShipment).toHaveBeenCalled();
     });
 
-    it('should return label URL', async () => {
+    it('should return label URL (AC-003)', async () => {
       const request = createPostRequest({ orderId: 'order-123' });
       const response = await POST(request);
       const data = await response.json();
@@ -256,15 +264,104 @@ describe('POST /api/admin/shipments', () => {
       expect(data.labelUrl).toBeDefined();
     });
 
-    it('should handle provider error', async () => {
-      mockCreateShipment.mockRejectedValue(new Error('Provider unavailable'));
+    it('should support different service types (AC-017)', async () => {
+      const request = createPostRequest({
+        orderId: 'order-123',
+        serviceType: 'express',
+      });
+      await POST(request);
+
+      const callArgs = mockCreateShipment.mock.calls[0][0];
+      expect(callArgs.serviceType).toBe('express');
+    });
+  });
+
+  describe('Carrier Error Handling (AC-013)', () => {
+    it('should return 502 on carrier API error', async () => {
+      const { ShippingProviderError } = await import(
+        '@/lib/shipping/providers/types'
+      );
+      mockCreateShipment.mockRejectedValue(
+        new ShippingProviderError('Provider unavailable', 'PROVIDER_DOWN', 'israel_post', true)
+      );
+
+      const request = createPostRequest({ orderId: 'order-123' });
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(502);
+      expect(data.error).toContain('שגיאה בשירות השילוח');
+    });
+
+    it('should return 500 on unexpected error', async () => {
+      mockCreateShipment.mockRejectedValue(new Error('Unexpected'));
 
       const request = createPostRequest({ orderId: 'order-123' });
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toContain('Failed to create shipment');
+      expect(data.error).toContain('שגיאת מערכת');
+    });
+  });
+
+  describe('Audit Logging (AC-016)', () => {
+    it('should log shipment creation to audit log', async () => {
+      let auditInsertCalled = false;
+      mockFrom.mockImplementation((table: string) => {
+        if (table === 'orders') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                single: vi.fn().mockResolvedValue({
+                  data: {
+                    id: 'order-123',
+                    order_number: 'FP-2026-001',
+                    fulfillment_status: 'ready_to_ship',
+                    total: 250,
+                    shipping_address: {
+                      name: 'Customer',
+                      street: 'Herzl 50',
+                      city: 'Haifa',
+                      postalCode: '3303500',
+                      country: 'Israel',
+                      phone: '052-1234567',
+                    },
+                  },
+                  error: null,
+                }),
+              }),
+            }),
+            update: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          };
+        }
+        if (table === 'shipments') {
+          return {
+            insert: vi.fn().mockResolvedValue({ data: { id: 'shipment-1' }, error: null }),
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                  maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+                }),
+              }),
+            }),
+          };
+        }
+        if (table === 'admin_audit_log') {
+          auditInsertCalled = true;
+          return {
+            insert: vi.fn().mockResolvedValue({ data: null, error: null }),
+          };
+        }
+        return { insert: vi.fn().mockResolvedValue({ data: null, error: null }) };
+      });
+
+      const request = createPostRequest({ orderId: 'order-123' });
+      await POST(request);
+
+      expect(auditInsertCalled).toBe(true);
     });
   });
 });
@@ -340,7 +437,9 @@ describe('GET /api/admin/shipments', () => {
 
     const request = createGetRequest();
     const response = await GET(request);
+    const data = await response.json();
 
     expect(response.status).toBe(401);
+    expect(data.error).toContain('נדרשת הרשאת מנהל');
   });
 });

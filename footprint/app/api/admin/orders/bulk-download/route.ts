@@ -60,15 +60,24 @@ interface OrderRecord {
   transformed_image_key: string | null;
 }
 
+interface ManifestEntry {
+  orderId: string;
+  orderNumber: string;
+  size: string;
+  fileName: string;
+  status: 'included' | 'skipped' | 'failed';
+  reason?: string;
+}
+
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<BulkDownloadResponse | ErrorResponse>> {
-  // Rate limiting
-  const rateLimited = await checkRateLimit('general', request);
+  // Rate limiting — 5/min for downloads (AC-010)
+  const rateLimited = await checkRateLimit('download', request);
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
   try {
-    // 1. Verify authentication
+    // 1. Verify authentication (AC-009)
     const supabase = await createClient();
     const {
       data: { user },
@@ -77,7 +86,7 @@ export async function POST(
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Unauthorized - Please sign in' },
+        { error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
       );
     }
@@ -86,7 +95,7 @@ export async function POST(
     const userRole = user.user_metadata?.role;
     if (userRole !== 'admin') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: 'נדרשת הרשאת מנהל' },
         { status: 403 }
       );
     }
@@ -97,7 +106,7 @@ export async function POST(
       body = await request.json();
     } catch {
       return NextResponse.json(
-        { error: 'Invalid JSON body' },
+        { error: 'גוף בקשה לא תקין' },
         { status: 400 }
       );
     }
@@ -106,28 +115,29 @@ export async function POST(
 
     if (!orderIds) {
       return NextResponse.json(
-        { error: 'Missing required field: orderIds' },
+        { error: 'חסר שדה orderIds' },
         { status: 400 }
       );
     }
 
     if (!Array.isArray(orderIds)) {
       return NextResponse.json(
-        { error: 'orderIds must be an array' },
+        { error: 'orderIds חייב להיות מערך' },
         { status: 400 }
       );
     }
 
     if (orderIds.length === 0) {
       return NextResponse.json(
-        { error: 'orderIds must contain at least one order ID' },
+        { error: 'יש לציין לפחות הזמנה אחת' },
         { status: 400 }
       );
     }
 
+    // AC-004: Limit batch to 50 orders
     if (orderIds.length > MAX_ORDERS) {
       return NextResponse.json(
-        { error: `Cannot download more than ${MAX_ORDERS} orders at once` },
+        { error: `מקסימום ${MAX_ORDERS} הזמנות להורדה` },
         { status: 400 }
       );
     }
@@ -141,14 +151,14 @@ export async function POST(
     if (fetchError) {
       logger.error('Failed to fetch orders', fetchError);
       return NextResponse.json(
-        { error: 'Failed to fetch orders from database' },
+        { error: 'שגיאת מערכת' },
         { status: 500 }
       );
     }
 
     if (!orders || orders.length === 0) {
       return NextResponse.json(
-        { error: 'No orders found for the provided IDs' },
+        { error: 'לא נמצאו הזמנות' },
         { status: 404 }
       );
     }
@@ -161,26 +171,52 @@ export async function POST(
     const files: Array<{ name: string; buffer: Buffer }> = [];
     const skipped: string[] = [];
     const failed: string[] = [];
+    const manifestEntries: ManifestEntry[] = [];
 
     for (const order of orders as OrderRecord[]) {
-      // Skip orders without transformed images
+      const printSize = order.size || 'A4';
+
+      // Skip orders without transformed images (AC-005)
       if (!order.transformed_image_url || !order.transformed_image_key) {
         skipped.push(order.id);
+        manifestEntries.push({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          size: printSize,
+          fileName: '',
+          status: 'skipped',
+          reason: 'No transformed image',
+        });
         continue;
       }
 
       // Validate print size
-      const printSize = order.size || 'A4';
       if (!isValidPrintSize(printSize)) {
         skipped.push(order.id);
+        manifestEntries.push({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          size: printSize,
+          fileName: '',
+          status: 'skipped',
+          reason: `Invalid print size: ${printSize}`,
+        });
         continue;
       }
 
       try {
-        // Fetch the transformed image
+        // Fetch the transformed image (AC-007)
         const imageResponse = await fetch(order.transformed_image_url);
         if (!imageResponse.ok) {
           failed.push(order.id);
+          manifestEntries.push({
+            orderId: order.id,
+            orderNumber: order.order_number,
+            size: printSize,
+            fileName: '',
+            status: 'failed',
+            reason: 'Failed to fetch image',
+          });
           continue;
         }
 
@@ -197,29 +233,70 @@ export async function POST(
         const printFileResponse = await fetch(printFile.downloadUrl);
         if (!printFileResponse.ok) {
           failed.push(order.id);
+          manifestEntries.push({
+            orderId: order.id,
+            orderNumber: order.order_number,
+            size: printSize,
+            fileName: '',
+            status: 'failed',
+            reason: 'Failed to fetch print file',
+          });
           continue;
         }
 
         const printFileBuffer = Buffer.from(await printFileResponse.arrayBuffer());
 
-        // Add to files list with a descriptive name
+        // AC-002: Organize files by order number in folders
+        // AC-008: Descriptive file naming
+        const fileName = `${order.order_number}/${order.order_number}_${printSize}_print.jpg`;
         files.push({
-          name: `${order.order_number}_${printSize}_print.jpg`,
+          name: fileName,
           buffer: printFileBuffer,
+        });
+
+        manifestEntries.push({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          size: printSize,
+          fileName,
+          status: 'included',
         });
       } catch (error) {
         logger.error(`Failed to process order ${order.id}`, error);
         failed.push(order.id);
+        manifestEntries.push({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          size: printSize,
+          fileName: '',
+          status: 'failed',
+          reason: 'Processing error',
+        });
       }
     }
 
     // 7. Check if we have any files to include
     if (files.length === 0) {
       return NextResponse.json(
-        { error: 'No valid print files could be generated' },
+        { error: 'לא נמצאו קבצי הדפסה תקינים' },
         { status: 400 }
       );
     }
+
+    // AC-003: Include manifest.json in ZIP
+    const manifest = {
+      generatedAt: new Date().toISOString(),
+      totalOrders: orderIds.length,
+      included: files.length,
+      skipped: skipped.length,
+      failed: failed.length,
+      notFound: notFound.length,
+      entries: manifestEntries,
+    };
+    files.push({
+      name: 'manifest.json',
+      buffer: Buffer.from(JSON.stringify(manifest, null, 2)),
+    });
 
     // 8. Create ZIP archive
     const zipBuffer = await createZipArchive(files);
@@ -237,12 +314,26 @@ export async function POST(
     // 10. Get presigned download URL
     const downloadUrl = await getDownloadUrl(uploadResult.key, ZIP_EXPIRES_IN);
 
+    // AC-011: Audit log for download
+    await supabase.from('admin_audit_log').insert({
+      admin_id: user.id,
+      action: 'bulk_download',
+      details: {
+        orderIds: orders.map((o: OrderRecord) => o.id),
+        fileCount: files.length - 1, // exclude manifest
+        skipped,
+        failed,
+        notFound,
+      },
+      created_at: new Date().toISOString(),
+    });
+
     // 11. Return success response
     return NextResponse.json({
       success: true,
       downloadUrl,
       fileName: zipFileName,
-      fileCount: files.length,
+      fileCount: files.length - 1, // exclude manifest from count
       expiresIn: ZIP_EXPIRES_IN,
       skipped,
       notFound,
@@ -251,7 +342,7 @@ export async function POST(
   } catch (error) {
     logger.error('Bulk download error', error);
     return NextResponse.json(
-      { error: 'Failed to create bulk download' },
+      { error: 'שגיאת מערכת' },
       { status: 500 }
     );
   }

@@ -10,7 +10,7 @@
   "priority": "medium",
   "story_points": 8,
   "description": "Integrate with Israel Post and DHL APIs for automated shipping label generation, tracking number assignment, and delivery status updates",
-  "status": "pending",
+  "status": "completed",
   "objective": {
     "as_a": "Footprint admin",
     "i_want": "to automatically generate shipping labels and track deliveries",

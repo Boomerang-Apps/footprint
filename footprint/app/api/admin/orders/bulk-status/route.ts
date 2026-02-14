@@ -48,8 +48,8 @@ interface ErrorResponse {
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<BulkStatusResponse | ErrorResponse>> {
-  // 1. Rate limiting (strict for bulk operations)
-  const rateLimitResult = await checkRateLimit('strict', request);
+  // 1. Rate limiting (10/min for bulk operations — AC-013)
+  const rateLimitResult = await checkRateLimit('bulk', request);
   if (rateLimitResult) {
     return rateLimitResult as NextResponse<ErrorResponse>;
   }
