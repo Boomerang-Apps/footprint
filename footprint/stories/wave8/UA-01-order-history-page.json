@@ -10,7 +10,7 @@
   "priority": "high",
   "story_points": 5,
   "description": "Create a user-facing order history page showing all past orders with status, tracking info, and quick actions for reordering or viewing details",
-  "status": "completed",
+  "status": "complete",
   "objective": {
     "as_a": "registered customer",
     "i_want": "to view my order history",

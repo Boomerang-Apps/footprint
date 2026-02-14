@@ -7,14 +7,12 @@
   "priority": "high",
   "story_points": 5,
   "description": "Create admin API endpoint to list all orders with filtering, sorting, and pagination for admin dashboard",
-  "status": "completed",
-
+  "status": "complete",
   "objective": {
     "as_a": "Footprint admin",
     "i_want": "to view and manage all customer orders via API",
     "so_that": "I can monitor order status, track shipments, and manage the fulfillment process"
   },
-
   "acceptance_criteria": [
     {
       "id": "AC-001",
@@ -67,7 +65,6 @@
       "test_approach": "Mock rate limiter, verify checkRateLimit called"
     }
   ],
-
   "files": {
     "create": [
       "app/api/admin/orders/route.ts",
@@ -79,7 +76,6 @@
       "lib/auth/admin.ts"
     ]
   },
-
   "technical_requirements": {
     "reuse_components": [
       "lib/supabase/server.ts - createClient()",
@@ -100,7 +96,6 @@
       }
     }
   },
-
   "tdd": {
     "test_framework": "vitest",
     "test_files": [
@@ -167,7 +162,6 @@
       "rate_limit": "vi.mock('@/lib/rate-limit')"
     }
   },
-
   "safety": {
     "stop_conditions": [
       "Any modification to customer-facing order endpoints",
@@ -180,11 +174,9 @@
     ],
     "rollback_plan": "Delete new admin endpoint files"
   },
-
   "dependencies": {
     "required_before": [],
     "blocks": []
   },
-
   "estimated_tests": 21
 }

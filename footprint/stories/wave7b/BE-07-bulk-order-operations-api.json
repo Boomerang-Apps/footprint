@@ -10,7 +10,7 @@
   "priority": "high",
   "story_points": 5,
   "description": "Create API endpoints for bulk order operations including batch status updates, batch assignments, and fulfillment workflow actions",
-  "status": "completed",
+  "status": "complete",
   "objective": {
     "as_a": "Footprint admin",
     "i_want": "to update multiple orders at once via API",
@@ -141,10 +141,21 @@
       "cancelled"
     ],
     "valid_transitions": {
-      "pending": ["printing", "cancelled"],
-      "printing": ["ready_to_ship", "pending"],
-      "ready_to_ship": ["shipped", "printing"],
-      "shipped": ["delivered"],
+      "pending": [
+        "printing",
+        "cancelled"
+      ],
+      "printing": [
+        "ready_to_ship",
+        "pending"
+      ],
+      "ready_to_ship": [
+        "shipped",
+        "printing"
+      ],
+      "shipped": [
+        "delivered"
+      ],
       "delivered": [],
       "cancelled": []
     },
