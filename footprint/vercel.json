@@ -5,6 +5,12 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "regions": ["fra1"],
+  "crons": [
+    {
+      "path": "/api/cron/expire-pending-orders",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

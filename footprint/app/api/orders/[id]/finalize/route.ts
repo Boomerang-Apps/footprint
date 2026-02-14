@@ -15,6 +15,7 @@ import {
   triggerConfirmationEmail,
   triggerNewOrderNotification,
 } from '@/lib/orders/create';
+import { createPaymentRecord } from '@/lib/payments/record';
 import { logger } from '@/lib/logger';
 
 interface FinalizeResponse {
@@ -89,6 +90,19 @@ export async function POST(
     }
 
     logger.info(`Order finalized: ${order.order_number} (${orderId})`);
+
+    // Defensive payment record (webhook usually arrives first)
+    try {
+      await createPaymentRecord({
+        orderId: order.id,
+        provider: 'payplus',
+        status: 'succeeded',
+        externalTransactionId: `finalize-${order.id}`,
+        amount: 0,
+      });
+    } catch (e) {
+      logger.error('Defensive payment record failed (non-fatal)', e);
+    }
 
     // Fire-and-forget email triggers
     triggerConfirmationEmail(orderId);

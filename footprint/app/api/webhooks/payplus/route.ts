@@ -23,6 +23,8 @@ import {
   type CreateOrderParams,
 } from '@/lib/orders/create';
 import { createAdminClient } from '@/lib/supabase/server';
+import { createPaymentRecord } from '@/lib/payments/record';
+import { isPayPlusIP, extractClientIP, getWhitelistedIPs } from '@/lib/payments/ip-whitelist';
 import { logger } from '@/lib/logger';
 
 /**
@@ -131,6 +133,21 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    // 1.5. Check source IP (defense-in-depth, signature is primary gate)
+    const clientIP = extractClientIP(request);
+    const whitelistedIPs = getWhitelistedIPs();
+    if (clientIP) {
+      logger.info(`Webhook from IP: ${clientIP}`);
+      if (whitelistedIPs.length > 0 && !isPayPlusIP(clientIP)) {
+        logger.warn(`Webhook rejected: IP ${clientIP} not in whitelist`);
+        return NextResponse.json(
+          { error: 'IP not authorized' },
+          { status: 403 }
+        );
+      }
+    }
+    // If IP can't be determined, allow through (rely on signature verification)
 
     // 2. Verify user-agent header
     const userAgent = request.headers.get('user-agent');
@@ -245,6 +262,23 @@ export async function POST(
 
           logger.info(`Order updated to paid: ${existing.order_number} (${existing.id})`);
 
+          // Record payment (fire-and-forget, must not break order flow)
+          try {
+            await createPaymentRecord({
+              orderId: preCreatedOrderId,
+              provider: 'payplus',
+              status: 'succeeded',
+              externalId: payload.page_request_uid,
+              externalTransactionId: payload.transaction_uid,
+              amount: payload.amount ? Math.round(payload.amount * 100) : 0,
+              cardLastFour: payload.voucher_num,
+              installments: payload.number_of_payments,
+              webhookPayload: payload as unknown as Record<string, unknown>,
+            });
+          } catch (e) {
+            logger.error('Payment record creation failed (non-fatal)', e);
+          }
+
           // Trigger emails
           triggerConfirmationEmail(existing.id);
           triggerNewOrderNotification(existing.id);
@@ -282,6 +316,22 @@ export async function POST(
 
         logger.info(`Order created: ${orderResult.orderNumber} (${orderResult.orderId})`);
 
+        try {
+          await createPaymentRecord({
+            orderId: orderResult.orderId,
+            provider: 'payplus',
+            status: 'succeeded',
+            externalTransactionId: payload.transaction_uid,
+            externalId: payload.page_request_uid,
+            amount: payload.amount ? Math.round(payload.amount * 100) : 0,
+            cardLastFour: payload.voucher_num,
+            installments: payload.number_of_payments,
+            webhookPayload: payload as unknown as Record<string, unknown>,
+          });
+        } catch (e) {
+          logger.error('Payment record creation failed (non-fatal)', e);
+        }
+
         triggerConfirmationEmail(orderResult.orderId);
         triggerNewOrderNotification(orderResult.orderId);
 
@@ -302,6 +352,28 @@ export async function POST(
     } else {
       // Payment failed - log for debugging
       logger.info(`Payment failed: ${payload.transaction_uid} (status: ${payload.status_code})`);
+
+      // Record failed payment attempt
+      if (payload.more_info) {
+        try {
+          const moreInfoData = JSON.parse(payload.more_info);
+          if (moreInfoData.orderId) {
+            await createPaymentRecord({
+              orderId: moreInfoData.orderId,
+              provider: 'payplus',
+              status: 'failed',
+              externalTransactionId: payload.transaction_uid,
+              amount: payload.amount ? Math.round(payload.amount * 100) : 0,
+              errorCode: payload.status_code,
+              errorMessage: `Payment failed with status code: ${payload.status_code}`,
+              webhookPayload: payload as unknown as Record<string, unknown>,
+            });
+          }
+        } catch (e) {
+          logger.error('Failed payment record creation failed (non-fatal)', e);
+        }
+      }
+
       return NextResponse.json({
         received: true,
         orderCreated: false,
