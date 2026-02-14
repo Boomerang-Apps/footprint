@@ -59,6 +59,11 @@ vi.mock('@/lib/fulfillment/zip-archive', () => ({
 // Import after mocks are set up
 import { POST } from './route';
 
+// Use valid UUIDs for testing
+const UUID_ORDER_1 = '550e8400-e29b-41d4-a716-446655440001';
+const UUID_ORDER_2 = '550e8400-e29b-41d4-a716-446655440002';
+const UUID_ORDER_MISSING = '550e8400-e29b-41d4-a716-446655440099';
+
 function createRequest(body: object): NextRequest {
   return new NextRequest('http://localhost/api/admin/orders/bulk-download', {
     method: 'POST',
@@ -84,14 +89,14 @@ describe('POST /api/admin/orders/bulk-download', () => {
     mockIn.mockResolvedValue({
       data: [
         {
-          id: 'order-1',
+          id: UUID_ORDER_1,
           order_number: 'FP-2026-001',
           size: 'A4',
           transformed_image_url: 'https://storage.example.com/image1.jpg',
           transformed_image_key: 'transformed/order-1/image.jpg',
         },
         {
-          id: 'order-2',
+          id: UUID_ORDER_2,
           order_number: 'FP-2026-002',
           size: 'A3',
           transformed_image_url: 'https://storage.example.com/image2.jpg',
@@ -115,7 +120,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
         error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 401 }),
       });
 
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       const response = await POST(request);
       const data = await response.json();
 
@@ -129,7 +134,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
         error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
       });
 
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       const response = await POST(request);
       const data = await response.json();
 
@@ -145,7 +150,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('orderIds');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 400 when orderIds is empty', async () => {
@@ -154,15 +159,16 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 400 when orderIds is not an array', async () => {
-      const request = createRequest({ orderIds: 'order-1' });
+      const request = createRequest({ orderIds: UUID_ORDER_1 });
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('מערך');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 400 when orderIds exceeds maximum limit (AC-004)', async () => {
@@ -172,8 +178,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('50');
-      expect(data.error).toContain('מקסימום');
+      expect(data.error).toBe('Invalid request body');
     });
   });
 
@@ -181,7 +186,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
     it('should return 404 when no orders found', async () => {
       mockIn.mockResolvedValue({ data: [], error: null });
 
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       const response = await POST(request);
       const data = await response.json();
 
@@ -195,7 +200,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
         error: { message: 'Database connection failed' },
       });
 
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       const response = await POST(request);
       const data = await response.json();
 
@@ -207,14 +212,14 @@ describe('POST /api/admin/orders/bulk-download', () => {
       mockIn.mockResolvedValue({
         data: [
           {
-            id: 'order-1',
+            id: UUID_ORDER_1,
             order_number: 'FP-2026-001',
             size: 'A4',
             transformed_image_url: 'https://storage.example.com/image1.jpg',
             transformed_image_key: 'transformed/order-1/image.jpg',
           },
           {
-            id: 'order-2',
+            id: UUID_ORDER_2,
             order_number: 'FP-2026-002',
             size: 'A3',
             transformed_image_url: null,
@@ -224,18 +229,18 @@ describe('POST /api/admin/orders/bulk-download', () => {
         error: null,
       });
 
-      const request = createRequest({ orderIds: ['order-1', 'order-2'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1, UUID_ORDER_2] });
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.skipped).toContain('order-2');
+      expect(data.skipped).toContain(UUID_ORDER_2);
     });
   });
 
   describe('Successful Download', () => {
     it('should return download URL for valid request', async () => {
-      const request = createRequest({ orderIds: ['order-1', 'order-2'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1, UUID_ORDER_2] });
       const response = await POST(request);
       const data = await response.json();
 
@@ -245,7 +250,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
     });
 
     it('should include file count in response', async () => {
-      const request = createRequest({ orderIds: ['order-1', 'order-2'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1, UUID_ORDER_2] });
       const response = await POST(request);
       const data = await response.json();
 
@@ -254,7 +259,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
     });
 
     it('should include expiration time', async () => {
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       const response = await POST(request);
       const data = await response.json();
 
@@ -264,7 +269,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
     });
 
     it('should return ZIP filename', async () => {
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       const response = await POST(request);
       const data = await response.json();
 
@@ -275,7 +280,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
     it('should organize files by order number in ZIP (AC-002)', async () => {
       const { createZipArchive } = await import('@/lib/fulfillment/zip-archive');
 
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       await POST(request);
 
       // Verify createZipArchive was called with folder-organized names
@@ -288,7 +293,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
     it('should include manifest.json in ZIP (AC-003)', async () => {
       const { createZipArchive } = await import('@/lib/fulfillment/zip-archive');
 
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       await POST(request);
 
       const filesArg = vi.mocked(createZipArchive).mock.calls[0][0];
@@ -306,7 +311,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
       mockIn.mockResolvedValue({
         data: [
           {
-            id: 'order-1',
+            id: UUID_ORDER_1,
             order_number: 'FP-2026-001',
             size: 'A4',
             transformed_image_url: 'https://storage.example.com/image1.jpg',
@@ -316,18 +321,18 @@ describe('POST /api/admin/orders/bulk-download', () => {
         error: null,
       });
 
-      const request = createRequest({ orderIds: ['order-1', 'order-missing'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1, UUID_ORDER_MISSING] });
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.notFound).toContain('order-missing');
+      expect(data.notFound).toContain(UUID_ORDER_MISSING);
     });
   });
 
   describe('Audit Logging (AC-011)', () => {
     it('should log download to admin_audit_log', async () => {
-      const request = createRequest({ orderIds: ['order-1', 'order-2'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1, UUID_ORDER_2] });
       await POST(request);
 
       expect(mockFrom).toHaveBeenCalledWith('admin_audit_log');
@@ -342,7 +347,7 @@ describe('POST /api/admin/orders/bulk-download', () => {
         status: 404,
       });
 
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       const response = await POST(request);
       const data = await response.json();
 

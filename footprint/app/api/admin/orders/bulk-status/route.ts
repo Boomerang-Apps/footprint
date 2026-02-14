@@ -23,18 +23,11 @@ import { createClient } from '@/lib/supabase/server';
 import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
+import { bulkStatusSchema, parseRequestBody } from '@/lib/validation/admin';
 import {
-  isValidFulfillmentStatus,
   validateBatchTransitions,
   type FulfillmentStatus,
 } from '@/lib/fulfillment/status-transitions';
-
-const MAX_BATCH_SIZE = 100;
-
-interface BulkStatusRequest {
-  orderIds: string[];
-  status: FulfillmentStatus;
-}
 
 interface BulkStatusResponse {
   success: number;
@@ -63,54 +56,12 @@ export async function POST(
 
     const supabase = await createClient();
 
-    // 3. Parse request body
-    let body: BulkStatusRequest;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: 'גוף בקשה לא תקין' },
-        { status: 400 }
-      );
-    }
+    // 3. Parse and validate request body
+    const parsed = await parseRequestBody(request, bulkStatusSchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const body = parsed.data;
 
-    // 5. Validate request fields
-    if (!body.orderIds || !Array.isArray(body.orderIds)) {
-      return NextResponse.json(
-        { error: 'חסר שדה orderIds' },
-        { status: 400 }
-      );
-    }
-
-    if (body.orderIds.length === 0) {
-      return NextResponse.json(
-        { error: 'רשימת orderIds ריקה' },
-        { status: 400 }
-      );
-    }
-
-    if (body.orderIds.length > MAX_BATCH_SIZE) {
-      return NextResponse.json(
-        { error: `מקסימום ${MAX_BATCH_SIZE} הזמנות בפעולה אחת` },
-        { status: 400 }
-      );
-    }
-
-    if (!body.status) {
-      return NextResponse.json(
-        { error: 'חסר שדה status' },
-        { status: 400 }
-      );
-    }
-
-    if (!isValidFulfillmentStatus(body.status)) {
-      return NextResponse.json(
-        { error: 'סטטוס לא תקין' },
-        { status: 400 }
-      );
-    }
-
-    // 6. Fetch orders to validate transitions
+    // 4. Fetch orders to validate transitions
     const { data: orders, error: fetchError } = await supabase
       .from('orders')
       .select('id, status, order_number')
@@ -131,7 +82,7 @@ export async function POST(
       );
     }
 
-    // 7. Validate status transitions
+    // 5. Validate status transitions
     const ordersWithStatus = orders.map((o) => ({
       id: o.id,
       currentStatus: o.status as FulfillmentStatus,
@@ -142,7 +93,7 @@ export async function POST(
       body.status
     );
 
-    // 8. Update valid orders
+    // 6. Update valid orders
     let successCount = 0;
     const errors = [...invalidOrders];
 
@@ -165,7 +116,7 @@ export async function POST(
 
       successCount = validOrderIds.length;
 
-      // 9. Record status history for each updated order
+      // 7. Record status history for each updated order
       const historyEntries = validOrderIds.map((orderId) => ({
         order_id: orderId,
         status: body.status,
@@ -176,7 +127,7 @@ export async function POST(
 
       await supabase.from('order_status_history').insert(historyEntries);
 
-      // 10. Audit log
+      // 8. Audit log
       await supabase.from('admin_audit_log').insert({
         admin_id: user.id,
         action: 'bulk_status_update',
@@ -189,7 +140,7 @@ export async function POST(
       });
     }
 
-    // 11. Return results
+    // 9. Return results
     return NextResponse.json({
       success: successCount,
       failed: errors.length,

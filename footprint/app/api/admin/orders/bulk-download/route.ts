@@ -27,16 +27,12 @@ import { createClient } from '@/lib/supabase/server';
 import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
+import { bulkDownloadSchema, parseRequestBody } from '@/lib/validation/admin';
 import { uploadToR2, getDownloadUrl } from '@/lib/storage/r2';
 import { getOrCreatePrintFile, isValidPrintSize, PrintSize } from '@/lib/orders/printFile';
 import { createZipArchive, generateZipFileName } from '@/lib/fulfillment/zip-archive';
 
-const MAX_ORDERS = 50;
 const ZIP_EXPIRES_IN = 3600; // 1 hour
-
-interface BulkDownloadRequest {
-  orderIds: string[];
-}
 
 interface BulkDownloadResponse {
   success: boolean;
@@ -86,48 +82,11 @@ export async function POST(
     const supabase = await createClient();
 
     // 2. Parse and validate request body
-    let body: BulkDownloadRequest;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: 'גוף בקשה לא תקין' },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseRequestBody(request, bulkDownloadSchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const { orderIds } = parsed.data;
 
-    const { orderIds } = body;
-
-    if (!orderIds) {
-      return NextResponse.json(
-        { error: 'חסר שדה orderIds' },
-        { status: 400 }
-      );
-    }
-
-    if (!Array.isArray(orderIds)) {
-      return NextResponse.json(
-        { error: 'orderIds חייב להיות מערך' },
-        { status: 400 }
-      );
-    }
-
-    if (orderIds.length === 0) {
-      return NextResponse.json(
-        { error: 'יש לציין לפחות הזמנה אחת' },
-        { status: 400 }
-      );
-    }
-
-    // AC-004: Limit batch to 50 orders
-    if (orderIds.length > MAX_ORDERS) {
-      return NextResponse.json(
-        { error: `מקסימום ${MAX_ORDERS} הזמנות להורדה` },
-        { status: 400 }
-      );
-    }
-
-    // 4. Fetch orders from database
+    // 3. Fetch orders from database
     const { data: orders, error: fetchError } = await supabase
       .from('orders')
       .select('id, order_number, size, transformed_image_url, transformed_image_key')
@@ -148,11 +107,11 @@ export async function POST(
       );
     }
 
-    // 5. Track which orders were found and which weren't
+    // 4. Track which orders were found and which weren't
     const foundOrderIds = new Set(orders.map((o: OrderRecord) => o.id));
     const notFound = orderIds.filter((id) => !foundOrderIds.has(id));
 
-    // 6. Process each order and collect files
+    // 5. Process each order and collect files
     const files: Array<{ name: string; buffer: Buffer }> = [];
     const skipped: string[] = [];
     const failed: string[] = [];
@@ -260,7 +219,7 @@ export async function POST(
       }
     }
 
-    // 7. Check if we have any files to include
+    // 6. Check if we have any files to include
     if (files.length === 0) {
       return NextResponse.json(
         { error: 'לא נמצאו קבצי הדפסה תקינים' },
@@ -283,11 +242,11 @@ export async function POST(
       buffer: Buffer.from(JSON.stringify(manifest, null, 2)),
     });
 
-    // 8. Create ZIP archive
+    // 7. Create ZIP archive
     const zipBuffer = await createZipArchive(files);
     const zipFileName = generateZipFileName();
 
-    // 9. Upload ZIP to R2 storage
+    // 8. Upload ZIP to R2 storage
     const uploadResult = await uploadToR2(
       zipBuffer,
       'bulk-downloads',
@@ -296,10 +255,10 @@ export async function POST(
       'bulk-downloads'
     );
 
-    // 10. Get presigned download URL
+    // 9. Get presigned download URL
     const downloadUrl = await getDownloadUrl(uploadResult.key, ZIP_EXPIRES_IN);
 
-    // AC-011: Audit log for download
+    // 10. Audit log for download (AC-011)
     await supabase.from('admin_audit_log').insert({
       admin_id: user.id,
       action: 'bulk_download',

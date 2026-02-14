@@ -98,6 +98,134 @@ export const createShipmentSchema = z.object({
 export type CreateShipmentInput = z.infer<typeof createShipmentSchema>;
 
 // ============================================================================
+// Fulfillment orders query
+// ============================================================================
+
+const PRINT_SIZES = ['A5', 'A4', 'A3', 'A2'] as const;
+const PAPER_TYPES = ['matte', 'glossy', 'canvas'] as const;
+const FRAME_TYPES = ['none', 'black', 'white', 'oak'] as const;
+
+export const fulfillmentOrdersQuerySchema = paginationSchema.extend({
+  status: z.enum(FULFILLMENT_STATUSES).optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  search: z.string().max(200).optional(),
+  size: z.enum(PRINT_SIZES).optional(),
+  paper: z.enum(PAPER_TYPES).optional(),
+  frame: z.enum(FRAME_TYPES).optional(),
+});
+
+export type FulfillmentOrdersQueryInput = z.infer<typeof fulfillmentOrdersQuerySchema>;
+
+// ============================================================================
+// Shipments list query
+// ============================================================================
+
+export const shipmentsQuerySchema = paginationSchema.extend({
+  orderId: z.string().regex(uuidRegex, 'Invalid UUID').optional(),
+});
+
+export type ShipmentsQueryInput = z.infer<typeof shipmentsQuerySchema>;
+
+// ============================================================================
+// Shipment quote query
+// ============================================================================
+
+export const shipmentQuoteSchema = z.object({
+  orderId: z.string().regex(uuidRegex, 'Invalid UUID'),
+  carrier: z.enum(CARRIERS).optional(),
+});
+
+export type ShipmentQuoteInput = z.infer<typeof shipmentQuoteSchema>;
+
+// ============================================================================
+// Order status update
+// ============================================================================
+
+export const orderStatusSchema = z.object({
+  status: z.enum(ORDER_STATUSES),
+  note: z.string().max(500).optional(),
+});
+
+export type OrderStatusInput = z.infer<typeof orderStatusSchema>;
+
+// ============================================================================
+// Fulfillment status update
+// ============================================================================
+
+export const fulfillmentStatusSchema = z.object({
+  status: z.enum(FULFILLMENT_STATUSES),
+  note: z.string().max(500).optional(),
+});
+
+export type FulfillmentStatusInput = z.infer<typeof fulfillmentStatusSchema>;
+
+// ============================================================================
+// Tracking update
+// ============================================================================
+
+export const trackingSchema = z.object({
+  trackingNumber: z.string().min(1).max(100),
+  carrier: z.enum(CARRIERS),
+  note: z.string().max(500).optional(),
+});
+
+export type TrackingInput = z.infer<typeof trackingSchema>;
+
+// ============================================================================
+// Refund
+// ============================================================================
+
+export const refundSchema = z.object({
+  amount: z.number().int().min(1).max(10_000_000),
+  reason: z.string().max(500).optional(),
+});
+
+export type RefundInput = z.infer<typeof refundSchema>;
+
+// ============================================================================
+// Download query
+// ============================================================================
+
+export const downloadQuerySchema = z.object({
+  size: z.enum(PRINT_SIZES),
+});
+
+export type DownloadQueryInput = z.infer<typeof downloadQuerySchema>;
+
+// ============================================================================
+// Bulk download
+// ============================================================================
+
+export const bulkDownloadSchema = z.object({
+  orderIds: z.array(z.string().regex(uuidRegex, 'Invalid UUID')).min(1).max(50),
+});
+
+export type BulkDownloadInput = z.infer<typeof bulkDownloadSchema>;
+
+// ============================================================================
+// User role update
+// ============================================================================
+
+export const userRoleSchema = z.object({
+  isAdmin: z.boolean(),
+});
+
+export type UserRoleInput = z.infer<typeof userRoleSchema>;
+
+// ============================================================================
+// User status update
+// ============================================================================
+
+const USER_STATUSES = ['active', 'inactive', 'suspended'] as const;
+
+export const userStatusSchema = z.object({
+  status: z.enum(USER_STATUSES),
+});
+
+export type UserStatusInput = z.infer<typeof userStatusSchema>;
+
+// ============================================================================
 // Helper functions
 // ============================================================================
 

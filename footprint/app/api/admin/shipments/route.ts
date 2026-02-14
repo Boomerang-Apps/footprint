@@ -10,16 +10,11 @@ import { createClient } from '@/lib/supabase/server';
 import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
+import { createShipmentSchema, shipmentsQuerySchema, parseRequestBody, parseQueryParams } from '@/lib/validation/admin';
 import { getDefaultShippingService } from '@/lib/shipping/providers/shipping-service';
 import { ShippingProviderError } from '@/lib/shipping/providers/types';
 import { type CarrierCode } from '@/lib/shipping/tracking';
 import { validateAddress } from '@/lib/shipping/validation';
-
-interface CreateShipmentBody {
-  orderId: string;
-  carrier?: CarrierCode;
-  serviceType?: 'standard' | 'express' | 'registered';
-}
 
 interface ShipmentResponse {
   success: boolean;
@@ -69,27 +64,12 @@ export async function POST(
 
     const supabase = await createClient();
 
-    // 2. Parse request body
-    let body: CreateShipmentBody;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: 'גוף בקשה לא תקין' },
-        { status: 400 }
-      );
-    }
+    // 2. Parse and validate request body
+    const parsed = await parseRequestBody(request, createShipmentSchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const { orderId, carrier, serviceType } = parsed.data;
 
-    const { orderId, carrier, serviceType = 'registered' } = body;
-
-    if (!orderId) {
-      return NextResponse.json(
-        { error: 'חסר שדה orderId' },
-        { status: 400 }
-      );
-    }
-
-    // 4. Fetch order details
+    // 3. Fetch order details
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .select('id, order_number, fulfillment_status, shipping_address, total')
@@ -103,7 +83,7 @@ export async function POST(
       );
     }
 
-    // 5. Validate shipping address (AC-006)
+    // 4. Validate shipping address (AC-006)
     if (!order.shipping_address) {
       return NextResponse.json(
         { error: 'להזמנה אין כתובת משלוח' },
@@ -124,7 +104,7 @@ export async function POST(
       );
     }
 
-    // 6. Check for existing shipment (prevent duplicates - HAZ-004)
+    // 5. Check for existing shipment (prevent duplicates - HAZ-004)
     const { data: existingShipment } = await supabase
       .from('shipments')
       .select('id, tracking_number')
@@ -139,7 +119,7 @@ export async function POST(
       );
     }
 
-    // 7. Create shipment with provider
+    // 6. Create shipment with provider
     const shippingService = getDefaultShippingService();
 
     const shipmentRequest = {
@@ -185,7 +165,7 @@ export async function POST(
       throw error;
     }
 
-    // 8. Store shipment in database (AC-005)
+    // 7. Store shipment in database (AC-005)
     const { error: insertError } = await supabase.from('shipments').insert({
       order_id: orderId,
       shipment_id: result.shipmentId,
@@ -202,7 +182,7 @@ export async function POST(
       // Don't fail - shipment was created with carrier
     }
 
-    // 9. Update order fulfillment status
+    // 8. Update order fulfillment status
     await supabase
       .from('orders')
       .update({
@@ -212,7 +192,7 @@ export async function POST(
       })
       .eq('id', orderId);
 
-    // 10. Audit log (AC-016)
+    // 9. Audit log (AC-016)
     await supabase.from('admin_audit_log').insert({
       admin_id: user.id,
       action: 'shipment_created',
@@ -226,7 +206,7 @@ export async function POST(
       created_at: new Date().toISOString(),
     });
 
-    // 11. Return success response
+    // 10. Return success response
     return NextResponse.json(
       {
         success: true,
@@ -262,12 +242,12 @@ export async function GET(
 
     // 2. Parse query parameters
     const { searchParams } = new URL(request.url);
-    const orderId = searchParams.get('orderId');
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const parsed = parseQueryParams(searchParams, shipmentsQuerySchema);
+    if (parsed.error) return parsed.error;
+    const { orderId, page, limit } = parsed.data;
     const offset = (page - 1) * limit;
 
-    // 4. Build query
+    // 3. Build query
     let query = supabase
       .from('shipments')
       .select('*', { count: 'exact' });
@@ -276,7 +256,7 @@ export async function GET(
       query = query.eq('order_id', orderId);
     }
 
-    // 5. Execute query with pagination
+    // 4. Execute query with pagination
     const { data: shipments, error, count } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -289,7 +269,7 @@ export async function GET(
       );
     }
 
-    // 6. Return response
+    // 5. Return response
     return NextResponse.json({
       shipments: shipments || [],
       total: count || 0,

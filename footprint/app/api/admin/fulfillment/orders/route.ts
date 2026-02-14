@@ -33,6 +33,7 @@ import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { FULFILLMENT_STATUSES, type FulfillmentStatus } from '@/lib/fulfillment/status-transitions';
+import { fulfillmentOrdersQuerySchema, parseQueryParams } from '@/lib/validation/admin';
 
 interface FulfillmentOrder {
   id: string;
@@ -96,20 +97,10 @@ export async function GET(
 
     // 3. Parse query parameters
     const { searchParams } = new URL(request.url);
-
-    // Pagination
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)));
+    const parsed = parseQueryParams(searchParams, fulfillmentOrdersQuerySchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const { page, limit, status, startDate, endDate, search, size, paper, frame } = parsed.data;
     const offset = (page - 1) * limit;
-
-    // Filters
-    const status = searchParams.get('status');
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-    const search = searchParams.get('search');
-    const size = searchParams.get('size');
-    const paper = searchParams.get('paper');
-    const frame = searchParams.get('frame');
 
     // 5. Build query
     let query = supabase

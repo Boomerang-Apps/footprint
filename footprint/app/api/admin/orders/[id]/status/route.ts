@@ -36,22 +36,7 @@ import {
 import { sendStatusUpdateEmail } from '@/lib/email/resend';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
-
-// Valid order statuses
-const VALID_STATUSES: OrderStatus[] = [
-  'pending',
-  'paid',
-  'processing',
-  'printing',
-  'shipped',
-  'delivered',
-  'cancelled',
-];
-
-interface StatusUpdateRequest {
-  status: OrderStatus;
-  note?: string;
-}
+import { orderStatusSchema, parseRequestBody } from '@/lib/validation/admin';
 
 interface StatusUpdateResponse {
   success: boolean;
@@ -89,34 +74,12 @@ export async function PATCH(
 
     const supabase = await createClient();
 
-    // 2. Parse request body
-    let body: StatusUpdateRequest;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid JSON body' },
-        { status: 400 }
-      );
-    }
+    // 2. Parse and validate request body
+    const parsed = await parseRequestBody(request, orderStatusSchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const body = parsed.data;
 
-    // 3. Validate status field exists
-    if (!body.status) {
-      return NextResponse.json(
-        { error: 'Missing required field: status' },
-        { status: 400 }
-      );
-    }
-
-    // 4. Validate status value
-    if (!VALID_STATUSES.includes(body.status)) {
-      return NextResponse.json(
-        { error: `Invalid status value. Must be one of: ${VALID_STATUSES.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    // 5. Fetch existing order
+    // 3. Fetch existing order
     const { data: order, error: fetchError } = await supabase
       .from('orders')
       .select('id, status, customer_email, customer_name, status_history')
@@ -130,7 +93,7 @@ export async function PATCH(
       );
     }
 
-    // 6. Validate status transition
+    // 4. Validate status transition
     const currentStatus = order.status as OrderStatus;
     const newStatus = body.status;
 
@@ -141,7 +104,7 @@ export async function PATCH(
       );
     }
 
-    // 7. Create status history entry
+    // 5. Create status history entry
     const historyEntry = createStatusHistoryEntry(
       newStatus,
       user.id,
@@ -151,7 +114,7 @@ export async function PATCH(
     const existingHistory = order.status_history || [];
     const updatedHistory = [...existingHistory, historyEntry];
 
-    // 8. Update order in database
+    // 6. Update order in database
     const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
       .update({
@@ -171,7 +134,7 @@ export async function PATCH(
       );
     }
 
-    // 9. Send customer notification email
+    // 7. Send customer notification email
     let notificationResult = {
       sent: false as boolean,
       to: order.customer_email as string | undefined,
@@ -201,7 +164,7 @@ export async function PATCH(
       };
     }
 
-    // 10. Return success response
+    // 8. Return success response
     return NextResponse.json({
       success: true,
       order: {

@@ -30,20 +30,8 @@ import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import type { OrderStatus } from '@/types/order';
 import { logger } from '@/lib/logger';
+import { ordersQuerySchema, parseQueryParams } from '@/lib/validation/admin';
 
-// Valid order statuses
-const VALID_STATUSES: OrderStatus[] = [
-  'pending',
-  'paid',
-  'processing',
-  'printing',
-  'shipped',
-  'delivered',
-  'cancelled',
-];
-
-// Valid sort fields (whitelist for security)
-const VALID_SORT_FIELDS = ['created_at', 'updated_at', 'total', 'status', 'order_number'];
 
 interface AdminOrderSummary {
   id: string;
@@ -96,37 +84,12 @@ export async function GET(
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
 
-    // Pagination
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+    const parsed = parseQueryParams(searchParams, ordersQuerySchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const { page, limit, status, from: fromDate, to: toDate, search, sortBy, sortOrder } = parsed.data;
     const offset = (page - 1) * limit;
 
-    // Filters
-    const status = searchParams.get('status');
-    const fromDate = searchParams.get('from');
-    const toDate = searchParams.get('to');
-    const search = searchParams.get('search');
-
-    // Sorting
-    const sortBy = searchParams.get('sortBy') || 'created_at';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
-
-    // 4. Validate parameters
-    if (status && !VALID_STATUSES.includes(status as OrderStatus)) {
-      return NextResponse.json(
-        { error: `Invalid status. Valid values: ${VALID_STATUSES.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    if (!VALID_SORT_FIELDS.includes(sortBy)) {
-      return NextResponse.json(
-        { error: `Invalid sort field. Valid values: ${VALID_SORT_FIELDS.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    // 5. Build query
+    // 4. Build query
     let query = supabase
       .from('orders')
       .select(`
@@ -173,7 +136,7 @@ export async function GET(
     // Apply pagination
     query = query.range(offset, offset + limit - 1);
 
-    // 6. Execute query
+    // 5. Execute query
     const { data: orders, error: queryError, count } = await query;
 
     if (queryError) {
@@ -184,7 +147,7 @@ export async function GET(
       );
     }
 
-    // 7. Transform response
+    // 6. Transform response
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transformedOrders: AdminOrderSummary[] = (orders || []).map((order: any) => ({
       id: order.id,

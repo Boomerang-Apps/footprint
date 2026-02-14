@@ -28,13 +28,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
-
-// Valid status values
-const VALID_STATUSES = ['active', 'inactive', 'suspended'];
-
-interface StatusUpdateRequest {
-  status: string;
-}
+import { userStatusSchema, parseRequestBody } from '@/lib/validation/admin';
 
 interface UserStatusResponse {
   id: string;
@@ -73,24 +67,11 @@ export async function PATCH(
     const supabase = await createClient();
 
     // 3. Parse and validate request body
-    let body: StatusUpdateRequest;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid JSON body' },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseRequestBody(request, userStatusSchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const body = parsed.data;
 
-    if (!body.status || !VALID_STATUSES.includes(body.status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Valid values: ${VALID_STATUSES.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    // 5. Prevent self-deactivation
+    // 4. Prevent self-deactivation
     if (targetUserId === user.id && body.status !== 'active') {
       return NextResponse.json(
         { error: 'לא ניתן להשבית את החשבון שלך' },
@@ -98,7 +79,7 @@ export async function PATCH(
       );
     }
 
-    // 6. Update user status
+    // 5. Update user status
     const { data: updatedUser, error: updateError } = await supabase
       .from('profiles')
       .update({ status: body.status })
@@ -129,7 +110,7 @@ export async function PATCH(
       );
     }
 
-    // 7. If deactivating, invalidate user's sessions
+    // 6. If deactivating, invalidate user's sessions
     if (body.status === 'inactive' || body.status === 'suspended') {
       try {
         const adminClient = createAdminClient();
@@ -140,7 +121,7 @@ export async function PATCH(
       }
     }
 
-    // 8. Log audit entry
+    // 7. Log audit entry
     await supabase.from('admin_audit_log').insert({
       actor_id: user.id,
       target_id: targetUserId,
@@ -149,7 +130,7 @@ export async function PATCH(
       created_at: new Date().toISOString(),
     });
 
-    // 9. Return success response
+    // 8. Return success response
     return NextResponse.json({
       success: true,
       user: {

@@ -27,16 +27,17 @@ import { createClient } from '@/lib/supabase/server';
 import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
-
-interface RoleUpdateRequest {
-  isAdmin: boolean;
-}
+import { userRoleSchema, parseRequestBody } from '@/lib/validation/admin';
 
 interface UserRoleResponse {
   id: string;
   email: string;
   isAdmin: boolean;
   updatedAt: string;
+}
+
+interface ErrorResponse {
+  error: string;
 }
 
 interface SuccessResponse {
@@ -69,24 +70,11 @@ export async function PATCH(
     const supabase = await createClient();
 
     // 3. Parse and validate request body
-    let body: RoleUpdateRequest;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid JSON body' },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseRequestBody(request, userRoleSchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const body = parsed.data;
 
-    if (typeof body.isAdmin !== 'boolean') {
-      return NextResponse.json(
-        { error: 'Invalid input: isAdmin must be a boolean' },
-        { status: 400 }
-      );
-    }
-
-    // 5. Prevent self-demotion
+    // 4. Prevent self-demotion
     if (targetUserId === user.id && body.isAdmin === false) {
       return NextResponse.json(
         { error: 'לא ניתן להסיר הרשאות מעצמך' },
@@ -94,7 +82,7 @@ export async function PATCH(
       );
     }
 
-    // 6. Update user role
+    // 5. Update user role
     const { data: updatedUser, error: updateError } = await supabase
       .from('profiles')
       .update({ is_admin: body.isAdmin })
@@ -125,7 +113,7 @@ export async function PATCH(
       );
     }
 
-    // 7. Log audit entry
+    // 6. Log audit entry
     await supabase.from('admin_audit_log').insert({
       actor_id: user.id,
       target_id: targetUserId,
@@ -134,7 +122,7 @@ export async function PATCH(
       created_at: new Date().toISOString(),
     });
 
-    // 8. Return success response
+    // 7. Return success response
     return NextResponse.json({
       success: true,
       user: {

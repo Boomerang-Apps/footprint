@@ -272,7 +272,7 @@ describe('PATCH /api/admin/users/[id]/status', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid status');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should handle auth errors gracefully', async () => {

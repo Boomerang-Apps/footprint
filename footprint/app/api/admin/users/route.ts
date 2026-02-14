@@ -29,12 +29,8 @@ import { createClient } from '@/lib/supabase/server';
 import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
+import { usersQuerySchema, parseQueryParams } from '@/lib/validation/admin';
 
-// Valid role filters
-const VALID_ROLES = ['all', 'admin', 'user'];
-
-// Valid sort fields (whitelist for security)
-const VALID_SORT_FIELDS = ['created_at', 'name', 'order_count', 'email'];
 
 interface AdminUserSummary {
   id: string;
@@ -90,37 +86,12 @@ export async function GET(
     // 3. Parse query parameters
     const { searchParams } = new URL(request.url);
 
-    // Pagination
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
+    const parsed = parseQueryParams(searchParams, usersQuerySchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const { page, limit, search, role, registeredFrom, registeredTo, sortBy, sortOrder } = parsed.data;
     const offset = (page - 1) * limit;
 
-    // Filters
-    const search = searchParams.get('search');
-    const role = searchParams.get('role') || 'all';
-    const registeredFrom = searchParams.get('registeredFrom');
-    const registeredTo = searchParams.get('registeredTo');
-
-    // Sorting
-    const sortBy = searchParams.get('sortBy') || 'created_at';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
-
-    // 5. Validate parameters
-    if (!VALID_ROLES.includes(role)) {
-      return NextResponse.json(
-        { error: `Invalid role. Valid values: ${VALID_ROLES.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    if (!VALID_SORT_FIELDS.includes(sortBy)) {
-      return NextResponse.json(
-        { error: `Invalid sort field. Valid values: ${VALID_SORT_FIELDS.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    // 6. Build query
+    // 4. Build query
     let query = supabase
       .from('profiles')
       .select(`
@@ -166,7 +137,7 @@ export async function GET(
     // Apply pagination
     query = query.range(offset, offset + limit - 1);
 
-    // 7. Execute query
+    // 5. Execute query
     const { data: users, error: queryError, count } = await query;
 
     if (queryError) {
@@ -177,7 +148,7 @@ export async function GET(
       );
     }
 
-    // 8. Transform response to camelCase
+    // 6. Transform response to camelCase
     const transformedUsers: AdminUserSummary[] = (users || []).map((user: Record<string, unknown>) => ({
       id: user.id as string,
       email: user.email as string,

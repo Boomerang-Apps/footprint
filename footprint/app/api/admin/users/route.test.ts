@@ -354,7 +354,7 @@ describe('GET /api/admin/users', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid sort field');
+      expect(data.error).toBe('Invalid query parameters');
     });
   });
 
@@ -382,12 +382,10 @@ describe('GET /api/admin/users', () => {
     });
 
     it('should cap limit at 100', async () => {
-      setupSupabaseChain(mockUsers);
-
       const request = createRequest('/api/admin/users?limit=500');
-      await GET(request);
+      const response = await GET(request);
 
-      expect(mockSupabaseRange).toHaveBeenCalledWith(0, 99);
+      expect(response.status).toBe(400);
     });
 
     it('should calculate totalPages correctly', async () => {
@@ -459,7 +457,7 @@ describe('GET /api/admin/users', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid role');
+      expect(data.error).toBe('Invalid query parameters');
     });
 
     it('should handle auth errors gracefully', async () => {

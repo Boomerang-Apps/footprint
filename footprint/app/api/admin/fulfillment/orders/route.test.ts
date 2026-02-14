@@ -303,9 +303,9 @@ describe('GET /api/admin/fulfillment/orders', () => {
 
     it('should limit maximum page size to 100', async () => {
       const request = createRequest({ limit: '500' });
-      await GET(request);
+      const response = await GET(request);
 
-      expect(mockSupabaseRange).toHaveBeenCalledWith(0, 99);
+      expect(response.status).toBe(400);
     });
   });
 

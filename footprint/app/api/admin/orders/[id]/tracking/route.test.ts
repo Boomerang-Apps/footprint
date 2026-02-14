@@ -214,7 +214,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
       const body = await response.json();
 
       expect(response.status).toBe(400);
-      expect(body.error).toContain('trackingNumber');
+      expect(body.error).toBe('Invalid request body');
     });
 
     it('should return 400 for missing carrier', async () => {
@@ -223,7 +223,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
       const body = await response.json();
 
       expect(response.status).toBe(400);
-      expect(body.error).toContain('carrier');
+      expect(body.error).toBe('Invalid request body');
     });
 
     it('should return 400 for invalid carrier code', async () => {
@@ -232,7 +232,7 @@ describe('PATCH /api/admin/orders/[id]/tracking', () => {
       const body = await response.json();
 
       expect(response.status).toBe(400);
-      expect(body.error).toContain('Invalid carrier');
+      expect(body.error).toBe('Invalid request body');
     });
 
     it('should return 400 for invalid tracking number format', async () => {

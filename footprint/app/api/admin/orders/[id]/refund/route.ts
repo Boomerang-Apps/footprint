@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { processRefund } from '@/lib/payments/refund';
 import { createPaymentRecord } from '@/lib/payments/record';
 import { logger } from '@/lib/logger';
+import { refundSchema, parseRequestBody } from '@/lib/validation/admin';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -34,16 +35,10 @@ export async function POST(
   try {
     const { id: orderId } = await params;
 
-    // 3. Parse body
-    const body = await request.json();
-    const { amount, reason } = body as { amount?: number; reason?: string };
-
-    if (!amount || amount <= 0 || !Number.isInteger(amount) || amount > 10_000_000) {
-      return NextResponse.json(
-        { error: 'Amount must be a positive integer in agorot (max 100,000 ILS)' },
-        { status: 400 }
-      );
-    }
+    // 3. Parse and validate body
+    const parsed = await parseRequestBody(request, refundSchema);
+    if (parsed.error) return parsed.error;
+    const { amount, reason } = parsed.data;
 
     const supabase = createAdminClient();
 

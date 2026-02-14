@@ -238,12 +238,10 @@ describe('GET /api/admin/orders', () => {
     });
 
     it('should cap limit at 100', async () => {
-      setupSupabaseChain(mockOrders);
-
       const request = createRequest('/api/admin/orders?limit=500');
-      await GET(request);
+      const response = await GET(request);
 
-      expect(mockSupabaseRange).toHaveBeenCalledWith(0, 99);
+      expect(response.status).toBe(400);
     });
 
     it('should return pagination metadata', async () => {
@@ -299,7 +297,7 @@ describe('GET /api/admin/orders', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid status');
+      expect(data.error).toBe('Invalid query parameters');
     });
   });
 
@@ -335,7 +333,7 @@ describe('GET /api/admin/orders', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid sort field');
+      expect(data.error).toBe('Invalid query parameters');
     });
   });
 

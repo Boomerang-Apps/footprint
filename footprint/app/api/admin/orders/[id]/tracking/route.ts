@@ -32,7 +32,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { verifyAdmin } from '@/lib/auth/admin';
 import {
-  isValidCarrier,
   validateTrackingNumber,
   generateTrackingUrl,
   CarrierCode,
@@ -40,12 +39,7 @@ import {
 import { sendTrackingNotificationEmail } from '@/lib/email/resend';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
-
-interface TrackingRequest {
-  trackingNumber: string;
-  carrier: CarrierCode;
-  note?: string;
-}
+import { trackingSchema, parseRequestBody } from '@/lib/validation/admin';
 
 interface TrackingResponse {
   success: boolean;
@@ -85,41 +79,12 @@ export async function PATCH(
 
     const supabase = await createClient();
 
-    // 2. Parse request body
-    let body: TrackingRequest;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid JSON body' },
-        { status: 400 }
-      );
-    }
+    // 2. Parse and validate request body
+    const parsed = await parseRequestBody(request, trackingSchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const body = parsed.data;
 
-    // 4. Validate required fields
-    if (!body.trackingNumber) {
-      return NextResponse.json(
-        { error: 'Missing required field: trackingNumber' },
-        { status: 400 }
-      );
-    }
-
-    if (!body.carrier) {
-      return NextResponse.json(
-        { error: 'Missing required field: carrier' },
-        { status: 400 }
-      );
-    }
-
-    // 5. Validate carrier code
-    if (!isValidCarrier(body.carrier)) {
-      return NextResponse.json(
-        { error: 'Invalid carrier code. Must be one of: israel_post, dhl, fedex, ups, other' },
-        { status: 400 }
-      );
-    }
-
-    // 6. Validate tracking number format
+    // 3. Validate tracking number format
     const validationResult = validateTrackingNumber(body.trackingNumber, body.carrier);
     if (!validationResult.valid) {
       return NextResponse.json(
@@ -128,7 +93,7 @@ export async function PATCH(
       );
     }
 
-    // 7. Fetch existing order
+    // 4. Fetch existing order
     const { data: order, error: fetchError } = await supabase
       .from('orders')
       .select('id, status, customer_email, customer_name')
@@ -142,10 +107,10 @@ export async function PATCH(
       );
     }
 
-    // 8. Generate tracking URL
+    // 5. Generate tracking URL
     const trackingUrl = generateTrackingUrl(body.trackingNumber, body.carrier);
 
-    // 9. Update order in database
+    // 6. Update order in database
     const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
       .update({
@@ -171,7 +136,7 @@ export async function PATCH(
       );
     }
 
-    // 10. Send customer notification email
+    // 7. Send customer notification email
     let notificationResult = {
       sent: false as boolean,
       to: order.customer_email as string | undefined,
@@ -202,7 +167,7 @@ export async function PATCH(
       };
     }
 
-    // 11. Return success response
+    // 8. Return success response
     return NextResponse.json({
       success: true,
       order: {

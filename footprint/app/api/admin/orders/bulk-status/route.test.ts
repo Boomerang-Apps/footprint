@@ -33,10 +33,15 @@ vi.mock('@/lib/rate-limit', () => ({
 
 import { POST } from './route';
 
+// Use valid UUIDs for testing
+const UUID_ORDER_1 = '550e8400-e29b-41d4-a716-446655440001';
+const UUID_ORDER_2 = '550e8400-e29b-41d4-a716-446655440002';
+const UUID_ORDER_3 = '550e8400-e29b-41d4-a716-446655440003';
+
 const mockOrders = [
-  { id: 'order-1', status: 'pending', order_number: 'FP-2026-001' },
-  { id: 'order-2', status: 'pending', order_number: 'FP-2026-002' },
-  { id: 'order-3', status: 'pending', order_number: 'FP-2026-003' },
+  { id: UUID_ORDER_1, status: 'pending', order_number: 'FP-2026-001' },
+  { id: UUID_ORDER_2, status: 'pending', order_number: 'FP-2026-002' },
+  { id: UUID_ORDER_3, status: 'pending', order_number: 'FP-2026-003' },
 ];
 
 function createRequest(body: object): NextRequest {
@@ -78,7 +83,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
         error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 401 }),
       });
 
-      const request = createRequest({ orderIds: ['order-1'], status: 'printing' });
+      const request = createRequest({ orderIds: [UUID_ORDER_1], status: 'printing' });
       const response = await POST(request);
 
       expect(response.status).toBe(401);
@@ -92,7 +97,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
         error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
       });
 
-      const request = createRequest({ orderIds: ['order-1'], status: 'printing' });
+      const request = createRequest({ orderIds: [UUID_ORDER_1], status: 'printing' });
       const response = await POST(request);
 
       expect(response.status).toBe(403);
@@ -108,16 +113,16 @@ describe('POST /api/admin/orders/bulk-status', () => {
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('orderIds');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 400 when status is missing', async () => {
-      const request = createRequest({ orderIds: ['order-1'] });
+      const request = createRequest({ orderIds: [UUID_ORDER_1] });
       const response = await POST(request);
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('status');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 400 when orderIds is empty', async () => {
@@ -126,7 +131,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('orderIds');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 400 when orderIds exceeds 100', async () => {
@@ -136,16 +141,16 @@ describe('POST /api/admin/orders/bulk-status', () => {
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('100');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 400 for invalid status value', async () => {
-      const request = createRequest({ orderIds: ['order-1'], status: 'invalid' });
+      const request = createRequest({ orderIds: [UUID_ORDER_1], status: 'invalid' });
       const response = await POST(request);
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('סטטוס');
+      expect(data.error).toBe('Invalid request body');
     });
   });
 
@@ -167,7 +172,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
 
     it('should update all orders successfully', async () => {
       const request = createRequest({
-        orderIds: ['order-1', 'order-2', 'order-3'],
+        orderIds: [UUID_ORDER_1, UUID_ORDER_2, UUID_ORDER_3],
         status: 'printing',
       });
       const response = await POST(request);
@@ -186,19 +191,19 @@ describe('POST /api/admin/orders/bulk-status', () => {
       setupChainedMocks();
       mockSupabaseIn.mockResolvedValueOnce({
         data: [
-          { id: 'order-1', status: 'pending', order_number: 'FP-001' },
-          { id: 'order-2', status: 'delivered', order_number: 'FP-002' }, // Cannot transition
+          { id: UUID_ORDER_1, status: 'pending', order_number: 'FP-001' },
+          { id: UUID_ORDER_2, status: 'delivered', order_number: 'FP-002' }, // Cannot transition
         ],
         error: null,
       });
       mockSupabaseIn.mockResolvedValueOnce({
-        data: [{ id: 'order-1', status: 'printing' }],
+        data: [{ id: UUID_ORDER_1, status: 'printing' }],
         error: null,
       });
       mockSupabaseInsert.mockResolvedValue({ data: null, error: null });
 
       const request = createRequest({
-        orderIds: ['order-1', 'order-2'],
+        orderIds: [UUID_ORDER_1, UUID_ORDER_2],
         status: 'printing',
       });
       const response = await POST(request);
@@ -208,7 +213,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
       expect(data.success).toBe(1);
       expect(data.failed).toBe(1);
       expect(data.errors).toHaveLength(1);
-      expect(data.errors[0].orderId).toBe('order-2');
+      expect(data.errors[0].orderId).toBe(UUID_ORDER_2);
     });
 
     it('should reject invalid status transitions', async () => {
@@ -217,13 +222,13 @@ describe('POST /api/admin/orders/bulk-status', () => {
       mockSupabaseInsert.mockReset();
       setupChainedMocks();
       mockSupabaseIn.mockResolvedValueOnce({
-        data: [{ id: 'order-1', status: 'delivered', order_number: 'FP-001' }],
+        data: [{ id: UUID_ORDER_1, status: 'delivered', order_number: 'FP-001' }],
         error: null,
       });
       mockSupabaseInsert.mockResolvedValue({ data: null, error: null });
 
       const request = createRequest({
-        orderIds: ['order-1'],
+        orderIds: [UUID_ORDER_1],
         status: 'pending',
       });
       const response = await POST(request);
@@ -237,7 +242,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
 
     it('should record status history for each order', async () => {
       const request = createRequest({
-        orderIds: ['order-1', 'order-2'],
+        orderIds: [UUID_ORDER_1, UUID_ORDER_2],
         status: 'printing',
       });
       await POST(request);
@@ -262,7 +267,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
 
     it('should log bulk operation to audit log', async () => {
       const request = createRequest({
-        orderIds: ['order-1', 'order-2'],
+        orderIds: [UUID_ORDER_1, UUID_ORDER_2],
         status: 'printing',
       });
       await POST(request);
@@ -272,7 +277,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
 
     it('should include affected order IDs in audit log', async () => {
       const request = createRequest({
-        orderIds: ['order-1', 'order-2'],
+        orderIds: [UUID_ORDER_1, UUID_ORDER_2],
         status: 'printing',
       });
       await POST(request);
@@ -296,7 +301,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
       });
 
       const request = createRequest({
-        orderIds: ['order-1'],
+        orderIds: [UUID_ORDER_1],
         status: 'printing',
       });
       const response = await POST(request);
@@ -320,7 +325,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
       });
 
       const request = createRequest({
-        orderIds: ['order-1', 'order-2'],
+        orderIds: [UUID_ORDER_1, UUID_ORDER_2],
         status: 'printing',
       });
       const response = await POST(request);
@@ -337,7 +342,7 @@ describe('POST /api/admin/orders/bulk-status', () => {
       );
 
       const request = createRequest({
-        orderIds: ['order-1'],
+        orderIds: [UUID_ORDER_1],
         status: 'printing',
       });
       const response = await POST(request);

@@ -34,6 +34,9 @@ vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(null)),
 }));
 
+// Use valid UUID for testing
+const TEST_ORDER_ID = '550e8400-e29b-41d4-a716-446655440000';
+
 // Mock address validation
 vi.mock('@/lib/shipping/validation', () => ({
   validateAddress: vi.fn(() => ({ valid: true, errors: {} })),
@@ -91,7 +94,7 @@ describe('POST /api/admin/shipments', () => {
             eq: vi.fn().mockReturnValue({
               single: vi.fn().mockResolvedValue({
                 data: {
-                  id: 'order-123',
+                  id: TEST_ORDER_ID,
                   order_number: 'FP-2026-001',
                   fulfillment_status: 'ready_to_ship',
                   total: 250,
@@ -150,7 +153,7 @@ describe('POST /api/admin/shipments', () => {
         error: NextResponse.json({ error: 'נדרשת הזדהות' }, { status: 401 }),
       });
 
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       const response = await POST(request);
       const data = await response.json();
 
@@ -164,7 +167,7 @@ describe('POST /api/admin/shipments', () => {
         error: NextResponse.json({ error: 'נדרשת הרשאת מנהל' }, { status: 403 }),
       });
 
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       const response = await POST(request);
       const data = await response.json();
 
@@ -180,7 +183,7 @@ describe('POST /api/admin/shipments', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('orderId');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 404 when order not found', async () => {
@@ -197,7 +200,7 @@ describe('POST /api/admin/shipments', () => {
         return { select: mockSelect, insert: mockInsert };
       });
 
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       const response = await POST(request);
       const data = await response.json();
 
@@ -213,7 +216,7 @@ describe('POST /api/admin/shipments', () => {
               eq: vi.fn().mockReturnValue({
                 single: vi.fn().mockResolvedValue({
                   data: {
-                    id: 'order-123',
+                    id: TEST_ORDER_ID,
                     order_number: 'FP-2026-001',
                     fulfillment_status: 'ready_to_ship',
                     shipping_address: null,
@@ -227,7 +230,7 @@ describe('POST /api/admin/shipments', () => {
         return { select: mockSelect, insert: mockInsert };
       });
 
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       const response = await POST(request);
       const data = await response.json();
 
@@ -239,7 +242,7 @@ describe('POST /api/admin/shipments', () => {
   describe('Shipment Creation (AC-001)', () => {
     it('should create shipment successfully', async () => {
       const request = createPostRequest({
-        orderId: 'order-123',
+        orderId: TEST_ORDER_ID,
         carrier: 'israel_post',
         serviceType: 'registered',
       });
@@ -253,14 +256,14 @@ describe('POST /api/admin/shipments', () => {
     });
 
     it('should use default carrier when not specified', async () => {
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       await POST(request);
 
       expect(mockCreateShipment).toHaveBeenCalled();
     });
 
     it('should return label URL (AC-003)', async () => {
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       const response = await POST(request);
       const data = await response.json();
 
@@ -269,7 +272,7 @@ describe('POST /api/admin/shipments', () => {
 
     it('should support different service types (AC-017)', async () => {
       const request = createPostRequest({
-        orderId: 'order-123',
+        orderId: TEST_ORDER_ID,
         serviceType: 'express',
       });
       await POST(request);
@@ -288,7 +291,7 @@ describe('POST /api/admin/shipments', () => {
         new ShippingProviderError('Provider unavailable', 'PROVIDER_DOWN', 'israel_post', true)
       );
 
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       const response = await POST(request);
       const data = await response.json();
 
@@ -299,7 +302,7 @@ describe('POST /api/admin/shipments', () => {
     it('should return 500 on unexpected error', async () => {
       mockCreateShipment.mockRejectedValue(new Error('Unexpected'));
 
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       const response = await POST(request);
       const data = await response.json();
 
@@ -318,7 +321,7 @@ describe('POST /api/admin/shipments', () => {
               eq: vi.fn().mockReturnValue({
                 single: vi.fn().mockResolvedValue({
                   data: {
-                    id: 'order-123',
+                    id: TEST_ORDER_ID,
                     order_number: 'FP-2026-001',
                     fulfillment_status: 'ready_to_ship',
                     total: 250,
@@ -361,7 +364,7 @@ describe('POST /api/admin/shipments', () => {
         return { insert: vi.fn().mockResolvedValue({ data: null, error: null }) };
       });
 
-      const request = createPostRequest({ orderId: 'order-123' });
+      const request = createPostRequest({ orderId: TEST_ORDER_ID });
       await POST(request);
 
       expect(auditInsertCalled).toBe(true);
@@ -386,7 +389,7 @@ describe('GET /api/admin/shipments', () => {
             data: [
               {
                 id: 'shipment-1',
-                order_id: 'order-123',
+                order_id: TEST_ORDER_ID,
                 tracking_number: 'RR123456789IL',
                 carrier: 'israel_post',
                 status: 'in_transit',
@@ -402,7 +405,7 @@ describe('GET /api/admin/shipments', () => {
           data: [
             {
               id: 'shipment-1',
-              order_id: 'order-123',
+              order_id: TEST_ORDER_ID,
               tracking_number: 'RR123456789IL',
               carrier: 'israel_post',
               status: 'in_transit',
@@ -426,7 +429,7 @@ describe('GET /api/admin/shipments', () => {
   });
 
   it('should filter by order ID', async () => {
-    const request = createGetRequest({ orderId: 'order-123' });
+    const request = createGetRequest({ orderId: TEST_ORDER_ID });
     const response = await GET(request);
 
     expect(response.status).toBe(200);

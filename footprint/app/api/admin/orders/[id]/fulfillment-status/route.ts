@@ -27,16 +27,11 @@ import { verifyAdmin } from '@/lib/auth/admin';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import {
-  isValidFulfillmentStatus,
   isValidFulfillmentTransition,
   getStatusLabel,
   type FulfillmentStatus,
 } from '@/lib/fulfillment/status-transitions';
-
-interface StatusUpdateRequest {
-  status: FulfillmentStatus;
-  note?: string;
-}
+import { fulfillmentStatusSchema, parseRequestBody } from '@/lib/validation/admin';
 
 interface StatusUpdateResponse {
   success: boolean;
@@ -71,33 +66,12 @@ export async function PATCH(
 
     const supabase = await createClient();
 
-    // 3. Parse request body
-    let body: StatusUpdateRequest;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: 'גוף בקשה לא תקין' },
-        { status: 400 }
-      );
-    }
+    // 3. Parse and validate request body
+    const parsed = await parseRequestBody(request, fulfillmentStatusSchema);
+    if (parsed.error) return parsed.error as NextResponse<ErrorResponse>;
+    const body = parsed.data;
 
-    // 5. Validate status field
-    if (!body.status) {
-      return NextResponse.json(
-        { error: 'חסר שדה status' },
-        { status: 400 }
-      );
-    }
-
-    if (!isValidFulfillmentStatus(body.status)) {
-      return NextResponse.json(
-        { error: 'סטטוס לא תקין' },
-        { status: 400 }
-      );
-    }
-
-    // 6. Fetch existing order
+    // 4. Fetch existing order
     const { data: order, error: fetchError } = await supabase
       .from('orders')
       .select('id, status, order_number')
@@ -120,7 +94,7 @@ export async function PATCH(
       );
     }
 
-    // 7. Validate status transition
+    // 5. Validate status transition
     const currentStatus = order.status as FulfillmentStatus;
     const newStatus = body.status;
 
@@ -133,7 +107,7 @@ export async function PATCH(
       );
     }
 
-    // 8. Update order
+    // 6. Update order
     const updatedAt = new Date().toISOString();
     const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
@@ -153,7 +127,7 @@ export async function PATCH(
       );
     }
 
-    // 9. Record status history
+    // 7. Record status history
     await supabase.from('order_status_history').insert({
       order_id: orderId,
       status: newStatus,
@@ -163,7 +137,7 @@ export async function PATCH(
       note: body.note || null,
     });
 
-    // 10. Return success response
+    // 8. Return success response
     return NextResponse.json({
       success: true,
       order: {

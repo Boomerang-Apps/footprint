@@ -114,7 +114,7 @@ describe('PATCH /api/admin/orders/[id]/fulfillment-status', () => {
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('status');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 400 for invalid status value', async () => {
@@ -123,7 +123,7 @@ describe('PATCH /api/admin/orders/[id]/fulfillment-status', () => {
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('סטטוס');
+      expect(data.error).toBe('Invalid request body');
     });
 
     it('should return 404 when order not found', async () => {
