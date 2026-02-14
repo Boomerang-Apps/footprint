@@ -3,14 +3,14 @@
   "schema_version": "4.2",
   "story_id": "CO-06",
   "type": "feature",
-  "wave_number": "8",
+  "wave_number": 8,
   "title": "PayPlus Israeli Payment Integration",
   "domain": "backend",
   "agent": "be-dev",
   "priority": "critical",
   "story_points": 13,
-  "description": "Complete integration with PayPlus payment gateway for Israeli credit card processing, including recurring payments, refunds, and compliance with Israeli payment regulations",
-  "status": "pending",
+  "description": "Complete integration with PayPlus payment gateway for Israeli credit card processing. Core payment flow (session creation, redirect, webhook verification, callbacks, ILS currency, idempotency, test mode, PCI compliance) was implemented in CO-01/CO-02. This story covers the 4 remaining gaps: payment record persistence (AC-007), refund processing (AC-008/009), webhook IP whitelisting (AC-014), and pending order timeout handling (AC-011).",
+  "status": "in_progress",
   "objective": {
     "as_a": "Israeli customer",
     "i_want": "to pay securely with my local credit card",
@@ -21,123 +21,169 @@
       "id": "AC-001",
       "description": "Initialize PayPlus payment session",
       "ears_format": "WHEN checkout initiated THEN create PayPlus payment page session with order details",
-      "test_approach": "Mock PayPlus API, verify session creation request"
+      "test_approach": "Mock PayPlus API, verify session creation request",
+      "status": "complete",
+      "implemented_in": "lib/payments/payplus.ts:100-171 (createPaymentLink)",
+      "tested_in": "lib/payments/payplus.test.ts"
     },
     {
       "id": "AC-002",
       "description": "Redirect to PayPlus hosted page",
       "ears_format": "WHEN payment session created THEN redirect customer to PayPlus hosted payment page",
-      "test_approach": "Verify redirect URL generated correctly"
+      "test_approach": "Verify redirect URL generated correctly",
+      "status": "complete",
+      "implemented_in": "components/checkout/PaymentModal.tsx (iframe)"
     },
     {
       "id": "AC-003",
       "description": "Handle successful payment callback",
       "ears_format": "WHEN PayPlus sends success callback THEN verify signature, update order status to 'paid', record transaction",
-      "test_approach": "Mock callback with valid signature, verify order updated"
+      "test_approach": "Mock callback with valid signature, verify order updated",
+      "status": "complete",
+      "implemented_in": "app/api/webhooks/payplus/route.ts:172-266"
     },
     {
       "id": "AC-004",
       "description": "Handle failed payment callback",
       "ears_format": "WHEN PayPlus sends failure callback THEN update order status to 'payment_failed', show error to customer",
-      "test_approach": "Mock failure callback, verify error handling"
+      "test_approach": "Mock failure callback, verify error handling",
+      "status": "complete",
+      "implemented_in": "app/api/webhooks/payplus/route.ts:302-310"
     },
     {
       "id": "AC-005",
       "description": "Signature verification",
       "ears_format": "WHEN callback received THEN verify HMAC signature using secret key, reject invalid signatures",
-      "test_approach": "Test with valid and invalid signatures"
+      "test_approach": "Test with valid and invalid signatures",
+      "status": "complete",
+      "implemented_in": "lib/payments/payplus.ts:188-208 (validateWebhook, timing-safe HMAC-SHA256)",
+      "tested_in": "lib/payments/payplus.test.ts (4 signature tests)"
     },
     {
       "id": "AC-006",
       "description": "Support Israeli Shekel currency",
       "ears_format": "WHEN payment created THEN use ILS currency code with amounts in agorot (1/100 shekel)",
-      "test_approach": "Verify currency and amount format in API request"
+      "test_approach": "Verify currency and amount format in API request",
+      "status": "complete",
+      "implemented_in": "lib/payments/payplus.ts:110 (amount / 100, currency_code: 'ILS')",
+      "tested_in": "lib/payments/payplus.test.ts (verifies amount=158 for 15800 agorot)"
     },
     {
       "id": "AC-007",
       "description": "Store transaction record",
       "ears_format": "WHEN payment succeeds THEN store transaction_id, approval_number, last_4_digits, card_brand in payments table",
-      "test_approach": "Verify payment record created with required fields"
+      "test_approach": "Verify payment record created with required fields",
+      "status": "pending",
+      "gap": "payments table schema exists (types/database.ts:166-204) but NO code writes to it"
     },
     {
       "id": "AC-008",
       "description": "Process refunds",
       "ears_format": "WHEN admin initiates refund THEN call PayPlus refund API, update payment status to 'refunded'",
-      "test_approach": "Mock refund API, verify refund processing"
+      "test_approach": "Mock refund API, verify refund processing",
+      "status": "pending",
+      "gap": "No refund code exists anywhere in the codebase"
     },
     {
       "id": "AC-009",
       "description": "Partial refund support",
       "ears_format": "WHEN admin initiates partial refund THEN specify amount and create partial refund record",
-      "test_approach": "Test partial refund with various amounts"
+      "test_approach": "Test partial refund with various amounts",
+      "status": "pending",
+      "gap": "No refund code exists anywhere in the codebase"
     },
     {
       "id": "AC-010",
       "description": "Handle duplicate callbacks",
       "ears_format": "WHEN duplicate callback received THEN idempotently skip if already processed",
-      "test_approach": "Send same callback twice, verify no duplicate processing"
+      "test_approach": "Send same callback twice, verify no duplicate processing",
+      "status": "complete",
+      "implemented_in": "app/api/webhooks/payplus/route.ts:206-215 (checks status === 'paid', returns no-op)"
     },
     {
       "id": "AC-011",
       "description": "Timeout handling",
       "ears_format": "WHEN payment page times out (15 min) THEN expire order, allow retry",
       "threshold": "timeout: 15min",
-      "test_approach": "Simulate timeout, verify order status"
+      "test_approach": "Simulate timeout, verify order status",
+      "status": "pending",
+      "gap": "No cron job or expiry mechanism for pending orders"
     },
     {
       "id": "AC-012",
       "description": "Test mode support",
       "ears_format": "WHEN PAYPLUS_TEST_MODE=true THEN use sandbox credentials and test card numbers",
-      "test_approach": "Verify test mode configuration"
+      "test_approach": "Verify test mode configuration",
+      "status": "complete",
+      "implemented_in": "lib/payments/payplus.ts:66 (PAYPLUS_SANDBOX env var), sandbox URL routing",
+      "tested_in": "lib/payments/payplus.test.ts (sandbox/production URL tests)"
     },
     {
       "id": "AC-013",
       "description": "PCI compliance",
       "ears_format": "WHEN payment processed THEN never store full card number, CVV, or track data on our servers",
-      "test_approach": "Audit stored data, verify no PCI scope data"
+      "test_approach": "Audit stored data, verify no PCI scope data",
+      "status": "complete",
+      "implemented_in": "PayPlus hosted page (SAQ-A), no card data touches our servers"
     },
     {
       "id": "AC-014",
       "description": "Webhook endpoint security",
       "ears_format": "WHEN webhook endpoint called THEN only accept requests from PayPlus IP whitelist",
-      "test_approach": "Test with allowed and blocked IPs"
+      "test_approach": "Test with allowed and blocked IPs",
+      "status": "pending",
+      "gap": "Webhook checks user-agent + HMAC signature but NOT source IP"
     }
   ],
   "files": {
+    "existing": [
+      "lib/payments/payplus.ts",
+      "lib/payments/payplus.test.ts",
+      "app/api/webhooks/payplus/route.ts",
+      "app/api/orders/[id]/finalize/route.ts",
+      "app/api/checkout/route.ts",
+      "types/database.ts",
+      "lib/auth/admin.ts",
+      "lib/rate-limit.ts",
+      "lib/logger.ts",
+      "lib/supabase/server.ts",
+      "vercel.json"
+    ],
     "create": [
-      "lib/payments/payplus-client.ts",
-      "lib/payments/payplus-client.test.ts",
-      "lib/payments/payplus-webhook.ts",
-      "lib/payments/payplus-webhook.test.ts",
-      "lib/payments/refund-service.ts",
-      "lib/payments/refund-service.test.ts",
-      "app/api/payments/payplus/create-session/route.ts",
-      "app/api/payments/payplus/create-session/route.test.ts",
-      "app/api/payments/payplus/webhook/route.ts",
-      "app/api/payments/payplus/webhook/route.test.ts",
-      "app/api/admin/refunds/route.ts",
-      "app/api/admin/refunds/route.test.ts"
+      "lib/payments/record.ts",
+      "lib/payments/record.test.ts",
+      "lib/payments/refund.ts",
+      "lib/payments/refund.test.ts",
+      "lib/payments/ip-whitelist.ts",
+      "lib/payments/ip-whitelist.test.ts",
+      "app/api/admin/orders/[id]/refund/route.ts",
+      "app/api/admin/orders/[id]/refund/route.test.ts",
+      "app/api/cron/expire-pending-orders/route.ts",
+      "app/api/cron/expire-pending-orders/route.test.ts"
     ],
     "modify": [
-      "lib/payments/index.ts",
-      "types/payment.ts",
-      "supabase/migrations/xxx_add_payplus_fields.sql"
+      "app/api/webhooks/payplus/route.ts",
+      "app/api/orders/[id]/finalize/route.ts",
+      "vercel.json"
     ],
     "forbidden": [
-      "store/orderStore.ts",
+      "stores/orderStore.ts",
       "components/*"
     ]
   },
   "technical_requirements": {
     "payplus_api": {
       "version": "v1.7",
-      "base_url": "https://api.payplus.co.il",
+      "sandbox_url": "https://restapidev.payplus.co.il/api/v1.0",
+      "production_url": "https://restapi.payplus.co.il/api/v1.0",
+      "refund_endpoint": "POST {baseUrl}/Transactions/RefundByTransactionUID",
       "docs": "https://docs.payplus.co.il"
     },
     "security": {
       "hmac_algorithm": "SHA256",
       "ip_whitelist": ["195.28.xxx.xxx/24"],
-      "webhook_timeout_ms": 5000
+      "webhook_timeout_ms": 5000,
+      "timing_safe_comparison": true
     },
     "compliance": {
       "pci_level": "SAQ-A (hosted page)",
@@ -146,70 +192,165 @@
     "environment_vars": [
       "PAYPLUS_API_KEY",
       "PAYPLUS_SECRET_KEY",
-      "PAYPLUS_TERMINAL_ID",
-      "PAYPLUS_TEST_MODE"
+      "PAYPLUS_PAYMENT_PAGE_UID",
+      "PAYPLUS_SANDBOX",
+      "PAYPLUS_WEBHOOK_IPS",
+      "CRON_SECRET"
+    ],
+    "reuse_functions": [
+      "lib/payments/payplus.ts → getPayPlusConfig(), validateWebhook()",
+      "lib/auth/admin.ts → verifyAdmin(), withAdminAuth()",
+      "lib/rate-limit.ts → checkRateLimit()",
+      "lib/logger.ts → logger",
+      "lib/supabase/server.ts → createAdminClient(), createClient()",
+      "types/database.ts → DbPayment, PaymentStatus, PaymentProvider"
+    ],
+    "api_endpoints": [
+      {
+        "method": "POST",
+        "path": "/api/admin/orders/[id]/refund",
+        "description": "Admin-only refund endpoint (full + partial)"
+      },
+      {
+        "method": "GET",
+        "path": "/api/cron/expire-pending-orders",
+        "description": "Vercel cron job to expire stale pending orders (every 5 min)"
+      }
+    ],
+    "database_tables": [
+      "payments",
+      "orders"
     ]
+  },
+  "design_source": {
+    "type": "none"
   },
   "tdd": {
     "test_framework": "vitest",
     "test_files": [
-      "lib/payments/payplus-client.test.ts",
-      "lib/payments/payplus-webhook.test.ts",
-      "lib/payments/refund-service.test.ts",
-      "app/api/payments/payplus/create-session/route.test.ts",
-      "app/api/payments/payplus/webhook/route.test.ts",
-      "app/api/admin/refunds/route.test.ts"
+      "lib/payments/payplus.test.ts",
+      "lib/payments/record.test.ts",
+      "lib/payments/refund.test.ts",
+      "lib/payments/ip-whitelist.test.ts",
+      "app/api/admin/orders/[id]/refund/route.test.ts",
+      "app/api/cron/expire-pending-orders/route.test.ts"
     ],
     "coverage_target": 95,
     "test_categories": [
       {
-        "name": "Session Creation",
-        "count": 5,
+        "name": "Session Creation (existing — 8 tests)",
+        "count": 8,
         "examples": [
           "should create payment session with order details",
-          "should use ILS currency",
+          "should use ILS currency (amount conversion agorot→ILS)",
           "should include callback URLs",
           "should handle API errors",
-          "should use test mode when configured"
+          "should use sandbox URL when configured",
+          "should use production URL when sandbox=false",
+          "should include customer phone if provided",
+          "should throw if response missing payment link"
         ]
       },
       {
-        "name": "Webhook Processing",
-        "count": 6,
+        "name": "Webhook Signature (existing — 4 tests)",
+        "count": 4,
         "examples": [
-          "should verify valid signature",
+          "should verify valid HMAC-SHA256 signature",
           "should reject invalid signature",
-          "should update order on success",
-          "should handle failure callback",
-          "should be idempotent",
-          "should reject non-whitelisted IPs"
+          "should reject tampered body",
+          "should handle empty body"
         ]
       },
       {
-        "name": "Refunds",
-        "count": 4,
+        "name": "Config (existing — 2 tests)",
+        "count": 2,
         "examples": [
-          "should process full refund",
-          "should process partial refund",
-          "should reject refund exceeding payment",
-          "should handle refund API errors"
+          "should return config from environment variables",
+          "should throw error if required env vars missing"
         ]
       },
       {
-        "name": "Security",
-        "count": 4,
+        "name": "Payment Records (NEW — ~8 tests)",
+        "count": 8,
         "examples": [
-          "should never log card numbers",
-          "should timeout long requests",
-          "should validate callback IP",
-          "should use HTTPS only"
+          "should create payment record with all fields",
+          "should default currency to ILS and installments to 1",
+          "should be idempotent on duplicate external_transaction_id",
+          "should set completed_at when status is succeeded",
+          "should skip completed_at for non-succeeded status",
+          "should store webhook_payload as JSONB",
+          "should handle missing optional fields gracefully",
+          "should not throw on database errors (returns error result)"
+        ]
+      },
+      {
+        "name": "Refund Service (NEW — ~8 tests)",
+        "count": 8,
+        "examples": [
+          "should call correct PayPlus refund API URL",
+          "should include correct auth headers",
+          "should convert agorot to ILS before sending",
+          "should return success with refund transaction UID",
+          "should return error on PayPlus API failure",
+          "should handle network errors gracefully",
+          "should never throw (returns result object)",
+          "should log refund attempt with transaction details"
+        ]
+      },
+      {
+        "name": "Admin Refund Endpoint (NEW — ~14 tests)",
+        "count": 14,
+        "examples": [
+          "should return 401 for unauthenticated requests",
+          "should return 403 for non-admin users",
+          "should return 429 when rate limited",
+          "should return 400 for missing amount",
+          "should return 400 for negative amount",
+          "should return 400 for amount exceeding payment",
+          "should return 404 for non-existent order",
+          "should return 400 for order in non-refundable status",
+          "should return 400 when no payment record found",
+          "should process full refund and update statuses",
+          "should process partial refund with negative record",
+          "should not change order status on partial refund",
+          "should return 502 if PayPlus refund fails",
+          "should not update DB if PayPlus call fails"
+        ]
+      },
+      {
+        "name": "IP Whitelisting (NEW — ~8 tests)",
+        "count": 8,
+        "examples": [
+          "should match exact IP address",
+          "should match IP within CIDR range",
+          "should reject IP outside range",
+          "should allow all when whitelist is empty (dev mode)",
+          "should parse IPs from PAYPLUS_WEBHOOK_IPS env var",
+          "should extract IP from X-Forwarded-For header",
+          "should extract IP from X-Real-IP header",
+          "should return null when no IP available"
+        ]
+      },
+      {
+        "name": "Expire Pending Orders Cron (NEW — ~7 tests)",
+        "count": 7,
+        "examples": [
+          "should return 401 for missing CRON_SECRET",
+          "should return 401 for invalid CRON_SECRET",
+          "should expire orders older than 15 minutes",
+          "should NOT expire orders newer than 15 minutes",
+          "should only expire orders with status 'pending'",
+          "should handle empty result set gracefully",
+          "should return count of expired orders"
         ]
       }
     ],
     "mocking_strategy": {
-      "payplus_api": "vi.mock('@/lib/payments/payplus-client')",
-      "database": "vi.mock('@/lib/supabase/server')",
-      "crypto": "Use real crypto for signature tests"
+      "payplus_api": "vi.mock global fetch for PayPlus API calls",
+      "database": "vi.mock('@/lib/supabase/server') — mock createAdminClient()",
+      "crypto": "Use real crypto for signature tests",
+      "admin_auth": "vi.mock('@/lib/auth/admin') — mock verifyAdmin()",
+      "rate_limit": "vi.mock('@/lib/rate-limit') — mock checkRateLimit()"
     }
   },
   "hazard_analysis": {
@@ -241,6 +382,20 @@
         "severity": "critical",
         "likelihood": "remote",
         "mitigation": "Environment variables only, never log credentials, secret rotation"
+      },
+      {
+        "id": "HAZ-005",
+        "description": "Payment record insert fails silently, losing transaction data",
+        "severity": "major",
+        "likelihood": "remote",
+        "mitigation": "Payment record failure is caught and logged but must NOT break order processing. Webhook payload stored for reconciliation."
+      },
+      {
+        "id": "HAZ-006",
+        "description": "Cron job expires order that was actually paid (race condition)",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "Only expire orders with status='pending'. Webhook/finalize always checks current status before update. 15-minute timeout provides ample buffer."
       }
     ],
     "risk_level": "high"
@@ -249,14 +404,16 @@
     "stop_conditions": [
       "Any suspected fraudulent transaction patterns",
       "API credential compromise",
-      "PCI compliance violation"
+      "PCI compliance violation",
+      "Payment record failures exceeding 1% of transactions"
     ],
     "escalation_triggers": [
       "Payment success rate < 90%",
       "Webhook failure rate > 1%",
-      "Any refund dispute"
+      "Any refund dispute",
+      "Cron job failing to run for > 30 minutes"
     ],
-    "rollback_plan": "Disable PayPlus integration, show 'Payment temporarily unavailable' message"
+    "rollback_plan": "Disable PayPlus integration, show 'Payment temporarily unavailable' message. For refund endpoint: disable route. For cron: remove from vercel.json crons config."
   },
   "dependencies": {
     "required_before": [
@@ -278,9 +435,47 @@
       "CO-04"
     ]
   },
+  "implementation_notes": {
+    "phase_1_payment_records": {
+      "description": "Create lib/payments/record.ts with idempotent createPaymentRecord(). Wire into webhook route (success + failure paths) and finalize route (defensive). Payment record failure must NOT break order processing.",
+      "files_touched": ["lib/payments/record.ts", "lib/payments/record.test.ts", "app/api/webhooks/payplus/route.ts", "app/api/orders/[id]/finalize/route.ts"],
+      "ac_coverage": ["AC-007"]
+    },
+    "phase_2_refunds": {
+      "description": "Create lib/payments/refund.ts calling PayPlus RefundByTransactionUID endpoint. Create admin endpoint at /api/admin/orders/[id]/refund with rate limiting, admin auth, full/partial refund support.",
+      "files_touched": ["lib/payments/refund.ts", "lib/payments/refund.test.ts", "app/api/admin/orders/[id]/refund/route.ts", "app/api/admin/orders/[id]/refund/route.test.ts"],
+      "ac_coverage": ["AC-008", "AC-009"],
+      "depends_on": "phase_1 (reads from payments table)"
+    },
+    "phase_3_ip_whitelist": {
+      "description": "Create lib/payments/ip-whitelist.ts with CIDR support. Add IP check to webhook route as step 1.5 (after secret key, before user-agent). Empty whitelist = allow all for dev mode.",
+      "files_touched": ["lib/payments/ip-whitelist.ts", "lib/payments/ip-whitelist.test.ts", "app/api/webhooks/payplus/route.ts"],
+      "ac_coverage": ["AC-014"],
+      "depends_on": null
+    },
+    "phase_4_timeout_handling": {
+      "description": "Create Vercel cron job at /api/cron/expire-pending-orders running every 5 min. Auth via CRON_SECRET. Expires pending orders older than 15 min. Add crons config to vercel.json.",
+      "files_touched": ["app/api/cron/expire-pending-orders/route.ts", "app/api/cron/expire-pending-orders/route.test.ts", "vercel.json"],
+      "ac_coverage": ["AC-011"],
+      "depends_on": null
+    }
+  },
+  "gap_analysis": {
+    "completed_at": "2026-02-14T00:00:00Z",
+    "summary": "9 of 14 ACs implemented in CO-01/CO-02. 5 ACs remain across 4 gaps.",
+    "implemented_acs": ["AC-001", "AC-002", "AC-003", "AC-004", "AC-005", "AC-006", "AC-010", "AC-012", "AC-013"],
+    "pending_acs": ["AC-007", "AC-008", "AC-009", "AC-011", "AC-014"],
+    "compliance_score_before": 57,
+    "existing_tests": 14,
+    "new_tests_needed": 49,
+    "total_tests_target": 63
+  },
+  "gates_completed": [],
   "metadata": {
     "created_at": "2026-02-01T21:00:00Z",
+    "updated_at": "2026-02-14T00:00:00Z",
     "created_by": "claude-opus-4-5"
   },
-  "estimated_tests": 19
+  "estimated_tests": 63,
+  "notes": "Core PayPlus flow is production-ready from CO-01/CO-02. This story tracks the gap-only implementation for the 5 remaining ACs. File paths in this updated story reflect actual codebase locations (diverged from original spec but functionally equivalent)."
 }
