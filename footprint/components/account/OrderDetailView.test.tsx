@@ -123,7 +123,6 @@ vi.mock('@/lib/ai/styles-ui', () => ({
   getStyleById: (id: string) => {
     const styles: Record<string, { nameHe: string; gradient: string }> = {
       watercolor: { nameHe: 'צבעי מים', gradient: 'from-blue-500 to-cyan-400' },
-      avatar_cartoon: { nameHe: 'אווטאר קרטון', gradient: 'from-violet-500 to-pink-500' },
     };
     return styles[id] || undefined;
   },

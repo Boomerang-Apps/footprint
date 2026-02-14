@@ -60,25 +60,6 @@ const STYLES: Style[] = [
     thumbnailUrl: '/styles/line-watercolor.jpg',
     processingTime: 12,
   },
-  {
-    id: 'oil_painting',
-    name: 'Oil',
-    nameHe: 'ציור שמן',
-    description: 'Thick brushstrokes and classic art style',
-    descriptionHe: 'משיכות מכחול עבות וסגנון אמנות קלאסי',
-    thumbnailUrl: '/styles/oil-painting.jpg',
-    processingTime: 12,
-    popular: true,
-  },
-  {
-    id: 'avatar_cartoon',
-    name: 'Avatar Cartoon',
-    nameHe: 'אווטאר קרטון',
-    description: '3D cartoon avatar style like Pixar characters',
-    descriptionHe: 'סגנון אווטאר קרטון תלת מימדי כמו דמויות פיקסאר',
-    thumbnailUrl: '/styles/avatar-cartoon.jpg',
-    processingTime: 10,
-  },
 ];
 
 export default function StyleGallery({
@@ -139,8 +120,6 @@ export default function StyleGallery({
                 ${style.id === 'watercolor' ? 'bg-gradient-to-br from-blue-200 to-purple-200' : ''}
                 ${style.id === 'line_art' ? 'bg-gradient-to-br from-zinc-50 to-zinc-300' : ''}
                 ${style.id === 'line_art_watercolor' ? 'bg-gradient-to-br from-purple-300 to-blue-300' : ''}
-                ${style.id === 'oil_painting' ? 'bg-gradient-to-br from-amber-300 to-orange-400' : ''}
-                ${style.id === 'avatar_cartoon' ? 'bg-gradient-to-br from-violet-400 to-pink-400' : ''}
               `}
             >
               <Sparkles className="w-8 h-8 text-white/80" />

@@ -17,7 +17,7 @@ const { mockUseOrderHistory, mockOrderHistoryData } = vi.hoisted(() => {
           orderId: 'demo_order_001',
           originalImageUrl: 'https://example.com/image.jpg',
           transformedImageUrl: 'https://example.com/transformed.jpg',
-          style: 'avatar_cartoon',
+          style: 'watercolor',
           size: 'A4',
           paperType: 'matte',
           frameType: 'black',

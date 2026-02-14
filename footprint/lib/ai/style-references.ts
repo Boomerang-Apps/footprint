@@ -82,27 +82,6 @@ export const STYLE_REFERENCES: Record<StyleType, StyleConfig> = {
       'Learn from the reference images: notice the delicate line work combined with soft watercolor washes. Apply this ink-and-wash aesthetic to the source photo - use clean contour lines with loose, flowing watercolor fills. DO NOT copy the content from references.',
   },
 
-  oil_painting: {
-    id: 'oil_painting',
-    references: [
-      // Add your reference images here:
-    ],
-    useReferences: true,
-    referencePrompt:
-      'Apply the exact oil painting style shown in the reference images. Match the brushstroke texture, color richness, and lighting.',
-  },
-
-  avatar_cartoon: {
-    id: 'avatar_cartoon',
-    references: [
-      // Add your reference images here:
-      // { path: '/style-references/avatar_cartoon/ref1.jpg', description: 'Pixar-style character' },
-    ],
-    useReferences: true,
-    referencePrompt:
-      'Apply the exact 3D cartoon style shown in the reference images. Match the eye size, skin smoothness, and overall Pixar/Disney aesthetic.',
-  },
-
   pop_art: {
     id: 'pop_art',
     references: [],
@@ -111,21 +90,6 @@ export const STYLE_REFERENCES: Record<StyleType, StyleConfig> = {
       'Transform into bold pop art style with vibrant colors, halftone dots, and strong outlines inspired by Warhol and Lichtenstein.',
   },
 
-  vintage: {
-    id: 'vintage',
-    references: [],
-    useReferences: true,
-    referencePrompt:
-      'Apply a vintage photographic look with muted tones, film grain, sepia hints, and classic retro aesthetic.',
-  },
-
-  romantic: {
-    id: 'romantic',
-    references: [],
-    useReferences: true,
-    referencePrompt:
-      'Create a soft, romantic atmosphere with dreamy lighting, soft focus effects, pastel tones, and ethereal glow.',
-  },
 };
 
 /**

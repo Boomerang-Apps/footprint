@@ -34,25 +34,23 @@ describe('StyleGallery', () => {
     it('displays all available styles', () => {
       render(<StyleGallery />);
 
-      // Check for style names in Hebrew - current 6 styles
+      // Check for style names in Hebrew - current 4 styles
       expect(screen.getByText('ללא פילטר')).toBeInTheDocument(); // Original
       expect(screen.getByText('צבעי מים')).toBeInTheDocument(); // Watercolor
       expect(screen.getByText('ציור קווי')).toBeInTheDocument(); // Line Art
       expect(screen.getByText('קווי + צבעי מים')).toBeInTheDocument(); // Line + Watercolor
-      expect(screen.getByText('ציור שמן')).toBeInTheDocument(); // Oil Painting
-      expect(screen.getByText('אווטאר קרטון')).toBeInTheDocument(); // Avatar Cartoon
     });
 
     it('renders style cards as clickable buttons', () => {
       render(<StyleGallery />);
       const styleCards = screen.getAllByRole('button');
-      expect(styleCards.length).toBe(6); // 6 styles
+      expect(styleCards.length).toBe(4); // 4 styles
     });
 
     it('displays style thumbnails', () => {
       render(<StyleGallery />);
       const images = screen.getAllByRole('img');
-      expect(images.length).toBe(6);
+      expect(images.length).toBe(4);
     });
   });
 
@@ -80,10 +78,10 @@ describe('StyleGallery', () => {
       const user = userEvent.setup();
       render(<StyleGallery />);
 
-      const oilCard = screen.getByRole('button', { name: /ציור שמן/i });
-      await user.click(oilCard);
+      const lineArtCard = screen.getByRole('button', { name: /ציור קווי/i });
+      await user.click(lineArtCard);
 
-      expect(mockSetSelectedStyle).toHaveBeenCalledWith('oil_painting');
+      expect(mockSetSelectedStyle).toHaveBeenCalledWith('line_art');
     });
   });
 
@@ -172,8 +170,8 @@ describe('StyleCard', () => {
 
   it('shows popular badge for popular styles', () => {
     render(<StyleGallery />);
-    // Watercolor and Oil Painting are marked as popular
+    // Only Watercolor is marked as popular
     const popularBadges = screen.getAllByText('פופולרי');
-    expect(popularBadges.length).toBe(2);
+    expect(popularBadges.length).toBe(1);
   });
 });

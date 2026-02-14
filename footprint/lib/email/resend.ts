@@ -108,11 +108,7 @@ const STYLE_NAMES_HE: Record<string, string> = {
   pop_art: 'פופ ארט',
   watercolor: 'צבעי מים',
   line_art: 'ציור קווי',
-  oil_painting: 'ציור שמן',
-  romantic: 'רומנטי',
-  comic_book: 'קומיקס',
-  comic: 'קומיקס',
-  vintage: 'וינטג׳',
+  line_art_watercolor: 'קו+מים',
   original: 'מקורי',
 };
 

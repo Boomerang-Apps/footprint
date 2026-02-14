@@ -15,7 +15,7 @@ const { mockOrders, mockListFn } = vi.hoisted(() => {
         orderId: 'demo_order_001',
         originalImageUrl: 'https://example.com/image.jpg',
         transformedImageUrl: 'https://example.com/transformed.jpg',
-        style: 'avatar_cartoon',
+        style: 'watercolor',
         size: 'A4',
         paperType: 'matte',
         frameType: 'black',
@@ -108,7 +108,7 @@ describe('Order History Integration', () => {
     expect(orderCard).toBeInTheDocument();
 
     // Should show style name from styles-ui (canonical Hebrew name)
-    expect(screen.getByText(/אווטאר קרטון/)).toBeInTheDocument();
+    expect(screen.getByText(/צבעי מים/)).toBeInTheDocument();
 
     // AC-008: No stats cards
     expect(screen.queryByText('בדרך')).not.toBeInTheDocument();
@@ -159,7 +159,7 @@ describe('Order History Integration', () => {
     expect(screen.getByText('ההזמנות שלי')).toBeInTheDocument();
 
     // Style name from styles-ui (canonical, not inline translations)
-    expect(screen.getByText(/אווטאר קרטון/)).toBeInTheDocument();
+    expect(screen.getByText(/צבעי מים/)).toBeInTheDocument();
   });
 
   it('applies responsive design classes', async () => {

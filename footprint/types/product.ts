@@ -6,11 +6,7 @@ export type StyleType =
   | 'watercolor'
   | 'line_art'
   | 'line_art_watercolor'
-  | 'oil_painting'
-  | 'avatar_cartoon'
-  | 'pop_art'
-  | 'vintage'
-  | 'romantic';
+  | 'pop_art';
 
 export interface Style {
   id: StyleType;

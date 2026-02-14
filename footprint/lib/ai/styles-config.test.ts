@@ -22,15 +22,11 @@ describe('STYLE_CONFIGS', () => {
     'pop_art',
     'watercolor',
     'line_art',
-    'oil_painting',
-    'romantic',
-    'comic_book',
-    'vintage',
     'original_enhanced',
   ];
 
-  it('should have all 8 styles defined', () => {
-    expect(Object.keys(STYLE_CONFIGS)).toHaveLength(8);
+  it('should have all 4 styles defined', () => {
+    expect(Object.keys(STYLE_CONFIGS)).toHaveLength(4);
   });
 
   it('should include every expected style', () => {
@@ -97,9 +93,9 @@ describe('STYLE_CONFIGS', () => {
 });
 
 describe('getAllStyles', () => {
-  it('should return array of all 8 styles', () => {
+  it('should return array of all 4 styles', () => {
     const styles = getAllStyles();
-    expect(styles).toHaveLength(8);
+    expect(styles).toHaveLength(4);
   });
 
   it('should return StyleConfig objects', () => {
@@ -140,8 +136,8 @@ describe('getStyleConfig', () => {
 
 describe('getStylePrompt', () => {
   it('should return prompt string for valid style', () => {
-    const prompt = getStylePrompt('oil_painting');
-    expect(prompt).toContain('oil painting');
+    const prompt = getStylePrompt('pop_art');
+    expect(prompt).toBeTruthy();
     expect(prompt.length).toBeGreaterThan(50);
   });
 
@@ -170,8 +166,8 @@ describe('isValidStyleId', () => {
 });
 
 describe('STYLE_IDS', () => {
-  it('should have 8 entries', () => {
-    expect(STYLE_IDS).toHaveLength(8);
+  it('should have 4 entries', () => {
+    expect(STYLE_IDS).toHaveLength(4);
   });
 
   it('should match keys of STYLE_CONFIGS', () => {

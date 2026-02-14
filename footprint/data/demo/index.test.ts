@@ -163,8 +163,7 @@ describe('Demo Data Module', () => {
         'watercolor',
         'line_art',
         'line_art_watercolor',
-        'oil_painting',
-        'avatar_cartoon',
+        'pop_art',
       ];
 
       styles.forEach((style) => {
@@ -187,7 +186,7 @@ describe('Demo Data Module', () => {
   describe('demoStyles', () => {
     it('should export an array of styles', () => {
       expect(Array.isArray(demoStyles)).toBe(true);
-      expect(demoStyles.length).toBe(6);
+      expect(demoStyles.length).toBe(5);
     });
 
     it('should have styles with all required fields', () => {
@@ -302,7 +301,7 @@ describe('Demo Data Module', () => {
 
   describe('getStylePreviewImage', () => {
     it('should return preview image for pop_art style', () => {
-      const url = getStylePreviewImage('avatar_cartoon');
+      const url = getStylePreviewImage('pop_art');
       expect(url).toBeDefined();
       expect(typeof url).toBe('string');
     });
@@ -313,8 +312,7 @@ describe('Demo Data Module', () => {
         'watercolor',
         'line_art',
         'line_art_watercolor',
-        'oil_painting',
-        'avatar_cartoon',
+        'pop_art',
       ];
 
       styles.forEach((style) => {
@@ -340,10 +338,10 @@ describe('Demo Data Module', () => {
 
   describe('getStyleById', () => {
     it('should return style for valid id', () => {
-      const style = getStyleById('avatar_cartoon');
+      const style = getStyleById('pop_art');
       expect(style).toBeDefined();
-      expect(style?.id).toBe('avatar_cartoon');
-      expect(style?.name).toBe('Avatar Cartoon');
+      expect(style?.id).toBe('pop_art');
+      expect(style?.name).toBe('Pop Art');
     });
 
     it('should return undefined for invalid id', () => {
@@ -375,7 +373,7 @@ describe('Demo Data Module', () => {
     it('should include pop_art and watercolor', () => {
       const popular = getPopularStyles();
       const ids = popular.map((s) => s.id);
-      expect(ids).toContain('avatar_cartoon');
+      expect(ids).toContain('pop_art');
       expect(ids).toContain('watercolor');
     });
   });

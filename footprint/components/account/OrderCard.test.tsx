@@ -21,8 +21,8 @@ vi.mock('@/components/ui/OrderStatusBadge', () => ({
 vi.mock('@/lib/ai/styles-ui', () => ({
   getStyleById: (id: string) => {
     const styles: Record<string, { nameHe: string; gradient: string }> = {
-      avatar_cartoon: { nameHe: 'אווטאר קרטון', gradient: 'from-violet-500 to-pink-500' },
       watercolor: { nameHe: 'צבעי מים', gradient: 'from-blue-500 to-cyan-400' },
+      pop_art: { nameHe: 'פופ ארט', gradient: 'from-violet-500 to-pink-500' },
     };
     return styles[id] || undefined;
   },
@@ -38,7 +38,7 @@ const mockOrder: Order = {
       orderId: 'demo_order_001',
       originalImageUrl: 'https://example.com/image.jpg',
       transformedImageUrl: 'https://example.com/transformed.jpg',
-      style: 'avatar_cartoon',
+      style: 'watercolor',
       size: 'A4',
       paperType: 'matte',
       frameType: 'black',
@@ -101,8 +101,8 @@ describe('OrderCard', () => {
       expect(gradient).toBeInTheDocument();
       expect(gradient).toHaveClass('bg-gradient-to-br');
       // Should use the style-specific gradient from styles-ui
-      expect(gradient).toHaveClass('from-violet-500');
-      expect(gradient).toHaveClass('to-pink-500');
+      expect(gradient).toHaveClass('from-blue-500');
+      expect(gradient).toHaveClass('to-cyan-400');
     });
 
     it('does not render image thumbnail', () => {
@@ -137,7 +137,7 @@ describe('OrderCard', () => {
       render(<OrderCard order={mockOrder} />);
 
       // Uses canonical style name from styles-ui.ts (not inline translations)
-      expect(screen.getByText('אווטאר קרטון · A4')).toBeInTheDocument();
+      expect(screen.getByText('צבעי מים · A4')).toBeInTheDocument();
     });
   });
 

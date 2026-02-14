@@ -1226,7 +1226,7 @@ describe('Order Store', () => {
       // Change current state
       act(() => {
         store.setTransformedImage('https://example.com/v2.jpg');
-        store.setSelectedStyle('oil_painting');
+        store.setSelectedStyle('watercolor');
       });
 
       const versionId = useOrderStore.getState().savedVersions[0].id;

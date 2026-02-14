@@ -22,16 +22,14 @@ vi.mock('@/lib/ai', () => ({
       'watercolor',
       'line_art',
       'line_art_watercolor',
-      'oil_painting',
-      'avatar_cartoon',
+      'pop_art',
     ].includes(style),
   ALLOWED_STYLES: [
     'original',
     'watercolor',
     'line_art',
     'line_art_watercolor',
-    'oil_painting',
-    'avatar_cartoon',
+    'pop_art',
   ],
 }));
 
@@ -202,7 +200,7 @@ describe('POST /api/transform', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'oil_painting',
+          style: 'watercolor',
         }),
       });
 
@@ -212,14 +210,13 @@ describe('POST /api/transform', () => {
       expect(data.transformedUrl).toContain('images.footprint.co.il');
     });
 
-    it('should support all 6 styles', async () => {
+    it('should support all 5 styles', async () => {
       const styles = [
         'original',
         'watercolor',
         'line_art',
         'line_art_watercolor',
-        'oil_painting',
-        'avatar_cartoon',
+        'pop_art',
       ];
 
       for (const style of styles) {
@@ -412,7 +409,7 @@ describe('POST /api/transform', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'oil_painting',
+          style: 'pop_art',
         }),
       });
 
@@ -431,7 +428,7 @@ describe('POST /api/transform', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
-          style: 'avatar_cartoon',
+          style: 'watercolor',
         }),
       });
 

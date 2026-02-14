@@ -163,7 +163,7 @@ describe('transformWithNanoBanana', () => {
     });
 
     await expect(
-      transformWithNanoBanana('base64data', 'oil_painting')
+      transformWithNanoBanana('base64data', 'watercolor')
     ).rejects.toThrow('No output returned');
   });
 
@@ -182,7 +182,7 @@ describe('transformWithNanoBanana', () => {
     });
 
     await expect(
-      transformWithNanoBanana('base64data', 'vintage')
+      transformWithNanoBanana('base64data', 'pop_art')
     ).rejects.toThrow('No image in Nano Banana response');
   });
 
@@ -221,7 +221,7 @@ describe('transformWithNanoBanana', () => {
     });
 
     await expect(
-      transformWithNanoBanana('base64data', 'romantic')
+      transformWithNanoBanana('base64data', 'line_art')
     ).rejects.toThrow('Service Unavailable');
   });
 

@@ -348,7 +348,6 @@ describe('CompletePage', () => {
     it.each([
       ['pop_art', 'פופ ארט'],
       ['watercolor', 'צבעי מים'],
-      ['oil_painting', 'ציור שמן'],
     ])('displays %s as %s', (styleKey, styleName) => {
       (useOrderStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockOrderData,

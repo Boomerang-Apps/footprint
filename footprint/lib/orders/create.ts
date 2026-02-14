@@ -219,7 +219,7 @@ export async function createOrder(
 
   // Insert order items
   // DB uses enums — normalize display names to valid enum values
-  const VALID_STYLES = ['pop_art', 'watercolor', 'line_art', 'oil_painting', 'romantic', 'comic_book', 'vintage', 'original'];
+  const VALID_STYLES = ['pop_art', 'watercolor', 'line_art', 'line_art_watercolor', 'original'];
   const VALID_PAPERS = ['matte', 'glossy', 'canvas'];
   const VALID_FRAMES = ['none', 'black', 'white', 'oak'];
 

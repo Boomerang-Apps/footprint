@@ -48,8 +48,7 @@ export type StyleType =
   | 'watercolor'
   | 'line_art'
   | 'line_art_watercolor'
-  | 'oil_painting'
-  | 'avatar_cartoon';
+  | 'pop_art';
 
 export type SizeType = 'A5' | 'A4' | 'A3' | 'A2';
 

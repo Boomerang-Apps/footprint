@@ -34,8 +34,8 @@ describe('lib/ai/replicate', () => {
   });
 
   describe('STYLE_PROMPTS', () => {
-    it('should have prompts for all 9 styles', () => {
-      expect(Object.keys(STYLE_PROMPTS)).toHaveLength(9);
+    it('should have prompts for all 5 styles', () => {
+      expect(Object.keys(STYLE_PROMPTS)).toHaveLength(5);
     });
 
     it('should include original style', () => {
@@ -55,27 +55,19 @@ describe('lib/ai/replicate', () => {
       expect(STYLE_PROMPTS.line_art_watercolor).toContain('watercolor');
     });
 
-    it('should include oil_painting style', () => {
-      expect(STYLE_PROMPTS.oil_painting).toContain('oil painting');
-    });
-
-    it('should include avatar_cartoon style', () => {
-      expect(STYLE_PROMPTS.avatar_cartoon).toContain('cartoon');
+    it('should include pop_art style', () => {
+      expect(STYLE_PROMPTS.pop_art).toContain('Pop Art');
     });
   });
 
   describe('ALLOWED_STYLES', () => {
-    it('should contain all 9 style types', () => {
-      expect(ALLOWED_STYLES).toHaveLength(9);
+    it('should contain all 5 style types', () => {
+      expect(ALLOWED_STYLES).toHaveLength(5);
       expect(ALLOWED_STYLES).toContain('original');
       expect(ALLOWED_STYLES).toContain('watercolor');
       expect(ALLOWED_STYLES).toContain('line_art');
       expect(ALLOWED_STYLES).toContain('line_art_watercolor');
-      expect(ALLOWED_STYLES).toContain('oil_painting');
-      expect(ALLOWED_STYLES).toContain('avatar_cartoon');
       expect(ALLOWED_STYLES).toContain('pop_art');
-      expect(ALLOWED_STYLES).toContain('vintage');
-      expect(ALLOWED_STYLES).toContain('romantic');
     });
   });
 
@@ -85,11 +77,7 @@ describe('lib/ai/replicate', () => {
       expect(isValidStyle('watercolor')).toBe(true);
       expect(isValidStyle('line_art')).toBe(true);
       expect(isValidStyle('line_art_watercolor')).toBe(true);
-      expect(isValidStyle('oil_painting')).toBe(true);
-      expect(isValidStyle('avatar_cartoon')).toBe(true);
       expect(isValidStyle('pop_art')).toBe(true);
-      expect(isValidStyle('vintage')).toBe(true);
-      expect(isValidStyle('romantic')).toBe(true);
     });
 
     it('should return false for invalid styles', () => {
@@ -114,8 +102,7 @@ describe('lib/ai/replicate', () => {
         'watercolor',
         'line_art',
         'line_art_watercolor',
-        'oil_painting',
-        'avatar_cartoon',
+        'pop_art',
       ];
 
       styles.forEach((style) => {
@@ -138,14 +125,14 @@ describe('lib/ai/replicate', () => {
     it('should call Replicate API with correct parameters', async () => {
       mockRun.mockResolvedValue(mockOutputUrl);
 
-      await transformImage(testImageUrl, 'avatar_cartoon');
+      await transformImage(testImageUrl, 'pop_art');
 
       expect(mockRun).toHaveBeenCalledWith(
         'black-forest-labs/flux-kontext-pro',
         expect.objectContaining({
           input: expect.objectContaining({
             image: testImageUrl,
-            prompt: expect.stringContaining('cartoon'),
+            prompt: expect.stringContaining('Pop Art'),
           }),
         })
       );
@@ -170,7 +157,7 @@ describe('lib/ai/replicate', () => {
     it('should use correct model', async () => {
       mockRun.mockResolvedValue(mockOutputUrl);
 
-      await transformImage(testImageUrl, 'oil_painting');
+      await transformImage(testImageUrl, 'watercolor');
 
       expect(mockRun).toHaveBeenCalledWith(
         'black-forest-labs/flux-kontext-pro',
@@ -201,7 +188,7 @@ describe('lib/ai/replicate', () => {
     it('should throw error when API fails', async () => {
       mockRun.mockRejectedValue(new Error('API Error'));
 
-      await expect(transformImage(testImageUrl, 'avatar_cartoon')).rejects.toThrow('API Error');
+      await expect(transformImage(testImageUrl, 'pop_art')).rejects.toThrow('API Error');
     });
 
     it('should throw error when API returns null', async () => {
@@ -223,7 +210,7 @@ describe('lib/ai/replicate', () => {
     it('should throw error for missing API token', async () => {
       vi.stubEnv('REPLICATE_API_TOKEN', '');
 
-      await expect(transformImage(testImageUrl, 'avatar_cartoon')).rejects.toThrow(
+      await expect(transformImage(testImageUrl, 'pop_art')).rejects.toThrow(
         'REPLICATE_API_TOKEN is not configured'
       );
     });
@@ -236,7 +223,7 @@ describe('lib/ai/replicate', () => {
     it('should return result on first successful attempt', async () => {
       mockRun.mockResolvedValue(mockOutputUrl);
 
-      const result = await transformWithRetry(testImageUrl, 'avatar_cartoon', 1);
+      const result = await transformWithRetry(testImageUrl, 'pop_art', 1);
 
       expect(result).toBe(mockOutputUrl);
       expect(mockRun).toHaveBeenCalledTimes(1);
@@ -289,7 +276,7 @@ describe('lib/ai/replicate', () => {
       });
 
       await expect(
-        transformWithRetry(testImageUrl, 'oil_painting', 5)
+        transformWithRetry(testImageUrl, 'watercolor', 5)
       ).rejects.toThrow('Persistent error');
 
       expect(mockRun).toHaveBeenCalledTimes(5);
@@ -332,7 +319,7 @@ describe('lib/ai/replicate', () => {
         return 0 as unknown as NodeJS.Timeout;
       });
 
-      await expect(transformWithRetry(testImageUrl, 'avatar_cartoon')).rejects.toThrow(
+      await expect(transformWithRetry(testImageUrl, 'pop_art')).rejects.toThrow(
         'Final error'
       );
 
@@ -348,14 +335,10 @@ describe('lib/ai/replicate', () => {
         'watercolor',
         'line_art',
         'line_art_watercolor',
-        'oil_painting',
-        'avatar_cartoon',
         'pop_art',
-        'vintage',
-        'romantic',
       ];
 
-      expect(styles).toHaveLength(9);
+      expect(styles).toHaveLength(5);
     });
   });
 });

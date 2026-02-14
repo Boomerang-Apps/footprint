@@ -29,8 +29,7 @@ const mockStyles: Style[] = [
   { id: 'watercolor', name: 'Watercolor', nameHe: 'צבעי מים', description: 'Soft, flowing artistic style', descriptionHe: 'סגנון אמנותי רך וזורם', thumbnailUrl: '/styles/watercolor.jpg', processingTime: 10 },
   { id: 'line_art', name: 'Line Art', nameHe: 'ציור קווי', description: 'Clean minimalist lines', descriptionHe: 'קווים נקיים ומינימליסטיים', thumbnailUrl: '/styles/line-art.jpg', processingTime: 6 },
   { id: 'line_art_watercolor', name: 'Line + Watercolor', nameHe: 'קווי + צבעי מים', description: 'Lines with watercolor fills', descriptionHe: 'קווים עם מילוי צבעי מים', thumbnailUrl: '/styles/line-watercolor.jpg', processingTime: 12 },
-  { id: 'oil_painting', name: 'Oil', nameHe: 'ציור שמן', description: 'Classic painted look', descriptionHe: 'מראה ציור קלאסי', thumbnailUrl: '/styles/oil-painting.jpg', processingTime: 12 },
-  { id: 'avatar_cartoon', name: 'Avatar Cartoon', nameHe: 'אווטאר קרטון', description: '3D cartoon avatar style', descriptionHe: 'סגנון אווטאר קרטון תלת מימדי', thumbnailUrl: '/styles/avatar-cartoon.jpg', processingTime: 10 },
+  { id: 'pop_art', name: 'Pop Art', nameHe: 'פופ ארט', description: 'Bold pop art style', descriptionHe: 'סגנון פופ ארט נועז', thumbnailUrl: '/styles/pop-art.jpg', processingTime: 8 },
 ];
 
 const mockSizes: Size[] = [

@@ -262,7 +262,7 @@ describe('mockClient', () => {
             },
             {
               originalImageUrl: 'https://example.com/photo2.jpg',
-              style: 'oil_painting',
+              style: 'pop_art',
               size: 'A3',
               paperType: 'canvas',
               frameType: 'oak',
@@ -588,7 +588,7 @@ describe('mockClient', () => {
 
       it('should calculate price for A3 + canvas + oak (free shipping)', async () => {
         const result = await flush(mockClient.products.calculatePrice({
-          style: 'oil_painting',
+          style: 'pop_art',
           size: 'A3',
           paperType: 'canvas',
           frameType: 'oak',

@@ -53,8 +53,8 @@ const mockFavorite2: FavoriteItem = {
   id: 'fav-2',
   imageUrl: 'https://example.com/transformed2.jpg',
   originalImageUrl: 'https://example.com/original2.jpg',
-  style: 'oil_painting',
-  styleName: 'ציור שמן',
+  style: 'pop_art',
+  styleName: 'פופ ארט',
   createdAt: new Date('2026-02-10').getTime(),
 };
 

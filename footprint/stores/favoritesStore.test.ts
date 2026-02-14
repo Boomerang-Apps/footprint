@@ -12,8 +12,8 @@ const mockFavorite = {
 const mockFavorite2 = {
   imageUrl: 'https://example.com/transformed2.jpg',
   originalImageUrl: 'https://example.com/original2.jpg',
-  style: 'oil_painting' as const,
-  styleName: 'ציור שמן',
+  style: 'line_art' as const,
+  styleName: 'ציור קווי',
 };
 
 describe('favoritesStore', () => {
@@ -92,7 +92,7 @@ describe('favoritesStore', () => {
       const { favorites } = useFavoritesStore.getState();
       expect(favorites).toHaveLength(2);
       expect(favorites[0].style).toBe('watercolor');
-      expect(favorites[1].style).toBe('oil_painting');
+      expect(favorites[1].style).toBe('line_art');
     });
 
     it('should only remove the targeted favorite', () => {
@@ -104,7 +104,7 @@ describe('favoritesStore', () => {
 
       const { favorites } = useFavoritesStore.getState();
       expect(favorites).toHaveLength(1);
-      expect(favorites[0].style).toBe('oil_painting');
+      expect(favorites[0].style).toBe('line_art');
     });
   });
 

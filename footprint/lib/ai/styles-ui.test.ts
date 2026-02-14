@@ -3,9 +3,9 @@ import { STYLES, getStyleById, type StyleOption } from './styles-ui';
 
 describe('styles-ui', () => {
   describe('STYLES array', () => {
-    it('should export STYLES array with 9 style options', () => {
+    it('should export STYLES array with 5 style options', () => {
       expect(STYLES).toBeDefined();
-      expect(STYLES).toHaveLength(9);
+      expect(STYLES).toHaveLength(5);
     });
 
     it('should have correct shape for each StyleOption', () => {
@@ -28,25 +28,18 @@ describe('styles-ui', () => {
       expect(ids).toContain('watercolor');
       expect(ids).toContain('line_art');
       expect(ids).toContain('line_art_watercolor');
-      expect(ids).toContain('oil_painting');
-      expect(ids).toContain('avatar_cartoon');
       expect(ids).toContain('pop_art');
-      expect(ids).toContain('vintage');
-      expect(ids).toContain('romantic');
     });
 
-    it('should have badge only on watercolor (popular) and pop_art/romantic (new)', () => {
+    it('should have badge only on watercolor (popular) and pop_art (new)', () => {
       const watercolor = STYLES.find((s) => s.id === 'watercolor');
       expect(watercolor?.badge).toBe('popular');
 
       const popArt = STYLES.find((s) => s.id === 'pop_art');
       expect(popArt?.badge).toBe('new');
 
-      const romantic = STYLES.find((s) => s.id === 'romantic');
-      expect(romantic?.badge).toBe('new');
-
       const noBadge = STYLES.filter(
-        (s) => !['watercolor', 'pop_art', 'romantic'].includes(s.id)
+        (s) => !['watercolor', 'pop_art'].includes(s.id)
       );
       for (const style of noBadge) {
         expect(style.badge).toBeUndefined();

@@ -19,11 +19,7 @@ const ALL_STYLES: StyleType[] = [
   'watercolor',
   'line_art',
   'line_art_watercolor',
-  'oil_painting',
-  'avatar_cartoon',
   'pop_art',
-  'vintage',
-  'romantic',
 ];
 
 describe('STYLE_REFERENCES', () => {
@@ -125,7 +121,5 @@ describe('hasStyleReferences', () => {
   it('should return false for styles with useReferences=true but no images', () => {
     // These have useReferences=true but empty references array
     expect(hasStyleReferences('pop_art')).toBe(false);
-    expect(hasStyleReferences('vintage')).toBe(false);
-    expect(hasStyleReferences('romantic')).toBe(false);
   });
 });
