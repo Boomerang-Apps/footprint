@@ -171,15 +171,13 @@ describe('StylePage', () => {
       expect(screen.getByText(/הקישו על סגנון לתצוגה מקדימה/i)).toBeInTheDocument();
     });
 
-    it('renders all 6 style options', () => {
+    it('renders all 4 style options', () => {
       render(<StylePage />);
-      // Check for style buttons using aria-label - current 6 styles
+      // Check for style buttons using aria-label - current 4 styles
       expect(screen.getByRole('button', { name: 'ללא פילטר' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'צבעי מים' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'ציור קווי' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'קו+מים' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'ציור שמן' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'אווטאר קרטון' })).toBeInTheDocument();
     });
 
     it('highlights selected style', () => {
@@ -270,8 +268,8 @@ describe('StylePage', () => {
   describe('AI Processing Overlay', () => {
     it('shows processing overlay when style is selected', async () => {
       render(<StylePage />);
-      const oilButton = screen.getByRole('button', { name: /ציור שמן/i });
-      fireEvent.click(oilButton);
+      const watercolorButton = screen.getByRole('button', { name: /צבעי מים/i });
+      fireEvent.click(watercolorButton);
 
       // Overlay should appear
       await waitFor(() => {
@@ -282,8 +280,8 @@ describe('StylePage', () => {
     it('hides processing overlay after timeout', async () => {
       vi.useFakeTimers();
       render(<StylePage />);
-      const oilButton = screen.getByRole('button', { name: 'ציור שמן' });
-      fireEvent.click(oilButton);
+      const watercolorButton = screen.getByRole('button', { name: 'צבעי מים' });
+      fireEvent.click(watercolorButton);
 
       // Overlay should be visible
       expect(screen.getByTestId('ai-overlay')).toBeInTheDocument();
