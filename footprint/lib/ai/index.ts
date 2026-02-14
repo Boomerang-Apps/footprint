@@ -24,6 +24,7 @@ import {
   isValidStyle,
 } from './replicate';
 import { logger } from '@/lib/logger';
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
 
 // Re-export common types and utilities
 export type { StyleType };
@@ -207,7 +208,7 @@ async function transformWithReplicateProvider(
  * Fetches an image from URL and returns as base64
  */
 async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
-  const response = await fetch(url);
+  const response = await fetchWithTimeout(url, { timeout: TIMEOUT_DEFAULTS.AI });
   if (!response.ok) {
     throw new Error(`Failed to fetch image: ${response.status}`);
   }

@@ -7,6 +7,7 @@
 
 import { getPayPlusConfig } from '@/lib/payments/payplus';
 import { logger } from '@/lib/logger';
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
 
 export interface ProcessRefundParams {
   transactionUid: string;
@@ -36,9 +37,10 @@ export async function processRefund(
       `Processing refund: txn=${params.transactionUid}, amount=${amountILS} ILS`
     );
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${config.baseUrl}/Transactions/RefundByTransactionUID`,
       {
+        timeout: TIMEOUT_DEFAULTS.API,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

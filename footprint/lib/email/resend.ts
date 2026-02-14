@@ -5,6 +5,8 @@
  * https://resend.com/docs
  */
 
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -399,7 +401,8 @@ export async function sendOrderConfirmationEmail(
       html: generateOrderConfirmationHtml(params),
     };
 
-    const response = await fetch(RESEND_API_URL, {
+    const response = await fetchWithTimeout(RESEND_API_URL, {
+      timeout: TIMEOUT_DEFAULTS.API,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -580,7 +583,8 @@ export async function sendStatusUpdateEmail(
       html: generateStatusUpdateHtml(params),
     };
 
-    const response = await fetch(RESEND_API_URL, {
+    const response = await fetchWithTimeout(RESEND_API_URL, {
+      timeout: TIMEOUT_DEFAULTS.API,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -719,7 +723,8 @@ export async function sendTrackingNotificationEmail(
       html: generateTrackingNotificationHtml(params),
     };
 
-    const response = await fetch(RESEND_API_URL, {
+    const response = await fetchWithTimeout(RESEND_API_URL, {
+      timeout: TIMEOUT_DEFAULTS.API,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -983,7 +988,8 @@ export async function sendNewOrderNotificationEmail(
       html: generateNewOrderNotificationHtml(params),
     };
 
-    const response = await fetch(RESEND_API_URL, {
+    const response = await fetchWithTimeout(RESEND_API_URL, {
+      timeout: TIMEOUT_DEFAULTS.API,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

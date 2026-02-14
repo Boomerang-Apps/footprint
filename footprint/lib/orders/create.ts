@@ -7,6 +7,7 @@
 
 import { createAdminClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/logger';
+import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
 
 // ============================================================================
 // Types
@@ -288,7 +289,8 @@ export async function createOrder(
 export async function triggerConfirmationEmail(orderId: string): Promise<void> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/orders/${orderId}/confirm`, {
+    const response = await fetchWithTimeout(`${baseUrl}/api/orders/${orderId}/confirm`, {
+      timeout: TIMEOUT_DEFAULTS.API,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -321,7 +323,8 @@ export async function triggerConfirmationEmail(orderId: string): Promise<void> {
 export async function triggerNewOrderNotification(orderId: string): Promise<void> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/orders/${orderId}/notify`, {
+    const response = await fetchWithTimeout(`${baseUrl}/api/orders/${orderId}/notify`, {
+      timeout: TIMEOUT_DEFAULTS.API,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
