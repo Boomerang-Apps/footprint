@@ -103,7 +103,7 @@ function extractR2Key(url: string): string {
 export async function POST(
   request: Request
 ): Promise<NextResponse<TransformResponse | ErrorResponse>> {
-  // Rate limiting: 10 transforms per minute (expensive AI operation)
+  // Rate limiting: 20 transforms per minute (AC-011)
   const rateLimited = await checkRateLimit('transform', request);
   if (rateLimited) return rateLimited as NextResponse<ErrorResponse>;
 
