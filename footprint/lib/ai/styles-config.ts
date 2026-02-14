@@ -78,6 +78,19 @@ export interface StyleConfig {
   };
 
   /**
+   * Optional post-processing with Sharp after AI generation.
+   * Use to boost saturation/contrast for styles that need more vibrant colors.
+   */
+  postProcess?: {
+    /** Saturation multiplier (1.0 = unchanged, 2.0 = double) */
+    saturation?: number;
+    /** Brightness multiplier (1.0 = unchanged) */
+    brightness?: number;
+    /** Linear contrast: output = a * input + b */
+    linearContrast?: { a: number; b: number };
+  };
+
+  /**
    * Fallback CSS filter for demo mode
    */
   cssFilter: string;
@@ -226,9 +239,9 @@ Do not apply any artistic filters or style transformations. The result should lo
     nameHe: 'דיוקן גיאומטרי',
     nameEn: 'WPAP',
     description: 'Sharp geometric polygons, bold flat colors, high contrast',
-    prompt: `Transform the uploaded portrait into WPAP (Wedha's Pop Art Portrait) style. Preserve exact facial likeness, proportions, and identity first. Build the portrait using sharp angular polygon planes only — faceted geometry with strong high-contrast light and shadow blocks that follow facial anatomy and the original light direction. Use bold vibrant saturated colors with solid flat fills only. No gradients, no soft shading, no smooth blending, no airbrush effects. Each color region must be a single solid flat color. Crisp Illustrator-like vector edges, poster style composition. No texture, no brush strokes, no realism, no blur, no painterly effects. Preserve hairstyle, glasses, beard, and facial hair accurately. Simple flat solid background. Modern digital vector illustration, print-ready resolution.`,
+    prompt: `Create a WPAP (Wedha's Pop Art Portrait) vector illustration. The FACE must be colored with bold flat polygon fills — forehead golden yellow, one cheek deep purple, other cheek orange, nose olive green, chin teal, shadows in magenta. NO natural skin color anywhere — every face polygon a different bold color. Razor-sharp straight edges between every polygon like Illustrator vector art. Hair as sharp angular geometric strokes in dark tones with colorful highlights. Background: large pastel geometric rectangles in soft yellow, pink, pale blue, teal. Single flat solid color per polygon — no gradients, no soft edges. Crisp vector quality. Preserve facial likeness.`,
     negativePrompt:
-      'no gradients, no soft shading, no watercolor, no brush strokes, no oil painting, no realism, no photorealism, no smooth blending, no airbrush, no texture, no 3D render, no cartoon, no anime, no curved organic shapes, no glow, no feathering, no blur',
+      'no natural skin tones, no beige, no tan, no flesh tones, no photorealism, no gradients, no soft shading, no smooth blending, no watercolor, no brush strokes, no blur, no soft edges',
     styleAnchors: {
       medium: 'digital vector illustration, geometric polygon portrait',
       era: '2010s WPAP movement, Wedha Abdul Rasyid',
@@ -239,6 +252,11 @@ Do not apply any artistic filters or style transformations. The result should lo
     },
     parameters: {
       temperature: 0.8,
+    },
+    postProcess: {
+      saturation: 1.8,
+      brightness: 1.0,
+      linearContrast: { a: 1.15, b: 0 },
     },
     cssFilter: 'saturate(1.8) contrast(1.4) brightness(1.05)',
     icon: 'hexagon',

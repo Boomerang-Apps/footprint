@@ -11,6 +11,7 @@
  */
 
 import { StyleType, STYLE_PROMPTS, isValidStyle } from './replicate';
+import { STYLE_CONFIGS } from './styles-config';
 import {
   getStyleReferences,
   getStyleReferencePrompt,
@@ -102,6 +103,12 @@ function buildPrompt(
   const instructions = customInstructions || '';
   const referencePrompt = hasReferences ? getStyleReferencePrompt(style) : '';
 
+  // Get negative prompt from styles-config if available
+  const styleConfig = (STYLE_CONFIGS as Record<string, (typeof STYLE_CONFIGS)[keyof typeof STYLE_CONFIGS]>)[style];
+  const negativeSection = styleConfig?.negativePrompt
+    ? `\n\nDO NOT: ${styleConfig.negativePrompt}`
+    : '';
+
   // If we have reference images, use them for style inspiration
   if (hasReferences && referencePrompt) {
     return `Transform the source photograph into an artistic image using the style concepts, colors, and techniques shown in the reference images.
@@ -118,6 +125,7 @@ SOURCE PHOTOGRAPH: The last image is the photograph to transform. Keep all conte
 
 STYLE DESCRIPTION:
 ${basePrompt}
+${negativeSection}
 
 ${instructions}
 
@@ -133,6 +141,7 @@ IMPORTANT:
   return `Transform this photograph using the following artistic style:
 
 ${basePrompt}
+${negativeSection}
 
 ${instructions}
 
@@ -208,6 +217,7 @@ export async function transformWithNanoBanana(
     ],
     generationConfig: {
       responseModalities: ['TEXT', 'IMAGE'],
+      temperature: 1.5,
       ...(supportsAspectRatio && {
         imageConfig: {
           aspectRatio: '1:1',

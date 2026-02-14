@@ -28,8 +28,8 @@ describe('WPAP Style — Nano Banana Config (styles-config.ts)', () => {
     const prompt = STYLE_CONFIGS.wpap.prompt;
     expect(prompt).toContain('WPAP');
     expect(prompt).toContain('polygon');
-    expect(prompt).toContain('flat');
-    expect(prompt).toContain('likeness');
+    expect(prompt.toLowerCase()).toContain('flat');
+    expect(prompt).toContain('face');
   });
 
   it('should have negativePrompt with anti-gradient terms', () => {
@@ -37,7 +37,7 @@ describe('WPAP Style — Nano Banana Config (styles-config.ts)', () => {
     expect(neg).toBeDefined();
     expect(neg).toContain('no gradients');
     expect(neg).toContain('no watercolor');
-    expect(neg).toContain('no realism');
+    expect(neg).toContain('no photorealism');
   });
 
   it('should have all required styleAnchors', () => {

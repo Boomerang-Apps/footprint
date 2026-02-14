@@ -95,7 +95,7 @@ export const STYLE_REFERENCES: Record<StyleType, StyleConfig> = {
     references: [],
     useReferences: true,
     referencePrompt:
-      'Transform into WPAP (Wedha\'s Pop Art Portrait) style with sharp angular polygon planes, bold flat solid colors, high contrast, and crisp vector edges.',
+      'Create WPAP geometric polygon art. CRITICAL: Replace ALL natural skin tones with vivid artificial colors (red, cyan, purple, orange, blue, yellow, magenta, green, teal). Every polygon must be a different bold saturated color. No realistic colors anywhere. Sharp angular facets, flat solid fills, crisp hard edges. White background.',
   },
 
 };

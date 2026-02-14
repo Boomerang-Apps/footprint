@@ -23,8 +23,10 @@ import {
   STYLE_PROMPTS,
   isValidStyle,
 } from './replicate';
+import { STYLE_CONFIGS } from './styles-config';
 import { logger } from '@/lib/logger';
 import { fetchWithTimeout, TIMEOUT_DEFAULTS } from '@/lib/utils/fetch-with-timeout';
+import sharp from 'sharp';
 
 // Re-export common types and utilities
 export type { StyleType };
@@ -109,14 +111,16 @@ export async function transformImage(
   // Try preferred provider first
   if (preferredProvider === 'nano-banana' && isNanoBananaConfigured()) {
     try {
-      return await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries, options.referenceImages);
+      const result = await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries, options.referenceImages);
+      return await applyPostProcessing(result, style);
     } catch (error) {
       logger.error('Nano Banana failed', error);
 
       // Fall back to Replicate if configured
       if (isReplicateConfigured()) {
         logger.info('Falling back to Replicate...');
-        return await transformWithReplicateProvider(input, style, startTime, options.maxRetries);
+        const result = await transformWithReplicateProvider(input, style, startTime, options.maxRetries);
+        return await applyPostProcessing(result, style);
       }
       throw error;
     }
@@ -125,20 +129,80 @@ export async function transformImage(
   // Try Replicate
   if (isReplicateConfigured()) {
     try {
-      return await transformWithReplicateProvider(input, style, startTime, options.maxRetries);
+      const result = await transformWithReplicateProvider(input, style, startTime, options.maxRetries);
+      return await applyPostProcessing(result, style);
     } catch (error) {
       logger.error('Replicate failed', error);
 
       // Fall back to Nano Banana if configured
       if (isNanoBananaConfigured()) {
         logger.info('Falling back to Nano Banana...');
-        return await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries, options.referenceImages);
+        const result = await transformWithNanoBananaProvider(input, style, startTime, options.maxRetries, options.referenceImages);
+        return await applyPostProcessing(result, style);
       }
       throw error;
     }
   }
 
   throw new Error('No AI provider configured. Set GOOGLE_AI_API_KEY or REPLICATE_API_TOKEN');
+}
+
+/**
+ * Applies Sharp post-processing to boost colors for styles that need it.
+ * Configured per-style via STYLE_CONFIGS[style].postProcess
+ */
+async function applyPostProcessing(
+  result: TransformResult,
+  style: StyleType
+): Promise<TransformResult> {
+  const config = (STYLE_CONFIGS as Record<string, (typeof STYLE_CONFIGS)[keyof typeof STYLE_CONFIGS]>)[style];
+  if (!config?.postProcess) return result;
+
+  const { saturation, brightness, linearContrast } = config.postProcess;
+
+  try {
+    let imageBuffer: Buffer;
+
+    if (result.imageBase64) {
+      imageBuffer = Buffer.from(result.imageBase64, 'base64');
+    } else if (result.imageUrl) {
+      const response = await fetchWithTimeout(result.imageUrl, { timeout: TIMEOUT_DEFAULTS.AI });
+      if (!response.ok) return result;
+      imageBuffer = Buffer.from(await response.arrayBuffer());
+    } else {
+      return result;
+    }
+
+    let pipeline = sharp(imageBuffer);
+
+    // Boost saturation and brightness
+    if (saturation || brightness) {
+      pipeline = pipeline.modulate({
+        ...(saturation && { saturation }),
+        ...(brightness && { brightness }),
+      });
+    }
+
+    // Boost contrast via linear transform
+    if (linearContrast) {
+      pipeline = pipeline.linear(linearContrast.a, linearContrast.b);
+    }
+
+    const outputBuffer = await pipeline.png().toBuffer();
+    const outputBase64 = outputBuffer.toString('base64');
+
+    logger.info(`Post-processing applied for style: ${style} (sat: ${saturation}, bright: ${brightness})`);
+
+    return {
+      ...result,
+      imageBase64: outputBase64,
+      imageUrl: undefined,
+      mimeType: 'image/png',
+    };
+  } catch (error) {
+    logger.warn('Post-processing failed, returning original', error);
+    return result;
+  }
 }
 
 /**
