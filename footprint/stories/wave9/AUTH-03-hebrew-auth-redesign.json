@@ -1,0 +1,318 @@
+{
+  "$schema": "../../../planning/schemas/story-schema-v4.2.json",
+  "schema_version": "4.2",
+  "story_id": "AUTH-03",
+  "type": "enhancement",
+  "wave_number": 9,
+  "title": "Hebrew Auth Pages Redesign - Modern Login & Signup",
+  "domain": "frontend",
+  "agent": "fe-dev",
+  "priority": "high",
+  "story_points": 5,
+  "description": "Redesign login and signup pages to be fully Hebrew RTL with a sleek, modern visual design. Current pages are entirely in English with a dated look. The redesign converts all UI text to Hebrew, adds brand identity (logo, gradient accents, brand-purple theming), modernizes the visual style with refined inputs/cards/shadows, and ensures a polished mobile-first experience.",
+  "status": "ready",
+  "objective": {
+    "as_a": "Hebrew-speaking customer visiting Footprint",
+    "i_want": "login and signup pages in Hebrew with a modern, professional design",
+    "so_that": "I feel confident using the site and can navigate auth flows in my native language"
+  },
+  "acceptance_criteria": [
+    {
+      "id": "AC-01",
+      "description": "Login page heading and subtitle in Hebrew",
+      "ears_format": "WHEN user navigates to /login THEN heading displays 'ברוכים השבים' and subtitle displays 'התחברו לחשבון שלכם כדי להמשיך'",
+      "test_approach": "Render login page, verify Hebrew heading and subtitle text"
+    },
+    {
+      "id": "AC-02",
+      "description": "Login form labels and placeholders in Hebrew",
+      "ears_format": "WHEN login page renders THEN email label shows 'אימייל', password label shows 'סיסמה', placeholders in Hebrew, button shows 'התחברות'",
+      "test_approach": "Verify all form labels, placeholders, and button text are in Hebrew"
+    },
+    {
+      "id": "AC-03",
+      "description": "Login links in Hebrew",
+      "ears_format": "WHEN login page renders THEN forgot password shows 'שכחת סיסמה?' and signup link shows 'אין לך חשבון? הרשמה'",
+      "test_approach": "Verify link text is Hebrew, href correct"
+    },
+    {
+      "id": "AC-04",
+      "description": "Login validation messages in Hebrew",
+      "ears_format": "WHEN user submits empty login form THEN error shows 'אימייל הוא שדה חובה' and 'סיסמה היא שדה חובה'",
+      "test_approach": "Submit empty form, verify Hebrew error messages"
+    },
+    {
+      "id": "AC-05",
+      "description": "Login loading state in Hebrew",
+      "ears_format": "WHEN login is in progress THEN button shows 'מתחבר...' with spinner",
+      "test_approach": "Trigger loading state, verify Hebrew loading text"
+    },
+    {
+      "id": "AC-06",
+      "description": "Signup page heading and subtitle in Hebrew",
+      "ears_format": "WHEN user navigates to /register THEN heading displays 'יצירת חשבון' and subtitle displays 'הרשמו כדי להתחיל ליצור הדפסים'",
+      "test_approach": "Render register page, verify Hebrew heading and subtitle"
+    },
+    {
+      "id": "AC-07",
+      "description": "Signup form labels and placeholders in Hebrew",
+      "ears_format": "WHEN register page renders THEN labels show 'שם מלא', 'אימייל', 'סיסמה', 'אימות סיסמה' with Hebrew placeholders",
+      "test_approach": "Verify all register form labels and placeholders are Hebrew"
+    },
+    {
+      "id": "AC-08",
+      "description": "Signup validation messages in Hebrew",
+      "ears_format": "WHEN user submits invalid register form THEN errors show Hebrew messages: 'נא למלא את כל השדות', 'הסיסמאות אינן תואמות', 'הסיסמה חייבת להכיל לפחות 6 תווים'",
+      "test_approach": "Trigger each validation path, verify Hebrew error messages"
+    },
+    {
+      "id": "AC-09",
+      "description": "Signup links and button in Hebrew",
+      "ears_format": "WHEN register page renders THEN button shows 'יצירת חשבון', loading shows 'יוצר חשבון...', link shows 'כבר יש לך חשבון? התחברות'",
+      "test_approach": "Verify button text, loading state, and sign-in link are Hebrew"
+    },
+    {
+      "id": "AC-10",
+      "description": "Social login buttons in Hebrew",
+      "ears_format": "WHEN social login buttons render THEN labels show 'המשך עם Google', 'המשך עם Facebook', 'המשך עם Apple' and divider shows 'או'",
+      "test_approach": "Render SocialLoginButtons with Hebrew labels, verify text"
+    },
+    {
+      "id": "AC-11",
+      "description": "Modern card design with brand identity",
+      "ears_format": "WHEN auth pages render THEN card uses rounded-2xl, soft shadow, brand-purple gradient accent at top, and Footprint logo above heading",
+      "test_approach": "Visual inspection - verify card has rounded-2xl, shadow-soft-lg, gradient accent"
+    },
+    {
+      "id": "AC-12",
+      "description": "Modern input styling",
+      "ears_format": "WHEN auth form inputs render THEN inputs use rounded-xl borders, h-12 height, smooth focus transitions with brand-purple ring",
+      "test_approach": "Verify input className includes rounded-xl, h-12, transition styling"
+    },
+    {
+      "id": "AC-13",
+      "description": "Social buttons with provider brand colors",
+      "ears_format": "WHEN social buttons render THEN Google button has white bg with subtle border, Facebook uses #1877F2 bg, Apple uses black bg",
+      "test_approach": "Verify social button styling per provider brand guidelines"
+    },
+    {
+      "id": "AC-14",
+      "description": "Mobile-first responsive layout",
+      "ears_format": "WHEN auth page viewed on mobile (< 640px) THEN card is full-width with px-4 padding, no max-width constraint on small screens",
+      "test_approach": "Render at mobile viewport, verify responsive layout"
+    },
+    {
+      "id": "AC-15",
+      "description": "Auth layout with subtle gradient background",
+      "ears_format": "WHEN auth layout renders THEN background shows subtle gradient from white to brand-purple/5",
+      "test_approach": "Verify auth layout has gradient background styling"
+    },
+    {
+      "id": "AC-16",
+      "description": "RTL direction explicitly set on auth forms",
+      "ears_format": "WHEN auth forms render THEN dir='rtl' is set on the form container",
+      "test_approach": "Verify dir attribute on form element"
+    },
+    {
+      "id": "AC-17",
+      "description": "Existing auth functionality preserved",
+      "ears_format": "WHEN all visual changes applied THEN email/password login, Google/Facebook/Apple OAuth, form validation, and navigation all work identically",
+      "test_approach": "Run full existing test suite - all tests pass"
+    },
+    {
+      "id": "AC-18",
+      "description": "Password visibility toggle accessible in RTL",
+      "ears_format": "WHEN password field renders in RTL THEN eye toggle icon positioned at left side (start in LTR terms) with proper RTL padding",
+      "test_approach": "Verify toggle button position in RTL layout"
+    }
+  ],
+  "files": {
+    "create": [],
+    "modify": [
+      "app/(auth)/layout.tsx",
+      "app/(auth)/login/page.tsx",
+      "app/(auth)/register/page.tsx",
+      "components/auth/LoginForm.tsx",
+      "components/auth/SocialLoginButtons.tsx",
+      "components/auth/LoginForm.test.tsx",
+      "components/auth/SocialLoginButtons.test.tsx"
+    ],
+    "forbidden": [
+      "lib/supabase/*",
+      "app/api/auth/*",
+      "app/auth/callback/*"
+    ]
+  },
+  "technical_requirements": {
+    "reuse_components": [
+      "components/ui/Button.tsx",
+      "components/ui/Input.tsx",
+      "components/ui/Card.tsx"
+    ],
+    "reuse_patterns": {
+      "PostPurchaseSignup": "Follow Hebrew pattern from components/auth/PostPurchaseSignup.tsx - already uses Hebrew text, rounded-xl inputs, violet/brand theming",
+      "tailwind_theme": "Use existing brand-purple (#8b5cf6), shadow-soft-lg, rounded-2xl from tailwind.config.ts"
+    },
+    "icons_from_lucide": ["Eye", "EyeOff"],
+    "state_management": "No state changes - visual/text only refactor"
+  },
+  "design_source": {
+    "type": "none",
+    "verified": false
+  },
+  "design_specs": {
+    "layout": {
+      "max_width": "max-w-md (448px)",
+      "padding": "px-4 py-12 mobile, px-6 desktop",
+      "direction": "RTL"
+    },
+    "colors": {
+      "background": "gradient from white to brand-purple/5",
+      "card_bg": "white",
+      "card_shadow": "shadow-soft-lg",
+      "accent": "brand-purple (#8b5cf6)",
+      "gradient_accent": "bg-gradient-brand (purple to pink) - 3px top bar on card",
+      "google_btn": "white bg, zinc-200 border",
+      "facebook_btn": "#1877F2 bg, white text",
+      "apple_btn": "black bg, white text",
+      "input_border": "zinc-200, focus: brand-purple",
+      "error": "red-500"
+    },
+    "typography": {
+      "heading": "text-2xl font-bold text-zinc-900",
+      "subtitle": "text-sm text-zinc-500",
+      "labels": "text-sm font-medium text-zinc-700",
+      "links": "text-sm font-medium text-brand-purple"
+    }
+  },
+  "tdd": {
+    "test_framework": "vitest",
+    "test_files": [
+      "components/auth/LoginForm.test.tsx",
+      "components/auth/SocialLoginButtons.test.tsx"
+    ],
+    "coverage_target": 90,
+    "test_categories": [
+      {
+        "name": "Hebrew Login Text",
+        "count": 6,
+        "examples": [
+          "renders Hebrew heading 'ברוכים השבים'",
+          "renders Hebrew email label 'אימייל'",
+          "renders Hebrew password label 'סיסמה'",
+          "renders Hebrew submit button 'התחברות'",
+          "shows Hebrew error 'אימייל הוא שדה חובה'",
+          "shows Hebrew loading text 'מתחבר...'"
+        ]
+      },
+      {
+        "name": "Hebrew Signup Text",
+        "count": 5,
+        "examples": [
+          "renders Hebrew heading 'יצירת חשבון'",
+          "renders Hebrew name label 'שם מלא'",
+          "renders Hebrew confirm password label 'אימות סיסמה'",
+          "shows Hebrew validation 'הסיסמאות אינן תואמות'",
+          "shows Hebrew sign-in link 'כבר יש לך חשבון? התחברות'"
+        ]
+      },
+      {
+        "name": "Hebrew Social Buttons",
+        "count": 3,
+        "examples": [
+          "renders 'המשך עם Google' label",
+          "renders Hebrew divider 'או'",
+          "renders all provider labels in Hebrew"
+        ]
+      },
+      {
+        "name": "RTL Layout",
+        "count": 2,
+        "examples": [
+          "login form has dir='rtl'",
+          "social buttons container has dir='rtl'"
+        ]
+      },
+      {
+        "name": "Visual Design",
+        "count": 3,
+        "examples": [
+          "card has rounded-2xl and shadow classes",
+          "inputs use rounded-xl and h-12 styling",
+          "social buttons use provider brand colors"
+        ]
+      },
+      {
+        "name": "Existing Functionality Preserved",
+        "count": 6,
+        "examples": [
+          "calls onSubmit with email and password on valid submission",
+          "shows loading state when isLoading is true",
+          "toggles password visibility",
+          "disables form inputs when loading",
+          "Google OAuth handler called on click",
+          "keyboard navigation works"
+        ]
+      }
+    ],
+    "mocking_strategy": {
+      "supabase": "vi.mock('@/lib/supabase/client')",
+      "next_router": "vi.mock('next/navigation')",
+      "next_link": "Mock next/link as anchor element"
+    }
+  },
+  "hazard_analysis": {
+    "identified_hazards": [
+      {
+        "id": "HAZ-001",
+        "description": "Test regressions from changed text - existing tests match English strings",
+        "severity": "major",
+        "likelihood": "frequent",
+        "mitigation": "Update all test assertions to match new Hebrew text. Run full test suite before and after."
+      },
+      {
+        "id": "HAZ-002",
+        "description": "OAuth callback breaks if form structure changes",
+        "severity": "critical",
+        "likelihood": "remote",
+        "mitigation": "OAuth handlers are in page-level components, not in LoginForm. No changes to Supabase auth calls."
+      },
+      {
+        "id": "HAZ-003",
+        "description": "RTL layout breaks password visibility toggle positioning",
+        "severity": "minor",
+        "likelihood": "occasional",
+        "mitigation": "Use logical properties (start/end) instead of left/right for toggle positioning"
+      }
+    ],
+    "risk_level": "low"
+  },
+  "safety": {
+    "stop_conditions": [
+      "Any modification to Supabase auth logic or OAuth callback handling",
+      "Changes to API route handlers",
+      "Removal of accessibility attributes (aria-*, role, etc.)"
+    ],
+    "escalation_triggers": [
+      "OAuth flow stops working after changes",
+      "More than 5 test failures unrelated to text changes"
+    ],
+    "rollback_plan": "Git revert - all changes are visual/text only, zero backend impact"
+  },
+  "dependencies": {
+    "required_before": ["AUTH-01"],
+    "blocks": []
+  },
+  "traceability": {
+    "requirements": ["PRD-AUTH", "PRD-I18N"],
+    "epic": "USER-AUTH",
+    "related_stories": ["AUTH-01", "AUTH-02"]
+  },
+  "gate0_research": "Gate 0 Research: Analyzed current login page screenshot + register page code. Found: (1) All UI text is English across both pages — headings, labels, placeholders, buttons, links, validation messages, loading states. (2) Design is dated — plain white Card on gray bg, no branding/logo, generic inputs. (3) RTL inherited from root but not explicit on forms causing '?Forgot password' misalignment. (4) Social buttons are plain secondary variant with no provider brand colors. (5) PostPurchaseSignup component already demonstrates the target pattern: Hebrew text, rounded-xl inputs, violet/brand theming, proper RTL. (6) Tailwind config has brand-purple, shadow-soft-lg, gradient-brand, rounded-2xl ready to use. Impact: 7 files modified, 0 new files, 0 backend changes. Estimated 25 test updates for English→Hebrew string assertions.",
+  "metadata": {
+    "created_at": "2026-02-14T12:00:00Z",
+    "created_by": "claude-opus-4-6"
+  },
+  "estimated_tests": 25,
+  "notes": "Pure visual + i18n refactor. No auth logic changes. PostPurchaseSignup.tsx is the pattern to follow for Hebrew auth UI. The existing SocialLoginButtons component already supports custom labels and dir prop — just need to pass Hebrew values from the page components."
+}

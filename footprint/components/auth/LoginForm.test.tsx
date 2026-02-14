@@ -1,6 +1,6 @@
 /**
  * LoginForm Component Tests
- * TDD Test Suite for AUTH-01: User Login Page
+ * TDD Test Suite for AUTH-03: Hebrew Auth Pages Redesign
  */
 
 import { describe, it, expect, vi } from 'vitest';
@@ -9,75 +9,87 @@ import userEvent from '@testing-library/user-event';
 import { LoginForm } from './LoginForm';
 
 describe('LoginForm', () => {
-  describe('Rendering', () => {
-    it('renders email input field', () => {
+  describe('Hebrew Rendering', () => {
+    it('renders Hebrew email label', () => {
       render(<LoginForm onSubmit={vi.fn()} />);
-      expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+      expect(screen.getByLabelText('אימייל')).toBeInTheDocument();
     });
 
-    it('renders password input field', () => {
+    it('renders Hebrew password label', () => {
       render(<LoginForm onSubmit={vi.fn()} />);
-      expect(screen.getByPlaceholderText(/enter your password/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('הזינו את הסיסמה שלכם')).toBeInTheDocument();
     });
 
-    it('renders login button', () => {
+    it('renders Hebrew login button', () => {
       render(<LoginForm onSubmit={vi.fn()} />);
-      expect(screen.getByRole('button', { name: /sign in|log in|login/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /התחברות/i })).toBeInTheDocument();
     });
 
-    it('renders forgot password link', () => {
+    it('renders Hebrew forgot password link', () => {
       render(<LoginForm onSubmit={vi.fn()} />);
-      expect(screen.getByRole('link', { name: /forgot password/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /שכחת סיסמה/i })).toBeInTheDocument();
     });
 
-    it('renders create account link', () => {
+    it('renders Hebrew create account link', () => {
       render(<LoginForm onSubmit={vi.fn()} />);
-      expect(screen.getByRole('link', { name: /create account|sign up|register/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /הרשמה/i })).toBeInTheDocument();
+    });
+
+    it('renders sign-up prompt text in Hebrew', () => {
+      render(<LoginForm onSubmit={vi.fn()} />);
+      expect(screen.getByText(/אין לך חשבון/)).toBeInTheDocument();
     });
   });
 
-  describe('Form Validation', () => {
-    it('shows error when email is empty on submit', async () => {
+  describe('RTL Layout', () => {
+    it('has dir="rtl" on the form', () => {
+      const { container } = render(<LoginForm onSubmit={vi.fn()} />);
+      expect(container.firstChild).toHaveAttribute('dir', 'rtl');
+    });
+  });
+
+  describe('Form Validation (Hebrew Messages)', () => {
+    it('shows Hebrew error when email is empty on submit', async () => {
       const user = userEvent.setup();
       const onSubmit = vi.fn();
 
       render(<LoginForm onSubmit={onSubmit} />);
 
-      await user.click(screen.getByRole('button', { name: /sign in|log in|login/i }));
+      await user.click(screen.getByRole('button', { name: /התחברות/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/email is required/i)).toBeInTheDocument();
+        expect(screen.getByText('אימייל הוא שדה חובה')).toBeInTheDocument();
       });
       expect(onSubmit).not.toHaveBeenCalled();
     });
 
-    it('shows error when password is empty on submit', async () => {
+    it('shows Hebrew error when password is empty on submit', async () => {
       const user = userEvent.setup();
       const onSubmit = vi.fn();
 
       render(<LoginForm onSubmit={onSubmit} />);
 
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.click(screen.getByRole('button', { name: /sign in|log in|login/i }));
+      await user.type(screen.getByLabelText('אימייל'), 'test@example.com');
+      await user.click(screen.getByRole('button', { name: /התחברות/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/password is required/i)).toBeInTheDocument();
+        expect(screen.getByText('סיסמה היא שדה חובה')).toBeInTheDocument();
       });
       expect(onSubmit).not.toHaveBeenCalled();
     });
 
-    it('shows error for invalid email format', async () => {
+    it('shows Hebrew error for invalid email format', async () => {
       const user = userEvent.setup();
       const onSubmit = vi.fn();
 
       render(<LoginForm onSubmit={onSubmit} />);
 
-      await user.type(screen.getByLabelText(/email/i), 'invalid-email');
-      await user.type(screen.getByPlaceholderText(/enter your password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /sign in|log in|login/i }));
+      await user.type(screen.getByLabelText('אימייל'), 'invalid-email');
+      await user.type(screen.getByPlaceholderText('הזינו את הסיסמה שלכם'), 'password123');
+      await user.click(screen.getByRole('button', { name: /התחברות/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/valid email/i)).toBeInTheDocument();
+        expect(screen.getByText('נא להזין כתובת אימייל תקינה')).toBeInTheDocument();
       });
       expect(onSubmit).not.toHaveBeenCalled();
     });
@@ -90,9 +102,9 @@ describe('LoginForm', () => {
 
       render(<LoginForm onSubmit={onSubmit} />);
 
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByPlaceholderText(/enter your password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /sign in|log in|login/i }));
+      await user.type(screen.getByLabelText('אימייל'), 'test@example.com');
+      await user.type(screen.getByPlaceholderText('הזינו את הסיסמה שלכם'), 'password123');
+      await user.click(screen.getByRole('button', { name: /התחברות/i }));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -102,54 +114,51 @@ describe('LoginForm', () => {
       });
     });
 
-    it('shows loading state when isLoading is true', () => {
+    it('shows Hebrew loading state when isLoading is true', () => {
       render(<LoginForm onSubmit={vi.fn()} isLoading={true} />);
 
-      const button = screen.getByRole('button', { name: /sign in|log in|login|signing|logging/i });
+      const button = screen.getByRole('button', { name: /מתחבר/i });
       expect(button).toBeDisabled();
     });
 
     it('disables form inputs when loading', () => {
       render(<LoginForm onSubmit={vi.fn()} isLoading={true} />);
 
-      expect(screen.getByLabelText(/email/i)).toBeDisabled();
-      expect(screen.getByPlaceholderText(/enter your password/i)).toBeDisabled();
+      expect(screen.getByLabelText('אימייל')).toBeDisabled();
+      expect(screen.getByPlaceholderText('הזינו את הסיסמה שלכם')).toBeDisabled();
     });
   });
 
   describe('Error Display', () => {
     it('displays server error message when provided', () => {
-      render(<LoginForm onSubmit={vi.fn()} error="Invalid credentials" />);
+      render(<LoginForm onSubmit={vi.fn()} error="פרטי התחברות שגויים" />);
 
-      expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
+      expect(screen.getByText('פרטי התחברות שגויים')).toBeInTheDocument();
     });
 
-    it('clears server error when user starts typing', async () => {
+    it('error is visible alongside form', async () => {
       const user = userEvent.setup();
-      const { rerender } = render(<LoginForm onSubmit={vi.fn()} error="Invalid credentials" />);
+      const { rerender } = render(<LoginForm onSubmit={vi.fn()} error="פרטי התחברות שגויים" />);
 
-      expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
+      expect(screen.getByText('פרטי התחברות שגויים')).toBeInTheDocument();
 
-      await user.type(screen.getByLabelText(/email/i), 'a');
-
-      // Error should still be visible as it's controlled by parent
-      // But form should allow input
-      expect(screen.getByLabelText(/email/i)).toHaveValue('a');
+      await user.type(screen.getByLabelText('אימייל'), 'a');
+      expect(screen.getByLabelText('אימייל')).toHaveValue('a');
     });
   });
 
   describe('Password Visibility', () => {
     it('has password input type hidden by default', () => {
       render(<LoginForm onSubmit={vi.fn()} />);
-      expect(screen.getByPlaceholderText(/enter your password/i)).toHaveAttribute('type', 'password');
+      expect(screen.getByPlaceholderText('הזינו את הסיסמה שלכם')).toHaveAttribute('type', 'password');
     });
 
     it('toggles password visibility when show/hide button is clicked', async () => {
       const user = userEvent.setup();
       render(<LoginForm onSubmit={vi.fn()} />);
 
-      const passwordInput = screen.getByPlaceholderText(/enter your password/i);
-      const toggleButton = screen.getByRole('button', { name: /show password|hide password/i });
+      const passwordInput = screen.getByPlaceholderText('הזינו את הסיסמה שלכם');
+      const toggleButton = screen.getByRole('button', { name: /הצג סיסמה|הסתר סיסמה/i });
 
       expect(passwordInput).toHaveAttribute('type', 'password');
 
@@ -158,20 +167,6 @@ describe('LoginForm', () => {
 
       await user.click(toggleButton);
       expect(passwordInput).toHaveAttribute('type', 'password');
-    });
-  });
-
-  describe('RTL Support', () => {
-    it('respects dir prop for RTL layout', () => {
-      const { container } = render(<LoginForm onSubmit={vi.fn()} dir="rtl" />);
-      expect(container.firstChild).toHaveAttribute('dir', 'rtl');
-    });
-
-    it('renders correctly in LTR by default', () => {
-      const { container } = render(<LoginForm onSubmit={vi.fn()} />);
-      // Should not have explicit dir or have dir="ltr"
-      const form = container.firstChild;
-      expect(form).not.toHaveAttribute('dir', 'rtl');
     });
   });
 
@@ -184,8 +179,8 @@ describe('LoginForm', () => {
     it('labels are associated with inputs', () => {
       render(<LoginForm onSubmit={vi.fn()} />);
 
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByPlaceholderText(/enter your password/i);
+      const emailInput = screen.getByLabelText('אימייל');
+      const passwordInput = screen.getByPlaceholderText('הזינו את הסיסמה שלכם');
 
       expect(emailInput).toHaveAttribute('id');
       expect(passwordInput).toHaveAttribute('id');
@@ -195,10 +190,10 @@ describe('LoginForm', () => {
       const user = userEvent.setup();
       render(<LoginForm onSubmit={vi.fn()} />);
 
-      await user.click(screen.getByRole('button', { name: /sign in|log in|login/i }));
+      await user.click(screen.getByRole('button', { name: /התחברות/i }));
 
       await waitFor(() => {
-        const emailInput = screen.getByLabelText(/email/i);
+        const emailInput = screen.getByLabelText('אימייל');
         expect(emailInput).toHaveAttribute('aria-invalid', 'true');
       });
     });
@@ -208,10 +203,10 @@ describe('LoginForm', () => {
       render(<LoginForm onSubmit={vi.fn()} />);
 
       await user.tab();
-      expect(screen.getByLabelText(/email/i)).toHaveFocus();
+      expect(screen.getByLabelText('אימייל')).toHaveFocus();
 
       await user.tab();
-      expect(screen.getByPlaceholderText(/enter your password/i)).toHaveFocus();
+      expect(screen.getByPlaceholderText('הזינו את הסיסמה שלכם')).toHaveFocus();
     });
   });
 });

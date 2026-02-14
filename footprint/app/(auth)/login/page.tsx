@@ -18,7 +18,7 @@ function LoginPageContent() {
   useEffect(() => {
     const callbackError = searchParams?.get('error');
     if (callbackError === 'auth_callback_failed') {
-      setError('Social login failed. Please try again.');
+      setError('ההתחברות נכשלה. נסו שוב.');
     }
   }, [searchParams]);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -50,11 +50,11 @@ function LoginPageContent() {
         router.refresh();
       } else {
         logger.warn('Login: no session returned');
-        setError('Login failed. Please try again.');
+        setError('ההתחברות נכשלה. נסו שוב.');
       }
     } catch (err) {
       logger.error('Login unexpected error', err);
-      setError('Invalid email or password. Please try again.');
+      setError('אימייל או סיסמה שגויים. נסו שוב.');
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +77,7 @@ function LoginPageContent() {
         setError(authError.message);
       }
     } catch {
-      setError('Failed to sign in with Google. Please try again.');
+      setError('ההתחברות עם Google נכשלה. נסו שוב.');
     } finally {
       setGoogleLoading(false);
     }
@@ -100,7 +100,7 @@ function LoginPageContent() {
         setError(authError.message);
       }
     } catch {
-      setError('Failed to sign in with Apple. Please try again.');
+      setError('ההתחברות עם Apple נכשלה. נסו שוב.');
     } finally {
       setAppleLoading(false);
     }
@@ -124,7 +124,7 @@ function LoginPageContent() {
         setError(authError.message);
       }
     } catch {
-      setError('Failed to sign in with Facebook. Please try again.');
+      setError('ההתחברות עם Facebook נכשלה. נסו שוב.');
     } finally {
       setFacebookLoading(false);
     }
@@ -133,15 +133,16 @@ function LoginPageContent() {
   const isAnyLoading = isLoading || googleLoading || appleLoading || facebookLoading;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-light-muted px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>
-            Sign in to your account to continue
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-md overflow-hidden rounded-2xl shadow-soft-lg">
+        <div className="h-1 bg-gradient-brand" />
+        <CardHeader className="text-center pt-8" dir="rtl">
+          <CardTitle className="text-2xl font-bold text-zinc-900">ברוכים השבים</CardTitle>
+          <CardDescription className="text-zinc-500">
+            התחברו לחשבון שלכם כדי להמשיך
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pb-8">
           <SocialLoginButtons
             onGoogleClick={handleGoogleLogin}
             onAppleClick={handleAppleLogin}
