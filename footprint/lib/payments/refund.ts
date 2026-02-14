@@ -25,6 +25,11 @@ export async function processRefund(
 ): Promise<RefundResult> {
   try {
     const config = getPayPlusConfig();
+
+    if (!config.baseUrl.startsWith('https://')) {
+      return { success: false, errorMessage: 'PayPlus base URL must use HTTPS' };
+    }
+
     const amountILS = params.amount / 100;
 
     logger.info(

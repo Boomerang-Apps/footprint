@@ -6,6 +6,7 @@
  * Requires CRON_SECRET authorization header.
  */
 
+import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/logger';
@@ -17,7 +18,13 @@ export async function GET(request: Request): Promise<NextResponse> {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  const expectedHeader = `Bearer ${cronSecret}`;
+  if (
+    !cronSecret ||
+    !authHeader ||
+    authHeader.length !== expectedHeader.length ||
+    !crypto.timingSafeEqual(Buffer.from(authHeader), Buffer.from(expectedHeader))
+  ) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }

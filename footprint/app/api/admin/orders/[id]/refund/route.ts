@@ -38,9 +38,9 @@ export async function POST(
     const body = await request.json();
     const { amount, reason } = body as { amount?: number; reason?: string };
 
-    if (!amount || amount <= 0) {
+    if (!amount || amount <= 0 || !Number.isInteger(amount) || amount > 10_000_000) {
       return NextResponse.json(
-        { error: 'Amount must be a positive number (in agorot)' },
+        { error: 'Amount must be a positive integer in agorot (max 100,000 ILS)' },
         { status: 400 }
       );
     }
