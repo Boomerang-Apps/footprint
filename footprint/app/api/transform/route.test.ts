@@ -68,6 +68,22 @@ vi.mock('@/lib/ai/nano-banana', () => ({
   loadReferenceImages: () => Promise.resolve([]),
 }));
 
+// Mock transformation cache
+const mockGetCachedTransformation = vi.fn();
+const mockSetCachedTransformation = vi.fn();
+vi.mock('@/lib/ai/transformation-cache', () => ({
+  getCachedTransformation: (...args: unknown[]) => mockGetCachedTransformation(...args),
+  setCachedTransformation: (...args: unknown[]) => mockSetCachedTransformation(...args),
+}));
+
+// Mock concurrency limit
+const mockAcquireConcurrencySlot = vi.fn();
+const mockReleaseConcurrencySlot = vi.fn();
+vi.mock('@/lib/ai/concurrency-limit', () => ({
+  acquireConcurrencySlot: (...args: unknown[]) => mockAcquireConcurrencySlot(...args),
+  releaseConcurrencySlot: (...args: unknown[]) => mockReleaseConcurrencySlot(...args),
+}));
+
 // Mock global fetch for fetching transformed images
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
@@ -114,6 +130,12 @@ describe('POST /api/transform', () => {
       ok: true,
       arrayBuffer: () => Promise.resolve(new ArrayBuffer(1024)),
     });
+
+    // Default: no Redis cache hit, concurrency allowed
+    mockGetCachedTransformation.mockResolvedValue(null);
+    mockSetCachedTransformation.mockResolvedValue(undefined);
+    mockAcquireConcurrencySlot.mockResolvedValue({ allowed: true, currentCount: 1 });
+    mockReleaseConcurrencySlot.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -416,6 +438,132 @@ describe('POST /api/transform', () => {
       const response = await POST(request);
 
       expect(response.headers.get('content-type')).toContain('application/json');
+    });
+  });
+
+  describe('Redis caching (AC-003, AC-004)', () => {
+    it('should return cached result from Redis when available', async () => {
+      mockGetCachedTransformation.mockResolvedValue({
+        url: 'https://images.footprint.co.il/transformed/cached.png',
+        provider: 'nano-banana',
+        transformationId: 'cached-tx-id',
+      });
+
+      const request = new Request('http://localhost/api/transform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
+          style: 'watercolor',
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.cached).toBe(true);
+      expect(data.transformedUrl).toBe('https://images.footprint.co.il/transformed/cached.png');
+      expect(data.transformationId).toBe('cached-tx-id');
+      // Should NOT call AI transform
+      expect(mockTransformImage).not.toHaveBeenCalled();
+    });
+
+    it('should fall through to AI when Redis misses', async () => {
+      mockGetCachedTransformation.mockResolvedValue(null);
+
+      const request = new Request('http://localhost/api/transform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
+          style: 'watercolor',
+        }),
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(200);
+      expect(mockTransformImage).toHaveBeenCalled();
+    });
+
+    it('should populate Redis cache after successful transformation', async () => {
+      const request = new Request('http://localhost/api/transform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
+          style: 'watercolor',
+        }),
+      });
+
+      await POST(request);
+
+      expect(mockSetCachedTransformation).toHaveBeenCalledWith(
+        expect.any(String),
+        'watercolor',
+        expect.objectContaining({
+          url: expect.any(String),
+          provider: 'nano-banana',
+        })
+      );
+    });
+  });
+
+  describe('Concurrency limiting (AC-006)', () => {
+    it('should return 429 when concurrent limit exceeded', async () => {
+      mockAcquireConcurrencySlot.mockResolvedValue({ allowed: false, currentCount: 3 });
+
+      const request = new Request('http://localhost/api/transform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
+          style: 'watercolor',
+        }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(429);
+      expect(data.code).toBe('CONCURRENT_LIMIT');
+      expect(mockTransformImage).not.toHaveBeenCalled();
+    });
+
+    it('should allow when under concurrent limit', async () => {
+      mockAcquireConcurrencySlot.mockResolvedValue({ allowed: true, currentCount: 1 });
+
+      const request = new Request('http://localhost/api/transform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
+          style: 'watercolor',
+        }),
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(200);
+      expect(mockTransformImage).toHaveBeenCalled();
+    });
+
+    it('should release concurrency slot even when transformation fails', async () => {
+      mockTransformImage.mockRejectedValue(new Error('AI API error'));
+
+      const request = new Request('http://localhost/api/transform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: 'https://images.footprint.co.il/uploads/user123/photo.jpg',
+          style: 'watercolor',
+        }),
+      });
+
+      await POST(request);
+
+      expect(mockReleaseConcurrencySlot).toHaveBeenCalled();
     });
   });
 });

@@ -45,6 +45,14 @@ import {
 import { loadReferenceImages, type ReferenceImage } from '@/lib/ai/nano-banana';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
+import {
+  getCachedTransformation,
+  setCachedTransformation,
+} from '@/lib/ai/transformation-cache';
+import {
+  acquireConcurrencySlot,
+  releaseConcurrencySlot,
+} from '@/lib/ai/concurrency-limit';
 
 interface TransformRequest {
   imageUrl: string;
@@ -110,7 +118,7 @@ export async function POST(
       const supabase = await createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        userId = userId;
+        userId = user.id;
       }
     } catch (authError) {
       logger.debug('Auth check failed, using anonymous transform', authError);
@@ -176,26 +184,73 @@ export async function POST(
 
     const originalImageKey = extractR2Key(imageUrl);
 
-    // 3. Check cache for existing transformation
+    // 3a. Check Redis cache first (fast path, ~50ms)
+    try {
+      const redisCached = await getCachedTransformation(originalImageKey, style);
+      if (redisCached) {
+        logger.info('Transform metrics', {
+          style, provider: redisCached.provider, cacheHit: true, source: 'redis',
+          processingTimeMs: Date.now() - startTime, userId,
+        });
+        return NextResponse.json({
+          transformedUrl: redisCached.url,
+          style,
+          provider: redisCached.provider as AIProvider,
+          processingTime: Date.now() - startTime,
+          cost: 0,
+          transformationId: redisCached.transformationId,
+          cached: true,
+        });
+      }
+    } catch {
+      // Redis cache lookup failed, continue
+    }
+
+    // 3b. Check DB cache (slower path, ~300ms)
     try {
       const cached = await findExistingTransformation(originalImageKey, style);
       if (cached && cached.transformed_image_key) {
-        // Return cached result
         const cachedUrl = `${process.env.R2_PUBLIC_URL}/${cached.transformed_image_key}`;
+
+        // Backfill Redis for future fast hits
+        setCachedTransformation(originalImageKey, style, {
+          url: cachedUrl,
+          provider: cached.provider,
+          transformationId: cached.id,
+        }).catch(() => { /* best-effort backfill */ });
+
+        logger.info('Transform metrics', {
+          style, provider: cached.provider, cacheHit: true, source: 'db',
+          processingTimeMs: Date.now() - startTime, userId,
+        });
         return NextResponse.json({
           transformedUrl: cachedUrl,
           style,
           provider: cached.provider as AIProvider,
           processingTime: Date.now() - startTime,
-          cost: 0, // No cost for cached results
+          cost: 0,
           transformationId: cached.id,
           cached: true,
         });
       }
     } catch {
-      // Cache lookup failed, continue with transformation
+      // DB cache lookup failed, continue with transformation
     }
 
+    // 3c. Check concurrent transformation limit (max 3 per user)
+    const concurrency = await acquireConcurrencySlot(userId);
+    if (!concurrency.allowed) {
+      logger.warn('Concurrent limit exceeded', { userId, currentCount: concurrency.currentCount });
+      return NextResponse.json(
+        {
+          error: 'Too many concurrent transformations. Please wait for one to complete.',
+          code: 'CONCURRENT_LIMIT',
+        },
+        { status: 429 }
+      );
+    }
+
+    try {
     // 4. Create transformation record
     try {
       const record = await createTransformation({
@@ -314,7 +369,21 @@ export async function POST(
       }
     }
 
-    // 8. Return success response
+    // 8. Store in Redis cache for future fast hits
+    setCachedTransformation(originalImageKey, style, {
+      url: uploadResult.publicUrl,
+      provider: result.provider,
+      transformationId: transformationId || 'unknown',
+    }).catch(() => { /* best-effort cache population */ });
+
+    // 9. Log structured metrics (AC-012)
+    logger.info('Transform metrics', {
+      transformationId, style, provider: result.provider,
+      processingTimeMs: processingTime, cost: result.estimatedCost,
+      cacheHit: false, source: 'ai', userId,
+    });
+
+    // 10. Return success response
     return NextResponse.json({
       transformedUrl: uploadResult.publicUrl,
       style,
@@ -323,6 +392,11 @@ export async function POST(
       cost: result.estimatedCost,
       transformationId: transformationId || 'unknown',
     });
+
+    } finally {
+      // Always release concurrency slot
+      await releaseConcurrencySlot(userId);
+    }
   } catch (error) {
     logger.error('Unexpected error in transform route', error);
 
