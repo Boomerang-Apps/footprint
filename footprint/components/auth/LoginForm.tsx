@@ -15,7 +15,6 @@ export interface LoginFormProps {
   onSubmit: (data: LoginFormData) => void;
   isLoading?: boolean;
   error?: string;
-  dir?: 'ltr' | 'rtl';
   className?: string;
 }
 
@@ -30,7 +29,7 @@ function validateEmail(email: string): boolean {
 }
 
 export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
-  ({ onSubmit, isLoading = false, error, dir, className }, ref) => {
+  ({ onSubmit, isLoading = false, error, className }, ref) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -46,13 +45,13 @@ export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
       const newErrors: FormErrors = {};
 
       if (!email.trim()) {
-        newErrors.email = 'Email is required';
+        newErrors.email = 'אימייל הוא שדה חובה';
       } else if (!validateEmail(email)) {
-        newErrors.email = 'Please enter a valid email address';
+        newErrors.email = 'נא להזין כתובת אימייל תקינה';
       }
 
       if (!password) {
-        newErrors.password = 'Password is required';
+        newErrors.password = 'סיסמה היא שדה חובה';
       }
 
       setErrors(newErrors);
@@ -76,7 +75,7 @@ export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
       <form
         ref={ref}
         role="form"
-        dir={dir}
+        dir="rtl"
         className={cn('w-full max-w-md space-y-6', className)}
         onSubmit={handleSubmit}
         noValidate
@@ -84,7 +83,7 @@ export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
         {error && (
           <div
             role="alert"
-            className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600"
+            className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600"
           >
             {error}
           </div>
@@ -94,9 +93,9 @@ export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
           <div>
             <label
               htmlFor={emailId}
-              className="mb-1.5 block text-sm font-medium text-text-primary"
+              className="mb-1.5 block text-sm font-medium text-zinc-700"
             >
-              Email
+              אימייל
             </label>
             <Input
               id={emailId}
@@ -107,19 +106,20 @@ export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
               disabled={isLoading}
               error={touched.email && !!errors.email}
               errorMessage={touched.email ? errors.email : undefined}
-              placeholder="Enter your email"
+              placeholder="הזינו את האימייל שלכם"
               autoComplete="email"
               aria-invalid={touched.email && !!errors.email}
               aria-describedby={touched.email && errors.email ? emailErrorId : undefined}
+              className="h-12 rounded-xl"
             />
           </div>
 
           <div>
             <label
               htmlFor={passwordId}
-              className="mb-1.5 block text-sm font-medium text-text-primary"
+              className="mb-1.5 block text-sm font-medium text-zinc-700"
             >
-              Password
+              סיסמה
             </label>
             <div className="relative">
               <Input
@@ -131,17 +131,17 @@ export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
                 disabled={isLoading}
                 error={touched.password && !!errors.password}
                 errorMessage={touched.password ? errors.password : undefined}
-                placeholder="Enter your password"
+                placeholder="הזינו את הסיסמה שלכם"
                 autoComplete="current-password"
                 aria-invalid={touched.password && !!errors.password}
                 aria-describedby={touched.password && errors.password ? passwordErrorId : undefined}
-                className="pr-12"
+                className="h-12 rounded-xl pl-12"
               />
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 rounded"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 rounded"
+                aria-label={showPassword ? 'הסתר סיסמה' : 'הצג סיסמה'}
               >
                 {showPassword ? (
                   <EyeOffIcon className="h-5 w-5" />
@@ -153,12 +153,12 @@ export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
           </div>
         </div>
 
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-start">
           <Link
             href="/forgot-password"
-            className="text-sm text-brand-purple hover:underline focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 rounded"
+            className="text-sm font-medium text-brand-purple hover:underline focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 rounded"
           >
-            Forgot password?
+            שכחת סיסמה?
           </Link>
         </div>
 
@@ -168,17 +168,18 @@ export const LoginForm = forwardRef<HTMLFormElement, LoginFormProps>(
           loading={isLoading}
           disabled={isLoading}
           size="lg"
+          className="h-12 rounded-xl text-base"
         >
-          {isLoading ? 'Signing in...' : 'Sign in'}
+          {isLoading ? 'מתחבר...' : 'התחברות'}
         </Button>
 
-        <p className="text-center text-sm text-text-muted">
-          Don&apos;t have an account?{' '}
+        <p className="text-center text-sm text-zinc-500">
+          אין לך חשבון?{' '}
           <Link
             href="/register"
             className="font-medium text-brand-purple hover:underline focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2 rounded"
           >
-            Create account
+            הרשמה
           </Link>
         </p>
       </form>

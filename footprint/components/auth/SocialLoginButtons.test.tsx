@@ -1,6 +1,6 @@
 /**
  * SocialLoginButtons Component Tests
- * TDD Test Suite for AUTH-01: User Login Page
+ * TDD Test Suite for AUTH-03: Hebrew Auth Pages Redesign
  */
 
 import { describe, it, expect, vi } from 'vitest';
@@ -9,15 +9,20 @@ import userEvent from '@testing-library/user-event';
 import { SocialLoginButtons } from './SocialLoginButtons';
 
 describe('SocialLoginButtons', () => {
-  describe('Rendering', () => {
-    it('renders Google login button', () => {
+  describe('Hebrew Rendering', () => {
+    it('renders Hebrew Google button label by default', () => {
       render(<SocialLoginButtons onGoogleClick={vi.fn()} onAppleClick={vi.fn()} />);
-      expect(screen.getByRole('button', { name: /google/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /המשך עם Google/i })).toBeInTheDocument();
     });
 
-    it('renders Apple login button', () => {
+    it('renders Hebrew Apple button label by default', () => {
       render(<SocialLoginButtons onGoogleClick={vi.fn()} onAppleClick={vi.fn()} />);
-      expect(screen.getByRole('button', { name: /apple/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /המשך עם Apple/i })).toBeInTheDocument();
+    });
+
+    it('renders Hebrew divider text by default', () => {
+      render(<SocialLoginButtons onGoogleClick={vi.fn()} onAppleClick={vi.fn()} />);
+      expect(screen.getByText('או')).toBeInTheDocument();
     });
 
     it('renders Google icon', () => {
@@ -29,10 +34,14 @@ describe('SocialLoginButtons', () => {
       render(<SocialLoginButtons onGoogleClick={vi.fn()} onAppleClick={vi.fn()} />);
       expect(screen.getByTestId('apple-icon')).toBeInTheDocument();
     });
+  });
 
-    it('renders divider with "or" text', () => {
-      render(<SocialLoginButtons onGoogleClick={vi.fn()} onAppleClick={vi.fn()} />);
-      expect(screen.getByText(/or/i)).toBeInTheDocument();
+  describe('RTL Layout', () => {
+    it('has dir="rtl" by default', () => {
+      const { container } = render(
+        <SocialLoginButtons onGoogleClick={vi.fn()} onAppleClick={vi.fn()} />
+      );
+      expect(container.firstChild).toHaveAttribute('dir', 'rtl');
     });
   });
 
@@ -136,25 +145,12 @@ describe('SocialLoginButtons', () => {
     });
   });
 
-  describe('RTL Support', () => {
-    it('respects dir prop for RTL layout', () => {
-      const { container } = render(
-        <SocialLoginButtons
-          onGoogleClick={vi.fn()}
-          onAppleClick={vi.fn()}
-          dir="rtl"
-        />
-      );
-      expect(container.firstChild).toHaveAttribute('dir', 'rtl');
-    });
-  });
-
   describe('Accessibility', () => {
     it('buttons have descriptive accessible names', () => {
       render(<SocialLoginButtons onGoogleClick={vi.fn()} onAppleClick={vi.fn()} />);
 
-      expect(screen.getByRole('button', { name: /continue with google/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /continue with apple/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /המשך עם Google/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /המשך עם Apple/i })).toBeInTheDocument();
     });
 
     it('Google button is keyboard accessible', async () => {
@@ -197,21 +193,6 @@ describe('SocialLoginButtons', () => {
 
       expect(screen.getByRole('button', { name: /sign in with google/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /sign in with apple/i })).toBeInTheDocument();
-    });
-
-    it('supports Hebrew labels', () => {
-      render(
-        <SocialLoginButtons
-          onGoogleClick={vi.fn()}
-          onAppleClick={vi.fn()}
-          googleLabel="המשך עם Google"
-          appleLabel="המשך עם Apple"
-          dir="rtl"
-        />
-      );
-
-      expect(screen.getByRole('button', { name: /המשך עם google/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /המשך עם apple/i })).toBeInTheDocument();
     });
   });
 
@@ -317,17 +298,17 @@ describe('SocialLoginButtons', () => {
           showDivider={false}
         />
       );
-      expect(screen.queryByText(/or/i)).not.toBeInTheDocument();
+      expect(screen.queryByText('או')).not.toBeInTheDocument();
     });
 
     it('shows custom divider text', () => {
       render(
         <SocialLoginButtons
           onGoogleClick={vi.fn()}
-          dividerText="או"
+          dividerText="or"
         />
       );
-      expect(screen.getByText('או')).toBeInTheDocument();
+      expect(screen.getByText('or')).toBeInTheDocument();
     });
   });
 });

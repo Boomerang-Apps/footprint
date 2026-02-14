@@ -266,7 +266,6 @@ export function CheckoutAuthFlow({
           onSubmit={handleEmailLogin}
           isLoading={isLoading}
           error={undefined}
-          dir="rtl"
         />
       </div>
 

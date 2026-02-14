@@ -29,19 +29,19 @@ export default function RegisterPage() {
 
     // Validation
     if (!email || !password || !name) {
-      setError('Please fill in all fields');
+      setError('נא למלא את כל השדות');
       setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('הסיסמאות אינן תואמות');
       setIsLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('הסיסמה חייבת להכיל לפחות 6 תווים');
       setIsLoading(false);
       return;
     }
@@ -70,13 +70,13 @@ export default function RegisterPage() {
       if (data.user) {
         // Check if email confirmation is required
         if (data.user.identities?.length === 0) {
-          setError('This email is already registered. Please sign in instead.');
+          setError('אימייל זה כבר רשום. נסו להתחבר.');
           return;
         }
 
         // Check if email confirmation is pending
         if (data.session === null) {
-          setError('Please check your email to confirm your account.');
+          setError('בדקו את האימייל שלכם לאימות החשבון.');
           return;
         }
 
@@ -85,7 +85,7 @@ export default function RegisterPage() {
       }
     } catch (err) {
       logger.error('Registration unexpected error', err);
-      setError('An error occurred. Please try again.');
+      setError('אירעה שגיאה. נסו שוב.');
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +108,7 @@ export default function RegisterPage() {
         setError(authError.message);
       }
     } catch {
-      setError('Failed to sign in with Google. Please try again.');
+      setError('ההתחברות עם Google נכשלה. נסו שוב.');
     } finally {
       setGoogleLoading(false);
     }
@@ -131,7 +131,7 @@ export default function RegisterPage() {
         setError(authError.message);
       }
     } catch {
-      setError('Failed to sign in with Apple. Please try again.');
+      setError('ההתחברות עם Apple נכשלה. נסו שוב.');
     } finally {
       setAppleLoading(false);
     }
@@ -155,7 +155,7 @@ export default function RegisterPage() {
         setError(authError.message);
       }
     } catch {
-      setError('Failed to sign in with Facebook. Please try again.');
+      setError('ההתחברות עם Facebook נכשלה. נסו שוב.');
     } finally {
       setFacebookLoading(false);
     }
@@ -164,15 +164,16 @@ export default function RegisterPage() {
   const isAnyLoading = isLoading || googleLoading || appleLoading || facebookLoading;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-light-muted px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Create account</CardTitle>
-          <CardDescription>
-            Sign up to start creating your prints
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-md overflow-hidden rounded-2xl shadow-soft-lg">
+        <div className="h-1 bg-gradient-brand" />
+        <CardHeader className="text-center pt-8" dir="rtl">
+          <CardTitle className="text-2xl font-bold text-zinc-900">יצירת חשבון</CardTitle>
+          <CardDescription className="text-zinc-500">
+            הרשמו כדי להתחיל ליצור הדפסים
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pb-8">
           <SocialLoginButtons
             onGoogleClick={handleGoogleLogin}
             onAppleClick={handleAppleLogin}
@@ -182,13 +183,17 @@ export default function RegisterPage() {
             facebookLoading={facebookLoading}
             showFacebook
             disabled={isAnyLoading}
+            googleLabel="המשך עם Google"
+            facebookLabel="המשך עם Facebook"
+            appleLabel="המשך עם Apple"
+            dividerText="או"
           />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" dir="rtl" noValidate>
             {error && (
               <div
                 role="alert"
-                className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600"
+                className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600"
               >
                 {error}
               </div>
@@ -197,9 +202,9 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="name"
-                className="mb-1.5 block text-sm font-medium text-text-primary"
+                className="mb-1.5 block text-sm font-medium text-zinc-700"
               >
-                Full Name
+                שם מלא
               </label>
               <Input
                 id="name"
@@ -207,17 +212,18 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
-                placeholder="Enter your name"
+                placeholder="הזינו את השם שלכם"
                 autoComplete="name"
+                className="h-12 rounded-xl"
               />
             </div>
 
             <div>
               <label
                 htmlFor="email"
-                className="mb-1.5 block text-sm font-medium text-text-primary"
+                className="mb-1.5 block text-sm font-medium text-zinc-700"
               >
-                Email
+                אימייל
               </label>
               <Input
                 id="email"
@@ -225,17 +231,18 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                placeholder="Enter your email"
+                placeholder="הזינו את האימייל שלכם"
                 autoComplete="email"
+                className="h-12 rounded-xl"
               />
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="mb-1.5 block text-sm font-medium text-text-primary"
+                className="mb-1.5 block text-sm font-medium text-zinc-700"
               >
-                Password
+                סיסמה
               </label>
               <Input
                 id="password"
@@ -243,17 +250,18 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                placeholder="Create a password"
+                placeholder="צרו סיסמה"
                 autoComplete="new-password"
+                className="h-12 rounded-xl"
               />
             </div>
 
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="mb-1.5 block text-sm font-medium text-text-primary"
+                className="mb-1.5 block text-sm font-medium text-zinc-700"
               >
-                Confirm Password
+                אימות סיסמה
               </label>
               <Input
                 id="confirmPassword"
@@ -261,8 +269,9 @@ export default function RegisterPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
-                placeholder="Confirm your password"
+                placeholder="הזינו שוב את הסיסמה"
                 autoComplete="new-password"
+                className="h-12 rounded-xl"
               />
             </div>
 
@@ -272,18 +281,18 @@ export default function RegisterPage() {
               loading={isLoading}
               disabled={isAnyLoading}
               size="lg"
-              className="mt-6"
+              className="mt-6 h-12 rounded-xl text-base"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? 'יוצר חשבון...' : 'יצירת חשבון'}
             </Button>
 
-            <p className="text-center text-sm text-text-muted">
-              Already have an account?{' '}
+            <p className="text-center text-sm text-zinc-500">
+              כבר יש לך חשבון?{' '}
               <Link
                 href="/login"
                 className="font-medium text-brand-purple hover:underline"
               >
-                Sign in
+                התחברות
               </Link>
             </p>
           </form>

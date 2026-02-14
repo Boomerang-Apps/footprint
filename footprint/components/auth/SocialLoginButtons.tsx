@@ -40,17 +40,17 @@ export const SocialLoginButtons = forwardRef<HTMLDivElement, SocialLoginButtonsP
       facebookLoading = false,
       instagramLoading = false,
       disabled = false,
-      dir,
-      googleLabel = 'Continue with Google',
-      appleLabel = 'Continue with Apple',
-      facebookLabel = 'Continue with Facebook',
-      instagramLabel = 'Continue with Instagram',
+      dir = 'rtl',
+      googleLabel = 'המשך עם Google',
+      appleLabel = 'המשך עם Apple',
+      facebookLabel = 'המשך עם Facebook',
+      instagramLabel = 'המשך עם Instagram',
       showGoogle = true,
       showApple = true,
       showFacebook = false,
       showInstagram = false,
       showDivider = true,
-      dividerText = 'or',
+      dividerText = 'או',
       className,
     },
     ref
@@ -67,15 +67,15 @@ export const SocialLoginButtons = forwardRef<HTMLDivElement, SocialLoginButtonsP
         <div className="grid gap-3">
           {showGoogle && onGoogleClick && (
             <Button
-              variant="secondary"
+              variant="outline"
               fullWidth
               onClick={onGoogleClick}
               disabled={isDisabled}
               loading={googleLoading}
-              className="relative"
+              className="relative h-12 rounded-xl border-zinc-200 bg-white hover:bg-zinc-50"
               aria-label={googleLabel}
             >
-              <GoogleIcon className="mr-2 h-5 w-5" />
+              <GoogleIcon className="ml-2 h-5 w-5" />
               {googleLabel}
             </Button>
           )}
@@ -87,10 +87,10 @@ export const SocialLoginButtons = forwardRef<HTMLDivElement, SocialLoginButtonsP
               onClick={onFacebookClick}
               disabled={isDisabled}
               loading={facebookLoading}
-              className="relative"
+              className="relative h-12 rounded-xl bg-[#1877F2] text-white hover:bg-[#166fe5]"
               aria-label={facebookLabel}
             >
-              <FacebookIcon className="mr-2 h-5 w-5" />
+              <FacebookIcon className="ml-2 h-5 w-5" />
               {facebookLabel}
             </Button>
           )}
@@ -102,10 +102,10 @@ export const SocialLoginButtons = forwardRef<HTMLDivElement, SocialLoginButtonsP
               onClick={onInstagramClick}
               disabled={isDisabled}
               loading={instagramLoading}
-              className="relative"
+              className="relative h-12 rounded-xl"
               aria-label={instagramLabel}
             >
-              <InstagramIcon className="mr-2 h-5 w-5" />
+              <InstagramIcon className="ml-2 h-5 w-5" />
               {instagramLabel}
             </Button>
           )}
@@ -117,10 +117,10 @@ export const SocialLoginButtons = forwardRef<HTMLDivElement, SocialLoginButtonsP
               onClick={onAppleClick}
               disabled={isDisabled}
               loading={appleLoading}
-              className="relative"
+              className="relative h-12 rounded-xl bg-black text-white hover:bg-zinc-800"
               aria-label={appleLabel}
             >
-              <AppleIcon className="mr-2 h-5 w-5" />
+              <AppleIcon className="ml-2 h-5 w-5" />
               {appleLabel}
             </Button>
           )}
