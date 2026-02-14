@@ -90,6 +90,14 @@ export const STYLE_REFERENCES: Record<StyleType, StyleConfig> = {
       'Transform into bold pop art style with vibrant colors, halftone dots, and strong outlines inspired by Warhol and Lichtenstein.',
   },
 
+  wpap: {
+    id: 'wpap',
+    references: [],
+    useReferences: true,
+    referencePrompt:
+      'Transform into WPAP (Wedha\'s Pop Art Portrait) style with sharp angular polygon planes, bold flat solid colors, high contrast, and crisp vector edges.',
+  },
+
 };
 
 /**

@@ -24,7 +24,8 @@ export type StyleId =
   | 'pop_art'
   | 'watercolor'
   | 'line_art'
-  | 'original_enhanced';
+  | 'original_enhanced'
+  | 'wpap';
 
 /**
  * Complete style configuration
@@ -48,6 +49,13 @@ export interface StyleConfig {
    * "Transform the provided photograph into [style]. Preserve [subject details] but render with [specific techniques]."
    */
   prompt: string;
+
+  /**
+   * Negative prompt for styles that need explicit exclusions.
+   * For Gemini, these are folded into the main prompt as "do not" instructions.
+   * Stored separately for documentation and potential use with other providers.
+   */
+  negativePrompt?: string;
 
   /**
    * Detailed style anchors (medium, era, palette, texture)
@@ -212,6 +220,29 @@ Do not apply any artistic filters or style transformations. The result should lo
     cssFilter: 'saturate(1.2) contrast(1.1) brightness(1.05)',
     icon: 'sun',
     gradient: ['#10b981', '#34d399'],
+  },
+  wpap: {
+    id: 'wpap',
+    nameHe: 'דיוקן גיאומטרי',
+    nameEn: 'WPAP',
+    description: 'Sharp geometric polygons, bold flat colors, high contrast',
+    prompt: `Transform the uploaded portrait into WPAP (Wedha's Pop Art Portrait) style. Preserve exact facial likeness, proportions, and identity first. Build the portrait using sharp angular polygon planes only — faceted geometry with strong high-contrast light and shadow blocks that follow facial anatomy and the original light direction. Use bold vibrant saturated colors with solid flat fills only. No gradients, no soft shading, no smooth blending, no airbrush effects. Each color region must be a single solid flat color. Crisp Illustrator-like vector edges, poster style composition. No texture, no brush strokes, no realism, no blur, no painterly effects. Preserve hairstyle, glasses, beard, and facial hair accurately. Simple flat solid background. Modern digital vector illustration, print-ready resolution.`,
+    negativePrompt:
+      'no gradients, no soft shading, no watercolor, no brush strokes, no oil painting, no realism, no photorealism, no smooth blending, no airbrush, no texture, no 3D render, no cartoon, no anime, no curved organic shapes, no glow, no feathering, no blur',
+    styleAnchors: {
+      medium: 'digital vector illustration, geometric polygon portrait',
+      era: '2010s WPAP movement, Wedha Abdul Rasyid',
+      palette:
+        'bold vibrant saturated colors: cyan, magenta, purple, green, red, yellow',
+      texture: 'flat solid color planes, crisp hard edges, no gradients',
+      lighting: 'high-contrast angular light and shadow blocks',
+    },
+    parameters: {
+      temperature: 0.8,
+    },
+    cssFilter: 'saturate(1.8) contrast(1.4) brightness(1.05)',
+    icon: 'hexagon',
+    gradient: ['#06b6d4', '#ec4899'],
   },
 };
 

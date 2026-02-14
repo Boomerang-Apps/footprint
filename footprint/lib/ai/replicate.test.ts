@@ -34,8 +34,8 @@ describe('lib/ai/replicate', () => {
   });
 
   describe('STYLE_PROMPTS', () => {
-    it('should have prompts for all 5 styles', () => {
-      expect(Object.keys(STYLE_PROMPTS)).toHaveLength(5);
+    it('should have prompts for all 6 styles', () => {
+      expect(Object.keys(STYLE_PROMPTS)).toHaveLength(6);
     });
 
     it('should include original style', () => {
@@ -61,13 +61,14 @@ describe('lib/ai/replicate', () => {
   });
 
   describe('ALLOWED_STYLES', () => {
-    it('should contain all 5 style types', () => {
-      expect(ALLOWED_STYLES).toHaveLength(5);
+    it('should contain all 6 style types', () => {
+      expect(ALLOWED_STYLES).toHaveLength(6);
       expect(ALLOWED_STYLES).toContain('original');
       expect(ALLOWED_STYLES).toContain('watercolor');
       expect(ALLOWED_STYLES).toContain('line_art');
       expect(ALLOWED_STYLES).toContain('line_art_watercolor');
       expect(ALLOWED_STYLES).toContain('pop_art');
+      expect(ALLOWED_STYLES).toContain('wpap');
     });
   });
 
@@ -336,9 +337,10 @@ describe('lib/ai/replicate', () => {
         'line_art',
         'line_art_watercolor',
         'pop_art',
+        'wpap',
       ];
 
-      expect(styles).toHaveLength(5);
+      expect(styles).toHaveLength(6);
     });
   });
 });
