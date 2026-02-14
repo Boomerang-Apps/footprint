@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable standalone output for Docker deployments
-  output: 'standalone',
+  // Enable standalone output only for Docker builds (set NEXT_OUTPUT=standalone in Dockerfile)
+  // Vercel does not need standalone and it causes builds to hang
+  ...(process.env.NEXT_OUTPUT === 'standalone' ? { output: 'standalone' } : {}),
   images: {
     remotePatterns: [
       {

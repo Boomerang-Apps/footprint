@@ -17,6 +17,8 @@ COPY . .
 
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
+# Enable standalone output for Docker
+ENV NEXT_OUTPUT=standalone
 
 RUN npm run build
 
