@@ -10,7 +10,7 @@
   "priority": "P0",
   "story_points": 2,
   "description": "Configure two critical production environment variables in Vercel: PAYPLUS_WEBHOOK_IPS (comma-separated IP whitelist for webhook endpoint security) and CRON_SECRET (Bearer token for cron job authentication). Both are required by code already merged to main (CO-06, PR #24). Without these, the webhook endpoint accepts requests from any IP and the cron job for expiring pending orders returns 401 on every invocation.",
-  "status": "pending",
+  "status": "in_progress",
   "objective": {
     "as_a": "operations engineer",
     "i_want": "to configure production environment variables for PayPlus webhook IP whitelisting and cron job authentication",
@@ -169,5 +169,5 @@
     "created_at": "2026-02-14T17:30:00Z",
     "created_by": "claude-opus-4-6"
   },
-  "notes": "Pure operations story — no code changes. CRON_SECRET pre-generated: bRWEfZThXiZWRorALkEEkT0zg8sRVSCEl7Rfu4W9pgA= (from openssl rand -base64 32). PAYPLUS_WEBHOOK_IPS format: comma-separated IPs or CIDRs (e.g., '185.180.224.0/24,185.180.225.0/24'). Get exact IPs from PayPlus merchant dashboard under webhook settings. Cron runs every 5 min (vercel.json). Empty PAYPLUS_WEBHOOK_IPS = allow all (current dev behavior)."
+  "notes": "Pure operations story — no code changes. CRON_SECRET set in Vercel production on 2026-02-14 and redeployed (AC-01, AC-02, AC-06 done). PAYPLUS_WEBHOOK_IPS deferred — PayPlus public docs do not list server IPs; need to obtain from merchant dashboard or PayPlus support. Webhook still works without IP whitelist (empty = allow all). PAYPLUS_WEBHOOK_IPS format: comma-separated IPs or CIDRs. Cron runs every 5 min (vercel.json)."
 }
